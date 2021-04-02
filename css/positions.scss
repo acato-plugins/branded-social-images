@@ -1,0 +1,16 @@
+.position-grid {
+  figure {
+    width: 64px;
+    img {
+      padding: 0;
+    }
+  }
+  .carbon-radio-image-list {
+    max-width: 240px;
+  }
+  input {
+    &:focus {
+      outline: none;
+    }
+  }
+}

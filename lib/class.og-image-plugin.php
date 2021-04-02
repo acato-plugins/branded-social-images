@@ -30,8 +30,49 @@ class Plugin
 			$this->logo_options['enabled'] = $this->logo_options['enabled'] == 'on';
 
 			// text options
-			$this->text_options = get_site_option('cls_og_image__og_text_options', $defaults['text_options']);
-			$this->text_options['enabled'] = $this->text_options['enabled'] == 'on';
+			$this->text_options = $defaults['text_options'];
+//			var_dump( get_attached_file(get_site_option('_cls_default_og_text__ttf_upload')));exit;
+			$font_file = get_site_option('_cls_default_og_text__font');
+
+			$this->text_options['font-file'] = $font_file;
+
+			$position = get_site_option('_cls_default_og_text_position', 'top-left');
+			switch ($position) {
+				case 'top-left':
+				case 'top':
+				case 'top-right':
+					$this->text_options['top'] = 20;
+					break;
+				case 'bottom-left':
+				case 'bottom':
+				case 'bottom-right':
+					$this->text_options['bottom'] = 20;
+					break;
+				case 'left':
+				case 'center':
+				case 'right':
+					$this->text_options['top'] = 20;
+					$this->text_options['bottom'] = 20;
+					break;
+			}
+			switch ($position) {
+				case 'top-left':
+				case 'bottom-left':
+				case 'left':
+					$this->text_options['left'] = 20;
+					break;
+				case 'top-right':
+				case 'bottom-right':
+				case 'right':
+					$this->text_options['right'] = 20;
+					break;
+				case 'top':
+				case 'center':
+				case 'bottom':
+					$this->text_options['left'] = 20;
+					$this->text_options['right'] = 20;
+					break;
+			}
 
 			add_rewrite_endpoint('og-image.png', EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
 			add_image_size('og-image', $this->width, $this->height, true);
@@ -74,6 +115,29 @@ class Plugin
 			}
 		});
 
+		add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+		add_filter('rank_math/opengraph/facebook/image_secure_url', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+		add_filter('rank_math/opengraph/twitter/twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+		add_filter('rank_math/opengraph/facebook/og_image_type', function() { return 'image/png'; }, PHP_INT_MAX);
+		// todo: yoast seo override
+
+		add_action('wp_head', [static::class, 'late_head'], PHP_INT_MAX);
+	}
+
+	public $page_has_og_image = false;
+
+	public static function overrule_og_image($old=null)
+	{
+//		var_dump($old);exit;
+		self::getInstance()->page_has_og_image = true;
+		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) .'og-image.png';
+	}
+
+	public static function late_head()
+	{
+		if (!self::getInstance()->page_has_og_image) {
+			?><meta property="og:image" content="<?php print self::overrule_og_image(); ?>"><?php
+		}
 	}
 
 	public function default_options()
@@ -81,9 +145,10 @@ class Plugin
 		$defaults = [];
 		$defaults['text_options'] = [ // colors are RGBA in hex format
 			'enabled' => 'on',
-			'left' => '20', 'bottom' => '20', 'top' => null, 'right' => null,
+			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
 			'font-size' => '32', 'color' => '#ffffffff', 'line-height' => '40',
-			'font-family' => 'google:Redressed',
+			'font-file' => '',
+			'font-family' => '',
 			'font-weight' => 400,
 			'font-style' => 'normal',
 			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
@@ -143,7 +208,9 @@ class Plugin
 		$this->text_options['font-weight'] = $this->evaluate_font_weight($this->text_options['font-weight'], 400);
 		$this->text_options['font-style'] = $this->evaluate_font_style($this->text_options['font-style'], 'normal');
 
-		$this->text_options['font-file'] = $this->font_filename($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
+		if (!$this->text_options['font-file']) {
+			$this->text_options['font-file'] = $this->font_filename($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
+		}
 
 		// we need a TTF
 		if (!is_file($this->storage() .'/'. $this->text_options['font-file']) || substr($this->text_options['font-file'], -4) !== '.ttf') {
@@ -201,7 +268,12 @@ class Plugin
 
 	public static function init()
 	{
-		self::getInstance();
+		$instance = self::getInstance();
+		if (is_admin()) {
+			require_once __DIR__ . '/class.og-image-admin.php';
+			$admin = Admin::getInstance();
+			$admin->storage = $instance->storage();
+		}
 	}
 
 	public function evaluate_font_style($style, $default = 'normal')

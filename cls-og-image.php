@@ -34,6 +34,6 @@ require_once 'lib/class.og-image-plugin.php';
 
 add_action('plugins_loaded', [Plugin::class, 'init']);
 
-add_filter('cls_og_text', function($text, $post_id, $image_id, $type) {
-	return "Case:\nBetaalvereniging.nl";
-}, 10, 4);
+//add_filter('cls_og_text', function($text, $post_id, $image_id, $type) {
+//	return "Case:\nBetaalvereniging.nl";
+//}, 10, 4);

@@ -31,8 +31,6 @@ class GD {
 
 	public function text_overlay($textOptions, $text)
 	{
-//		var_dump($textOptions, $text);
-
 		$image_width = imagesx($this->resource);
 		$image_height = imagesy($this->resource);
 
@@ -60,7 +58,7 @@ class GD {
 		$text_stroke_color = false;
 		if ($textOptions['text-stroke-color']) {
 			$text_stroke_color = $this->manager->hex_to_rgba($textOptions['text-stroke-color'], true);
-			$text_stroke_color = imagecolorallocatealpha($this->resource, $text_stroke_color[0], $text_stroke_color[1], $text_stroke_color[2], $text_stroke_color[3]);
+			$text_stroke_color = imagecolorallocatealpha($this->resource, $text_stroke_color[0], $text_stroke_color[1], $text_stroke_color[2], $text_stroke_color[3]/10);
 			imagecolortransparent($this->resource, $text_stroke_color);
 		}
 
@@ -140,6 +138,7 @@ class GD {
 
 	private function imagettfstroketext(&$image, $size, $angle, $x, $y, &$strokecolor, $fontfile, $text, $px) {
 		for($c1 = ($x-$px); $c1 <= ($x+$px); $c1++) {
+			$a +=2;
 			$c2 = $y + round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
 			imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
 			$c3 = $y - round(sqrt($px*$px - ($x-$c1)*($x-$c1)));

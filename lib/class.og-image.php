@@ -2,11 +2,15 @@
 
 namespace Clearsite\Plugins\OGImage;
 
+use RankMath;
+
 class Image {
 	private $manager;
 	public $image_id;
 	public $post_id;
 	public $serve_type;
+
+	private $use_cache = true; // for skipping caching, set to false
 
 	public function __construct( Plugin $manager)
 	{
@@ -15,6 +19,10 @@ class Image {
 		$this->post_id = get_the_ID();
 		// This plugin provides a meta box ...
 		$this->image_id = $this->getImageIdForPost( $this->post_id );
+
+		if (defined('WP_DEBUG') && WP_DEBUG) {
+			$this->use_cache = false;
+		}
 	}
 
 	public function getManager()
@@ -71,6 +79,11 @@ class Image {
 			header('X-OG-Error-Fail: Generating image failed.');
 			unlink($lock_file);
 			return false;
+		}
+
+		if (!$retry && !$this->use_cache) {
+			@unlink($cache_file);
+			@unlink($lock_file);
 		}
 
 		if (is_file($cache_file)) {
@@ -160,29 +173,31 @@ class Image {
 
 	public function getTextForPost($post_id)
 	{
-		// default text
-		if (trim($this->manager->text_options['text'])) {
-			$type = 'default';
-			$text = $this->manager->text_options['text'];
-		}
-		$meta = get_post_meta($post_id, 'cls_og_text', true);
+		$meta = get_post_meta($post_id, '_cls_og_text', true);
 		if ($meta) {
 			$type = 'meta';
 			$text = trim($meta);
 		}
 
-		ob_start();
-		do_action('wp_head');
-		$head = ob_get_clean();
-		// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
-		// also; poor excuse for tag parsing. sorry.
-		if ($head && false !== strpos($head, 'og:title')) {
-			preg_match('/og:title.+content=(.)([^\n]+)/', $head, $m);
-			$title = $m[2];
-			$quote = $m[1];
+		if (!$text) {
+			ob_start();
+			do_action('wp_head');
+			$head = ob_get_clean();
+			// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
+			// also; poor excuse for tag parsing. sorry.
+			if ($head && false !== strpos($head, 'og:title')) {
+				preg_match('/og:title.+content=(.)([^\n]+)/', $head, $m);
+				$title = $m[2];
+				$quote = $m[1];
 
-			$text = trim($title, ' />'. $quote);
-			$type = 'scraped';
+				$text = trim($title, ' />' . $quote);
+				$type = 'scraped';
+			}
+		}
+		// default text
+		if (!$text && trim($this->manager->text_options['text'])) {
+			$type = 'default';
+			$text = $this->manager->text_options['text'];
 		}
 
 		return apply_filters('cls_og_text', $text, $post_id, $this->getImageIdForPost($post_id), $type);
@@ -190,22 +205,31 @@ class Image {
 
 	private function getImageIdForPost($post_id)
 	{
-		$image_id = get_post_meta($post_id, 'cls_og_image', true);
+		$the_img = 'meta';
+		$image_id = get_post_meta($post_id, '_cls_og_image', true);
 		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION') && !$image_id) {
 			$image_id = get_post_meta($post_id, '_yoast_wpseo_opengraph-image-id', true);
+			$the_img = 'yoast';
 		}
 		// maybe RankMath?
-		if (defined('WPSEO_VERSION') && !$image_id) { // TODO: Detect and Use RankMath
-			$image_id = get_post_meta($post_id, '_yoast_wpseo_opengraph-image-id', true);
+		if (class_exists(RankMath::class) && !$image_id) {
+			$image_id = get_post_meta($post_id, 'rank_math_facebook_image_id', true);
+			$the_img = 'rankmath';
 		}
 		// thumbnail?
 		if (!$image_id) {
+			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($post_id);
 		}
 		// global Image?
 		if (!$image_id) {
-			$image_id = get_site_option('cls_og_image');
+			$the_img = 'global';
+			$image_id = get_site_option('_default_og_image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
+		}
+
+		if ($image_id) { // this is for LOCAL DEBUGGING ONLY
+//			add_filter('cls_og_text', function() use ($the_img) { return $the_img; }, PHP_INT_MAX);
 		}
 
 		return $image_id;
