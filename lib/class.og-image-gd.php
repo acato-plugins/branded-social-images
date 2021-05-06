@@ -70,6 +70,7 @@ class GD {
 		$text_height = $textDim[1] - $textDim[7];
 
 		$l = $textOptions['line-height'];
+
 		if ($l > $text_height) {
 //			$text_height = $l;
 		}
@@ -118,9 +119,54 @@ class GD {
 		imagettftext($this->resource, $fontSize, 0, $text_posX, $text_posY + $text_height * .82, $text_color, $font, $text);
 	}
 
-	public function logo_overlay()
+	public function logo_overlay($logoOptions)
 	{
+		if (!$logoOptions['file']) {
+			return;
+		}
+		$file = $logoOptions['file'];
+		if (!is_file($file)) {
+			return;
+		}
 
+
+		// source
+		$logo = imagecreatefromstring(file_get_contents($file));
+		$logo_width = imagesx($logo);
+		$logo_height = imagesy($logo);
+
+		// target
+		$image_width = imagesx($this->resource);
+		$image_height = imagesy($this->resource);
+
+		// logo overlay
+		$w = $logoOptions['w'];
+		$h = $logoOptions['h'];
+
+		$p = 0 ; //???
+
+		if ($logoOptions['halign'] == 'center') {
+			$logo_posX = ( $image_width - $logoOptions['left'] - $logoOptions['right']) / 2 - $w / 2 + $logoOptions['left'];
+		}
+		if ($logoOptions['halign'] == 'right') {
+			$logo_posX = $image_width - $logoOptions['right'] - $w - $p;
+		}
+		if ($logoOptions['halign'] == 'left') {
+			$logo_posX = $logoOptions['left'] + $p;
+		}
+
+		if ($logoOptions['valign'] == 'center') {
+			$logo_posY = ( $image_height - $logoOptions['top'] - $logoOptions['bottom '] ) / 2 - $h / 2 + $logoOptions['top'];
+		}
+		if ($logoOptions['valign'] == 'bottom') {
+			$logo_posY = $image_height - $logoOptions['bottom'] - $h - $p;
+		}
+		if ($logoOptions['valign'] == 'top') {
+			$logo_posY = $logoOptions['top'] + $p;
+		}
+
+		imagecopyresampled($this->resource, $logo, $logo_posX, $logo_posY, 0, 0, $w, $h, $logo_width, $logo_height);
+		imagedestroy($logo);
 	}
 
 	public function save()

@@ -23,6 +23,10 @@ class Image {
 		if (defined('WP_DEBUG') && WP_DEBUG) {
 			$this->use_cache = false;
 		}
+
+		if (isset($_GET['_preview'])) {
+			$this->use_cache = false;
+		}
 	}
 
 	public function getManager()
@@ -130,15 +134,15 @@ class Image {
 				return false;
 			}
 
-			$editor = wp_get_image_editor( $image_file );
+//			$editor = wp_get_image_editor( $image_file );
 			// we assume GD because we cannot be sure Imagick is there.
-			// TODO: check for existence and make use of imagick
-			if (true) { // debug
+			// TODO: add IMagick variant, work in progress
 //			if (is_a($editor, \WP_Image_Editor_Imagick::class)) {
 //				require_once __DIR__ .'/class.og-image-imagick.php';
 //				$image = new IMagick($this, $image_file, $cache_file);
 //			}
 //			elseif (is_a($editor, \WP_Image_Editor_GD::class)) {
+			if (true) { // hard coded GD now
 				require_once __DIR__ .'/class.og-image-gd.php';
 				$image = new GD($this, $image_file, $cache_file);
 			}
@@ -149,7 +153,6 @@ class Image {
 			}
 
 			if ($this->manager->logo_options['enabled']) {
-				// todo: overlay logo
 				$image->logo_overlay($this->manager->logo_options);
 			}
 
@@ -165,6 +168,9 @@ class Image {
 			}
 
 			unlink($lock_file);
+			if (!$this->use_cache) {
+				add_action('shutdown', function () use ($cache_file) { @unlink($cache_file); });
+			}
 			return is_file($cache_file) ? $cache_file : false;
 		}
 		unlink($lock_file);
@@ -200,7 +206,9 @@ class Image {
 			$text = $this->manager->text_options['text'];
 		}
 
-		return apply_filters('cls_og_text', $text, $post_id, $this->getImageIdForPost($post_id), $type);
+		$text = apply_filters('cls_og_text', $text, $post_id, $this->getImageIdForPost($post_id), $type);
+
+		return $text;
 	}
 
 	private function getImageIdForPost($post_id)
@@ -225,7 +233,7 @@ class Image {
 		// global Image?
 		if (!$image_id) {
 			$the_img = 'global';
-			$image_id = get_site_option('_default_og_image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
+			$image_id = get_site_option('_cls_default_og_image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
 		}
 
 		if ($image_id) { // this is for LOCAL DEBUGGING ONLY

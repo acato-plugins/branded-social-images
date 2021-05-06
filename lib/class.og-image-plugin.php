@@ -21,13 +21,12 @@ class Plugin
 		});
 
 		// phase 1; add the endpoints
-		add_action('init', function () {
+		add_action('wp', function () {
 			$this->width = get_site_option('cls_og_image__og_width', 1200);
 			$this->height = get_site_option('cls_og_image__og_height', 630);
 
 			$defaults = $this->default_options();
-			$this->logo_options = get_site_option('cls_og_image__og_logo_options', $defaults['logo_options']);
-			$this->logo_options['enabled'] = $this->logo_options['enabled'] == 'on';
+			$this->logo_options = $defaults['logo_options'];
 
 			// text options
 			$this->text_options = $defaults['text_options'];
@@ -36,49 +35,27 @@ class Plugin
 
 			$this->text_options['font-file'] = $font_file;
 
-			$position = get_site_option('_cls_default_og_text_position', 'top-left');
-			switch ($position) {
-				case 'top-left':
-				case 'top':
-				case 'top-right':
-					$this->text_options['top'] = 20;
-					break;
-				case 'bottom-left':
-				case 'bottom':
-				case 'bottom-right':
-					$this->text_options['bottom'] = 20;
-					break;
-				case 'left':
-				case 'center':
-				case 'right':
-					$this->text_options['top'] = 20;
-					$this->text_options['bottom'] = 20;
-					break;
-			}
-			switch ($position) {
-				case 'top-left':
-				case 'bottom-left':
-				case 'left':
-					$this->text_options['left'] = 20;
-					break;
-				case 'top-right':
-				case 'bottom-right':
-				case 'right':
-					$this->text_options['right'] = 20;
-					break;
-				case 'top':
-				case 'center':
-				case 'bottom':
-					$this->text_options['left'] = 20;
-					$this->text_options['right'] = 20;
-					break;
+			$this->validate_text_options();
+			$this->validate_logo_options();
+
+			$this->text_options['position'] = get_site_option('_cls_default_og_text_position', 'top-left');
+			$this->logo_options['position'] = get_site_option('_cls_default_og_logo_position', 'bottom-right');
+			$id = get_the_ID();
+			if ($id) {
+				$p = get_post_meta($id, '_cls_og_text_position', true);
+
+				if ($p) {
+					$this->text_options['position'] = $p;
+				}
 			}
 
+			$this->expand_text_options();
+			$this->expand_logo_options();
+		});
+
+		add_action('init', function(){
 			add_rewrite_endpoint('og-image.png', EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
 			add_image_size('og-image', $this->width, $this->height, true);
-
-			$this->validate_text_options();
-			$this->expand_text_options();
 		});
 
 		// phase 2; alter the endpoints to be data-less (like /feed)
@@ -104,39 +81,82 @@ class Plugin
 				$og_image = new Image($this);
 				if (current_user_can('edit_posts') && isset($_GET['_preview'])) {
 					$this->preview = true;
+
 					$this->text_options = shortcode_atts($this->text_options, $_GET); // picks appropriate items from _GET and uses the current settings as default
 					$this->logo_options = shortcode_atts($this->logo_options, $_GET); // picks appropriate items from _GET and uses the current settings as default
+
 					$this->validate_text_options();
-					$this->expand_text_options();
+					$this->validate_logo_options();
+
+					if (isset($_GET['text_position'])) {
+						$this->text_options['position'] = $_GET['text_position'];
+						unset($this->text_options['top'], $this->text_options['left'], $this->text_options['bottom'], $this->text_options['right']);
+					}
+					if (isset($_GET['logo_position'])) {
+						$this->logo_options['position'] = $_GET['logo_position'];
+						unset($this->logo_options['top'], $this->logo_options['left'], $this->logo_options['bottom'], $this->logo_options['right']);
+					}
+					if (isset($_GET['text'])) {
+						add_filter('cls_og_text', function($text) {
+							return urldecode($_GET['text']);
+						}, PHP_INT_MAX);
+					}
+					if (!empty($_GET['image'])) {
+						$id = intval($_GET['image']);
+						if ($id && 'attachment' === get_post_type($id) && wp_get_attachment_image($id)) {
+							$og_image->image_id = $id;
+						}
+					}
+					$this->expand_text_options($fast = true);
+					$this->expand_logo_options();
 				}
+
 				$og_image->serve_type = get_site_option('cls_og_image__serve_type', 'inline'); // inline or redirect
 				$og_image->serve();
+
 				exit;
 			}
 		});
 
-		add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-		add_filter('rank_math/opengraph/facebook/image_secure_url', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-		add_filter('rank_math/opengraph/twitter/twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-		add_filter('rank_math/opengraph/facebook/og_image_type', function() { return 'image/png'; }, PHP_INT_MAX);
-		// todo: yoast seo override
+		add_action('wp', function () {
+			$id = get_the_ID();
+			if (!is_admin() && $id) {
+				$killswitch = get_post_meta($id, '_cls_og_disabled', true);
+				if (!$killswitch && 'on' !== $killswitch) {
+					// overrule RankMath
+					add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+					add_filter('rank_math/opengraph/facebook/image_secure_url', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+					add_filter('rank_math/opengraph/twitter/twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+					add_filter('rank_math/opengraph/facebook/og_image_type', function () {
+						return 'image/png';
+					}, PHP_INT_MAX);
 
-		add_action('wp_head', [static::class, 'late_head'], PHP_INT_MAX);
+					// overrule Yoast SEO
+					add_filter('wpseo_opengraph_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+					add_filter('wpseo_twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+
+					// if an overrule did not take, we need to define our own.
+					add_action('wp_head', [static::class, 'late_head'], PHP_INT_MAX);
+				}
+			}
+		}, PHP_INT_MAX);
+
 	}
 
 	public $page_has_og_image = false;
 
-	public static function overrule_og_image($old=null)
+	public static function overrule_og_image($old = null)
 	{
 //		var_dump($old);exit;
 		self::getInstance()->page_has_og_image = true;
-		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) .'og-image.png';
+		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . 'og-image.png';
 	}
 
 	public static function late_head()
 	{
 		if (!self::getInstance()->page_has_og_image) {
-			?><meta property="og:image" content="<?php print self::overrule_og_image(); ?>"><?php
+			?>
+			<meta property="og:image" content="<?php print self::overrule_og_image(); ?>"><?php
 		}
 	}
 
@@ -161,7 +181,9 @@ class Plugin
 			'text-stroke' => '2',
 		];
 		$defaults['logo_options'] = [
-			'enabled' => '',
+			'enabled' => 'on',
+			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
+			'size' => get_site_option('_cls_og_image_logo_size', '20%'),
 		];
 
 		// more freemium options to consider;
@@ -184,9 +206,9 @@ class Plugin
 		$this->text_options = shortcode_atts($all_possible_options, $this->text_options);
 
 		// colors
-		$colors = [ 'background-color', 'color', 'text-shadow-color', 'text-stroke-color' ];
+		$colors = ['background-color', 'color', 'text-shadow-color', 'text-stroke-color'];
 		foreach ($colors as $_color) {
-			$color = strtolower($this->text_options[ $_color ]);
+			$color = strtolower($this->text_options[$_color]);
 
 			// single "digit" colors
 			if (preg_match('/#[0-9a-f]{3,4}$/', trim($color), $m)) {
@@ -199,25 +221,73 @@ class Plugin
 			if (!preg_match('/#[0-9a-f]{6,8}$/', trim($color), $m) || preg_match('/#[0-9a-f]{7}$/', trim($color), $m)) {
 				$color = '';
 			}
-			$this->text_options[ $_color ] = $color;
+			$this->text_options[$_color] = $color;
 		}
+		$this->text_options['text'] = get_site_option('_cls_default_og_text');
 	}
 
-	public function expand_text_options()
+	public function validate_logo_options()
 	{
-		$this->text_options['font-weight'] = $this->evaluate_font_weight($this->text_options['font-weight'], 400);
-		$this->text_options['font-style'] = $this->evaluate_font_style($this->text_options['font-style'], 'normal');
+		$all_possible_options = $this->default_options();
+		$all_possible_options = $all_possible_options['logo_options'];
+		$this->logo_options = shortcode_atts($all_possible_options, $this->logo_options);
+	}
 
-		if (!$this->text_options['font-file']) {
-			$this->text_options['font-file'] = $this->font_filename($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
+	public function expand_text_options($fast = false)
+	{
+
+		switch ($this->text_options['position']) {
+			case 'top-left':
+			case 'top':
+			case 'top-right':
+				$this->text_options['top'] = 20;
+				break;
+			case 'bottom-left':
+			case 'bottom':
+			case 'bottom-right':
+				$this->text_options['bottom'] = 20;
+				break;
+			case 'left':
+			case 'center':
+			case 'right':
+				$this->text_options['top'] = 20;
+				$this->text_options['bottom'] = 20;
+				break;
+		}
+		switch ($this->text_options['position']) {
+			case 'top-left':
+			case 'bottom-left':
+			case 'left':
+				$this->text_options['left'] = 20;
+				break;
+			case 'top-right':
+			case 'bottom-right':
+			case 'right':
+				$this->text_options['right'] = 20;
+				break;
+			case 'top':
+			case 'center':
+			case 'bottom':
+				$this->text_options['left'] = 20;
+				$this->text_options['right'] = 20;
+				break;
 		}
 
-		// we need a TTF
-		if (!is_file($this->storage() .'/'. $this->text_options['font-file']) || substr($this->text_options['font-file'], -4) !== '.ttf') {
-			$this->text_options['font-file'] = $this->download_font($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
-		}
-		if (is_file($this->storage() .'/'. $this->text_options['font-file'])) {
-			$this->text_options['font-file'] = $this->storage() .'/'. $this->text_options['font-file'];
+		if (!$fast) {
+			$this->text_options['font-weight'] = $this->evaluate_font_weight($this->text_options['font-weight'], 400);
+			$this->text_options['font-style'] = $this->evaluate_font_style($this->text_options['font-style'], 'normal');
+
+			if (!$this->text_options['font-file']) {
+				$this->text_options['font-file'] = $this->font_filename($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
+			}
+
+			// we need a TTF
+			if (!is_file($this->storage() . '/' . $this->text_options['font-file']) || substr($this->text_options['font-file'], -4) !== '.ttf') {
+				$this->text_options['font-file'] = $this->download_font($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
+			}
+			if (is_file($this->storage() . '/' . $this->text_options['font-file'])) {
+				$this->text_options['font-file'] = $this->storage() . '/' . $this->text_options['font-file'];
+			}
 		}
 
 		// text positioning
@@ -226,34 +296,157 @@ class Plugin
 		$bottom = &$this->text_options['bottom'];
 		$left = &$this->text_options['left'];
 
-		$top = 'null' === $top || (empty( $top ) && 0 !== $top && '0' !== $top) ? null : $top;
-		$right = 'null' === $right || (empty( $right ) && 0 !== $right && '0' !== $right) ? null : $right;
-		$bottom = 'null' === $bottom || (empty( $bottom ) && 0 !== $bottom && '0' !== $bottom) ? null : $bottom;
-		$left = 'null' === $left || (empty( $left ) && 0 !== $left && '0' !== $left) ? null : $left;
+		$top = 'null' === $top || (empty($top) && 0 !== $top && '0' !== $top) ? null : $top;
+		$right = 'null' === $right || (empty($right) && 0 !== $right && '0' !== $right) ? null : $right;
+		$bottom = 'null' === $bottom || (empty($bottom) && 0 !== $bottom && '0' !== $bottom) ? null : $bottom;
+		$left = 'null' === $left || (empty($left) && 0 !== $left && '0' !== $left) ? null : $left;
 
 		$this->evaluate_vertical($top, $bottom);
 		$this->evaluate_horizontal($left, $right);
 
 		if (null !== $top && null !== $bottom) {
 			$valign = 'center';
-		}
-		elseif (null !== $top) {
+		} elseif (null !== $top) {
 			$valign = 'top';
-		}
-		else {
+		} else {
 			$valign = 'bottom';
 		}
 		if (null !== $left && null !== $right) {
 			$halign = 'center';
-		}
-		elseif (null !== $left) {
+		} elseif (null !== $left) {
 			$halign = 'left';
-		}
-		else {
+		} else {
 			$halign = 'right';
 		}
 		$this->text_options['valign'] = $valign;
 		$this->text_options['halign'] = $halign;
+	}
+
+	public function expand_logo_options()
+	{
+		switch ($this->logo_options['position']) {
+			case 'top-left':
+			case 'top':
+			case 'top-right':
+				$this->logo_options['top'] = 20;
+				break;
+			case 'bottom-left':
+			case 'bottom':
+			case 'bottom-right':
+				$this->logo_options['bottom'] = 20;
+				break;
+			case 'left':
+			case 'center':
+			case 'right':
+				$this->logo_options['top'] = 20;
+				$this->logo_options['bottom'] = 20;
+				break;
+		}
+		switch ($this->logo_options['position']) {
+			case 'top-left':
+			case 'bottom-left':
+			case 'left':
+				$this->logo_options['left'] = 20;
+				break;
+			case 'top-right':
+			case 'bottom-right':
+			case 'right':
+				$this->logo_options['right'] = 20;
+				break;
+			case 'top':
+			case 'center':
+			case 'bottom':
+				$this->logo_options['left'] = 20;
+				$this->logo_options['right'] = 20;
+				break;
+		}
+
+		$this->logo_options['file'] = get_site_option('_cls_og_image_logo');
+		if (is_numeric($this->logo_options['file'])) {
+			$this->logo_options['file'] = get_attached_file($this->logo_options['file']);
+		}
+		list($sw, $sh) = getimagesize($this->logo_options['file']);
+		if ($sw && $sh) {
+			$sa = $sw / $sh;
+			$this->logo_options['enabled'] = true;
+			$this->logo_options['source_width'] = $sw;
+			$this->logo_options['source_height'] = $sh;
+			$this->logo_options['source_aspectratio'] = $sa;
+		} else {
+			// not an image
+			$this->logo_options['file'] = false;
+			$this->logo_options['error'] = 'Not an image';
+			$this->logo_options['enabled'] = false;
+			return;
+		}
+
+		// logo positioning
+		$top = &$this->logo_options['top'];
+		$right = &$this->logo_options['right'];
+		$bottom = &$this->logo_options['bottom'];
+		$left = &$this->logo_options['left'];
+
+		$top = 'null' === $top || (empty($top) && 0 !== $top && '0' !== $top) ? null : $top;
+		$right = 'null' === $right || (empty($right) && 0 !== $right && '0' !== $right) ? null : $right;
+		$bottom = 'null' === $bottom || (empty($bottom) && 0 !== $bottom && '0' !== $bottom) ? null : $bottom;
+		$left = 'null' === $left || (empty($left) && 0 !== $left && '0' !== $left) ? null : $left;
+
+		$this->evaluate_vertical($top, $bottom);
+		$this->evaluate_horizontal($left, $right);
+
+		if (null !== $top && null !== $bottom) {
+			$valign = 'center';
+		} elseif (null !== $top) {
+			$valign = 'top';
+		} else {
+			$valign = 'bottom';
+		}
+		if (null !== $left && null !== $right) {
+			$halign = 'center';
+		} elseif (null !== $left) {
+			$halign = 'left';
+		} else {
+			$halign = 'right';
+		}
+		$this->logo_options['valign'] = $valign;
+		$this->logo_options['halign'] = $halign;
+		// size w and h are bounding box!
+		if (preg_match('/[0-9]+%/', $this->logo_options['size'])) {
+			$this->logo_options['size'] = min(100, intval($this->logo_options['size']));
+			$this->logo_options['size'] = max(0, intval($this->logo_options['size']));
+			$this->logo_options['w'] = $this->logo_options['size'] / 100 * $this->width;
+			$this->logo_options['h'] = $this->logo_options['size'] / 100 * $this->height;
+			$this->logo_options['size'] .= '%';
+		} elseif (preg_match('/([0-9]+)x([0-9]+)/', $this->logo_options['size'], $m)) {
+			$w = $m[1];
+			$w = min($this->width, $w);
+			$this->logo_options['w'] = max(0, $w); // stupid to set 0, but could mean "auto"
+			$h = $m[2];
+			$h = min($this->height, $h);
+			$this->logo_options['h'] = max(0, $h); // stupid to set 0, but could mean "auto"
+		} else { // assume a pixel width
+			$w = intval($this->logo_options['size']);
+			$w = min($this->width, $w);
+			$this->logo_options['w'] = max(0, $w); // stupid to set 0, but could mean "auto"
+			$this->logo_options['h'] = 0; // auto
+		}
+		// resolve "unset"
+		if (!$this->logo_options['w'] && !$this->logo_options['h']) {
+			$this->logo_options['w'] = $sw;
+			$this->logo_options['h'] = $sh;
+		}
+		// resolve "auto"
+		if ($this->logo_options['w'] && !$this->logo_options['h']) { // auto height
+			$this->logo_options['h'] = $this->logo_options['w'] / $sa;
+		}
+		if (!$this->logo_options['w'] && $this->logo_options['h']) { // auto height
+			$this->logo_options['w'] = $this->logo_options['h'] * $sa;
+		}
+		// resolve aspect issues
+		// -> this makes bounding box actual image size
+		$scale = min($this->logo_options['w'] / $sw, $this->logo_options['h'] / $sh);
+		$this->logo_options['w'] = $sw * $scale;
+		$this->logo_options['h'] = $sh * $scale;
 	}
 
 	public static function getInstance()
@@ -278,7 +471,7 @@ class Plugin
 
 	public function evaluate_font_style($style, $default = 'normal')
 	{
-		$allowed = [ 'normal', 'italic' ];
+		$allowed = ['normal', 'italic'];
 		if (!in_array($style, $allowed)) {
 			return $default;
 		}
@@ -303,14 +496,13 @@ class Plugin
 			'ultra bold' => 800,
 		];
 		if (!intval($weight)) {
-			if (isset($translate[ strtolower($weight) ])) {
-				$weight = $translate[ strtolower($weight) ];
-			}
-			else {
+			if (isset($translate[strtolower($weight)])) {
+				$weight = $translate[strtolower($weight)];
+			} else {
 				$weight = $default;
 			}
 		}
-		$weight = floor($weight/100) * 100;
+		$weight = floor($weight / 100) * 100;
 		if (!$weight) {
 			$weight = $default;
 		}
@@ -324,7 +516,7 @@ class Plugin
 	public static function setError($tag, $text)
 	{
 		$errors = get_option('cls_og_image__errors', []);
-		$errors[ $tag ] = $text;
+		$errors[$tag] = $text;
 		$errors = array_filter($errors);
 		update_option('cls_og_image__og_logo_errors', $errors);
 	}
@@ -333,7 +525,7 @@ class Plugin
 	{
 		if (preg_match('/google:(.+)/', $font_family, $m)) {
 			$italic = $font_style == 'italic' ? 'italic' : '';
-			$font_filename = $m[1] /* fontname */ . '-w'. $font_weight . ( $italic ? '-'. $italic : '' ) .'.ttf';
+			$font_filename = $m[1] /* fontname */ . '-w' . $font_weight . ($italic ? '-' . $italic : '') . '.ttf';
 			return $font_filename;
 		}
 
@@ -350,12 +542,12 @@ class Plugin
 			self::setError('font-family', __('Don\'t know where to get this font. Sorry.', 'clsogimg'));
 			return false;
 		}
-		if (is_file($this->storage() .'/'. $font_filename)) {
+		if (is_file($this->storage() . '/' . $font_filename)) {
 			return $font_filename;
 		}
 		if (preg_match('/google:(.+)/', $font_family, $m)) {
 			$italic = $font_style == 'italic' ? 'italic' : '';
-			$font_css = wp_remote_retrieve_body(wp_remote_get('http://fonts.googleapis.com/css?family='. $m[1] .':' . $font_weight . $italic, ['useragent' => ' ']));
+			$font_css = wp_remote_retrieve_body(wp_remote_get('http://fonts.googleapis.com/css?family=' . $m[1] . ':' . $font_weight . $italic, ['useragent' => ' ']));
 
 			if (!$font_css) {
 				self::setError('font-family', __('Could not download font from Google Fonts. Please download yourself and upload here.', 'clsogimg'));
@@ -364,11 +556,10 @@ class Plugin
 			// grab any url
 			self::setError('font-family', null);
 			if (preg_match('@https?://[^)]+ttf@', $font_css, $n)) {
-				$font_ttf = wp_remote_retrieve_body( wp_remote_get($n[0]) );
-				$this->file_put_contents( $this->storage() .'/'. $font_filename, $font_ttf );
+				$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
+				$this->file_put_contents($this->storage() . '/' . $font_filename, $font_ttf);
 				return $font_filename;
-			}
-			else {
+			} else {
 				self::setError('font-family', __('This Google Fonts does not offer a TTF file. Sorry, cannot continue at this time.', 'clsogimg'));
 				return false;
 			}

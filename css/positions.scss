@@ -1,16 +1,26 @@
 .position-grid {
-  figure {
+  figure, img {
     width: 64px;
-    img {
-      padding: 0;
-    }
   }
-  .carbon-radio-image-list {
+
+  figure img {
+    padding: 0;
+  }
+
+  .carbon-radio-image-list, .cf-radio__list, &.cf-radio-image .cf-radio__list {
     max-width: 240px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
   }
+
   input {
     &:focus {
       outline: none;
     }
   }
+}
+
+#cls-og-preview {
+  zoom: 0.5;
 }
