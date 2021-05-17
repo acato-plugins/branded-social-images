@@ -113,7 +113,7 @@ class Plugin
 					}
 					if (!empty($_GET['text'])) {
 						add_filter('cls_og_text', function($text) {
-							return urldecode($_GET['text']);
+							return stripslashes_deep(urldecode($_GET['text']));
 						}, PHP_INT_MAX);
 					}
 					if (!empty($_GET['image'])) {
