@@ -42,10 +42,19 @@ class Plugin
 			$this->logo_options['position'] = get_site_option('_cls_default_og_logo_position', 'bottom-right');
 			$id = get_the_ID();
 			if ($id) {
-				$p = get_post_meta($id, '_cls_og_text_position', true);
+				$overrule_text_position = get_post_meta($id, '_cls_og_text_position', true);
+				if ($overrule_text_position) {
+					$this->text_options['position'] = $overrule_text_position;
+				}
 
-				if ($p) {
-					$this->text_options['position'] = $p;
+				$overrule_logo_enabled = get_post_meta($id, '_cls_og_logo_enabled', true);
+				if (!$overrule_logo_enabled || 'yes' === $overrule_logo_enabled) {
+					$this->logo_options['enabled'] = $overrule_logo_enabled;
+				}
+
+				$overrule_logo_position = get_post_meta($id, '_cls_og_logo_position', true);
+				if ($overrule_logo_position) {
+					$this->logo_options['position'] = $overrule_logo_position;
 				}
 			}
 
@@ -88,15 +97,21 @@ class Plugin
 					$this->validate_text_options();
 					$this->validate_logo_options();
 
-					if (isset($_GET['text_position'])) {
-						$this->text_options['position'] = $_GET['text_position'];
-						unset($this->text_options['top'], $this->text_options['left'], $this->text_options['bottom'], $this->text_options['right']);
-					}
 					if (isset($_GET['logo_position'])) {
 						$this->logo_options['position'] = $_GET['logo_position'];
 						unset($this->logo_options['top'], $this->logo_options['left'], $this->logo_options['bottom'], $this->logo_options['right']);
 					}
-					if (isset($_GET['text'])) {
+					if (!empty($_GET['logo_enabled'])) {
+						$this->logo_options['enabled'] = $_GET['logo_enabled'] === 'yes';
+					}
+					if (isset($_GET['text_position'])) {
+						$this->text_options['position'] = $_GET['text_position'];
+						unset($this->text_options['top'], $this->text_options['left'], $this->text_options['bottom'], $this->text_options['right']);
+					}
+					if (!empty($_GET['text_enabled'])) {
+						$this->text_options['enabled'] = $_GET['text_enabled'] === 'yes';
+					}
+					if (!empty($_GET['text'])) {
 						add_filter('cls_og_text', function($text) {
 							return urldecode($_GET['text']);
 						}, PHP_INT_MAX);
@@ -324,6 +339,10 @@ class Plugin
 
 	public function expand_logo_options()
 	{
+		if (empty($this->logo_options['enabled']) && false !== $this->logo_options['enabled']) {
+			$this->logo_options['enabled'] = true;
+		}
+
 		switch ($this->logo_options['position']) {
 			case 'top-left':
 			case 'top':
@@ -368,7 +387,6 @@ class Plugin
 		list($sw, $sh) = getimagesize($this->logo_options['file']);
 		if ($sw && $sh) {
 			$sa = $sw / $sh;
-			$this->logo_options['enabled'] = true;
 			$this->logo_options['source_width'] = $sw;
 			$this->logo_options['source_height'] = $sh;
 			$this->logo_options['source_aspectratio'] = $sa;

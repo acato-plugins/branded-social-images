@@ -7,6 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInitd581cbfb17b5b823a2d65e303c990640
 {
     public static $prefixLengthsPsr4 = array (
+        'G' => 
+        array (
+            'GDText\\Tests\\' => 13,
+            'GDText\\' => 7,
+        ),
         'C' => 
         array (
             'Carbon_Fields\\' => 14,
@@ -14,6 +19,14 @@ class ComposerStaticInitd581cbfb17b5b823a2d65e303c990640
     );
 
     public static $prefixDirsPsr4 = array (
+        'GDText\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/stil/gd-text/tests',
+        ),
+        'GDText\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/stil/gd-text/src',
+        ),
         'Carbon_Fields\\' => 
         array (
             0 => __DIR__ . '/..' . '/htmlburger/carbon-fields/core',

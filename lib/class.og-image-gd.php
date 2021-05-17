@@ -65,16 +65,17 @@ class GD {
 		$font = $textOptions['font-file'];
 		$fontSize = $textOptions['font-size'];
 
+		$text = str_replace(['<br>', '<br />', '<br/>', '\\n'], "\n", $text); // predefined line breaks
+		$text = str_replace('\\r', '', $text);
+		$text = $this->wrapTextByPixels($text, $image_width * .7, $fontSize, $font);
+		$lines = count(explode("\n", $text));
+
 		$textDim = imagettfbbox($fontSize, 0, $font, $text);
 		$text_width = $textDim[2] - $textDim[0];
 		$text_height = $textDim[1] - $textDim[7];
 
-		$l = $textOptions['line-height'];
-
-		if ($l > $text_height) {
-//			$text_height = $l;
-		}
-		// todo: word-wrapping
+		$lineDim = imagettfbbox($fontSize, 0, $font, 'Wg');
+		$line_height = $lineDim[1] - $lineDim[7];
 
 		$p = $textOptions['padding'];
 
@@ -109,14 +110,14 @@ class GD {
 		if ($text_shadow_color) {
 			$shiftX = $textOptions['text-shadow-left'];
 			$shiftY = $textOptions['text-shadow-top'];
-			imagettftext($this->resource, $fontSize, 0, $text_posX + $shiftX, $text_posY + $shiftY + $text_height * .82, $text_shadow_color, $font, $text);
+			imagettftext($this->resource, $fontSize, 0, $text_posX + $shiftX, $text_posY + $shiftY + $line_height - .2*$line_height , $text_shadow_color, $font, $text);
 		}
 
 		if ($text_stroke_color) {
-			$this->imagettfstroketext($this->resource, $fontSize, 0, $text_posX, $text_posY + $text_height * .82,
+			$this->imagettfstroketext($this->resource, $fontSize, 0, $text_posX, $text_posY + $line_height - .2*$line_height ,
 				$text_stroke_color, $font, $text, $textOptions['text-stroke']);
 		}
-		imagettftext($this->resource, $fontSize, 0, $text_posX, $text_posY + $text_height * .82, $text_color, $font, $text);
+		imagettftext($this->resource, $fontSize, 0, $text_posX, $text_posY + $line_height - .2*$line_height , $text_color, $font, $text);
 	}
 
 	public function logo_overlay($logoOptions)
@@ -190,5 +191,78 @@ class GD {
 			$c3 = $y - round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
 			imagettftext($image, $size, $angle, $c1, $c3, $strokecolor, $fontfile, $text);
 		}
+	}
+
+
+
+	// Returns expected width of rendered text in pixels
+	private function getWidthPixels(string $text, string $font, int $font_size): int {
+		// https://www.php.net/manual/en/function.imageftbbox.php#refsect1-function.imageftbbox-returnvalues
+		$bbox = imageftbbox($font_size, 0, $font, " " . $text);
+		return $bbox[2] - $bbox[0];
+	}
+
+	// Returns wrapped format (with newlines) of a piece of text (meant to be rendered on an image)
+	// using the width of rendered bounding box of text
+	private function wrapTextByPixels(
+		string $text,
+		int $line_max_pixels,
+		int $font_size,
+		string $font
+	): string {
+		$words = explode(' ', $text);   // tokenize the text into words
+		$lines = [];                             // Array[Array[string]]: array to store lines of words
+		$crr_line_idx = 0;                       // (zero-based) index of current lines in which words are being added
+		$crr_line_pixels = 0;                    // width of current line (in which words are being added) in pixels
+
+		foreach ($words as $word) {
+			// determine the new width of current line (in pixels) if the current word is added to it (including space)
+			$crr_line_new_pixels = $crr_line_pixels + static::getWidthPixels(' ' . $word, $font, $font_size);
+			// determine the width of current word in pixels
+			$crr_word_pixels = static::getWidthPixels($word, $font, $font_size);
+
+
+			if ($crr_word_pixels > $line_max_pixels) {
+				// if the current word itself is too long to fit in single line
+				// then we have no option: it must still be put in oneline only
+				if ($crr_line_pixels == 0) {
+					// but it is put into current line only if current line is empty
+					$lines[$crr_line_idx] = array($word);
+					$crr_line_idx++;
+				} else {
+					// otherwise if current line is non-empty, then the extra long word is put into a newline
+					$crr_line_idx++;
+					$lines[$crr_line_idx] = array($word);
+					$crr_line_idx++;
+					$crr_line_pixels = 0;
+				}
+			} else if ($crr_line_new_pixels > $line_max_pixels) {
+				// otherwise if new width of current line (including current word and space)
+				// exceeds the maximum permissible width, then force the current word into newline
+				$crr_line_idx++;
+				$lines[$crr_line_idx] = array($word);
+				$crr_line_pixels = $crr_word_pixels;
+			} else {
+				// else if the current word (including space) can fit in the current line, then put it there
+				$lines[$crr_line_idx][] = $word;
+				$crr_line_pixels = $crr_line_new_pixels;
+			}
+		}
+
+		// after the above foreach loop terminates, the $lines 2-d array Array[Array[string]]
+		// would contain words segregated into lines to preserve the $line_max_pixels
+
+		// now we just need to stitch together lines (array of word strings) into a single continuous piece of text with
+		$concatenated_string = array_reduce(
+			$lines,
+			static function (string $wrapped_text, array $crr_line): string {
+				return $wrapped_text . PHP_EOL . implode(' ', $crr_line);
+			},
+			''
+		);
+
+		// the above process of concatenating lines into single piece of text will inadvertently
+		// add an extra newline '\n' character in the beginning; so we must remove that
+		return Image::removeFirstOccurrence($concatenated_string, "\n");
 	}
 }

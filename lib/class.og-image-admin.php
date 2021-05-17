@@ -84,12 +84,15 @@ class Admin {
 
 		// POSTS
 
-		$fields = array(
-			Field::make( 'image', 'cls_og_image', __( 'You can upload/select an OG Image here') ),
-			Field::make( 'text', 'cls_og_text', __( 'Text on image') ),
-		);
+		$fields = [];
+		$fields[] = Field::make( 'image', 'cls_og_image', __( 'You can upload/select a specific OG Image here') );
 
-		$fields[] = self::carbon_field__position('cls_og_text_position');
+		$fields[] = Field::make( 'checkbox', 'cls_og_text_enabled', __( 'Use text on this image?') )->set_default_value('yes')->set_help_text('Uncheck if you do not wish text on this image, or choose a position below');
+		$fields[] = Field::make( 'text', 'cls_og_text', __( 'Text on image') );
+		$fields[] = self::carbon_field__position('cls_og_text_position', get_site_option('_cls_default_og_text_position', 'bottom-right'));
+
+		$fields[] = Field::make( 'checkbox', 'cls_og_logo_enabled', __( 'Use a logo on this image?') )->set_default_value('yes')->set_help_text('Uncheck if you do not wish a logo on this image, or choose a position below');
+		$fields[] = self::carbon_field__position('cls_og_logo_position', get_site_option('_cls_default_og_logo_position', 'bottom-right'));
 
 //		$fields[] = self::carbon_field__logo();
 
@@ -104,7 +107,7 @@ class Admin {
 			$fields[0]->set_help_text('No Fallback images have been detected. If you do not set-up an image here, no OG:Image will be available for this '. get_post_type());
 		}
 
-		$killswitch = Field::make( 'checkbox', 'cls_og_disabled', __( 'Check this box to disable OG by Clearsite for this post/page/item') )->set_help_text('This does NOT disable the OG image url, so you can still test it, but, the OG image will not be advertised to browsers.');
+		$killswitch = Field::make( 'checkbox', 'cls_og_disabled', __( 'Check this box to disable OG by Clearsite for this post/page/item') )->set_help_text('This does NOT disable the OG image url, so you can still test it, but, the Clearsite OG image will not be advertised to browsers.<br /><br />If you use a plugin like Yoast SEO or Rank Math, their OG image might still be advertised. This checkbox does <strong>not</strong>strong> change that.');
 		array_unshift($fields, $killswitch);
 
 		Container::make('post_meta', __('OG Image'))
