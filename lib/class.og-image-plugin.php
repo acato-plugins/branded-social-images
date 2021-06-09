@@ -22,6 +22,7 @@ class Plugin
 
 		// phase 1; add the endpoints
 		add_action('wp', function () {
+			// todo: why aren't these _-prefixed?
 			$this->width = get_site_option('cls_og_image__og_width', 1200);
 			$this->height = get_site_option('cls_og_image__og_height', 630);
 
@@ -35,6 +36,14 @@ class Plugin
 
 			$this->text_options['font-file'] = $font_file;
 
+
+			$this->text_options['color'] = get_site_option('_cls_default_og_color');
+			$this->text_options['background-color'] = get_site_option('_cls_default_og_background_color');
+			$this->text_options['text-stroke'] = get_site_option('_cls_default_og_text_stroke');
+			$this->text_options['text-stroke-color'] = get_site_option('_cls_default_og_text_stroke_color');
+			$this->text_options['text-shadow-color'] = get_site_option('_cls_default_og_text_shadow_color');
+			$this->text_options['text-shadow-left'] = get_site_option('_cls_default_og_text_shadow_left');
+			$this->text_options['text-shadow-top'] = get_site_option('_cls_default_og_text_shadow_top');
 			$this->validate_text_options();
 			$this->validate_logo_options();
 
@@ -55,6 +64,41 @@ class Plugin
 				$overrule_logo_position = get_post_meta($id, '_cls_og_logo_position', true);
 				if ($overrule_logo_position) {
 					$this->logo_options['position'] = $overrule_logo_position;
+				}
+
+				$overrule_color = get_post_meta($id, '_cls_og_color', true);
+				if ($overrule_color) {
+					$this->text_options['color'] = $overrule_color;
+				}
+
+				$overrule_color = get_post_meta($id, '_cls_og_background_color', true);
+				if ($overrule_color) {
+					$this->text_options['background-color'] = $overrule_color;
+				}
+
+				$overrule_color = get_post_meta($id, '_cls_og_text_stroke_color', true);
+				if ($overrule_color) {
+					$this->text_options['text-stroke-color'] = $overrule_color;
+				}
+
+				$overrule = get_post_meta($id, '_cls_og_text_stroke', true);
+				if ($overrule !== '') {
+					$this->text_options['text-stroke'] = intval($overrule);
+				}
+
+				$overrule_color = get_post_meta($id, '_cls_og_text_shadow_color', true);
+				if ($overrule_color) {
+					$this->text_options['text-shadow-color'] = $overrule_color;
+				}
+
+				$overrule_left = get_post_meta($id, '_cls_og_text_shadow_left', true);
+				if ($overrule_left !== '') {
+					$this->text_options['text-shadow-left'] = $overrule_left;
+				}
+
+				$overrule_top = get_post_meta($id, '_cls_og_text_shadow_top', true);
+				if ($overrule_top !== '') {
+					$this->text_options['text-shadow-top'] = $overrule_top;
 				}
 			}
 
@@ -111,6 +155,28 @@ class Plugin
 					if (!empty($_GET['text_enabled'])) {
 						$this->text_options['enabled'] = $_GET['text_enabled'] === 'yes';
 					}
+					if (!empty($_GET['color'])) {
+						$this->text_options['color'] = urldecode($_GET['color']);
+					}
+					if (!empty($_GET['background_color'])) {
+						$this->text_options['background-color'] = urldecode($_GET['background_color']);
+					}
+					if (isset($_GET['text_stroke']) && '' !== $_GET['text_stroke']) {
+						$this->text_options['text-stroke'] = intval($_GET['text_stroke']);
+					}
+					if (!empty($_GET['text_stroke_color'])) {
+						$this->text_options['text-stroke-color'] = urldecode($_GET['text_stroke_color']);
+					}
+					if (!empty($_GET['text_shadow_color'])) {
+						$this->text_options['text-shadow-color'] = urldecode($_GET['text_shadow_color']);
+					}
+					if (isset($_GET['text_shadow_left']) && '' !== $_GET['text_shadow_left']) {
+						$this->text_options['text-shadow-left'] = $_GET['text_shadow_left'];
+					}
+					if (isset($_GET['text_shadow_top']) && '' !== $_GET['text_shadow_top']) {
+						$this->text_options['text-shadow-top'] = $_GET['text_shadow_top'];
+					}
+
 					if (!empty($_GET['text'])) {
 						add_filter('cls_og_text', function($text) {
 							return stripslashes_deep(urldecode($_GET['text']));
@@ -188,7 +254,7 @@ class Plugin
 			'font-style' => 'normal',
 			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
 			'padding' => '10',
-			'background-color' => '#99999999',
+			'background-color' => '#66666666',
 			'text-shadow-color' => '',
 			'text-shadow-left' => '2',
 			'text-shadow-top' => '-2',
@@ -335,6 +401,17 @@ class Plugin
 		}
 		$this->text_options['valign'] = $valign;
 		$this->text_options['halign'] = $halign;
+
+		$shadow_type = 'open';
+		foreach (['left','top'] as $dir) {
+			if (preg_match('/[0-9]+S/', $this->text_options['text-shadow-' . $dir])) {
+				$shadow_type = 'solid';
+			}
+			if (preg_match('/[0-9]+G/', $this->text_options['text-shadow-' . $dir])) {
+				$shadow_type = 'gradient';
+			}
+		}
+		$this->text_options['text-shadow-type'] = $shadow_type;
 	}
 
 	public function expand_logo_options()
@@ -601,7 +678,7 @@ class Plugin
 		return $dir;
 	}
 
-	public function hex_to_rgba($hex_color, $alpha_is_gd = false)
+	public function hex_to_rgba($hex_color, $alpha_is_gd = false): array
 	{
 		if (substr($hex_color, 0, 1) !== '#') {
 			$hex_color = '#ffffffff';
@@ -616,6 +693,20 @@ class Plugin
 		}
 
 		return $int_values;
+	}
+
+	public function rgba_to_hex($rgba_color, $alpha_is_gd = false): string
+	{
+		if ($alpha_is_gd) {
+			$rgba_color[3] = intval($rgba_color[3]);
+			$rgba_color[3] = $rgba_color[3] / 127 * 255;
+			$rgba_color[3] = 255 - floor($rgba_color[3]);
+			$rgba_color[3] = max(0, $rgba_color[3]); // minimum value = 0
+			$rgba_color[3] = min(255, $rgba_color[3]); // maximum value = 255
+		}
+		$hex_values = array_map(function($in) { return sprintf("%02s", dechex($in)); }, $rgba_color);
+
+		return '#' . strtoupper( substr(implode('', $hex_values), 0, 8) );
 	}
 
 	public function file_put_contents($filename, $content)

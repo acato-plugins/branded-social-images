@@ -73,10 +73,19 @@ class Admin {
 		);
 
 		self::carbon_field__fonts($fields);
-		$fields[] = self::carbon_field__position('cls_default_og_text_position', true);
+		$fields[] = self::carbon_field__position('cls_default_og_text_position', 'Default text position', true);
+
+		self::carbon_field__color( $fields, 'cls_default_og_color', 'Default Text color', '#FFFFFFFF');
+		self::carbon_field__color( $fields, 'cls_default_og_background_color', 'Default Text background color', '#66666666');
+		self::carbon_field__color( $fields, 'cls_default_og_text_stroke_color', 'Default Text stroke color', '#00000000');
+		$fields[ count($fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
+		$fields[] = Field::make('text', 'cls_default_og_text_stroke', 'Default stroke width')->set_default_value(0);
+		self::carbon_field__color( $fields, 'cls_default_og_text_shadow_color', 'Default Text shadow color', '#00000000');
+		$fields[] = Field::make('text', 'cls_default_og_text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value('-2');
+		$fields[] = Field::make('text', 'cls_default_og_text_shadow_left', 'Shadow offset - vertical. Negative numbers to left, Positive numbers to right.')->set_default_value('2');
 
 		$fields[] =	Field::make( 'image', 'cls_og_image_logo', 'Your logo' )->set_help_text('For best results, use PNG with transparency at at least (!) 600 pixels wide and/or high. If you get "gritty" results, use higher values.');
-		$fields[] = self::carbon_field__position('cls_default_og_logo_position', 'bottom-right');
+		$fields[] = self::carbon_field__position('cls_default_og_logo_position', 'Default logo position', 'bottom-right');
 		$fields[] =	Field::make( 'text', 'cls_og_image_logo_size', 'Size' )->set_help_text('You can use a width (like 200), width and height (like 200x160) or a percentage (like 20%). This determines the bounding box, the logo aspect ratio will remain in tact.')->set_default_value('20%');
 
 		Container::make( 'theme_options', __( 'OG Image by Clearsite' ) )
@@ -88,11 +97,19 @@ class Admin {
 		$fields[] = Field::make( 'image', 'cls_og_image', __( 'You can upload/select a specific OG Image here') );
 
 		$fields[] = Field::make( 'checkbox', 'cls_og_text_enabled', __( 'Use text on this image?') )->set_default_value('yes')->set_help_text('Uncheck if you do not wish text on this image, or choose a position below');
-		$fields[] = Field::make( 'text', 'cls_og_text', __( 'Text on image') );
-		$fields[] = self::carbon_field__position('cls_og_text_position', get_site_option('_cls_default_og_text_position', 'bottom-right'));
+		$fields[] = Field::make( 'text', 'cls_og_text', __( 'Text on image') )->set_help_text('If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.');
+		self::carbon_field__color( $fields, 'cls_og_color', 'Text color', get_site_option('_cls_default_og_color', '#FFFFFFFF'));
+		$fields[] = self::carbon_field__position('cls_og_text_position', 'Text position', get_site_option('_cls_default_og_text_position', 'bottom-right'));
+		self::carbon_field__color( $fields, 'cls_og_background_color', 'Text background color', get_site_option('_cls_default_og_background_color', '#66666666'));
+		self::carbon_field__color( $fields, 'cls_og_text_stroke_color', 'Text stroke color', get_site_option('_cls_default_og_text_stroke_color', '#00000000'));
+		$fields[ count($fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
+		$fields[] = Field::make('text', 'cls_og_text_stroke', 'Stroke width')->set_default_value(get_site_option('_cls_default_og_text_stroke', '0'));
+		self::carbon_field__color( $fields, 'cls_og_text_shadow_color', 'Text shadow color', get_site_option('_cls_default_og_text_shadow', '#00000000'));
+		$fields[] = Field::make('text', 'cls_og_text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value(get_site_option('_cls_default_og_shadow_top', '-2'));
+		$fields[] = Field::make('text', 'cls_og_text_shadow_left', 'Shadow offset - vertical. Negative numbers to left, Positive numbers to right.')->set_default_value(get_site_option('_cls_default_og_shadow_left', '2'));
 
 		$fields[] = Field::make( 'checkbox', 'cls_og_logo_enabled', __( 'Use a logo on this image?') )->set_default_value('yes')->set_help_text('Uncheck if you do not wish a logo on this image, or choose a position below');
-		$fields[] = self::carbon_field__position('cls_og_logo_position', get_site_option('_cls_default_og_logo_position', 'bottom-right'));
+		$fields[] = self::carbon_field__position('cls_og_logo_position', 'Logo position', get_site_option('_cls_default_og_logo_position', 'bottom-right'));
 
 //		$fields[] = self::carbon_field__logo();
 
@@ -116,7 +133,7 @@ class Admin {
 			->add_fields( $fields );
 	}
 
-	private static function carbon_field__position($field_name, $default = false) {
+	private static function carbon_field__position($field_name, $field_label, $default = false) {
 		static $once;
 		if (!$once) {
 			$once = true;
@@ -134,7 +151,7 @@ class Admin {
 
 		$default_value = is_string($default) ? $default : reset($positions); // ffing hack!
 
-		return Field::make('radio_image', $field_name, $default ? 'Default position' : 'Position')
+		return Field::make('radio_image', $field_name, $field_label)
 			->set_options($positions)->set_default_value($default_value)
 			->set_classes( 'position-grid' );
 	}
@@ -149,7 +166,19 @@ class Admin {
 		$fields[] = Field::make('file', 'cls_default_og_text__ttf_upload', 'Font upload')
 			->set_help_text('You can upload your own font here, but this MUST be a TTF font-file. You <strong>AND YOU ALONE</strong> are responsible for the proper permissions and usage rights of the font on your website.')
 			->set_type(['font/ttf']);
-		return $fields;
+	}
+
+	private static function carbon_field__color(&$fields, $field_name, $field_label, $default_value = false) {
+		// google fonts
+		$field = Field::make('color', $field_name, $field_label . ' (default: '. $default_value .')');
+		if ($default_value && strlen($default_value) > 7) { // default has alpha channel
+			$field->set_alpha_enabled(true);
+		}
+		if ($default_value) {
+			$field->set_default_value($default_value);
+		}
+		$field->set_palette( [ $default_value, '#FFFFFFFF', '#00000000' ] );
+		$fields[] = $field;
 	}
 
 	public static function maybe_move_font()

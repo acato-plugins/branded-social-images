@@ -31,6 +31,7 @@ class GD {
 
 	public function text_overlay($textOptions, $text)
 	{
+		$debug = false; // true;
 		$image_width = imagesx($this->resource);
 		$image_height = imagesy($this->resource);
 
@@ -39,29 +40,40 @@ class GD {
 		$text_color = imagecolorallocatealpha($this->resource, $text_color[0], $text_color[1], $text_color[2], $text_color[3] );
 		imagecolortransparent($this->resource, $text_color);
 
+		if ($debug) { print 'TextOptions debug: <pre>'; var_dump($textOptions); }
 		$background_color = false;
 		if ($textOptions['background-color']) {
-			$background_color = $this->manager->hex_to_rgba($textOptions['background-color'], true);
-			//		var_dump($background_color);exit;
-			$background_color = imagecolorallocatealpha($this->resource, $background_color[0], $background_color[1], $background_color[2], $background_color[3]);
-			imagecolortransparent($this->resource, $background_color);
+			$background_color_rgba = $this->manager->hex_to_rgba($textOptions['background-color'], true);
+			if ($background_color_rgba[3] < 127) { // not 100% transparent
+				//		var_dump($background_color);exit;
+				$background_color = imagecolorallocatealpha($this->resource, $background_color_rgba[0], $background_color_rgba[1], $background_color_rgba[2], $background_color_rgba[3]);
+				imagecolortransparent($this->resource, $background_color);
+				if ($debug) { print "\n" . 'background-color:'; var_dump($background_color_rgba, $background_color); }
+			}
 		}
 
 		$text_shadow_color = false;
 		if ($textOptions['text-shadow-color']) {
-			$text_shadow_color = $this->manager->hex_to_rgba($textOptions['text-shadow-color'], true);
+			$text_shadow_color_rgba = $this->manager->hex_to_rgba($textOptions['text-shadow-color'], true);
+			if ($text_shadow_color_rgba[3] < 127) { // not 100% transparent
 //			var_dump($text_shadow_color);exit;
-			$text_shadow_color = imagecolorallocatealpha($this->resource, $text_shadow_color[0], $text_shadow_color[1], $text_shadow_color[2], $text_shadow_color[3]);
-			imagecolortransparent($this->resource, $text_shadow_color);
+				$text_shadow_color = imagecolorallocatealpha($this->resource, $text_shadow_color_rgba[0], $text_shadow_color_rgba[1], $text_shadow_color_rgba[2], $text_shadow_color_rgba[3]);
+				imagecolortransparent($this->resource, $text_shadow_color);
+				if ($debug) { print "\n" . 'text-shadow-color:'; var_dump($text_shadow_color_rgba, $text_shadow_color); }
+			}
 		}
 
 		$text_stroke_color = false;
 		if ($textOptions['text-stroke-color']) {
-			$text_stroke_color = $this->manager->hex_to_rgba($textOptions['text-stroke-color'], true);
-			$text_stroke_color = imagecolorallocatealpha($this->resource, $text_stroke_color[0], $text_stroke_color[1], $text_stroke_color[2], $text_stroke_color[3]/10);
-			imagecolortransparent($this->resource, $text_stroke_color);
+			$text_stroke_color_rgba = $this->manager->hex_to_rgba($textOptions['text-stroke-color'], true);
+			if ($text_stroke_color_rgba[3] < 127) { // not 100% transparent
+//			var_dump($textOptions['text-stroke-color'], $text_stroke_color);exit;
+				$text_stroke_color = imagecolorallocatealpha($this->resource, $text_stroke_color_rgba[0], $text_stroke_color_rgba[1], $text_stroke_color_rgba[2], $text_stroke_color_rgba[3]);
+				imagecolortransparent($this->resource, $text_stroke_color);
+				if ($debug) { print "\n" . 'text-stroke-color:'; var_dump($text_stroke_color_rgba, $text_stroke_color); }
+			}
 		}
-
+		if ($debug) { exit; }
 		$font = $textOptions['font-file'];
 		$fontSize = $textOptions['font-size'];
 
@@ -100,24 +112,70 @@ class GD {
 		}
 
 		// text-background
-		if ($background_color) {
+		if (false !== $background_color) {
 			if ('inline' === $textOptions['display']) {
 				imagefilledrectangle($this->resource, $text_posX - $p, $text_posY - $p, $text_posX + $text_width + $p, $text_posY + $text_height + $p, $background_color);
 			}
 		}
 		// NOTE: imagettf uses Y position for bottom!! of the text, not the top
 		// ALSO: this is for the text BASE, so some text might stick out below. compensate by 18% of text height.
-		if ($text_shadow_color) {
+		if (false !== $text_shadow_color) {
 			$shiftX = $textOptions['text-shadow-left'];
 			$shiftY = $textOptions['text-shadow-top'];
-			imagettftext($this->resource, $fontSize, 0, $text_posX + $shiftX, $text_posY + $shiftY + $line_height - .2*$line_height , $text_shadow_color, $font, $text);
+			$steps = max(absint($shiftX), absint($shiftY));
+			$start_color = $textOptions['color'];
+			$end_color = $textOptions['text-shadow-color'];
+			if ('open' === $textOptions['text-shadow-type']) {
+				$steps = 1;
+			}
+			if ('solid' === $textOptions['text-shadow-type']) {
+				$start_color = $end_color;
+			}
+
+			for ($step = $steps; $step > 0; $step -- /* skip step 0 as it is the text-position */) {
+				$shiftX_step = self::gradient_value(0, $shiftX, $step, $steps);
+				$shiftY_step = self::gradient_value(0, $shiftY, $step, $steps);
+				$text_shadow_color_step = $this->gradient_color($start_color, $end_color, $step, $steps, true);
+				$text_shadow_color_step = $this->manager->hex_to_rgba($text_shadow_color_step, true);
+				$text_shadow_color_step = imagecolorallocatealpha($this->resource, $text_shadow_color_step[0], $text_shadow_color_step[1], $text_shadow_color_step[2], $text_shadow_color_step[3]);
+				imagecolortransparent($this->resource, $text_shadow_color_step);
+				imagettftext($this->resource, $fontSize, 0, $text_posX + $shiftX_step, $text_posY + $shiftY_step + $line_height - .2*$line_height , $text_shadow_color_step, $font, $text);
+			}
 		}
 
-		if ($text_stroke_color) {
+		if (false !== $text_stroke_color) {
 			$this->imagettfstroketext($this->resource, $fontSize, 0, $text_posX, $text_posY + $line_height - .2*$line_height ,
 				$text_stroke_color, $font, $text, $textOptions['text-stroke']);
 		}
 		imagettftext($this->resource, $fontSize, 0, $text_posX, $text_posY + $line_height - .2*$line_height , $text_color, $font, $text);
+	}
+
+	private function gradient_color($hex_rgba_start, $hex_rgba_end, $step, $steps = 100, $skip_alpha = false, $return_as_hex = true)
+	{
+		$hex_rgba_start_rgba = $this->manager->hex_to_rgba($hex_rgba_start);
+		$hex_rgba_end_rgba = $this->manager->hex_to_rgba($hex_rgba_end);
+		if ($skip_alpha) {
+			if (is_bool($skip_alpha)) {
+				$skip_alpha = $hex_rgba_end;
+			}
+			$skip_alpha = $this->manager->hex_to_rgba($skip_alpha);
+			$hex_rgba_start_rgba[3] = $hex_rgba_end_rgba[3] = $skip_alpha[3];
+		}
+
+		$gradient_hex_rgba = [
+			self::gradient_value( $hex_rgba_start_rgba[0], $hex_rgba_end_rgba[0], $step, $steps),
+			self::gradient_value( $hex_rgba_start_rgba[1], $hex_rgba_end_rgba[1], $step, $steps),
+			self::gradient_value( $hex_rgba_start_rgba[2], $hex_rgba_end_rgba[2], $step, $steps),
+			self::gradient_value( $hex_rgba_start_rgba[3], $hex_rgba_end_rgba[3], $step, $steps),
+		];
+
+		return $return_as_hex ? $this->manager->rgba_to_hex($gradient_hex_rgba) : $gradient_hex_rgba;
+	}
+
+	private static function gradient_value($start, $end, $step, $steps = 100) {
+		$percentage = $step/$steps;
+		$value_range = $end - $start;
+		return $value_range * $percentage + $start;
 	}
 
 	public function logo_overlay($logoOptions)

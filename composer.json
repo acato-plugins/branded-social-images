@@ -1,4 +1,14 @@
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/clearsite/carbon-field-number.git"
+        }
+    ],
+    "require": {
+        "htmlburger/carbon-fields": "^2.0",
+        "clearsite/carbon-field-number": "*"
+    },
     "require": {
         "htmlburger/carbon-fields": "^2"
     }
