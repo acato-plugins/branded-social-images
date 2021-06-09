@@ -3,7 +3,7 @@
  * Plugin Name: OG-Image (by Clearsite)
  * Description: Spice up your OG-Images to be meaningful.
  * Plugin URI: https://clearsite.nl/plugin/cls-og-image
- * Author: Internetbureau Clearsite, Remon Pel, Gijs van Arem, Merlijn Ackerstaff
+ * Author: Internetbureau Clearsite, Remon Pel, Merlijn Ackerstaff, Gijs van Arem
  * Author URI: https://www.clearsite.nl
  * Version: 0.0.1
  * License: GPL2
