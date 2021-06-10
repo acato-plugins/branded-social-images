@@ -23,72 +23,123 @@
 
 		var update_delay = false;
 
+		var update_preview_data = function(fieldName, fieldValue) {
+			if (fieldName === 'cls_og_image') {
+				og_preview.image = fieldValue; // this is an ID
+			}
+			if (fieldName === 'cls_og_text') {
+				og_preview.text = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_text_position') {
+				og_preview.text_position = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_color') {
+				og_preview.color = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_background_color') {
+				og_preview.background_color = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_text_stroke') {
+				og_preview.text_stroke = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_text_stroke_color') {
+				og_preview.text_stroke_color = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_text_shadow_color') {
+				og_preview.text_shadow_color = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_text_shadow_left') {
+				og_preview.text_shadow_left = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_text_shadow_top') {
+				og_preview.text_shadow_top = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_text_enabled') {
+				og_preview.text_enabled = fieldValue ? 'yes' : 'no';
+
+				container.find("[name='*_cls_og_text'],[name='*_cls_og_text_position']").each(function () {
+					$(this).closest('div.carbon-field').toggle(fieldValue);
+				});
+			}
+			if (fieldName === 'cls_og_logo_position') {
+				og_preview.logo_position = encodeURIComponent(fieldValue);
+			}
+			if (fieldName === 'cls_og_logo_enabled') {
+				og_preview.logo_enabled = fieldValue ? 'yes' : 'no';
+
+				container.find("[name*='_cls_og_logo_position']").each(function () {
+					$(this).closest('div.carbon-field').toggle(fieldValue);
+				});
+			}
+		};
+
+		// CarbonFields v2.x
 		$(document).on('carbonFields.apiLoaded', function (e, api) {
 			$(document).on('carbonFields.fieldUpdated', function (e, fieldName) {
-				// console.log(fieldName);
 				if (update_delay) {
 					clearTimeout(update_delay);
 				}
+				var p = $("#cls-og-preview"), img = p.find('img');
+
 				update_delay = setTimeout(function () {
-					var v = api.getFieldValue(fieldName), p = $("#cls-og-preview");
-					if (fieldName === 'cls_og_image') {
-						og_preview.image = v; // this is an ID
-					}
-					if (fieldName === 'cls_og_text') {
-						og_preview.text = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_text_position') {
-						og_preview.text_position = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_color') {
-						og_preview.color = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_background_color') {
-						og_preview.background_color = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_text_stroke') {
-						og_preview.text_stroke = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_text_stroke_color') {
-						og_preview.text_stroke_color = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_text_shadow_color') {
-						og_preview.text_shadow_color = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_text_shadow_left') {
-						og_preview.text_shadow_left = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_text_shadow_top') {
-						og_preview.text_shadow_top = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_text_enabled') {
-						og_preview.text_enabled = v ? 'yes' : 'no';
+					var v = api.getFieldValue(fieldName);
+					img.attr('src', loading());
+					update_preview_data(fieldName, v);
 
-						$("[name='_cls_og_text'],[name='_cls_og_text_position']").each(function () {
-							console.log($(this).closest('div.carbon-field').toggle(v));
-						});
-					}
-					if (fieldName === 'cls_og_logo_position') {
-						og_preview.logo_position = encodeURIComponent(v);
-					}
-					if (fieldName === 'cls_og_logo_enabled') {
-						og_preview.logo_enabled = v ? 'yes' : 'no';
-
-						$("[name='_cls_og_logo_position']").each(function () {
-							$(this).closest('div.carbon-field').toggle(v);
-						});
-					}
-
-					var img = p.find('img');
 					if (img.length === 0) {
 						p.append('<img/>');
 						img = p.find('img');
 					}
-					img.attr('src', loading());
 					img.attr('src', og_preview_url());
 				}, 1000);
 			}).trigger('carbonFields.fieldUpdated', ['cls_og_logo_enabled']);
 		});
+
+		// CarbonFields v3.x uses React and unscrutable WordPress jvascript hooks
+		// it will take 19 years to understand this crap because it is even more poorly documented than life itself
+		// so we use old-skool HTML DOM events
+		if ($('body.carbon-fields-3').length > 0) {
+			var fields = container.find('input');
+			var _monitor_hidden, monitor_hidden_data = {}, monitor_hidden = function(){
+				fields.filter('[type=hidden]').each(function(){
+					if ($(this).prop('name').match(/\[_/)) {
+						var fieldName = $(this).prop('name').split('[_')[1].split(']')[0];
+						var fieldValue = $(this).prop('value');
+						if (!monitor_hidden_data.hasOwnProperty(fieldName) || monitor_hidden_data[fieldName] !== fieldValue) {
+							monitor_hidden_data[fieldName] = fieldValue;
+							$(this).trigger('change');
+						}
+					}
+				});
+			}, _wait_for_cf3 = false, wait_for_cf3 = function () {
+				fields = container.find('input');
+				if (fields.length > 0) {
+					clearInterval(_wait_for_cf3);
+					clearInterval(_monitor_hidden);
+					_monitor_hidden = setInterval(monitor_hidden, 1000);
+					fields.on('change keyup blur', function (e) {
+						if (update_delay) {
+							clearTimeout(update_delay);
+						}
+						var p = $("#cls-og-preview"), img = p.find('img'), fieldName = $(e.target).attr('name').split('[_')[1].split(']')[0],
+							v = $(e.target).is('[type=checkbox],[type=radio]') ? $(e.target).filter(':checked').prop('value') : $(e.target).val();
+
+						update_delay = setTimeout(function () {
+							img.attr('src', loading());
+							update_preview_data(fieldName, v);
+
+							if (img.length === 0) {
+								p.append('<img/>');
+								img = p.find('img');
+							}
+							img.attr('src', og_preview_url());
+						}, 1000);
+					});
+					$('[name="carbon_fields_compact_input[_cls_og_disabled]"]').trigger('change');
+				}
+			};
+			_wait_for_cf3 = setInterval(wait_for_cf3, 1000);
+		}
 
 		$(window).on('resize scroll', function () {
 			var c = $('#carbon_fields_container_og_image');

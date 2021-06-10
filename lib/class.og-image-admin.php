@@ -53,7 +53,11 @@ class Admin {
 			// carbon already present
 			if (version_compare(constant('Carbon_Fields\VERSION'), '3.0.0', '>=')) {
 				// this is a problem.
-				add_action('admin_notices', function(){
+				add_filter('admin_body_class', function($classList){
+					$classList .= ' carbon-fields-3';
+					return $classList;
+				});
+				add_action('_admin_notices', function(){
 					?><div id="message" class="updated error notice-error"><p>Problem detected: CarbonFields v3 detected. CLS OG Image will function but cannot produce previews while editing a post. This is due to API changes in Carbon Fields, we're working on a fix.</p></div><?php
 				});
 			}
