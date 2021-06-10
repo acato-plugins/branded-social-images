@@ -95,7 +95,7 @@
 			}).trigger('carbonFields.fieldUpdated', ['cls_og_logo_enabled']);
 		});
 
-		// CarbonFields v3.x uses React and unscrutable WordPress jvascript hooks
+		// CarbonFields v3.x uses React and inscrutable WordPress javascript hooks
 		// it will take 19 years to understand this crap because it is even more poorly documented than life itself
 		// so we use old-skool HTML DOM events
 		if ($('body.carbon-fields-3').length > 0) {
