@@ -22,10 +22,12 @@ class GD {
 
 		// use this construction so we don't have to check file mime
 		$baseImage = imagecreatefromstring(file_get_contents($source));
-		$this->resource = imagecreatetruecolor($w = imagesx($baseImage), $h = imagesy($baseImage));
+		$w = $this->manager->width;
+		$h = $this->manager->height;
+		$this->resource = imagecreatetruecolor($w, $h);
 		imagealphablending($this->resource, true);
 		imagesavealpha($this->resource, true);
-		imagecopy($this->resource, $baseImage, 0, 0, 0, 0, $w, $h);
+		imagecopyresampled($this->resource, $baseImage, 0, 0, 0, 0, $w, $h, imagesx($baseImage), imagesy($baseImage));
 		imagedestroy($baseImage);
 	}
 

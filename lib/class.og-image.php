@@ -17,6 +17,15 @@ class Image {
 		$this->manager = $manager;
 
 		$this->post_id = get_the_ID();
+		// hack for front-page
+		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		if ('/og-image.png/' === $current_url) {
+			$front = get_site_option('page_on_front');
+			if ($front) {
+				$this->post_id = $front;
+			}
+		}
+
 		// This plugin provides a meta box ...
 		$this->image_id = $this->getImageIdForPost( $this->post_id );
 
@@ -215,6 +224,7 @@ class Image {
 	{
 		$the_img = 'meta';
 		$image_id = get_post_meta($post_id, '_cls_og_image', true);
+
 		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION') && !$image_id) {
 			$image_id = get_post_meta($post_id, '_yoast_wpseo_opengraph-image-id', true);
@@ -226,7 +236,7 @@ class Image {
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if (!$image_id) {
+		if (!$image_id && ('yes' === get_site_option('_cls_og_image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($post_id);
 		}

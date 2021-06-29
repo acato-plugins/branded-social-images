@@ -73,6 +73,7 @@ class Admin {
 	{
 		$fields = array(
 			Field::make( 'image', 'cls_default_og_image', 'The default OG:Image for any page/post/... that has no OG:Image defined.' )->set_help_text('This should be a generic image that is applicable to the entire website.'),
+			Field::make( 'checkbox', 'cls_og_image_use_thumbnail', 'Use the WordPress Thumbnail image, if selected, before using the default image selected above.' )->set_default_value(false),
 			Field::make( 'text', 'cls_default_og_text', 'The default Text overlay for any page/post/... that has no OG:Title.' )->set_help_text('This should be a generic text that is applicable to the entire website.'),
 		);
 
