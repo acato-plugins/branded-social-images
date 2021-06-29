@@ -2,6 +2,8 @@
 
 namespace Clearsite\Plugins\OGImage;
 
+use function Complex\add;
+
 class Plugin
 {
 	public $width;
@@ -35,7 +37,6 @@ class Plugin
 			$font_file = get_site_option('_cls_default_og_text__font');
 
 			$this->text_options['font-file'] = $font_file;
-
 
 			$this->text_options['color'] = get_site_option('_cls_default_og_color');
 			$this->text_options['background-color'] = get_site_option('_cls_default_og_background_color');
@@ -109,6 +110,22 @@ class Plugin
 		add_action('init', function(){
 			add_rewrite_endpoint('og-image.png', EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
 			add_image_size('og-image', $this->width, $this->height, true);
+		});
+
+		add_action('admin_init', function() {
+			$font_file = get_site_option('_cls_default_og_text__font');
+			if (preg_match('/google:(.+)/', $font_file, $m)) {
+				$defaults = $this->default_options();
+				$this->text_options = $defaults['text_options'];
+				$this->text_options['font-file'] = $font_file;
+				$this->text_options['font-family'] = $font_file;
+				$this->expand_text_options();
+				if ($this->text_options['font-file'] && is_file($this->text_options['font-file']) && $this->text_options['font-file'] !== $font_file) { // PROCESSED!
+					update_site_option('_cls_default_og_text__font', basename($this->text_options['font-file']));
+					wp_redirect(remove_query_arg('asdadasd'));
+					exit;
+				}
+			}
 		});
 
 		// phase 2; alter the endpoints to be data-less (like /feed)
@@ -642,7 +659,7 @@ class Plugin
 		}
 		if (preg_match('/google:(.+)/', $font_family, $m)) {
 			$italic = $font_style == 'italic' ? 'italic' : '';
-			$font_css = wp_remote_retrieve_body(wp_remote_get('http://fonts.googleapis.com/css?family=' . $m[1] . ':' . $font_weight . $italic, ['useragent' => ' ']));
+			$font_css = wp_remote_retrieve_body(wp_remote_get('http://fonts.googleapis.com/css?family=' . urlencode($m[1]) . ':' . $font_weight . $italic, ['useragent' => ' ']));
 
 			if (!$font_css) {
 				self::setError('font-family', __('Could not download font from Google Fonts. Please download yourself and upload here.', 'clsogimg'));
