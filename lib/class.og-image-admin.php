@@ -71,9 +71,27 @@ class Admin {
 
 	public static function carbon_fields()
 	{
+		$selection = [];
+		$selection[] = 'The image selected with this plugin at the post-edit page.';
+		if (defined('WPSEO_VERSION')) {
+			$selection[] = 'The image selected with Yoast SEO at the post-edit page.';
+		}
+		if (class_exists(RankMath::class)) {
+			$selection[] = 'The image selected with RankMath at the post-edit page.';
+		}
+		$selection[] = 'The image selected as featured image at the post-edit page (if enabled below).';
+		$selection[] = 'The image selected here as "Default OG:Image".';
+
+		$selection = '<ul><li>'. implode('</li><li>', $selection) .'</li></ul>';
+
 		$fields = array(
-			Field::make( 'image', 'cls_default_og_image', 'The default OG:Image for any page/post/... that has no OG:Image defined.' )->set_help_text('This should be a generic image that is applicable to the entire website.'),
-			Field::make( 'checkbox', 'cls_og_image_use_thumbnail', 'Use the WordPress Thumbnail image, if selected, before using the default image selected above.' )->set_default_value(false),
+			Field::make( 'image', 'cls_default_og_image', 'The default OG:Image for any page/post/... that has no OG:Image defined.' )->set_help_text(
+				'This should be a generic image that is applicable to the entire website.'.
+				'<br />'.
+				'The Image to be used as OG:Image is selected in the following priority;'.
+				'<br />'.
+				$selection),
+			Field::make( 'checkbox', 'cls_og_image_use_thumbnail', 'Use the WordPress Featured image, if selected, before using the default image selected above.' )->set_default_value(true),
 			Field::make( 'text', 'cls_default_og_text', 'The default Text overlay for any page/post/... that has no OG:Title.' )->set_help_text('This should be a generic text that is applicable to the entire website.'),
 		);
 
@@ -82,13 +100,20 @@ class Admin {
 
 		self::carbon_field__color( $fields, 'cls_default_og_color', 'Default Text color', '#FFFFFFFF');
 		self::carbon_field__color( $fields, 'cls_default_og_background_color', 'Default Text background color', '#66666666');
-		self::carbon_field__color( $fields, 'cls_default_og_text_stroke_color', 'Default Text stroke color', '#00000000');
-		$fields[ count($fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
-		$fields[] = Field::make('text', 'cls_default_og_text_stroke', 'Default stroke width')->set_default_value(0);
-		self::carbon_field__color( $fields, 'cls_default_og_text_shadow_color', 'Default Text shadow color', '#00000000');
-		$fields[] = Field::make('text', 'cls_default_og_text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value('-2');
-		$fields[] = Field::make('text', 'cls_default_og_text_shadow_left', 'Shadow offset - vertical. Negative numbers to left, Positive numbers to right.')->set_default_value('2');
 
+		if ('on' === Plugin::FEATURE_STROKE) {
+			self::carbon_field__color($fields, 'cls_default_og_text_stroke_color', 'Default Text stroke color', '#00000000');
+			$fields[count($fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
+			$fields[] = Field::make('text', 'cls_default_og_text_stroke', 'Default stroke width')->set_default_value(0);
+		}
+		if ('on' === Plugin::FEATURE_SHADOW) {
+			self::carbon_field__color($fields, 'cls_default_og_text_shadow_color', 'Default Text shadow color', '#00000000');
+			$fields[] = Field::make('text', 'cls_default_og_text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value('-2');
+			$fields[] = Field::make('text', 'cls_default_og_text_shadow_left', 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.')->set_default_value('2');
+		}
+		if ('simple' === Plugin::FEATURE_SHADOW) {
+			$fields[] = Field::make('checkbox', 'cls_default_og_text_shadow_enabled', 'Use a text shadow')->set_default_value('off');
+		}
 		$fields[] =	Field::make( 'image', 'cls_og_image_logo', 'Your logo' )->set_help_text('For best results, use PNG with transparency at at least (!) 600 pixels wide and/or high. If you get "gritty" results, use higher values.');
 		$fields[] = self::carbon_field__position('cls_default_og_logo_position', 'Default logo position', 'bottom-right');
 		$fields[] =	Field::make( 'text', 'cls_og_image_logo_size', 'Size' )->set_help_text('You can use a width (like 200), width and height (like 200x160) or a percentage (like 20%). This determines the bounding box, the logo aspect ratio will remain in tact.')->set_default_value('20%');
@@ -106,12 +131,19 @@ class Admin {
 		self::carbon_field__color( $fields, 'cls_og_color', 'Text color', get_site_option('_cls_default_og_color', '#FFFFFFFF'));
 		$fields[] = self::carbon_field__position('cls_og_text_position', 'Text position', get_site_option('_cls_default_og_text_position', 'bottom-right'));
 		self::carbon_field__color( $fields, 'cls_og_background_color', 'Text background color', get_site_option('_cls_default_og_background_color', '#66666666'));
-		self::carbon_field__color( $fields, 'cls_og_text_stroke_color', 'Text stroke color', get_site_option('_cls_default_og_text_stroke_color', '#00000000'));
-		$fields[ count($fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
-		$fields[] = Field::make('text', 'cls_og_text_stroke', 'Stroke width')->set_default_value(get_site_option('_cls_default_og_text_stroke', '0'));
-		self::carbon_field__color( $fields, 'cls_og_text_shadow_color', 'Text shadow color', get_site_option('_cls_default_og_text_shadow', '#00000000'));
-		$fields[] = Field::make('text', 'cls_og_text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value(get_site_option('_cls_default_og_shadow_top', '-2'));
-		$fields[] = Field::make('text', 'cls_og_text_shadow_left', 'Shadow offset - vertical. Negative numbers to left, Positive numbers to right.')->set_default_value(get_site_option('_cls_default_og_shadow_left', '2'));
+		if ('on' === Plugin::FEATURE_STROKE) {
+			self::carbon_field__color( $fields, 'cls_og_text_stroke_color', 'Text stroke color', get_site_option('_cls_default_og_text_stroke_color', '#00000000'));
+			$fields[ count($fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
+			$fields[] = Field::make('text', 'cls_og_text_stroke', 'Stroke width')->set_default_value(get_site_option('_cls_default_og_text_stroke', '0'));
+		}
+		if ('on' === Plugin::FEATURE_SHADOW) {
+			self::carbon_field__color( $fields, 'cls_og_text_shadow_color', 'Text shadow color', get_site_option('_cls_default_og_text_shadow', '#00000000'));
+			$fields[] = Field::make('text', 'cls_og_text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value(get_site_option('_cls_default_og_shadow_top', '-2'));
+			$fields[] = Field::make('text', 'cls_og_text_shadow_left', 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.')->set_default_value(get_site_option('_cls_default_og_shadow_left', '2'));
+		}
+		if ('simple' === Plugin::FEATURE_SHADOW) {
+			$fields[] = Field::make('checkbox', 'cls_og_text_shadow_enabled', 'Use a text shadow')->set_default_value(get_site_option('_cls_default_og_shadow_enabled', 'off'));
+		}
 
 		$fields[] = Field::make( 'checkbox', 'cls_og_logo_enabled', __( 'Use a logo on this image?') )->set_default_value('yes')->set_help_text('Uncheck if you do not wish a logo on this image, or choose a position below');
 		$fields[] = self::carbon_field__position('cls_og_logo_position', 'Logo position', get_site_option('_cls_default_og_logo_position', 'bottom-right'));
@@ -175,7 +207,7 @@ class Admin {
 
 	private static function carbon_field__color(&$fields, $field_name, $field_label, $default_value = false) {
 		// google fonts
-		$field = Field::make('color', $field_name, $field_label . ' (default: '. $default_value .')');
+		$field = Field::make('color', $field_name, $field_label);
 		if ($default_value && strlen($default_value) > 7) { // default has alpha channel
 			$field->set_alpha_enabled(true);
 		}
@@ -183,6 +215,8 @@ class Admin {
 			$field->set_default_value($default_value);
 		}
 		$field->set_palette( [ $default_value, '#FFFFFFFF', '#00000000' ] );
+		list($hex,$dec) = self::hex_to_hex_opacity($default_value);
+		$field->set_help_text('The default color for this option is: '. $hex .', '. $dec .'%');
 		$fields[] = $field;
 	}
 
@@ -198,5 +232,15 @@ class Admin {
 				wp_delete_post($font_id);
 			}
 		}
+	}
+
+	private static function hex_to_hex_opacity($hex_color): array
+	{
+		if (substr($hex_color, 0, 1) !== '#') {
+			$hex_color = '#ffffffff';
+		}
+		$hex_values = str_split(substr($hex_color . 'FF', 1, 8), 6);
+
+		return [ $hex_values[0], intval((hexdec($hex_values[1])+1) / 256 * 100) ];
 	}
 }

@@ -54,6 +54,9 @@
 			if (fieldName === 'cls_og_text_shadow_top') {
 				og_preview.text_shadow_top = encodeURIComponent(fieldValue);
 			}
+			if (fieldName === 'cls_og_text_shadow_enabled') {
+				og_preview.text_shadow_enabled = encodeURIComponent(fieldValue ? 'on' : 'off');
+			}
 			if (fieldName === 'cls_og_text_enabled') {
 				og_preview.text_enabled = fieldValue ? 'yes' : 'no';
 

@@ -2,10 +2,11 @@
 
 namespace Clearsite\Plugins\OGImage;
 
-use function Complex\add;
-
 class Plugin
 {
+	const FEATURE_STROKE = 'off';
+	const FEATURE_SHADOW = 'simple';
+
 	public $width;
 	public $height;
 	public $logo_options;
@@ -42,9 +43,18 @@ class Plugin
 			$this->text_options['background-color'] = get_site_option('_cls_default_og_background_color');
 			$this->text_options['text-stroke'] = get_site_option('_cls_default_og_text_stroke');
 			$this->text_options['text-stroke-color'] = get_site_option('_cls_default_og_text_stroke_color');
-			$this->text_options['text-shadow-color'] = get_site_option('_cls_default_og_text_shadow_color');
-			$this->text_options['text-shadow-left'] = get_site_option('_cls_default_og_text_shadow_left');
-			$this->text_options['text-shadow-top'] = get_site_option('_cls_default_og_text_shadow_top');
+			if ('on' === Plugin::FEATURE_SHADOW) {
+				$this->text_options['text-shadow-color'] = get_site_option('_cls_default_og_text_shadow_color');
+				$this->text_options['text-shadow-left'] = get_site_option('_cls_default_og_text_shadow_left');
+				$this->text_options['text-shadow-top'] = get_site_option('_cls_default_og_text_shadow_top');
+			}
+			if ('simple' === Plugin::FEATURE_SHADOW) {
+				$enabled = get_site_option('_cls_default_og_text_shadow_enabled', 'off');
+				$enabled = 'off' === $enabled ? false : $enabled;
+				$this->text_options['text-shadow-color'] = $enabled?'#55555588':'#00000000';
+				$this->text_options['text-shadow-left'] = -2;
+				$this->text_options['text-shadow-top'] = 2;
+			}
 			$this->validate_text_options();
 			$this->validate_logo_options();
 
@@ -100,6 +110,13 @@ class Plugin
 				$overrule_top = get_post_meta($id, '_cls_og_text_shadow_top', true);
 				if ($overrule_top !== '') {
 					$this->text_options['text-shadow-top'] = $overrule_top;
+				}
+
+				$overrule_tsenabled = get_post_meta($id, '_cls_og_text_shadow_enabled', true);
+				if ($overrule_tsenabled === 'on') {
+					$this->text_options['text-shadow-color'] = '#55555588';
+					$this->text_options['text-shadow-top'] = -2;
+					$this->text_options['text-shadow-left'] = 2;
 				}
 			}
 
@@ -194,6 +211,11 @@ class Plugin
 						$this->text_options['text-shadow-top'] = $_GET['text_shadow_top'];
 					}
 
+					if (isset($_GET['text_shadow_enabled']) && 'on' === $_GET['text_shadow_enabled']) {
+						$this->text_options['text-shadow-color'] = '#55555588';
+						$this->text_options['text-shadow-top'] = -2;
+						$this->text_options['text-shadow-left'] = 2;
+					}
 					if (!empty($_GET['text'])) {
 						add_filter('cls_og_text', function($text) {
 							return stripslashes_deep(urldecode($_GET['text']));
@@ -275,6 +297,7 @@ class Plugin
 			'text-shadow-color' => '',
 			'text-shadow-left' => '2',
 			'text-shadow-top' => '-2',
+			'text-shadow-enabled' => 'off',
 			'text-stroke-color' => '',
 			'text-stroke' => '2',
 		];
@@ -478,7 +501,7 @@ class Plugin
 		if (is_numeric($this->logo_options['file'])) {
 			$this->logo_options['file'] = get_attached_file($this->logo_options['file']);
 		}
-		list($sw, $sh) = getimagesize($this->logo_options['file']);
+		list($sw, $sh) = is_file($this->logo_options['file']) ? getimagesize($this->logo_options['file']) : [0,0];
 		if ($sw && $sh) {
 			$sa = $sw / $sh;
 			$this->logo_options['source_width'] = $sw;
