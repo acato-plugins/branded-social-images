@@ -12,6 +12,7 @@ class Plugin
 	public $logo_options;
 	public $text_options;
 	public $preview;
+	public $padding = 40;
 
 	public function __construct()
 	{
@@ -25,31 +26,31 @@ class Plugin
 
 		// phase 1; add the endpoints
 		add_action('wp', function () {
-			// todo: why aren't these _-prefixed?
-			$this->width = get_site_option('cls_og_image__og_width', 1200);
-			$this->height = get_site_option('cls_og_image__og_height', 630);
+			// thi sis currently THE size for OG images.
+			$this->width = 1200;
+			$this->height = 630;
 
 			$defaults = $this->default_options();
 			$this->logo_options = $defaults['logo_options'];
 
 			// text options
 			$this->text_options = $defaults['text_options'];
-//			var_dump( get_attached_file(get_site_option('_cls_default_og_text__ttf_upload')));exit;
-			$font_file = get_site_option('_cls_default_og_text__font');
+//			var_dump( get_attached_file(get_site_option(Admin::DEFAULTS_PREFIX . 'text__ttf_upload')));exit;
+			$font_file = get_site_option(Admin::DEFAULTS_PREFIX . 'text__font');
 
 			$this->text_options['font-file'] = $font_file;
 
-			$this->text_options['color'] = get_site_option('_cls_default_og_color');
-			$this->text_options['background-color'] = get_site_option('_cls_default_og_background_color');
-			$this->text_options['text-stroke'] = get_site_option('_cls_default_og_text_stroke');
-			$this->text_options['text-stroke-color'] = get_site_option('_cls_default_og_text_stroke_color');
+			$this->text_options['color'] = get_site_option(Admin::DEFAULTS_PREFIX . 'color');
+			$this->text_options['background-color'] = get_site_option(Admin::DEFAULTS_PREFIX . 'background_color');
+			$this->text_options['text-stroke'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_stroke');
+			$this->text_options['text-stroke-color'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_stroke_color');
 			if ('on' === Plugin::FEATURE_SHADOW) {
-				$this->text_options['text-shadow-color'] = get_site_option('_cls_default_og_text_shadow_color');
-				$this->text_options['text-shadow-left'] = get_site_option('_cls_default_og_text_shadow_left');
-				$this->text_options['text-shadow-top'] = get_site_option('_cls_default_og_text_shadow_top');
+				$this->text_options['text-shadow-color'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_shadow_color');
+				$this->text_options['text-shadow-left'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_shadow_left');
+				$this->text_options['text-shadow-top'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_shadow_top');
 			}
 			if ('simple' === Plugin::FEATURE_SHADOW) {
-				$enabled = get_site_option('_cls_default_og_text_shadow_enabled', 'off');
+				$enabled = get_site_option(Admin::DEFAULTS_PREFIX . 'text_shadow_enabled', 'off');
 				$enabled = 'off' === $enabled ? false : $enabled;
 				$this->text_options['text-shadow-color'] = $enabled?'#55555588':'#00000000';
 				$this->text_options['text-shadow-left'] = -2;
@@ -58,61 +59,61 @@ class Plugin
 			$this->validate_text_options();
 			$this->validate_logo_options();
 
-			$this->text_options['position'] = get_site_option('_cls_default_og_text_position', 'top-left');
-			$this->logo_options['position'] = get_site_option('_cls_default_og_logo_position', 'bottom-right');
+			$this->text_options['position'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_position', 'top-left');
+			$this->logo_options['position'] = get_site_option(Admin::DEFAULTS_PREFIX . 'logo_position', 'bottom-right');
 			$id = get_the_ID();
 			if ($id) {
-				$overrule_text_position = get_post_meta($id, '_cls_og_text_position', true);
+				$overrule_text_position = get_post_meta($id, Admin::OPTION_PREFIX . 'text_position', true);
 				if ($overrule_text_position) {
 					$this->text_options['position'] = $overrule_text_position;
 				}
 
-				$overrule_logo_enabled = get_post_meta($id, '_cls_og_logo_enabled', true);
+				$overrule_logo_enabled = get_post_meta($id, Admin::OPTION_PREFIX . 'logo_enabled', true);
 				if (!$overrule_logo_enabled || 'yes' === $overrule_logo_enabled) {
 					$this->logo_options['enabled'] = $overrule_logo_enabled;
 				}
 
-				$overrule_logo_position = get_post_meta($id, '_cls_og_logo_position', true);
+				$overrule_logo_position = get_post_meta($id, Admin::OPTION_PREFIX . 'logo_position', true);
 				if ($overrule_logo_position) {
 					$this->logo_options['position'] = $overrule_logo_position;
 				}
 
-				$overrule_color = get_post_meta($id, '_cls_og_color', true);
+				$overrule_color = get_post_meta($id, Admin::OPTION_PREFIX . 'color', true);
 				if ($overrule_color) {
 					$this->text_options['color'] = $overrule_color;
 				}
 
-				$overrule_color = get_post_meta($id, '_cls_og_background_color', true);
+				$overrule_color = get_post_meta($id, Admin::OPTION_PREFIX . 'background_color', true);
 				if ($overrule_color) {
 					$this->text_options['background-color'] = $overrule_color;
 				}
 
-				$overrule_color = get_post_meta($id, '_cls_og_text_stroke_color', true);
+				$overrule_color = get_post_meta($id, Admin::OPTION_PREFIX . 'text_stroke_color', true);
 				if ($overrule_color) {
 					$this->text_options['text-stroke-color'] = $overrule_color;
 				}
 
-				$overrule = get_post_meta($id, '_cls_og_text_stroke', true);
+				$overrule = get_post_meta($id, Admin::OPTION_PREFIX . 'text_stroke', true);
 				if ($overrule !== '') {
 					$this->text_options['text-stroke'] = intval($overrule);
 				}
 
-				$overrule_color = get_post_meta($id, '_cls_og_text_shadow_color', true);
+				$overrule_color = get_post_meta($id, Admin::OPTION_PREFIX . 'text_shadow_color', true);
 				if ($overrule_color) {
 					$this->text_options['text-shadow-color'] = $overrule_color;
 				}
 
-				$overrule_left = get_post_meta($id, '_cls_og_text_shadow_left', true);
+				$overrule_left = get_post_meta($id, Admin::OPTION_PREFIX . 'text_shadow_left', true);
 				if ($overrule_left !== '') {
 					$this->text_options['text-shadow-left'] = $overrule_left;
 				}
 
-				$overrule_top = get_post_meta($id, '_cls_og_text_shadow_top', true);
+				$overrule_top = get_post_meta($id, Admin::OPTION_PREFIX . 'text_shadow_top', true);
 				if ($overrule_top !== '') {
 					$this->text_options['text-shadow-top'] = $overrule_top;
 				}
 
-				$overrule_tsenabled = get_post_meta($id, '_cls_og_text_shadow_enabled', true);
+				$overrule_tsenabled = get_post_meta($id, Admin::OPTION_PREFIX . 'text_shadow_enabled', true);
 				if ($overrule_tsenabled === 'on') {
 					$this->text_options['text-shadow-color'] = '#55555588';
 					$this->text_options['text-shadow-top'] = -2;
@@ -125,12 +126,12 @@ class Plugin
 		});
 
 		add_action('init', function(){
-			add_rewrite_endpoint('og-image.png', EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
+			add_rewrite_endpoint(Admin::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
 			add_image_size('og-image', $this->width, $this->height, true);
 		});
 
 		add_action('admin_init', function() {
-			$font_file = get_site_option('_cls_default_og_text__font');
+			$font_file = get_site_option(Admin::DEFAULTS_PREFIX . 'text__font');
 			if (preg_match('/google:(.+)/', $font_file, $m)) {
 				$defaults = $this->default_options();
 				$this->text_options = $defaults['text_options'];
@@ -138,7 +139,7 @@ class Plugin
 				$this->text_options['font-family'] = $font_file;
 				$this->expand_text_options();
 				if ($this->text_options['font-file'] && is_file($this->text_options['font-file']) && $this->text_options['font-file'] !== $font_file) { // PROCESSED!
-					update_site_option('_cls_default_og_text__font', basename($this->text_options['font-file']));
+					update_site_option(Admin::DEFAULTS_PREFIX . 'text__font', basename($this->text_options['font-file']));
 					wp_redirect(remove_query_arg('asdadasd'));
 					exit;
 				}
@@ -149,9 +150,9 @@ class Plugin
 		add_filter('rewrite_rules_array', function ($rules) {
 			$new_rules = [];
 			foreach ($rules as $source => $target) {
-				if (preg_match('/og-image\.png/', $source)) {
-					$source = explode('og-image.png', $source);
-					$source = $source[0] . 'og-image.png/?$';
+				if (preg_match('/'. strtr(Admin::BSI_IMAGE_NAME, [ '.' => '\\.', '-' => '\\-' ]) .'/', $source)) {
+					$source = explode(Admin::BSI_IMAGE_NAME, $source);
+					$source = $source[0] . Admin::BSI_IMAGE_NAME . '/?$';
 
 					$target = explode('clsogimg=', $target);
 					$target = $target[0] . 'clsogimg=1';
@@ -217,7 +218,7 @@ class Plugin
 						$this->text_options['text-shadow-left'] = 2;
 					}
 					if (!empty($_GET['text'])) {
-						add_filter('cls_og_text', function($text) {
+						add_filter('bsi_text', function($text) {
 							return stripslashes_deep(urldecode($_GET['text']));
 						}, PHP_INT_MAX);
 					}
@@ -231,7 +232,6 @@ class Plugin
 					$this->expand_logo_options();
 				}
 
-				$og_image->serve_type = get_site_option('cls_og_image__serve_type', 'inline'); // inline or redirect
 				$og_image->serve();
 
 				exit;
@@ -241,7 +241,7 @@ class Plugin
 		add_action('wp', function () {
 			$id = get_the_ID();
 			if (!is_admin() && $id) {
-				$killswitch = get_post_meta($id, '_cls_og_disabled', true);
+				$killswitch = get_post_meta($id, Admin::OPTION_PREFIX . 'disabled', true);
 				if (!$killswitch && 'on' !== $killswitch) {
 					// overrule RankMath
 					add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
@@ -269,7 +269,7 @@ class Plugin
 	{
 //		var_dump($old);exit;
 		self::getInstance()->page_has_og_image = true;
-		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . 'og-image.png';
+		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . Admin::BSI_IMAGE_NAME;
 	}
 
 	public static function late_head()
@@ -292,7 +292,7 @@ class Plugin
 			'font-weight' => 400,
 			'font-style' => 'normal',
 			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
-			'padding' => '10',
+			'padding' => '10', // background padding
 			'background-color' => '#66666666',
 			'text-shadow-color' => '',
 			'text-shadow-left' => '2',
@@ -304,7 +304,7 @@ class Plugin
 		$defaults['logo_options'] = [
 			'enabled' => 'on',
 			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'size' => get_site_option('_cls_og_image_logo_size', '20%'),
+			'size' => get_site_option(Admin::OPTION_PREFIX . 'image_logo_size', '20%'),
 		];
 
 		// more freemium options to consider;
@@ -344,7 +344,7 @@ class Plugin
 			}
 			$this->text_options[$_color] = $color;
 		}
-		$this->text_options['text'] = get_site_option('_cls_default_og_text');
+		$this->text_options['text'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text');
 	}
 
 	public function validate_logo_options()
@@ -356,41 +356,43 @@ class Plugin
 
 	public function expand_text_options($fast = false)
 	{
-
+		if (empty($this->text_options['position'])) {
+			$this->text_options['position'] = 'left';
+		}
 		switch ($this->text_options['position']) {
 			case 'top-left':
 			case 'top':
 			case 'top-right':
-				$this->text_options['top'] = 20;
+				$this->text_options['top'] = $this->padding;
 				break;
 			case 'bottom-left':
 			case 'bottom':
 			case 'bottom-right':
-				$this->text_options['bottom'] = 20;
+				$this->text_options['bottom'] = $this->padding;
 				break;
 			case 'left':
 			case 'center':
 			case 'right':
-				$this->text_options['top'] = 20;
-				$this->text_options['bottom'] = 20;
+				$this->text_options['top'] = $this->padding;
+				$this->text_options['bottom'] = $this->padding;
 				break;
 		}
 		switch ($this->text_options['position']) {
 			case 'top-left':
 			case 'bottom-left':
 			case 'left':
-				$this->text_options['left'] = 20;
+				$this->text_options['left'] = $this->padding;
 				break;
 			case 'top-right':
 			case 'bottom-right':
 			case 'right':
-				$this->text_options['right'] = 20;
+				$this->text_options['right'] = $this->padding;
 				break;
 			case 'top':
 			case 'center':
 			case 'bottom':
-				$this->text_options['left'] = 20;
-				$this->text_options['right'] = 20;
+				$this->text_options['left'] = $this->padding;
+				$this->text_options['right'] = $this->padding;
 				break;
 		}
 
@@ -464,40 +466,40 @@ class Plugin
 			case 'top-left':
 			case 'top':
 			case 'top-right':
-				$this->logo_options['top'] = 20;
+				$this->logo_options['top'] = $this->padding;
 				break;
 			case 'bottom-left':
 			case 'bottom':
 			case 'bottom-right':
-				$this->logo_options['bottom'] = 20;
+				$this->logo_options['bottom'] = $this->padding;
 				break;
 			case 'left':
 			case 'center':
 			case 'right':
-				$this->logo_options['top'] = 20;
-				$this->logo_options['bottom'] = 20;
+				$this->logo_options['top'] = $this->padding;
+				$this->logo_options['bottom'] = $this->padding;
 				break;
 		}
 		switch ($this->logo_options['position']) {
 			case 'top-left':
 			case 'bottom-left':
 			case 'left':
-				$this->logo_options['left'] = 20;
+				$this->logo_options['left'] = $this->padding;
 				break;
 			case 'top-right':
 			case 'bottom-right':
 			case 'right':
-				$this->logo_options['right'] = 20;
+				$this->logo_options['right'] = $this->padding;
 				break;
 			case 'top':
 			case 'center':
 			case 'bottom':
-				$this->logo_options['left'] = 20;
-				$this->logo_options['right'] = 20;
+				$this->logo_options['left'] = $this->padding;
+				$this->logo_options['right'] = $this->padding;
 				break;
 		}
 
-		$this->logo_options['file'] = get_site_option('_cls_og_image_logo');
+		$this->logo_options['file'] = get_site_option(Admin::OPTION_PREFIX . 'image_logo');
 		if (is_numeric($this->logo_options['file'])) {
 			$this->logo_options['file'] = get_attached_file($this->logo_options['file']);
 		}
@@ -598,7 +600,6 @@ class Plugin
 	{
 		$instance = self::getInstance();
 		if (is_admin()) {
-			require_once __DIR__ . '/class.og-image-admin.php';
 			$admin = Admin::getInstance();
 			$admin->storage = $instance->storage();
 		}
@@ -615,21 +616,8 @@ class Plugin
 
 	public function evaluate_font_weight($weight, $default = 400)
 	{
-		$translate = [
-			'thin' => 100,
-			'extra light' => 200,
-			'ultra light' => 200,
-			'light' => 300,
-			'normal' => 400,
-			'book' => 400,
-			'regular' => 400,
-			'medium' => 500,
-			'semi bold' => 600,
-			'demi bold' => 600,
-			'bold' => 700,
-			'extra bold' => 800,
-			'ultra bold' => 800,
-		];
+		$translate = Admin::font_weights();
+
 		if (!intval($weight)) {
 			if (isset($translate[strtolower($weight)])) {
 				$weight = $translate[strtolower($weight)];
@@ -650,10 +638,10 @@ class Plugin
 
 	public static function setError($tag, $text)
 	{
-		$errors = get_option('cls_og_image__errors', []);
+		$errors = get_option(Admin::OPTION_PREFIX . 'image__errors', []);
 		$errors[$tag] = $text;
 		$errors = array_filter($errors);
-		update_option('cls_og_image__og_logo_errors', $errors);
+		update_option(Admin::OPTION_PREFIX . 'image__og_logo_errors', $errors);
 	}
 
 	public function font_filename($font_family, $font_weight, $font_style)

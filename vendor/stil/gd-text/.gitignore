@@ -1,0 +1,7 @@
+vendor/
+demo/
+composer.lock
+Thumbs.db
+Desktop.ini
+.DS_Store
+.idea

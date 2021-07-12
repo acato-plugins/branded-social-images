@@ -9,6 +9,8 @@
 		return elementBottom > viewportTop && elementTop < viewportBottom;
 	};
 	var container = $('#carbon_fields_container_og_image');
+	var field_prefix = 'bsi_';
+
 	if (container.length > 0) {
 		container.after('<div id="cls-og-preview"></div>');
 		var og_preview = {'_preview': 1};
@@ -18,59 +20,59 @@
 		};
 
 		var og_preview_url = function () {
-			return cls_og.preview_url + '?' + $.param(og_preview);
+			return bsi_settings.preview_url + '?' + $.param(og_preview);
 		};
 
 		var update_delay = false;
 
 		var update_preview_data = function(fieldName, fieldValue) {
-			if (fieldName === 'cls_og_image') {
+			if (fieldName === field_prefix + 'image') {
 				og_preview.image = fieldValue; // this is an ID
 			}
-			if (fieldName === 'cls_og_text') {
+			if (fieldName === field_prefix + 'text') {
 				og_preview.text = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_text_position') {
+			if (fieldName === field_prefix + 'text_position') {
 				og_preview.text_position = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_color') {
+			if (fieldName === field_prefix + 'color') {
 				og_preview.color = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_background_color') {
+			if (fieldName === field_prefix + 'background_color') {
 				og_preview.background_color = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_text_stroke') {
+			if (fieldName === field_prefix + 'text_stroke') {
 				og_preview.text_stroke = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_text_stroke_color') {
+			if (fieldName === field_prefix + 'text_stroke_color') {
 				og_preview.text_stroke_color = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_text_shadow_color') {
+			if (fieldName === field_prefix + 'text_shadow_color') {
 				og_preview.text_shadow_color = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_text_shadow_left') {
+			if (fieldName === field_prefix + 'text_shadow_left') {
 				og_preview.text_shadow_left = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_text_shadow_top') {
+			if (fieldName === field_prefix + 'text_shadow_top') {
 				og_preview.text_shadow_top = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_text_shadow_enabled') {
+			if (fieldName === field_prefix + 'text_shadow_enabled') {
 				og_preview.text_shadow_enabled = encodeURIComponent(fieldValue ? 'on' : 'off');
 			}
-			if (fieldName === 'cls_og_text_enabled') {
+			if (fieldName === field_prefix + 'text_enabled') {
 				og_preview.text_enabled = fieldValue ? 'yes' : 'no';
 
-				container.find("[name='*_cls_og_text'],[name='*_cls_og_text_position']").each(function () {
+				container.find("[name='*_" + field_prefix + "_text'],[name='*_" + field_prefix + "_text_position']").each(function () {
 					$(this).closest('div.carbon-field').toggle(fieldValue);
 				});
 			}
-			if (fieldName === 'cls_og_logo_position') {
+			if (fieldName === field_prefix + 'logo_position') {
 				og_preview.logo_position = encodeURIComponent(fieldValue);
 			}
-			if (fieldName === 'cls_og_logo_enabled') {
+			if (fieldName === field_prefix + 'logo_enabled') {
 				og_preview.logo_enabled = fieldValue ? 'yes' : 'no';
 
-				container.find("[name*='_cls_og_logo_position']").each(function () {
+				container.find("[name*='_" + field_prefix + "_logo_position']").each(function () {
 					$(this).closest('div.carbon-field').toggle(fieldValue);
 				});
 			}
@@ -95,7 +97,7 @@
 					}
 					img.attr('src', og_preview_url());
 				}, 1000);
-			}).trigger('carbonFields.fieldUpdated', ['cls_og_logo_enabled']);
+			}).trigger('carbonFields.fieldUpdated', [field_prefix + 'logo_enabled']);
 		});
 
 		// CarbonFields v3.x uses React and inscrutable WordPress javascript hooks
@@ -138,7 +140,7 @@
 							img.attr('src', og_preview_url());
 						}, 1000);
 					});
-					$('[name="carbon_fields_compact_input[_cls_og_disabled]"]').trigger('change');
+					$('[name="carbon_fields_compact_input[_' + field_prefix + '_disabled]"]').trigger('change');
 				}
 			};
 			_wait_for_cf3 = setInterval(wait_for_cf3, 1000);

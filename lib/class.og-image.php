@@ -8,7 +8,6 @@ class Image {
 	private $manager;
 	public $image_id;
 	public $post_id;
-	public $serve_type;
 
 	private $use_cache = true; // for skipping caching, set to false
 
@@ -19,7 +18,7 @@ class Image {
 		$this->post_id = get_the_ID();
 		// hack for front-page
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-		if ('/og-image.png/' === $current_url) {
+		if ('/'. Admin::BSI_IMAGE_NAME . '/' === $current_url) {
 			$front = get_site_option('page_on_front');
 			if ($front) {
 				$this->post_id = $front;
@@ -56,18 +55,10 @@ class Image {
 		if ($image_cache) {
 			// we have cache, or have created cache. In any way, we have an image :)
 			// serve-type = redirect?
-			if ('redirect' === $this->serve_type) {
-				wp_redirect($image_cache['url']);
-				exit;
-			}
-			if ('inline' === $this->serve_type) {
-				header('Content-Type: image/png');
-				header('Content-Disposition: inline; filename=og-image.png');
-				header('Content-Length: '. filesize($image_cache['file']));
-				readfile($image_cache['file']);
-				exit;
-			}
-			echo 'Sorry, we have an image, but we don\'t know how to serve it.';
+			header('Content-Type: image/png');
+			header('Content-Disposition: inline; filename='. Admin::BSI_IMAGE_NAME);
+			header('Content-Length: '. filesize($image_cache['file']));
+			readfile($image_cache['file']);
 			exit;
 		}
 		echo 'Sorry, we could not create the image. This is probably a temporary error.';
@@ -86,8 +77,8 @@ class Image {
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/og-image.jpg.lock';
-		$cache_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/og-image.png';
+		$lock_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/'. Admin::BSI_IMAGE_NAME .'.lock';
+		$cache_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/'. Admin::BSI_IMAGE_NAME;
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
 			unlink($lock_file);
@@ -127,8 +118,8 @@ class Image {
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/og-image.jpg.lock';
-		$cache_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/og-image.png';
+		$lock_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/' . Admin::BSI_IMAGE_NAME . '.lock';
+		$cache_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/' . Admin::BSI_IMAGE_NAME;
 
 		$source = wp_get_attachment_image_src($image_id, 'og-image');
 		if ($source) {
@@ -188,7 +179,7 @@ class Image {
 
 	public function getTextForPost($post_id)
 	{
-		$meta = get_post_meta($post_id, '_cls_og_text', true);
+		$meta = get_post_meta($post_id, '_bsi_text', true);
 		if ($meta) {
 			$type = 'meta';
 			$text = trim($meta);
@@ -215,7 +206,7 @@ class Image {
 			$text = $this->manager->text_options['text'];
 		}
 
-		$text = apply_filters('cls_og_text', $text, $post_id, $this->getImageIdForPost($post_id), $type);
+		$text = apply_filters('bsi_text', $text, $post_id, $this->getImageIdForPost($post_id), $type);
 
 		return $text;
 	}
@@ -223,7 +214,7 @@ class Image {
 	private function getImageIdForPost($post_id)
 	{
 		$the_img = 'meta';
-		$image_id = get_post_meta($post_id, '_cls_og_image', true);
+		$image_id = get_post_meta($post_id, Admin::OPTION_PREFIX . '_image', true);
 
 		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION') && !$image_id) {
@@ -236,18 +227,18 @@ class Image {
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if (!$image_id && ('yes' === get_site_option('_cls_og_image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if (!$image_id && ('yes' === get_site_option(Admin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($post_id);
 		}
 		// global Image?
 		if (!$image_id) {
 			$the_img = 'global';
-			$image_id = get_site_option('_cls_default_og_image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
+			$image_id = get_site_option(Admin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
 		}
 
 		if ($image_id) { // this is for LOCAL DEBUGGING ONLY
-//			add_filter('cls_og_text', function() use ($the_img) { return $the_img; }, PHP_INT_MAX);
+//			add_filter('bsi_text', function() use ($the_img) { return $the_img; }, PHP_INT_MAX);
 		}
 
 		return $image_id;

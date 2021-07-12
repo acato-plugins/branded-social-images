@@ -44,14 +44,14 @@ private static $installed = array (
       ),
       'reference' => '6fabb62d555b03584c90820158f3c9096281ca43',
     ),
-    'stil/gd-text' => 
+    'htmlburger/carbon-fields' => 
     array (
-      'pretty_version' => 'v1.1.0',
-      'version' => '1.1.0.0',
+      'pretty_version' => '2.2.0',
+      'version' => '2.2.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'ae2bd5736dbd6d45a4af1e4b9c573dd4d8d06b11',
+      'reference' => 'f2e7e7b306f872b606b16909d2a2ee906381d5d1',
     ),
   ),
 );
