@@ -154,18 +154,22 @@ class GD {
 				$text_shadow_color_step = $this->manager->hex_to_rgba($text_shadow_color_step, true);
 //				$text_shadow_color_step = imagecolorallocatealpha($this->resource, $text_shadow_color_step[0], $text_shadow_color_step[1], $text_shadow_color_step[2], $text_shadow_color_step[3]);
 				$text_shadow_color_step = new Color($text_shadow_color_step[0], $text_shadow_color_step[1], $text_shadow_color_step[2], $text_shadow_color_step[3]);
-				imagecolortransparent($this->resource, $text_shadow_color_step);
+//				imagecolortransparent($this->resource, $text_shadow_color_step);
 //				imagettftext($this->resource, $fontSize, 0, $text_posX + $shiftX_step, $text_posY + $shiftY_step + $line_height - .2*$line_height , $text_shadow_color_step, $font, $text);
-				$this->imagettftextbox($this->resource, $fontSize, $text_posX + $shiftX_step, $text_posY + $shiftY_step, $text_width, $text_height , $text_shadow_color_step, $font, $text, $textOptions['halign']);
+				$this->imagettftextbox($this->resource, $fontSize, $text_posX + $shiftX_step, $text_posY + $shiftY_step, $text_width, $text_height , $text_shadow_color_step, $font, $text, ['align' => $textOptions['halign'] ]);
 			}
 		}
 
-		if (false !== $text_stroke_color) {
-			$this->imagettftextbox_stroke($this->resource, $fontSize, $text_posX, $text_posY, $text_width, $text_height,
-				$text_stroke_color, $font, $text, $textOptions['text-stroke'], $textOptions['halign']);
-		}
+//		if (false !== $text_stroke_color) {
+//			$this->imagettftextbox_stroke($this->resource, $fontSize, $text_posX, $text_posY, $text_width, $text_height,
+//				$text_stroke_color, $font, $text, $textOptions['text-stroke'], $textOptions['halign']);
+//		}
 //		imagettftext($this->resource, $fontSize, 0, $text_posX, $text_posY + $line_height - .2*$line_height , $text_color, $font, $text);
-		$this->imagettftextbox($this->resource, $fontSize, $text_posX, $text_posY, $text_width, $text_height, $text_color, $font, $text, $textOptions['halign']);
+		$this->imagettftextbox($this->resource, $fontSize, $text_posX, $text_posY, $text_width, $text_height, $text_color, $font, $text, [
+			'align' => $textOptions['halign'],
+			'stroke_width' => $textOptions['text-stroke'],
+			'stroke_color' => $text_stroke_color,
+		]);
 	}
 
 	private function gradient_color($hex_rgba_start, $hex_rgba_end, $step, $steps = 100, $skip_alpha = false, $return_as_hex = true)
@@ -258,24 +262,36 @@ class GD {
 		header('Content-Disposition: inline; filename='. $filename);
 		imagepng($this->resource);
 	}
+//
+//	private function imagettftextbox_stroke(&$image, $size, $x, $y, $w, $h, $strokecolor, $fontfile, $text, $px, $align='left') {
+//		for($c1 = ($x-$px); $c1 <= ($x+$px); $c1++) {
+//			$a +=2;
+//			$c2 = $y + round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
+////			imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
+//			$this->imagettftextbox($image, $size, $c1, $c2, $w, $h, $strokecolor, $fontfile, $text, ['align' => $align ]);
+//			$c3 = $y - round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
+////			imagettftext($image, $size, $angle, $c1, $c3, $strokecolor, $fontfile, $text);
+//			$this->imagettftextbox($image, $size, $c1, $c3, $w, $h, $strokecolor, $fontfile, $text, ['align' => $align ]);
+//		}
+//	}
 
-	private function imagettftextbox_stroke(&$image, $size, $x, $y, $w, $h, $strokecolor, $fontfile, $text, $px, $align='left') {
-		for($c1 = ($x-$px); $c1 <= ($x+$px); $c1++) {
-			$a +=2;
-			$c2 = $y + round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
-//			imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
-			$this->imagettftextbox($image, $size, $c1, $c2, $w, $h, $strokecolor, $fontfile, $text, $align);
-			$c3 = $y - round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
-//			imagettftext($image, $size, $angle, $c1, $c3, $strokecolor, $fontfile, $text);
-			$this->imagettftextbox($image, $size, $c1, $c3, $w, $h, $strokecolor, $fontfile, $text, $align);
-		}
-	}
-
-	private function imagettftextbox($image, $size, $x, $y, $w, $h, Color $color, $fontfile, $text, $align='left') {
+	private function imagettftextbox($image, $size, $x, $y, $w, $h, Color $color, $fontfile, $text, $options=[]) {
+		/** @var $align string left, center or right */
+		/** @var $stroke_width int */
+		/** @var $stroke_color false|Color a color */
+		extract (shortcode_atts([
+			'align' => 'left',
+			'stroke_width' => 0,
+			'stroke_color' => false,
+		], $options));
 		$textbox = new Box($image);
 		$textbox->setFontSize($size/.75);
 		$textbox->setFontFace($fontfile);
 		$textbox->setFontColor($color);
+		if (false !== $stroke_color && $stroke_width > 0) {
+			$textbox->setStrokeColor($stroke_color);
+			$textbox->setStrokeSize($stroke_width);
+		}
 		$textbox->setBox(
 		    $x,  // distance from left edge
 		    $y,  // distance from top edge
@@ -356,41 +372,24 @@ class GD {
 		$words = explode(' ', $text);
 		$lines = [];
 		$crr_line_idx = 0;
-		$debug = false;
 
 		foreach ($words as $word) {
+			if (empty($lines[$crr_line_idx])) { $lines[$crr_line_idx] = ''; }
 			$before = $lines[$crr_line_idx];
 			$lines[$crr_line_idx] = trim($lines[$crr_line_idx] . ' ' . $word);
 			if (static::getWidthPixels($lines[$crr_line_idx], $font, $font_size) < $line_max_pixels) {
-				if ($debug) {
-					$lines[$crr_line_idx + 1] = trim($lines[$crr_line_idx + 1] . ' ' . static::getWidthPixels($word, $font, $font_size));
-				}
 				continue;
 			}
 			// word overflow;
 			$lines[$crr_line_idx] = $before;
 			$crr_line_idx++;
-			if ($debug) {
-				$crr_line_idx++;
-			}
 			$lines[$crr_line_idx] = $word;
-			if ($debug) {
-				$lines[$crr_line_idx + 1] = static::getWidthPixels($word, $font, $font_size);
-			}
 			// protect against infinite loop
 			if (static::getWidthPixels($lines[$crr_line_idx], $font, $font_size) >= $line_max_pixels) {
 				// this word on it's own is too long, ignore that fact and move on
 				$crr_line_idx++;
-				if ($debug) {
-					$crr_line_idx++;
-				}
 			}
 		}
-
-		foreach($lines as $line) {
-//			var_dump($line, static::getWidthPixels($line, $font, $font_size), "($line_max_pixels)");
-		}
-//		exit;
 
 		return trim(implode( PHP_EOL, $lines));
 	}

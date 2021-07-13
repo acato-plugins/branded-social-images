@@ -191,19 +191,19 @@ class Plugin
 						$this->text_options['enabled'] = $_GET['text_enabled'] === 'yes';
 					}
 					if (!empty($_GET['color'])) {
-						$this->text_options['color'] = urldecode($_GET['color']);
+						$this->text_options['color'] = '#' . ltrim(urldecode($_GET['color']), '#');
 					}
 					if (!empty($_GET['background_color'])) {
-						$this->text_options['background-color'] = urldecode($_GET['background_color']);
+						$this->text_options['background-color'] = '#' . ltrim(urldecode($_GET['background_color']), '#');
 					}
 					if (isset($_GET['text_stroke']) && '' !== $_GET['text_stroke']) {
 						$this->text_options['text-stroke'] = intval($_GET['text_stroke']);
 					}
 					if (!empty($_GET['text_stroke_color'])) {
-						$this->text_options['text-stroke-color'] = urldecode($_GET['text_stroke_color']);
+						$this->text_options['text-stroke-color'] = '#' . ltrim(urldecode($_GET['text_stroke_color']), '#');
 					}
 					if (!empty($_GET['text_shadow_color'])) {
-						$this->text_options['text-shadow-color'] = urldecode($_GET['text_shadow_color']);
+						$this->text_options['text-shadow-color'] = '#' . ltrim(urldecode($_GET['text_shadow_color']), '#');
 					}
 					if (isset($_GET['text_shadow_left']) && '' !== $_GET['text_shadow_left']) {
 						$this->text_options['text-shadow-left'] = $_GET['text_shadow_left'];
