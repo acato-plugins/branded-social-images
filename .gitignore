@@ -1,2 +1,6 @@
 node_modules
 tmp
+bin/can-execute*
+bin/?webp*
+bin/macos
+bin/linux

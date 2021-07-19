@@ -77,6 +77,9 @@ class Admin
 
 	public static function carbon_fields()
 	{
+		// TODO: ImageMagick?! for now, GD only
+		$support_webp = function_exists('imagewebp') || Plugin::maybe_fake_support_webp();
+
 		$selection = [];
 		$selection[] = 'The image selected with this plugin at the post-edit page.';
 		if (defined('WPSEO_VERSION')) {
@@ -89,6 +92,8 @@ class Admin
 		$selection[] = 'The image selected here as "Default OG:Image".';
 
 		$selection = '<ul><li>' . implode('</li><li>', $selection) . '</li></ul>';
+
+		$selection .= "You can use " . ($support_webp ? "JPEG, PNG and WEBP" : "JPEG and PNG") . " as a source image, but the output will ALWAYS be PNG because of restrictions on Facebook and LinkedIn.";
 
 		$fields = array(
 			Field::make('image', Admin::CF_DEFAULTS_PREFIX . 'image', 'The default OG:Image for any page/post/... that has no OG:Image defined.')->set_help_text(
@@ -130,7 +135,8 @@ class Admin
 		// POSTS
 
 		$fields = [];
-		$fields[] = Field::make('image', Admin::CF_OPTION_PREFIX . 'image', __('You can upload/select a specific OG Image here'));
+
+		$fields[] = Field::make('image', Admin::CF_OPTION_PREFIX . 'image', __('You can upload/select a specific OG Image here'))->set_help_text("You can use " . ($support_webp ? "JPEG, PNG and WEBP" : "JPEG and PNG") . " as a source image, but the output will ALWAYS be PNG because of restrictions on Facebook and LinkedIn.");
 
 		$fields[] = Field::make('checkbox', Admin::CF_OPTION_PREFIX . 'text_enabled', __('Use text on this image?'))->set_default_value('yes')->set_help_text('Uncheck if you do not wish text on this image, or choose a position below');
 		$fields[] = Field::make('text', Admin::CF_OPTION_PREFIX . 'text', __('Text on image'))->set_help_text('If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.');

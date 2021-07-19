@@ -13,6 +13,7 @@ class GD {
 	private $manager;
 
 	private $source;
+	private $source_is_temporary;
 	private $target;
 
 	private $resource;
@@ -21,11 +22,28 @@ class GD {
 	{
 		$this->handler = $handler;
 		$this->manager = $handler->getManager();
+		$this->source_is_temporary = false;
+
+		// use this construction so we don't have to check file mime
+		if (is_file($source) && preg_match('@\.webp$@', strtolower(trim($source)))) {
+			// do we have webp support?
+			$support = function_exists('imagewebp');
+
+			if (!$support) {
+				// we cannot support natively
+				$support = Plugin::maybe_fake_support_webp();
+				if ($support) {
+					// we fake support, so we need to convert the input image to PNG
+					$source = Plugin::convert_webp_to_png($source);
+					$this->source_is_temporary = true;
+				}
+			}
+		}
+
 		$this->source = $source;
 		$this->target = $target;
 
-		// use this construction so we don't have to check file mime
-		$baseImage = imagecreatefromstring(file_get_contents($source));
+		$baseImage = imagecreatefromstring(file_get_contents($this->source));
 		$w = $this->manager->width;
 		$h = $this->manager->height;
 		$this->resource = imagecreatetruecolor($w, $h);
@@ -33,6 +51,9 @@ class GD {
 		imagesavealpha($this->resource, true);
 		imagecopyresampled($this->resource, $baseImage, 0, 0, 0, 0, $w, $h, imagesx($baseImage), imagesy($baseImage));
 		imagedestroy($baseImage);
+		if ($this->source_is_temporary) {
+			@unlink($this->source);
+		}
 	}
 
 	public function text_overlay($textOptions, $text)

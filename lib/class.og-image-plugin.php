@@ -303,6 +303,7 @@ class Plugin
 		];
 		$defaults['logo_options'] = [
 			'enabled' => 'on',
+			'position' => 'bottom-right',
 			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
 			'size' => get_site_option(Admin::OPTION_PREFIX . 'image_logo_size', '20%'),
 		];
@@ -775,4 +776,59 @@ class Plugin
 		}
 	}
 
+
+	public static function maybe_fake_support_webp(): bool
+	{
+		$support = false;
+
+		$bin = dirname(__DIR__) .'/bin';
+		// not downloaded yet
+		if (!file_exists("$bin/dwebp")) {
+			// can we fake support?
+			ob_start();
+			try {
+				exec($bin . '/download.sh');
+			} catch (\Exception $e) {
+
+			}
+			ob_end_clean();
+		}
+		if (!file_exists("$bin/dwebp")) {
+			// could not download
+		}
+		else {
+			// downloaded but did not run conversion tool succesfully
+			if (file_exists($bin . '/can-execute-binaries-from-php.success')) {
+				$support = true;
+			}
+		}
+
+		return $support;
+	}
+
+	public static function convert_webp_to_png($source)
+	{
+		$support = self::maybe_fake_support_webp(); // just in case
+		$target = false;
+		if ($support) {
+			$bin = dirname(__DIR__) . '/bin';
+			$target = "{$source}.temp.png";
+			$command = "{$bin}/dwebp \"{$source}\" -o \"{$target}\"";
+			ob_start();
+			try {
+				print $command;
+				exec($command);
+			}
+			catch(\Exception $e) {
+
+			}
+			$log = ob_get_clean();
+		}
+
+		if (!$target || !file_exists($target)) {
+			$target = $source;
+		}
+
+		return $target;
+	}
 }
