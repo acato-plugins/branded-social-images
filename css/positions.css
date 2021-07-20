@@ -15,15 +15,3 @@
 
 .position-grid input:focus {
   outline: none; }
-
-#cls-og-preview {
-  zoom: 0.5; }
-
-#cls-og-preview {
-  position: fixed;
-  right: 20px;
-  bottom: 50px; }
-  .inView + #cls-og-preview {
-    display: block; }
-  #cls-og-preview, .closed + #cls-og-preview {
-    display: none; }

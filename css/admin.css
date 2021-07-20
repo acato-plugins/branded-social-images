@@ -1,0 +1,102 @@
+@import url(//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css);
+#branded-social-images-editor {
+  width: 1200px;
+  height: 0;
+  padding-bottom: 52.5%;
+  position: relative; }
+  #branded-social-images-editor .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent no-repeat 100%/contain; }
+
+.position-grid figure,
+.position-grid img {
+  width: 64px; }
+
+.position-grid figure img {
+  padding: 0; }
+
+.position-grid .carbon-radio-list,
+.position-grid .carbon-radio-image-list,
+.position-grid .cf-radio__list,
+.position-grid.cf-radio-image .cf-radio__list {
+  width: 66px;
+  display: -ms-inline-grid;
+  display: inline-grid;
+  -ms-grid-columns: 22px 22px 22px;
+      grid-template-columns: 22px 22px 22px;
+  -ms-grid-rows: 22px 22px 22px;
+      grid-template-rows: 22px 22px 22px;
+  border: 1px solid black;
+  padding: 0 !important;
+  box-sizing: content-box; }
+
+.position-grid li {
+  display: -ms-inline-grid !important;
+  display: inline-grid !important;
+  width: 22px; }
+
+.position-grid li label {
+  border: 1px solid black;
+  width: 21px; }
+
+.position-grid .carbon-radio-list li label {
+  width: 22px; }
+
+.position-grid li, .position-grid li label {
+  box-sizing: border-box;
+  height: 22px;
+  overflow: hidden;
+  margin: 0 !important; }
+
+.position-grid input {
+  width: 20px;
+  height: 30px;
+  -webkit-appearance: none;
+          appearance: none;
+  border-radius: 0;
+  border: 0;
+  opacity: 0; }
+  .position-grid input:focus {
+    outline: none; }
+  .position-grid input:checked {
+    background: black; }
+
+.position-grid.with-labels label label {
+  border: 0; }
+
+.position-grid.with-labels input {
+  position: absolute;
+  left: -999em; }
+  .position-grid.with-labels input + label {
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    padding-left: 20px;
+    overflow: hidden;
+    white-space: nowrap; }
+  .position-grid.with-labels input:checked + label {
+    background: black; }
+
+.add-slider input {
+  display: inline-block !important;
+  width: auto !important; }
+
+.add-slider .a-slider {
+  display: inline-block;
+  width: 400px; }
+
+#cls-og-preview {
+  zoom: 0.5; }
+
+#cls-og-preview {
+  position: fixed;
+  right: 20px;
+  bottom: 50px; }
+  .inView + #cls-og-preview {
+    display: block; }
+  #cls-og-preview, .closed + #cls-og-preview {
+    display: none; }

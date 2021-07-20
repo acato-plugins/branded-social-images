@@ -1,4 +1,40 @@
 (function($) {
+	var domIdCounter = 0;
+	function patchPositionRadios() {
+		if (!domIdCounter) { // only do this once
+			domIdCounter ++;
+
+			// label input structure is only on CF2
+			$(".position-grid").find('label input').each(function () {
+				domIdCounter++;
+				var domId = 'position-radio-' + domIdCounter;
+				$(this).attr('id', domId);
+				$(this).after('<label for="' + domId + '"></label>');
+			}).end().addClass('with-labels');
+
+			$('.add-slider').each(function(){
+				var $input = $(this).find('input');
+				$input.attr('size', 4).on('keyup change', function(){
+					$(this).next('.a-slider').slider("value", parseInt($(this).val(), 10));
+				}).after('<div class="a-slider"></div>');
+
+				$input.next('.a-slider').slider({
+					min: parseInt($input.attr('min'), 10),
+					max: parseInt($input.attr('max'), 10),
+					step: parseInt($input.attr('step'), 10),
+					value: parseInt($input.attr('value'), 10),
+					change: function(event, ui) {
+						$(this).prev('input').val(ui.value);
+					},
+					slide: function(event, ui) {
+						$(this).prev('input').val(ui.value);
+					}
+				});
+			});
+
+		}
+	}
+
 	$.fn.isInViewport = function() {
 		var elementTop = $(this).offset().top;
 		var elementBottom = elementTop + $(this).outerHeight();
@@ -80,6 +116,8 @@
 
 		// CarbonFields v2.x
 		$(document).on('carbonFields.apiLoaded', function (e, api) {
+			console.log('CarbonFields v2 Init for Branded Social Images');
+			patchPositionRadios();
 			$(document).on('carbonFields.fieldUpdated', function (e, fieldName) {
 				if (update_delay) {
 					clearTimeout(update_delay);
@@ -152,5 +190,15 @@
 				c.toggleClass('inView', c.isInViewport());
 			}
 		});
+	}
+	console.log('Branded Social Images INIT');
+	// carbon 2, but no apiLoaded?
+	if ($('body').is('.toplevel_page_crb_carbon_fields_container_branded_social_images')) {
+		var waitForInterface = setInterval(function(){
+			if ($('.position-grid').length > 0) {
+				clearInterval(waitForInterface);
+				patchPositionRadios();
+			}
+		}, 500);
 	}
 })(jQuery);

@@ -20,20 +20,3 @@
     }
   }
 }
-
-#cls-og-preview {
-  zoom: 0.5;
-}
-
-#cls-og-preview {
-  position: fixed;
-  right: 20px;
-  bottom: 50px;
-  .inView + & {
-    display: block;
-  }
-  &, .closed + & {
-    display: none;
-  }
-}
-
