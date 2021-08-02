@@ -48,7 +48,7 @@
 	var field_prefix = 'bsi_';
 
 	if (container.length > 0) {
-		container.after('<div id="cls-og-preview"></div>');
+		container.after('<div id="cls-og-preview"><div></div></div>');
 		var og_preview = {'_preview': 1};
 
 		var loading = function () {
@@ -122,7 +122,7 @@
 				if (update_delay) {
 					clearTimeout(update_delay);
 				}
-				var p = $("#cls-og-preview"), img = p.find('img');
+				var p = $("#cls-og-preview div"), img = p.find('img');
 
 				update_delay = setTimeout(function () {
 					var v = api.getFieldValue(fieldName);

@@ -1,17 +1,4 @@
 @import url(//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css);
-#branded-social-images-editor {
-  width: 1200px;
-  height: 0;
-  padding-bottom: 52.5%;
-  position: relative; }
-  #branded-social-images-editor .background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent no-repeat 100%/contain; }
-
 .position-grid figure,
 .position-grid img {
   width: 64px; }
@@ -92,11 +79,66 @@
 #cls-og-preview {
   zoom: 0.5; }
 
-#cls-og-preview {
-  position: fixed;
-  right: 20px;
-  bottom: 50px; }
-  .inView + #cls-og-preview {
-    display: block; }
-  #cls-og-preview, .closed + #cls-og-preview {
-    display: none; }
+#cls-og-preview div {
+  width: 1200px;
+  height: 630px;
+  background-image: linear-gradient(45deg, #b0b0b0 25%, transparent 25%), linear-gradient(-45deg, #b0b0b0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #b0b0b0 75%), linear-gradient(-45deg, transparent 75%, #b0b0b0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+
+.inView + #cls-og-preview {
+  display: block; }
+
+#cls-og-preview, .closed + #cls-og-preview {
+  display: none; }
+
+#branded-social-images-editor {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1200px 1fr;
+      grid-template-columns: 1200px 1fr;
+  grid-template-areas: "image options" "image settings";
+  z-index: 0; }
+  #branded-social-images-editor .area--background {
+    width: 1200px;
+    height: 0;
+    padding-bottom: 52.5%;
+    position: relative;
+    grid-area: image;
+    background-image: linear-gradient(45deg, #b0b0b0 25%, transparent 25%), linear-gradient(-45deg, #b0b0b0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #b0b0b0 75%), linear-gradient(-45deg, transparent 75%, #b0b0b0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    z-index: 0; }
+  #branded-social-images-editor .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent no-repeat 100%/contain; }
+  #branded-social-images-editor .area--text {
+    grid-area: image;
+    z-index: 1;
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: var(--padding) 840px auto;
+        grid-template-columns: var(--padding) 840px auto;
+    -ms-grid-rows: var(--padding) 441px auto;
+        grid-template-rows: var(--padding) 441px auto;
+    grid-template-areas: ". . ." ". edit ." ". . ."; }
+    #branded-social-images-editor .area--text span.name-text {
+      grid-area: edit;
+      background: red; }
+      #branded-social-images-editor .area--text span.name-text textarea {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+        background: none;
+        border: none;
+        color: white; }
+  #branded-social-images-editor .area--options {
+    position: relative;
+    grid-area: options; }
+  #branded-social-images-editor .area--settings {
+    grid-area: settings; }

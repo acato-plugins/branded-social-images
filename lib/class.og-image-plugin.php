@@ -6,13 +6,13 @@ class Plugin
 {
 	const FEATURE_STROKE = 'off';
 	const FEATURE_SHADOW = 'simple';
+	const PADDING = 40;
 
 	public $width;
 	public $height;
 	public $logo_options;
 	public $text_options;
 	public $preview;
-	public $padding = 40;
 
 	public function __construct()
 	{
@@ -364,36 +364,36 @@ class Plugin
 			case 'top-left':
 			case 'top':
 			case 'top-right':
-				$this->text_options['top'] = $this->padding;
+				$this->text_options['top'] = self::PADDING;
 				break;
 			case 'bottom-left':
 			case 'bottom':
 			case 'bottom-right':
-				$this->text_options['bottom'] = $this->padding;
+				$this->text_options['bottom'] = self::PADDING;
 				break;
 			case 'left':
 			case 'center':
 			case 'right':
-				$this->text_options['top'] = $this->padding;
-				$this->text_options['bottom'] = $this->padding;
+				$this->text_options['top'] = self::PADDING;
+				$this->text_options['bottom'] = self::PADDING;
 				break;
 		}
 		switch ($this->text_options['position']) {
 			case 'top-left':
 			case 'bottom-left':
 			case 'left':
-				$this->text_options['left'] = $this->padding;
+				$this->text_options['left'] = self::PADDING;
 				break;
 			case 'top-right':
 			case 'bottom-right':
 			case 'right':
-				$this->text_options['right'] = $this->padding;
+				$this->text_options['right'] = self::PADDING;
 				break;
 			case 'top':
 			case 'center':
 			case 'bottom':
-				$this->text_options['left'] = $this->padding;
-				$this->text_options['right'] = $this->padding;
+				$this->text_options['left'] = self::PADDING;
+				$this->text_options['right'] = self::PADDING;
 				break;
 		}
 
@@ -467,36 +467,36 @@ class Plugin
 			case 'top-left':
 			case 'top':
 			case 'top-right':
-				$this->logo_options['top'] = $this->padding;
+				$this->logo_options['top'] = self::PADDING;
 				break;
 			case 'bottom-left':
 			case 'bottom':
 			case 'bottom-right':
-				$this->logo_options['bottom'] = $this->padding;
+				$this->logo_options['bottom'] = self::PADDING;
 				break;
 			case 'left':
 			case 'center':
 			case 'right':
-				$this->logo_options['top'] = $this->padding;
-				$this->logo_options['bottom'] = $this->padding;
+				$this->logo_options['top'] = self::PADDING;
+				$this->logo_options['bottom'] = self::PADDING;
 				break;
 		}
 		switch ($this->logo_options['position']) {
 			case 'top-left':
 			case 'bottom-left':
 			case 'left':
-				$this->logo_options['left'] = $this->padding;
+				$this->logo_options['left'] = self::PADDING;
 				break;
 			case 'top-right':
 			case 'bottom-right':
 			case 'right':
-				$this->logo_options['right'] = $this->padding;
+				$this->logo_options['right'] = self::PADDING;
 				break;
 			case 'top':
 			case 'center':
 			case 'bottom':
-				$this->logo_options['left'] = $this->padding;
-				$this->logo_options['right'] = $this->padding;
+				$this->logo_options['left'] = self::PADDING;
+				$this->logo_options['right'] = self::PADDING;
 				break;
 		}
 
@@ -548,6 +548,12 @@ class Plugin
 		}
 		$this->logo_options['valign'] = $valign;
 		$this->logo_options['halign'] = $halign;
+
+		// update july 2021: logo size is ALWAYS a percentage
+		if (intval($this->logo_options['size']) < 100) {
+			$this->logo_options['size'] = trim($this->logo_options['size'], '%') . '%';
+		}
+
 		// size w and h are bounding box!
 		if (preg_match('/[0-9]+%/', $this->logo_options['size'])) {
 			$this->logo_options['size'] = min(100, intval($this->logo_options['size']));

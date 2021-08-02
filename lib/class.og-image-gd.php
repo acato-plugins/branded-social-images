@@ -231,7 +231,6 @@ class GD {
 			return;
 		}
 
-
 		// source
 		$logo = imagecreatefromstring(file_get_contents($file));
 		$logo_width = imagesx($logo);
@@ -268,6 +267,9 @@ class GD {
 		}
 
 		imagecopyresampled($this->resource, $logo, $logo_posX, $logo_posY, 0, 0, $w, $h, $logo_width, $logo_height);
+//		var_dump($logoOptions);exit;
+//		header("content-type: image/png");
+//		imagepng($this->resource);exit;
 		imagedestroy($logo);
 	}
 
@@ -332,9 +334,11 @@ class GD {
 		static $widthCorrection;
 		$bbox = imageftbbox($font_size, 0, $font, $text);
 		$width = ($bbox[2] - $bbox[0]);
-		if (!$widthCorrection) {
-			$widthCorrection = static::getWidthPixelsTrue($text, $font, $font_size);
-			$widthCorrection = $widthCorrection['width'] / $width;
+		if ($width) {
+			if (!$widthCorrection) {
+				$widthCorrection = static::getWidthPixelsTrue($text, $font, $font_size);
+				$widthCorrection = $widthCorrection['width'] / $width;
+			}
 		}
 
 		return $width / $widthCorrection;
