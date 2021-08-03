@@ -20,7 +20,7 @@ add_action('plugins_loaded', [Plugin::class, 'init']);
 
 // short term migration
 add_action('plugins_loaded', function(){
-	if (get_site_option('bsi_version', 1) < 1) {
+	if (get_option('bsi_version', 1) < 1) {
 		global $wpdb;
 		try {
 			$wpdb->query("UPDATE {$wpdb->postmeta} SET meta_key = REPLACE(meta_key, 'cls_og_', 'bsi_')");
@@ -29,6 +29,6 @@ add_action('plugins_loaded', function(){
 		} catch (\Exception $e) {
 
 		}
-		update_site_option('bsi_version', 1);
+		update_option('bsi_version', 1);
 	}
 }, ~PHP_INT_MAX);

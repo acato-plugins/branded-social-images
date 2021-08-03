@@ -35,22 +35,22 @@ class Plugin
 
 			// text options
 			$this->text_options = $defaults['text_options'];
-//			var_dump( get_attached_file(get_site_option(Admin::DEFAULTS_PREFIX . 'text__ttf_upload')));exit;
-			$font_file = get_site_option(Admin::DEFAULTS_PREFIX . 'text__font');
+//			var_dump( get_attached_file(get_option(Admin::DEFAULTS_PREFIX . 'text__ttf_upload')));exit;
+			$font_file = get_option(Admin::DEFAULTS_PREFIX . 'text__font');
 
 			$this->text_options['font-file'] = $font_file;
 
-			$this->text_options['color'] = get_site_option(Admin::DEFAULTS_PREFIX . 'color');
-			$this->text_options['background-color'] = get_site_option(Admin::DEFAULTS_PREFIX . 'background_color');
-			$this->text_options['text-stroke'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_stroke');
-			$this->text_options['text-stroke-color'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_stroke_color');
+			$this->text_options['color'] = get_option(Admin::DEFAULTS_PREFIX . 'color');
+			$this->text_options['background-color'] = get_option(Admin::DEFAULTS_PREFIX . 'background_color');
+			$this->text_options['text-stroke'] = get_option(Admin::DEFAULTS_PREFIX . 'text_stroke');
+			$this->text_options['text-stroke-color'] = get_option(Admin::DEFAULTS_PREFIX . 'text_stroke_color');
 			if ('on' === Plugin::FEATURE_SHADOW) {
-				$this->text_options['text-shadow-color'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_shadow_color');
-				$this->text_options['text-shadow-left'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_shadow_left');
-				$this->text_options['text-shadow-top'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_shadow_top');
+				$this->text_options['text-shadow-color'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_color');
+				$this->text_options['text-shadow-left'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_left');
+				$this->text_options['text-shadow-top'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_top');
 			}
 			if ('simple' === Plugin::FEATURE_SHADOW) {
-				$enabled = get_site_option(Admin::DEFAULTS_PREFIX . 'text_shadow_enabled', 'off');
+				$enabled = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_enabled', 'off');
 				$enabled = 'off' === $enabled ? false : $enabled;
 				$this->text_options['text-shadow-color'] = $enabled?'#55555588':'#00000000';
 				$this->text_options['text-shadow-left'] = -2;
@@ -59,8 +59,8 @@ class Plugin
 			$this->validate_text_options();
 			$this->validate_logo_options();
 
-			$this->text_options['position'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text_position', 'top-left');
-			$this->logo_options['position'] = get_site_option(Admin::DEFAULTS_PREFIX . 'logo_position', 'bottom-right');
+			$this->text_options['position'] = get_option(Admin::DEFAULTS_PREFIX . 'text_position', 'top-left');
+			$this->logo_options['position'] = get_option(Admin::DEFAULTS_PREFIX . 'logo_position', 'bottom-right');
 			$id = get_the_ID();
 			if ($id) {
 				$overrule_text_position = get_post_meta($id, Admin::OPTION_PREFIX . 'text_position', true);
@@ -131,7 +131,7 @@ class Plugin
 		});
 
 		add_action('admin_init', function() {
-			$font_file = get_site_option(Admin::DEFAULTS_PREFIX . 'text__font');
+			$font_file = get_option(Admin::DEFAULTS_PREFIX . 'text__font');
 			if (preg_match('/google:(.+)/', $font_file, $m)) {
 				$defaults = $this->default_options();
 				$this->text_options = $defaults['text_options'];
@@ -139,7 +139,7 @@ class Plugin
 				$this->text_options['font-family'] = $font_file;
 				$this->expand_text_options();
 				if ($this->text_options['font-file'] && is_file($this->text_options['font-file']) && $this->text_options['font-file'] !== $font_file) { // PROCESSED!
-					update_site_option(Admin::DEFAULTS_PREFIX . 'text__font', basename($this->text_options['font-file']));
+					update_option(Admin::DEFAULTS_PREFIX . 'text__font', basename($this->text_options['font-file']));
 					wp_redirect(remove_query_arg('asdadasd'));
 					exit;
 				}
@@ -305,7 +305,7 @@ class Plugin
 			'enabled' => 'on',
 			'position' => 'bottom-right',
 			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'size' => get_site_option(Admin::OPTION_PREFIX . 'image_logo_size', '20%'),
+			'size' => get_option(Admin::OPTION_PREFIX . 'image_logo_size', '20%'),
 		];
 
 		// more freemium options to consider;
@@ -345,7 +345,7 @@ class Plugin
 			}
 			$this->text_options[$_color] = $color;
 		}
-		$this->text_options['text'] = get_site_option(Admin::DEFAULTS_PREFIX . 'text');
+		$this->text_options['text'] = get_option(Admin::DEFAULTS_PREFIX . 'text');
 	}
 
 	public function validate_logo_options()
@@ -500,7 +500,7 @@ class Plugin
 				break;
 		}
 
-		$this->logo_options['file'] = get_site_option(Admin::OPTION_PREFIX . 'image_logo');
+		$this->logo_options['file'] = get_option(Admin::OPTION_PREFIX . 'image_logo');
 		if (is_numeric($this->logo_options['file'])) {
 			$this->logo_options['file'] = get_attached_file($this->logo_options['file']);
 		}

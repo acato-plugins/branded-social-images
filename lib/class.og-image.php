@@ -19,7 +19,7 @@ class Image {
 		// hack for front-page
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		if ('/'. Admin::BSI_IMAGE_NAME . '/' === $current_url) {
-			$front = get_site_option('page_on_front');
+			$front = get_option('page_on_front');
 			if ($front) {
 				$this->post_id = $front;
 			}
@@ -227,14 +227,14 @@ class Image {
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if (!$image_id && ('yes' === get_site_option(Admin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if (!$image_id && ('yes' === get_option(Admin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($post_id);
 		}
 		// global Image?
 		if (!$image_id) {
 			$the_img = 'global';
-			$image_id = get_site_option(Admin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
+			$image_id = get_option(Admin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
 		}
 
 		if ($image_id) { // this is for LOCAL DEBUGGING ONLY

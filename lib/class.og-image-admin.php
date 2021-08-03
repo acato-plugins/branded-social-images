@@ -98,7 +98,7 @@ class Admin_Native
 		} // maybe RankMath?
 		elseif (class_exists(RankMath::class)) {
 			$image_comment = '<br />SEO by Rank Math has been detected. If you set-up an OG Image with Rank Math and not here, the image selected with Rank Math will be used.';
-		} elseif (!get_site_option(self::DEFAULTS_PREFIX . 'image')) {
+		} elseif (!get_option(self::DEFAULTS_PREFIX . 'image')) {
 			$image_comment = '<br />No Fallback images have been detected. If you do not set-up an image here, no OG:Image will be available for this ' . get_post_type();
 		}
 
@@ -135,21 +135,21 @@ class Admin_Native
 
 				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use text on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish text on this image.'],
 				'text' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Text on image', 'If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.'],
-				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Text color', 'default' => get_site_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
-				'text_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_site_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-right')],
+				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Text color', 'default' => get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
+				'text_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-right')],
 
-				'background_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Text background color', 'default' => get_site_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666')],
+				'background_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Text background color', 'default' => get_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666')],
 
-				'text_stroke_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => get_site_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000')],
-				'text_stroke' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Default stroke width', 'default' => get_site_option(self::DEFAULTS_PREFIX . 'text_stroke', '0')],
+				'text_stroke_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000')],
+				'text_stroke' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Default stroke width', 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke', '0')],
 
-				'text_shadow_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Text shadow color', get_site_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000')],
-				'text_shadow_top' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => get_site_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2')],
-				'text_shadow_left' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => get_site_option(self::DEFAULTS_PREFIX . 'shadow_left', '2')],
-				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Use a text shadow', 'default' => get_site_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
+				'text_shadow_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Text shadow color', get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000')],
+				'text_shadow_top' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2')],
+				'text_shadow_left' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_left', '2')],
+				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Use a text shadow', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
 
 				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a logo on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish a logo on this image, or choose a position below'],
-				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_site_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
+				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
 			]
 		];
 
@@ -174,7 +174,7 @@ class Admin_Native
 		}
 
 		foreach ($options['admin'] as $field => $_) {
-			$options['admin'][$field]['current_value'] = get_site_option($_['namespace'] . $field, !empty($_['default']) ? $_['default'] : null);
+			$options['admin'][$field]['current_value'] = get_option($_['namespace'] . $field, !empty($_['default']) ? $_['default'] : null);
 		}
 
 		if (get_the_ID()) {
@@ -307,12 +307,12 @@ class Admin_Native
 
 	public static function maybe_move_font()
 	{
-		if (is_admin() && ($font_id = get_site_option(self::DEFAULTS_PREFIX . 'text__ttf_upload'))) {
+		if (is_admin() && ($font_id = get_option(self::DEFAULTS_PREFIX . 'text__ttf_upload'))) {
 			$font = get_attached_file($font_id);
 			if (is_file($font)) {
 				$instance = self::getInstance();
-				update_site_option(self::DEFAULTS_PREFIX . 'text__ttf_upload', false);
-				update_site_option(self::DEFAULTS_PREFIX . 'text__font', basename($font));
+				update_option(self::DEFAULTS_PREFIX . 'text__ttf_upload', false);
+				update_option(self::DEFAULTS_PREFIX . 'text__font', basename($font));
 				rename($font, $instance->storage . '/' . basename($font));
 				wp_delete_post($font_id);
 			}
@@ -589,25 +589,25 @@ class Admin_CarbonFields
 
 		$fields[] = Field::make('checkbox', self::CF_OPTION_PREFIX . 'text_enabled', __('Use text on this image?'))->set_default_value('yes')->set_help_text('Uncheck if you do not wish text on this image, or choose a position below');
 		$fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text', __('Text on image'))->set_help_text('If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.');
-		self::carbon_field__color($fields, self::CF_OPTION_PREFIX . 'color', 'Text color', get_site_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF'));
-		$fields[] = self::carbon_field__position(self::CF_OPTION_PREFIX . 'text_position', 'Text position', get_site_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-right'));
-		self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'background_color', 'Text background color', get_site_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666'));
+		self::carbon_field__color($fields, self::CF_OPTION_PREFIX . 'color', 'Text color', get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF'));
+		$fields[] = self::carbon_field__position(self::CF_OPTION_PREFIX . 'text_position', 'Text position', get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-right'));
+		self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'background_color', 'Text background color', get_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666'));
 		if ('on' === Plugin::FEATURE_STROKE) {
-			self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'text_stroke_color', 'Text stroke color', get_site_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000'));
+			self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'text_stroke_color', 'Text stroke color', get_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000'));
 			$advanced_fields[count($advanced_fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
-			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_stroke', 'Stroke width')->set_default_value(get_site_option(self::DEFAULTS_PREFIX . 'text_stroke', '0'));
+			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_stroke', 'Stroke width')->set_default_value(get_option(self::DEFAULTS_PREFIX . 'text_stroke', '0'));
 		}
 		if ('on' === Plugin::FEATURE_SHADOW) {
-			self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'text_shadow_color', 'Text shadow color', get_site_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000'));
-			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value(get_site_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2'));
-			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_shadow_left', 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.')->set_default_value(get_site_option(self::DEFAULTS_PREFIX . 'shadow_left', '2'));
+			self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'text_shadow_color', 'Text shadow color', get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000'));
+			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value(get_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2'));
+			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_shadow_left', 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.')->set_default_value(get_option(self::DEFAULTS_PREFIX . 'shadow_left', '2'));
 		}
 		if ('simple' === Plugin::FEATURE_SHADOW) {
-			$advanced_fields[] = Field::make('checkbox', self::CF_OPTION_PREFIX . 'text_shadow_enabled', 'Use a text shadow')->set_default_value(get_site_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off'));
+			$advanced_fields[] = Field::make('checkbox', self::CF_OPTION_PREFIX . 'text_shadow_enabled', 'Use a text shadow')->set_default_value(get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off'));
 		}
 
 		$advanced_fields[] = Field::make('checkbox', self::CF_OPTION_PREFIX . 'logo_enabled', __('Use a logo on this image?'))->set_default_value('yes')->set_help_text('Uncheck if you do not wish a logo on this image, or choose a position below');
-		$advanced_fields[] = self::carbon_field__position(self::CF_OPTION_PREFIX . 'logo_position', 'Logo position', get_site_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right'));
+		$advanced_fields[] = self::carbon_field__position(self::CF_OPTION_PREFIX . 'logo_position', 'Logo position', get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right'));
 
 //		$fields[] = self::carbon_field__logo();
 
@@ -616,7 +616,7 @@ class Admin_CarbonFields
 		} // maybe RankMath?
 		elseif (class_exists(RankMath::class)) {
 			$fields[0]->set_help_text('SEO by Rank Math has been detected. If you set-up an OG Image with Rank Math and not here, the image selected with Rank Math will be used.');
-		} elseif (!get_site_option(self::DEFAULTS_PREFIX . 'image')) {
+		} elseif (!get_option(self::DEFAULTS_PREFIX . 'image')) {
 			$fields[0]->set_help_text('No Fallback images have been detected. If you do not set-up an image here, no OG:Image will be available for this ' . get_post_type());
 		}
 
@@ -675,12 +675,12 @@ class Admin_CarbonFields
 
 	public static function maybe_move_font()
 	{
-		if (is_admin() && ($font_id = get_site_option(self::DEFAULTS_PREFIX . 'text__ttf_upload'))) {
+		if (is_admin() && ($font_id = get_option(self::DEFAULTS_PREFIX . 'text__ttf_upload'))) {
 			$font = get_attached_file($font_id);
 			if (is_file($font)) {
 				$instance = self::getInstance();
-				update_site_option(self::DEFAULTS_PREFIX . 'text__ttf_upload', false);
-				update_site_option(self::DEFAULTS_PREFIX . 'text__font', basename($font));
+				update_option(self::DEFAULTS_PREFIX . 'text__ttf_upload', false);
+				update_option(self::DEFAULTS_PREFIX . 'text__font', basename($font));
 				rename($font, $instance->storage . '/' . basename($font));
 				wp_delete_post($font_id);
 			}
