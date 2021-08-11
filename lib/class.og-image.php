@@ -136,7 +136,7 @@ class Image {
 
 //			$editor = wp_get_image_editor( $image_file );
 			// we assume GD because we cannot be sure Imagick is there.
-			// TODO: add IMagick variant, work in progress
+			// TODO: add IMagick variant
 //			if (is_a($editor, \WP_Image_Editor_Imagick::class)) {
 //				require_once __DIR__ .'/class.og-image-imagick.php';
 //				$image = new IMagick($this, $image_file, $cache_file);

@@ -1,3 +1,6 @@
+/**
+ * Carbon fields version
+ */
 (function($) {
 	var domIdCounter = 0;
 	function patchPositionRadios() {
@@ -202,3 +205,80 @@
 		}, 500);
 	}
 })(jQuery);
+
+/**
+ * Native version
+ */
+
+function hex_to_rgba(hex) {
+	var c;
+	// #ABC or #ABCD
+	if(/^#([A-Fa-f0-9]{3,4})$/.test(hex)){
+		c= (hex + 'F').substring(1).split('');
+		return hex_to_rgba(c[0], c[0], c[1], c[1], c[2], c[2], c[3], c[3]);
+	}
+
+	c= '0x' + (hex.substring(1) + 'FF').substring(0,8);
+	return 'rgba('+[(c>>24)&255, (c>>16)&255, (c>>8)&255, Math.round((c&255)/25.5)/10].join(',')+')';
+}
+
+;(function($, s){
+	var editor = $('#'+s);
+	if (editor.length < 1) { return false; }
+	$(document).ready(function(){
+		$('div[contenteditable]').keydown(function(e) {
+			// trap the return key being pressed
+			if (e.keyCode === 13) {
+				// insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
+				document.execCommand('insertHTML', false, '<br/>');
+				// prevent the default behaviour of return key pressed
+				return false;
+			}
+		});
+
+	// bind editable
+		var texteditor = editor.find('.editable');
+		var texteditor_target = editor.find('textarea.editable-target');
+		console.log(texteditor, texteditor_target);
+
+		// on load set text to editable
+		texteditor.html(texteditor_target.val());
+
+		// update target when edited
+		texteditor.on('blur keyup paste input', function() {
+			texteditor_target.val(texteditor.html().replace(/&nbsp;<br/g, '<br'));
+		});
+
+		// update editor when target edited
+		texteditor_target.on('blur keyup paste', function() {
+			texteditor.html(texteditor_target.val().replace(/\n/g, '<br />'));
+		});
+
+		// text color
+		editor.find('#color').on('keyup blur paste input', function() {
+			editor.get(0).style.setProperty('--text-color', hex_to_rgba($(this).val()));
+		});
+		// text background color
+		editor.find('#background_color').on('keyup blur paste input', function() {
+			editor.get(0).style.setProperty('--text-background', hex_to_rgba($(this).val()));
+		}).trigger('blur');
+		// text shadow options
+		editor.find('#text_shadow_color').on('keyup blur paste input', function() {
+			editor.get(0).style.setProperty('--text-shadow-color', hex_to_rgba($(this).val()));
+		}).trigger('blur');
+		editor.find('#text_shadow_top').on('keyup blur paste input', function() {
+			editor.get(0).style.setProperty('--text-shadow-top', parseInt($(this).val(), 10) + 'px');
+		}).trigger('blur');
+		editor.find('#text_shadow_left').on('keyup blur paste input', function() {
+			editor.get(0).style.setProperty('--text-shadow-left', parseInt($(this).val(), 10) + 'px');
+		}).trigger('blur');
+		editor.find('#text_shadow_enabled').on('change', function() {
+			if ($(this).is(':checked')) {
+				editor.get(0).style.setProperty('--text-shadow-color', hex_to_rgba('#555555DD'));
+			}
+			else {
+				editor.get(0).style.setProperty('--text-shadow-color', hex_to_rgba('#00000000'));
+			}
+		}).trigger('change');
+	});
+})(jQuery, 'branded-social-images-editor');

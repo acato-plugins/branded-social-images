@@ -12,6 +12,7 @@ class Input {
 	protected $label;
 	protected $atts = [];
 	protected $content = '';
+	protected $value = null;
 	protected $current_value = null;
 
 	public function __construct($attribute_name, $atts)
@@ -19,8 +20,18 @@ class Input {
 		$this->name = $attribute_name;
 		$this->set_attributes($atts);
 
+		$this->set_value();
 		$this->set_current_value();
 		$this->set_attribute_name();
+	}
+
+	public function set_value()
+	{
+		$this->atts['value'] = $this->atts['value'] ?? '';
+		$this->value = $this->atts['value'];
+		if (array_key_exists('default', $this->atts)) {
+			$this->value = $this->atts['default'];
+		}
 	}
 
 	public function set_current_value()
@@ -35,11 +46,11 @@ class Input {
 		}
 	}
 
-	public function set_label($text)
+	public function set_label($text, $id_sufix=false)
 	{
 		$this->label = $text;
 		if (!$this->id) {
-			$this->generate_id();
+			$this->generate_id($id_sufix ? $text : '');
 		}
 	}
 
@@ -92,7 +103,12 @@ class Input {
 
 	public function get_tag_value()
 	{
-		return $this->current_value; // a text field had it's current value in value;
+		return $this->value;
+	}
+
+	public function get_current_value()
+	{
+		return $this->current_value;
 	}
 
 	public function generate_html(): string
@@ -123,10 +139,10 @@ class Input {
 			$this->id = $this->atts['id'];
 			return $this->id;
 		}
-		$id = $this->name . '';
+		$id = $this->name . $id_suffix;
 		$i = 0;
 		while (in_array($id, $ids)) {
-			$id = $this->name . '' . (++$i);
+			$id = $this->name . $id_suffix . (++$i);
 		}
 		$this->id = $id;
 		return $id;

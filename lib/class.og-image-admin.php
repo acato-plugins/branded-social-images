@@ -26,19 +26,29 @@ class Admin_Native
 		static $once;
 		if (!$once) {
 			$once = true;
-			add_action('admin_footer', function() {
-				?><style>
-					.toplevel_page_branded-social-images .wp-menu-image img { display: none; }
-					.toplevel_page_branded-social-images .wp-menu-image svg { width: 80%; height: 110%; }
-					.wp-not-current-submenu:not(:hover) .wp-menu-image svg path { fill: #eee; }
+			add_action('admin_footer', function () {
+				?>
+				<style>
+					.toplevel_page_branded-social-images .wp-menu-image img {
+						display: none;
+					}
+
+					.toplevel_page_branded-social-images .wp-menu-image svg {
+						width: 80%;
+						height: 110%;
+					}
+
+					.wp-not-current-submenu:not(:hover) .wp-menu-image svg path {
+						fill: #eee;
+					}
 				</style><?php
 			});
 		}
-		if (preg_match('/\.svg$/', static::ICON) && is_file(dirname(__DIR__) .'/img/' . basename('/'. static::ICON) ) ) {
-			return '" alt="" />'. file_get_contents(dirname(__DIR__) .'/img/' . basename('/'. static::ICON)) . '<link href="';
+		if (preg_match('/\.svg$/', static::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . static::ICON))) {
+			return '" alt="" />' . file_get_contents(dirname(__DIR__) . '/img/' . basename('/' . static::ICON)) . '<link href="';
 		}
-		if (preg_match('/\.svg$/', static::ICON) && is_file(dirname(__DIR__) .'/img/' . basename('/'. static::ICON) ) ) {
-			return plugins_url('/img/' . basename('/'.static::ICON), __DIR__);
+		if (preg_match('/\.svg$/', static::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . static::ICON))) {
+			return plugins_url('/img/' . basename('/' . static::ICON), __DIR__);
 		}
 		return static::ICON;
 	}
@@ -111,8 +121,7 @@ class Admin_Native
 				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => 'Default logo position', 'default' => 'bottom-right'],
 				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'single-slider', 'label' => 'Size', 'comment' => '', 'default' => '20%', 'attributes' => ['min' => 5, 'max' => 95]],
 
-
-				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'textarea', 'label' => 'The default text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.'],
+				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The default text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.'],
 				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Font', 'options' => self::get_font_list()],
 				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf', 'label' => 'Font upload'],
 				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
@@ -127,7 +136,7 @@ class Admin_Native
 				'text_shadow_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Default Text shadow color', '#00000000'],
 				'text_shadow_top' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => '-2'],
 				'text_shadow_left' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => '2'],
-				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Use a text shadow', 'default' => 'off'],
+				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'default' => 'off'],
 			],
 			'meta' => [
 				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Check this box to disable OG by Clearsite for this post/page/item'],
@@ -146,7 +155,7 @@ class Admin_Native
 				'text_shadow_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Text shadow color', get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000')],
 				'text_shadow_top' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2')],
 				'text_shadow_left' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_left', '2')],
-				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Use a text shadow', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
+				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
 
 				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a logo on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish a logo on this image, or choose a position below'],
 				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
@@ -154,23 +163,23 @@ class Admin_Native
 		];
 
 		if ('on' !== Plugin::FEATURE_STROKE) {
-			unset($options['admin'][self::CF_DEFAULTS_PREFIX . 'text_stroke_color']);
-			unset($options['admin'][self::CF_DEFAULTS_PREFIX . 'text_stroke']);
-			unset($options['meta'][self::CF_OPTION_PREFIX . 'text_stroke_color']);
-			unset($options['meta'][self::CF_OPTION_PREFIX . 'text_stroke']);
+			unset($options['admin']['text_stroke_color']);
+			unset($options['admin']['text_stroke']);
+			unset($options['meta']['text_stroke_color']);
+			unset($options['meta']['text_stroke']);
 		}
 
 		if ('on' !== Plugin::FEATURE_SHADOW) {
-			unset($options['admin'][self::CF_DEFAULTS_PREFIX . 'text_shadow_color']);
-			unset($options['admin'][self::CF_DEFAULTS_PREFIX . 'text_shadow_top']);
-			unset($options['admin'][self::CF_DEFAULTS_PREFIX . 'text_shadow_left']);
-			unset($options['meta'][self::CF_OPTION_PREFIX . 'text_shadow_color']);
-			unset($options['meta'][self::CF_OPTION_PREFIX . 'text_shadow_top']);
-			unset($options['meta'][self::CF_OPTION_PREFIX . 'text_shadow_left']);
+			unset($options['admin']['text_shadow_color']);
+			unset($options['admin']['text_shadow_top']);
+			unset($options['admin']['text_shadow_left']);
+			unset($options['meta']['text_shadow_color']);
+			unset($options['meta']['text_shadow_top']);
+			unset($options['meta']['text_shadow_left']);
 		}
 		if ('simple' !== Plugin::FEATURE_SHADOW) {
-			unset($options['admin'][self::CF_DEFAULTS_PREFIX . 'text_shadow_enabled']);
-			unset($options['meta'][self::CF_OPTION_PREFIX . 'text_shadow_enabled']);
+			unset($options['admin']['text_shadow_enabled']);
+			unset($options['meta']['text_shadow_enabled']);
 		}
 
 		foreach ($options['admin'] as $field => $_) {
@@ -188,19 +197,25 @@ class Admin_Native
 
 	public static function render_options($options, $filter = [])
 	{
-		require_once __DIR__ .'/class.html_inputs.php';
+		static $seen = [];
+		require_once __DIR__ . '/class.html_inputs.php';
+		if (!$filter) {
+			$filter = array_keys($options);
+		}
 
-		foreach ($options as $option_name => $option_atts) {
-			if ($filter && !in_array($option_name, $filter)) {
-				continue;
+		$filter = array_diff($filter, $seen);
+
+		foreach ($filter as $option_name) {
+			if (!empty ($options[$option_name])) {
+				$seen[] = $option_name;
+				self::render_option($option_name, $options[$option_name]);
 			}
-			self::render_option($option_name, $option_atts);
 		}
 	}
 
 	private static function render_option($option_name, $option_atts)
 	{
-		print '<span class="input-wrap name-'. esc_attr($option_name) .' input-'. $option_atts['type'] . ( !empty($option_atts['class']) ? str_replace(' ', ' wrap-', ' ' . $option_atts['class']) : '' ) .'">';
+		print '<span class="input-wrap name-' . esc_attr($option_name) . ' input-' . $option_atts['type'] . (!empty($option_atts['class']) ? str_replace(' ', ' wrap-', ' ' . $option_atts['class']) : '') . '">';
 		$label = '';
 		if (!empty($option_atts['label'])) {
 			$label = $option_atts['label'];
@@ -212,6 +227,10 @@ class Admin_Native
 
 	public static function show_editor($fields)
 	{
+
+		$text_settings = Plugin::getInstance()->text_options;
+		$logo_settings = Plugin::getInstance()->logo_options;
+
 		$image = $fields['image']['current_value'];
 		if (is_numeric($image)) {
 			$image = wp_get_attachment_image($image, 'og-image');
@@ -224,19 +243,29 @@ class Admin_Native
 		<style>
 			#branded-social-images-editor {
 				--padding: <?php print Plugin::PADDING; ?>px;
+				--text-background: none;
+				--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
+				--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
+				--text-shadow-top: <?php print intval($text_settings['text-shadow-top']); ?>px;
+				--text-shadow-left: <?php print intval($text_settings['text-shadow-left']); ?>px;
+				--font-size: <?php print $text_settings['font-size']; ?>px;
+				--text-padding: <?php print $text_settings['padding']; ?>px;
+				--line-height: <?php print $text_settings['line-height']; ?>px;
 			}
+
 		</style>
 		<div id="branded-social-images-editor">
 			<div class="area--background">
 				<div class="background" style="background-image:url('<?php print esc_attr($image); ?>')"></div>
 			</div>
 			<div class="area--text">
-				<?php self::render_options($fields, [
-					'text',
-				]); ?>
+				<div class="editable-container">
+					<div contenteditable="true" class="editable"><?php print $fields['text']['current_value']; ?></div>
+				</div>
 			</div>
 			<div class="area--options">
 				<?php self::render_options($fields, [
+					'text',
 					'image', 'image_use_thumbnail',
 					'image_logo', 'logo_position', 'image_logo_size',
 					'background_color',
@@ -261,14 +290,21 @@ class Admin_Native
 		<div class="wrap">
 			<h2>Branded Social Images</h2>
 			<?php
-				$errors = self::getErrors();
-				foreach ($errors as $error) {
-					?><div class="updated error"><p><?php print $error; ?></p></div><?php
-				}
+			$errors = self::getErrors();
+			foreach ($errors as $error) {
 				?>
+				<div class="updated error"><p><?php print $error; ?></p></div><?php
+			}
+			?>
 			<div>
-				<?php self::show_editor($fields); ?>
+				<form action="<?php print esc_attr(add_query_arg('bsi-defaults', '1')); ?>">
+					<?php self::show_editor($fields); ?>
+					<br/>
+					<br/>
+					<button class="action button-primary"><?php _e('Save settings'); ?></button>
+				</form>
 			</div>
+
 			<p>Branded Social Images is a free plugin by Clearsite. We are working on a full-featured Pro version,
 				please let us know what you think of this plugin and what you wish to see in the Pro version. <a
 					href="mailto:branded-social-images@clearsite.nl">Contact us here</a>.</p>
@@ -394,8 +430,7 @@ class Admin_Native
 			$errors = array_filter($errors);
 			$errors = array_unique($errors);
 			update_option(Admin::DEFAULTS_PREFIX . '_admin_errors', $errors);
-		}
-		else {
+		} else {
 			$errors = get_option(Admin::DEFAULTS_PREFIX . '_errors', []);
 			$errors[$tag] = $text;
 			$errors = array_filter($errors);
@@ -410,15 +445,15 @@ class Admin_Native
 		return $errors;
 	}
 
-	public static function getError($tag = null) {
+	public static function getError($tag = null)
+	{
 		$errors = get_option(Admin::DEFAULTS_PREFIX . '_errors', []);
 
 		if ($tag) {
 			$return = $errors[$tag];
 			unset($errors[$tag]);
 			$errors = array_filter($errors);
-		}
-		else {
+		} else {
 			$return = $errors;
 			$errors = [];
 		}
@@ -434,14 +469,13 @@ class Admin_Native
 		$font_filename = $font_family . '-w' . $font_weight . ($italic ? '-' . $italic : '');
 
 		$italic = $font_style == 'italic' ? 'italic' : '';
-		foreach ([ ' ' => '.ttf.', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15' => '.woff2'] as $user_agent => $extention) {
+		foreach ([' ' => '.ttf.', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15' => '.woff2'] as $user_agent => $extention) {
 			$font_css = wp_remote_retrieve_body(wp_remote_get('http://fonts.googleapis.com/css?family=' . $font_family . ':' . $font_weight . $italic, ['useragent' => $user_agent]));
 
 			if (!$font_css) {
 				self::setError('font-family', __('Could not download font from Google Fonts. Please download yourself and upload here.', 'clsogimg'));
-			}
-			else {
-				if (preg_match('@https?://[^)]+'. $extention .'@', $font_css, $n)) {
+			} else {
+				if (preg_match('@https?://[^)]+' . $extention . '@', $font_css, $n)) {
 					$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
 					self::file_put_contents(self::storage() . '/' . $font_filename . $extention, $font_ttf);
 				}
@@ -734,4 +768,69 @@ class Admin_CarbonFields
 
 class Admin extends Admin_CarbonFields
 {
+	public static function base_settings(): array
+	{
+		$defaults = [];
+		$defaults['text_options'] = [ // colors are RGBA in hex format
+			'enabled' => 'on',
+			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
+			'font-size' => '32', 'color' => '#ffffffff', 'line-height' => '40',
+			'font-file' => '',
+			'font-family' => '',
+			'font-weight' => 400,
+			'font-style' => 'normal',
+			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
+			'padding' => '10', // background padding
+			'background-color' => '#66666666',
+			'text-shadow-color' => '',
+			'text-shadow-left' => '2',
+			'text-shadow-top' => '-2',
+			'text-shadow-enabled' => 'off',
+			'text-stroke-color' => '',
+			'text-stroke' => '2',
+		];
+		$defaults['logo_options'] = [
+			'enabled' => 'on',
+			'position' => 'bottom-right',
+			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
+			'size' => get_option(self::OPTION_PREFIX . 'image_logo_size', '20%'),
+		];
+
+		// more freemium options to consider;
+		/**
+		 * stroke on text-shadow
+		 * rotation on text
+		 * independant rotation of shadow
+		 * skew?
+		 *
+		 */
+
+		return $defaults;
+	}
+
+	public static function hex_to_rgba($hex, $asRGBA=false)
+	{
+		$hex = str_replace( '#', '', $hex );
+		if (!$hex) {
+			$hex = '0000';
+		}
+		if (strlen($hex) <= 4) {
+			$hex = str_split($hex.'F');
+			$hex = $hex[0].$hex[0] . $hex[1].$hex[1] . $hex[2].$hex[2] . $hex[3].$hex[3];
+		}
+		$hex = substr($hex . 'FF', 0, 8);
+
+		$int = hexdec( $hex );
+		$red = ( $int >> 24 ) & 255;
+		$green = ( $int >> 16 ) & 255;
+		$blue = ( $int >> 8 ) & 255;
+		$alpha = floatval( $int & 255 ) / 255;
+
+		return $asRGBA ? sprintf('rgba(%d, %d, %d, %0.1f)', $red, $green, $blue, $alpha) : array(
+			'red' => $red,
+			'green' => $green,
+			'blue' => $blue,
+			'alpha' => $alpha,
+		);
+	}
 }

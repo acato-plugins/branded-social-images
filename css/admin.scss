@@ -21,6 +21,7 @@
     box-sizing: content-box;
 
   }
+
   li {
     display: inline-grid !important;
     width: 22px;
@@ -49,18 +50,25 @@
     border-radius: 0;
     border: 0;
     opacity: 0;
+
     &:focus {
       outline: none;
     }
+
     &:checked {
       background: black;
     }
   }
+
   &.with-labels {
-    label label { border: 0; }
+    label label {
+      border: 0;
+    }
+
     input {
       position: absolute;
       left: -999em;
+
       + label {
         background: transparent;
         width: 100%;
@@ -69,6 +77,7 @@
         overflow: hidden;
         white-space: nowrap;
       }
+
       &:checked + label {
         background: black;
       }
@@ -81,6 +90,7 @@
     display: inline-block !important;
     width: auto !important;
   }
+
   .a-slider {
     display: inline-block;
     width: 400px;
@@ -104,9 +114,11 @@
     //right: 20px;
     //bottom: 50px;
   }
+
   .inView + & {
     display: block;
   }
+
   &, .closed + & {
     display: none;
   }
@@ -149,19 +161,24 @@
     display: grid;
     grid-template-columns: var(--padding) 1200px*.7 auto;
     grid-template-rows: var(--padding) 630px*.7 auto;
-    grid-template-areas: ". . ." ". edit ." ". . ." ;
+    grid-template-areas: ". . ." ". edit ." ". . .";
 
-    span.name-text {
+    .editable-container {
       grid-area: edit;
-      background: red;
-      textarea {
+
+      .editable {
         width: auto;
         height: auto;
         max-width: 100%;
         max-height: 100%;
-        background: none;
         border: none;
-        color: white;
+        color: var(--text-color);
+        background: var(--text-background);
+        display: inline-block;
+        font-size: var(--font-size);
+        line-height: var(--line-height);
+        padding: var(--text-padding);
+        text-shadow: var(--text-shadow-left) var(--text-shadow-top) 0 var(--text-shadow-color);
       }
     }
   }
@@ -170,7 +187,71 @@
     position: relative; // should be below
     grid-area: options;
   }
+
   .area--settings {
     grid-area: settings;
+  }
+
+  .hidden {
+    display: block;
+  }
+
+  .wrap-position-grid {
+    .options-wrap {
+      width: 66px;
+      display: inline-grid;
+      grid-template-columns: 22px 22px 22px;
+      grid-template-rows: 22px 22px 22px;
+      border: 1px solid black;
+      padding: 0 !important;
+      box-sizing: content-box;
+
+    }
+
+    .option-wrap {
+      display: inline-grid !important;
+      width: 100%;
+      height: 100%;
+      position: relative;
+
+      label {
+        text-indent: 30px;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        border: 1px solid black;
+        border-top: 0;
+        border-left: 0;
+      }
+      &:nth-child(n+7) label {
+        border-bottom: 0;
+      }
+      &:nth-child(3n) label {
+        border-right: 0;
+      }
+      input:checked + label {
+        background: black;
+      }
+    }
+
+    input {
+      width: 20px;
+      height: 30px;
+      appearance: none;
+      border-radius: 0;
+      border: 0;
+      opacity: 0;
+
+      &:focus {
+        outline: none;
+      }
+
+      &:checked {
+        background: black;
+      }
+    }
   }
 }

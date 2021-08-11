@@ -25,39 +25,8 @@ class Plugin
 		});
 
 		// phase 1; add the endpoints
-		add_action('wp', function () {
-			// thi sis currently THE size for OG images.
-			$this->width = 1200;
-			$this->height = 630;
-
-			$defaults = $this->default_options();
-			$this->logo_options = $defaults['logo_options'];
-
-			// text options
-			$this->text_options = $defaults['text_options'];
-//			var_dump( get_attached_file(get_option(Admin::DEFAULTS_PREFIX . 'text__ttf_upload')));exit;
-			$font_file = get_option(Admin::DEFAULTS_PREFIX . 'text__font');
-
-			$this->text_options['font-file'] = $font_file;
-
-			$this->text_options['color'] = get_option(Admin::DEFAULTS_PREFIX . 'color');
-			$this->text_options['background-color'] = get_option(Admin::DEFAULTS_PREFIX . 'background_color');
-			$this->text_options['text-stroke'] = get_option(Admin::DEFAULTS_PREFIX . 'text_stroke');
-			$this->text_options['text-stroke-color'] = get_option(Admin::DEFAULTS_PREFIX . 'text_stroke_color');
-			if ('on' === Plugin::FEATURE_SHADOW) {
-				$this->text_options['text-shadow-color'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_color');
-				$this->text_options['text-shadow-left'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_left');
-				$this->text_options['text-shadow-top'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_top');
-			}
-			if ('simple' === Plugin::FEATURE_SHADOW) {
-				$enabled = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_enabled', 'off');
-				$enabled = 'off' === $enabled ? false : $enabled;
-				$this->text_options['text-shadow-color'] = $enabled?'#55555588':'#00000000';
-				$this->text_options['text-shadow-left'] = -2;
-				$this->text_options['text-shadow-top'] = 2;
-			}
-			$this->validate_text_options();
-			$this->validate_logo_options();
+		add_action('wp', function() {
+			$this->setup_defaults();
 
 			$this->text_options['position'] = get_option(Admin::DEFAULTS_PREFIX . 'text_position', 'top-left');
 			$this->logo_options['position'] = get_option(Admin::DEFAULTS_PREFIX . 'logo_position', 'bottom-right');
@@ -115,7 +84,7 @@ class Plugin
 
 				$overrule_tsenabled = get_post_meta($id, Admin::OPTION_PREFIX . 'text_shadow_enabled', true);
 				if ($overrule_tsenabled === 'on') {
-					$this->text_options['text-shadow-color'] = '#55555588';
+					$this->text_options['text-shadow-color'] = '#555555DD';
 					$this->text_options['text-shadow-top'] = -2;
 					$this->text_options['text-shadow-left'] = 2;
 				}
@@ -213,7 +182,7 @@ class Plugin
 					}
 
 					if (isset($_GET['text_shadow_enabled']) && 'on' === $_GET['text_shadow_enabled']) {
-						$this->text_options['text-shadow-color'] = '#55555588';
+						$this->text_options['text-shadow-color'] = '#555555DD';
 						$this->text_options['text-shadow-top'] = -2;
 						$this->text_options['text-shadow-left'] = 2;
 					}
@@ -261,6 +230,45 @@ class Plugin
 			}
 		}, PHP_INT_MAX);
 
+		add_action('admin_init', function() {
+			$this->setup_defaults();
+		});
+	}
+
+	public function setup_defaults() {
+		// thi sis currently THE size for OG images.
+		$this->width = 1200;
+		$this->height = 630;
+
+		$defaults = $this->default_options();
+		$this->logo_options = $defaults['logo_options'];
+
+		// text options
+		$this->text_options = $defaults['text_options'];
+//			var_dump( get_attached_file(get_option(Admin::DEFAULTS_PREFIX . 'text__ttf_upload')));exit;
+		$font_file = get_option(Admin::DEFAULTS_PREFIX . 'text__font');
+
+		$this->text_options['font-file'] = $font_file;
+
+		$this->text_options['color'] = get_option(Admin::DEFAULTS_PREFIX . 'color');
+		$this->text_options['background-color'] = get_option(Admin::DEFAULTS_PREFIX . 'background_color');
+		$this->text_options['text-stroke'] = get_option(Admin::DEFAULTS_PREFIX . 'text_stroke');
+		$this->text_options['text-stroke-color'] = get_option(Admin::DEFAULTS_PREFIX . 'text_stroke_color');
+		if ('on' === Plugin::FEATURE_SHADOW) {
+			$this->text_options['text-shadow-color'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_color');
+			$this->text_options['text-shadow-left'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_left');
+			$this->text_options['text-shadow-top'] = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_top');
+		}
+		if ('simple' === Plugin::FEATURE_SHADOW) {
+			$enabled = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_enabled', 'off');
+			$enabled = 'off' === $enabled ? false : $enabled;
+			$this->text_options['text-shadow-color'] = $enabled?'#555555DD':'#00000000';
+			$this->text_options['text-shadow-left'] = -2;
+			$this->text_options['text-shadow-top'] = 2;
+		}
+
+		$this->validate_text_options();
+		$this->validate_logo_options();
 	}
 
 	public $page_has_og_image = false;
@@ -282,42 +290,7 @@ class Plugin
 
 	public function default_options()
 	{
-		$defaults = [];
-		$defaults['text_options'] = [ // colors are RGBA in hex format
-			'enabled' => 'on',
-			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'font-size' => '32', 'color' => '#ffffffff', 'line-height' => '40',
-			'font-file' => '',
-			'font-family' => '',
-			'font-weight' => 400,
-			'font-style' => 'normal',
-			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
-			'padding' => '10', // background padding
-			'background-color' => '#66666666',
-			'text-shadow-color' => '',
-			'text-shadow-left' => '2',
-			'text-shadow-top' => '-2',
-			'text-shadow-enabled' => 'off',
-			'text-stroke-color' => '',
-			'text-stroke' => '2',
-		];
-		$defaults['logo_options'] = [
-			'enabled' => 'on',
-			'position' => 'bottom-right',
-			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'size' => get_option(Admin::OPTION_PREFIX . 'image_logo_size', '20%'),
-		];
-
-		// more freemium options to consider;
-		/**
-		 * stroke on text-shadow
-		 * rotation on text
-		 * independant rotation of shadow
-		 * skew?
-		 *
-		 */
-
-		return $defaults;
+		return Admin::base_settings();
 	}
 
 	public function validate_text_options()
