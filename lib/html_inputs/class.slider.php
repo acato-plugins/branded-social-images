@@ -2,17 +2,13 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
-class checkbox extends Input {
+require_once __DIR__ .'/class.text.php'; // dependency
+
+class slider extends text {
 	public function __construct($attribute_name, $atts)
 	{
 		parent::__construct($attribute_name, $atts);
-		$this->type = 'checkbox';
-	}
-
-	public function set_value()
-	{
-		$this->atts['value'] = $this->atts['value'] ?? 'on';
-		$this->value = $this->atts['value'];
+		$this->type = 'text';
 	}
 
 	public function generate_html(): string
@@ -27,10 +23,9 @@ class checkbox extends Input {
 		if (!isset($this->atts['checked']) && $this->get_current_value() == $this->get_tag_value()){
 			$this->atts['checked'] = 'checked';
 		}
-
 		$atts = $this->attributes(); // builds HTML attributes
 
-		return '<input type="hidden" name="'. $this->atts['name'] .'" value="off" />' .
-			'<input type="'. $this->type .'" '. $atts .'>' . ($this->empty ? '' : $this->content . '</'. $this->type .'>') . $label;
+
+		return $label .'<span class="add-slider"><input type="'. $this->type .'" '. $atts .'>' . ($this->empty ? '' : $this->content . '</'. $this->type .'>') . '</span>';
 	}
 }

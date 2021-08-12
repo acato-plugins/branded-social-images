@@ -20,5 +20,8 @@
   },
   "author": "Clearsite",
   "license": "ISC",
-  "homepage": "http://www.clearsite.nl"
+  "homepage": "http://www.clearsite.nl",
+  "dependencies": {
+    "vanilla-picker": "^2.11.2"
+  }
 }

@@ -77,8 +77,8 @@ class Image {
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/'. Admin::BSI_IMAGE_NAME .'.lock';
-		$cache_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/'. Admin::BSI_IMAGE_NAME;
+		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Admin::BSI_IMAGE_NAME .'.lock';
+		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Admin::BSI_IMAGE_NAME;
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
 			unlink($lock_file);
@@ -118,13 +118,26 @@ class Image {
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/' . Admin::BSI_IMAGE_NAME . '.lock';
-		$cache_file = $cache_file['basedir'] . '/og-images/' . $image_id . '/' . $post_id . '/' . Admin::BSI_IMAGE_NAME;
+		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Admin::BSI_IMAGE_NAME . '.lock';
+		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Admin::BSI_IMAGE_NAME;
 
-		$source = wp_get_attachment_image_src($image_id, 'og-image');
+		$source = '';
+		for ($i = Plugin::AA; $i > 1; $i--) {
+			$tag = "@{$i}x";
+			$source = wp_get_attachment_image_src($image_id, Plugin::IMAGE_SIZE_NAME. $tag);
+			if ($source && !empty($source[1]) && $source[1] * $this->manager->width * $i) {
+				break;
+			}
+		}
+
+		if (!$source) {
+			// use x1 source, no matter what dimensions
+			$source = wp_get_attachment_image_src($image_id, Plugin::IMAGE_SIZE_NAME);
+		}
+
 		if ($source) {
 			list($image, $width, $height) = $source;
-			if ($this->manager->height != $height || $this->manager->width != $width) {
+			if ($this->manager->height > $height || $this->manager->width > $width) {
 				header('X-OG-Error-Size: Image sizes do not match, web-master should rebuild thumbnails and use images of sufficient size.');
 			}
 			$image_file = str_replace($base_url, $base_dir, $image);
@@ -214,7 +227,7 @@ class Image {
 	private function getImageIdForPost($post_id)
 	{
 		$the_img = 'meta';
-		$image_id = get_post_meta($post_id, Admin::OPTION_PREFIX . '_image', true);
+		$image_id = get_post_meta($post_id, Admin::OPTION_PREFIX . 'image', true);
 
 		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION') && !$image_id) {

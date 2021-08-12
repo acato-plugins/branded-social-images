@@ -7,6 +7,7 @@ use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Clearsite\Tools\HTML_Inputs;
 use RankMath;
+use const Carbon_Fields\PLUGIN_FILE;
 
 class Admin_Native
 {
@@ -18,6 +19,7 @@ class Admin_Native
 	const BSI_IMAGE_NAME = 'social-image.png';
 	const ICON = 'clearsite-logo.svg';
 	const ADMIN_SLUG = 'branded-social-images';
+	const DO_NOT_RENDER = 'do_not_render';
 
 	public $storage = '';
 
@@ -63,19 +65,23 @@ class Admin_Native
 		return $instance;
 	}
 
-	private static function get_font_list()
+	private static function get_font_list(): array
 	{
-		$fonts = glob(self::getInstance()->storage . '/*.ttf');
-		sort($fonts);
+		$fonts = self::valid_fonts();
 		$options = [];
-		foreach ($fonts as $font) {
-			$options[basename($font)] = basename($font, '.ttf');
+
+		foreach ($fonts as $font_base => $_) {
+			if (!$_['valid']) {
+				continue;
+			}
+			$font_name = $_['name'];
+			$options[$font_base] = $font_name;
 		}
 
 		return $options;
 	}
 
-	private static function position_grid()
+	private static function position_grid(): array
 	{
 		return [
 			'top-left' => 'Top Left',
@@ -114,51 +120,53 @@ class Admin_Native
 
 		$options = [
 			'admin' => [
-				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'label' => 'The default OG:Image for any page/post/... that has no OG:Image defined.', 'comment' => 'todo: info', 'default' => false],
-				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use the WordPress Featured image, if selected, before using the default image selected above.', 'default' => true],
+				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'class' => 'no-remove', 'label' => 'The default OG:Image for any page/post/... that has no OG:Image defined.', 'comment' => 'todo: info'],
+				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use the WordPress Featured image, if selected, before using the default image selected above.', 'default' => 'on'],
 
 				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'label' => 'Your logo', 'comment' => 'For best results, use PNG with transparency at at least (!) 600 pixels wide and/or high. If you get "gritty" results, use higher values.'],
 				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => 'Default logo position', 'default' => 'bottom-right'],
-				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'single-slider', 'label' => 'Size', 'comment' => '', 'default' => '20%', 'attributes' => ['min' => 5, 'max' => 95]],
+				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale', 'comment' => '', 'default' => '20%', 'min' => 5, 'max' => 95, 'step' => 1],
 
 				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The default text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.'],
-				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Font', 'options' => self::get_font_list()],
-				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf', 'label' => 'Font upload'],
-				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
+				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Font', 'options' => self::get_font_list(), 'comment' => 'Fonts are stored in your uploads folder. You can manage them there.'],
+				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf', 'label' => 'Font upload', 'upload' => 'Upload .ttf file'],
+//				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
 
-				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid()],
-				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Default Text color', 'default' => '#FFFFFFFF'],
-				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Default Text background color', 'default' => '#66666666'],
+				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'The default text position', 'options' => self::position_grid()],
+				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text color', 'default' => '#FFFFFFFF'],
+				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text background color', 'default' => '#66666666'],
 
-				'text_stroke_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => '#00000000'],
+				'text_stroke_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'color', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => '#00000000'],
 				'text_stroke' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Default stroke width', 'default' => 0],
 
-				'text_shadow_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Default Text shadow color', '#00000000'],
+				'text_shadow_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'label' => 'Default Text shadow color', '#00000000'],
 				'text_shadow_top' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => '-2'],
 				'text_shadow_left' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => '2'],
-				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'default' => 'off'],
+				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'value' => 'on', 'default' => 'off'],
 			],
 			'meta' => [
 				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Check this box to disable OG by Clearsite for this post/page/item'],
 				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'label' => 'You can upload/select a specific OG Image here', 'comment' => 'You can use ' . ($support_webp ? "JPEG, PNG and WEBP" : "JPEG and PNG") . ' as a source image, but the output will ALWAYS be PNG because of restrictions on Facebook and LinkedIn.' . $image_comment],
 
 				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use text on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish text on this image.'],
-				'text' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Text on image', 'If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.'],
-				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Text color', 'default' => get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
-				'text_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-right')],
+				'text' => ['namespace' => self::OPTION_PREFIX, 'type' => 'textarea', 'class' => 'hidden editable-target', 'label' => 'Text on image', 'If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.'],
+				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text color', 'default' => get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
+				'text_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'Text position', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-right')],
 
-				'background_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Text background color', 'default' => get_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666')],
+				'background_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text background color', 'default' => get_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666')],
 
-				'text_stroke_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'class' => 'color-picker', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000')],
+				'text_stroke_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000')],
 				'text_stroke' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Default stroke width', 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke', '0')],
 
-				'text_shadow_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Text shadow color', get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000')],
+				'text_shadow_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'label' => 'Text shadow color', get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000')],
 				'text_shadow_top' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2')],
 				'text_shadow_left' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_left', '2')],
-				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
+				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'value' => 'on', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
 
 				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a logo on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish a logo on this image, or choose a position below'],
-				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
+				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'label' => 'Logo position', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
+
+				'image_logo' => ['namespace' => self::DO_NOT_RENDER, 'type' => 'image', 'label' => 'Your logo', 'comment' => 'For best results, use PNG with transparency at at least (!) 600 pixels wide and/or high. If you get "gritty" results, use higher values.', 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
 			]
 		];
 
@@ -215,7 +223,10 @@ class Admin_Native
 
 	private static function render_option($option_name, $option_atts)
 	{
-		print '<span class="input-wrap name-' . esc_attr($option_name) . ' input-' . $option_atts['type'] . (!empty($option_atts['class']) ? str_replace(' ', ' wrap-', ' ' . $option_atts['class']) : '') . '">';
+		if (!empty($option_atts['namespace']) && $option_atts['namespace'] == self::DO_NOT_RENDER) {
+			return;
+		}
+		print '<span data-name="' . esc_attr($option_name) . '" class="input-wrap name-' . esc_attr($option_name) . ' input-' . $option_atts['type'] . (!empty($option_atts['class']) ? str_replace(' ', ' wrap-', ' ' . $option_atts['class']) : '') . '">';
 		$label = '';
 		if (!empty($option_atts['label'])) {
 			$label = $option_atts['label'];
@@ -233,9 +244,16 @@ class Admin_Native
 
 		$image = $fields['image']['current_value'];
 		if (is_numeric($image)) {
-			$image = wp_get_attachment_image($image, 'og-image');
+			$image = wp_get_attachment_image($image, Plugin::IMAGE_SIZE_NAME);
 			preg_match('/src="(.+)"/U', $image, $m);
 			$image = $m[1];
+		}
+
+		$logo = $fields['image_logo']['current_value'];
+		if (is_numeric($logo)) {
+			$logo = wp_get_attachment_image($logo, 'full');
+			preg_match('/src="(.+)"/U', $logo, $m);
+			$logo = $m[1];
 		}
 
 		?>
@@ -243,20 +261,37 @@ class Admin_Native
 		<style>
 			#branded-social-images-editor {
 				--padding: <?php print Plugin::PADDING; ?>px;
+				--text-width: <?php print ceil(Plugin::getInstance()->width * .7 - 2 * $text_settings['padding']); ?>px;
+				--text-height: <?php print ceil(Plugin::getInstance()->height * .7 - 2 * $text_settings['padding']); ?>px;
+
 				--text-background: none;
 				--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
+				--text-font: <?php print $text_settings['font-file']; ?>;
 				--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
 				--text-shadow-top: <?php print intval($text_settings['text-shadow-top']); ?>px;
 				--text-shadow-left: <?php print intval($text_settings['text-shadow-left']); ?>px;
 				--font-size: <?php print $text_settings['font-size']; ?>px;
 				--text-padding: <?php print $text_settings['padding']; ?>px;
 				--line-height: <?php print $text_settings['line-height']; ?>px;
+
+				--logo-scale: <?php print $logo_settings['size']; ?>;
 			}
 
 		</style>
-		<div id="branded-social-images-editor">
+		<div id="branded-social-images-editor" data-use-thumbnail="<?php print self::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
+			<div class="area--background-canvas"></div>
+			<?php foreach (self::image_fallback_chain() as $kind => $fallback_image) { ?>
+				<div class="area--background-alternate image-source-<?php print $kind; ?>">
+					<div class="background"
+						 <?php if ($fallback_image) { ?>style="background-image:url('<?php print esc_attr($fallback_image); ?>')"<?php } ?>>
+					</div>
+				</div>
+			<?php } ?>
 			<div class="area--background">
 				<div class="background" style="background-image:url('<?php print esc_attr($image); ?>')"></div>
+			</div>
+			<div class="area--logo">
+				<div class="logo" style="background-image:url('<?php print esc_attr($logo); ?>')"></div>
 			</div>
 			<div class="area--text">
 				<div class="editable-container">
@@ -265,7 +300,6 @@ class Admin_Native
 			</div>
 			<div class="area--options">
 				<?php self::render_options($fields, [
-					'text',
 					'image', 'image_use_thumbnail',
 					'image_logo', 'logo_position', 'image_logo_size',
 					'background_color',
@@ -297,7 +331,7 @@ class Admin_Native
 			}
 			?>
 			<div>
-				<form action="<?php print esc_attr(add_query_arg('bsi-defaults', '1')); ?>">
+				<form method="POST" action="<?php print esc_attr(add_query_arg('bsi-defaults', '1')); ?>">
 					<?php self::show_editor($fields); ?>
 					<br/>
 					<br/>
@@ -312,6 +346,43 @@ class Admin_Native
 		<?php
 	}
 
+	public static function add_meta_boxes()
+	{
+		$post_types = apply_filters('bsi_post_types', ['post', 'page']);
+		foreach ($post_types as $post_type) {
+			add_meta_box(
+				self::ADMIN_SLUG,
+				'Branded Social Images',
+				[static::class, 'meta_panel'],
+				$post_type
+			);
+		}
+	}
+
+	public static function save_meta_data($post_id)
+	{
+		if (array_key_exists('branded_social_images', $_POST)) {
+			foreach ($_POST['branded_social_images'] as $namespace => $values) {
+				if (is_array($values)) {
+					foreach ($values as $key => $value) {
+						update_post_meta($post_id, "$namespace$key", $value);
+					}
+				}
+			}
+		}
+	}
+
+	public static function meta_panel()
+	{
+		$fields = self::field_list()['meta'];
+		self::show_editor($fields); ?>
+
+			<p>Branded Social Images is a free plugin by Clearsite. We are working on a full-featured Pro version,
+				please let us know what you think of this plugin and what you wish to see in the Pro version. <a
+					href="mailto:branded-social-images@clearsite.nl">Contact us here</a>.</p>
+		<?php
+	}
+
 	public function __construct()
 	{
 		add_filter('wp_check_filetype_and_ext', function ($result, $file, $filename, $mimes, $realmime) {
@@ -322,15 +393,18 @@ class Admin_Native
 			}
 			return $result;
 		}, 11, 5);
+
 		add_filter('upload_mimes', function ($existing_mimes) {
 			$existing_mimes['ttf'] = 'font/ttf';
 			return $existing_mimes;
 		});
 
 		add_action('admin_head', [static::class, 'maybe_move_font']);
-		add_action('admin_head', [static::class, 'process_post'], 11);
+		add_action('admin_head', [static::class, 'add_fontface_definitions']);
+		add_action('admin_init', [static::class, 'process_post'], 11);
 		add_action('admin_enqueue_scripts', function () {
-			wp_enqueue_script(self::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.js', __DIR__), ['jquery', 'jquery-ui-slider'], filemtime(dirname(__DIR__) . '/admin/admin.js'), true);
+			wp_register_script('vanilla-picker', plugins_url('admin/vanilla-picker.js', __DIR__), [], filemtime(dirname(__DIR__) . '/admin/vanilla-picker.js'), true);
+			wp_enqueue_script(self::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.js', __DIR__), ['jquery', 'jquery-ui-slider', 'vanilla-picker'], filemtime(dirname(__DIR__) . '/admin/admin.js'), true);
 			wp_localize_script(self::SCRIPT_STYLE_HANDLE, 'bsi_settings', ['preview_url' => get_permalink() . self::BSI_IMAGE_NAME]);
 
 			wp_enqueue_style(self::SCRIPT_STYLE_HANDLE, plugins_url('css/admin.css', __DIR__), '', filemtime(dirname(__DIR__) . '/css/admin.css'), 'all');
@@ -339,17 +413,93 @@ class Admin_Native
 		add_action('admin_menu', function () {
 			add_menu_page('Branded Social Images', 'Branded Social Images', 'edit_posts', self::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
 		});
+
+		add_action('admin_init', [static::class, 'sanitize_fonts']);
+
+		add_filter('image_size_names_choose', function ($default_sizes) {
+			return array_merge($default_sizes, array(
+				Plugin::IMAGE_SIZE_NAME => __('The OG-Image recommended size'),
+			));
+		});
+
+		add_action('save_post', [static::class, 'save_meta_data']);
+		add_action('add_meta_boxes', [static::class, 'add_meta_boxes']);
+		add_action('admin_notices', [static::class, 'admin_notices']);
 	}
+
+	public static function admin_notices()
+	{
+		$errors = self::getErrors();
+		foreach ($errors as $error) {
+			?><div class="updated error"><p><?php print $error; ?></p></div><?php
+		}
+
+	}
+
+	public static function default_google_fonts(): array
+	{
+		return ['Open Sans', 'Roboto', 'Montserrat', 'PT Sans', 'Merriweather', 'Oswald', 'Anton', 'Work Sans', 'Courgette', 'Josefin Sans'];
+	}
+
+	public static function add_fontface_definitions()
+	{
+		$fonts = self::valid_fonts();
+		$faces = [];
+		$storage = self::storage(true);
+		foreach ($fonts as $font_base => $font) {
+			if (!$font['valid']) {
+				continue;
+			}
+			$style = $font['style'];
+			$weight = $font['weight'];
+			$sources = [];
+			foreach (['ttf' => 'truetype'/*, 'woff2' => 'woff2', 'woff' => 'woff'*/] as $extention => $format) {
+				if (empty($font[$extention])) {
+					continue;
+				}
+				$sources[] = "url('$storage/$font_base.$extention') format('$format')";
+			}
+			$sources = implode(',', $sources);
+			$faces[] = <<< EOCSS
+@font-face {
+	font-family: $font_base;
+	font-style: $style;
+	font-weight: $weight;
+	src: $sources;
+}
+EOCSS;
+		}
+
+		print '<style id="font-face-definitions-for-branded-social-images">' . implode("\n\n", $faces) . '</style>';
+	}
+
+	public static function sanitize_fonts()
+	{
+		$storage = trailingslashit(self::storage());
+		foreach (self::default_google_fonts() as $font_family) {
+			foreach (['400'] as $font_weight) {
+				foreach (['normal'/*, 'italic'*/] as $font_style) {
+					foreach ([/*'woff', */'ttf'] as $extention) {
+						$local_filename = self::google_font_filename($font_family, $font_weight, $font_style, $extention);
+						if (!is_file($storage . $local_filename)/* && !is_file($storage . $local_filename . '2' / * facking hack * /)*/) {
+							self::download_google_font($font_family, $font_weight, $font_style);
+						}
+					}
+				}
+			}
+		}
+	}
+
 
 	public static function maybe_move_font()
 	{
 		if (is_admin() && ($font_id = get_option(self::DEFAULTS_PREFIX . 'text__ttf_upload'))) {
 			$font = get_attached_file($font_id);
 			if (is_file($font)) {
-				$instance = self::getInstance();
+				$instance = Plugin::getInstance();
 				update_option(self::DEFAULTS_PREFIX . 'text__ttf_upload', false);
 				update_option(self::DEFAULTS_PREFIX . 'text__font', basename($font));
-				rename($font, $instance->storage . '/' . basename($font));
+				rename($font, $instance->storage() . '/' . basename($font));
 				wp_delete_post($font_id);
 			}
 		}
@@ -358,7 +508,17 @@ class Admin_Native
 	public static function process_post()
 	{
 		if (is_admin() && !empty($_GET['page']) && $_GET['page'] === self::ADMIN_SLUG && !empty($_POST)) {
+			// bsi-defaults
 			// handle $_POST
+			foreach ($_POST['branded_social_images'] as $namespace => $values) {
+				if (is_array($values)) {
+					foreach ($values as $key => $value) {
+						update_option("$namespace$key", $value);
+					}
+				}
+			}
+			wp_redirect(remove_query_arg('bsi-defaults', add_query_arg('updated', 1)));
+			exit;
 		}
 	}
 
@@ -391,16 +551,21 @@ class Admin_Native
 		];
 	}
 
-	private static function storage()
+	private static function storage($as_url = false)
 	{
 		$dir = wp_upload_dir();
-		$dir = $dir['basedir'] . '/og-images';
+		$dir = $dir['basedir'] . '/' . Plugin::STORAGE;
 		if (!is_dir($dir)) {
 			mkdir($dir);
 		}
 		if (!is_dir($dir)) {
 //			self::setError('storage', __('Could not create the storage directory in the uploads folder. In a WordPress site the uploads folder should always be writable. Please fix this. This error will disappear once the problem has been corrected.', 'clsogimg'));
 		}
+
+		if ($as_url) {
+			return str_replace(trailingslashit(ABSPATH), '/', $dir);
+		}
+
 		return $dir;
 	}
 
@@ -463,19 +628,102 @@ class Admin_Native
 		return $return;
 	}
 
-	public static function download_google_font($font_family, $font_weight, $font_style)
+	public static function nice_font_name($font)
+	{
+		// w400 to normal, w700 to bold etc
+		list($name, $_) = explode('-w', $font . '-w400', 2);
+		return $name;
+	}
+
+	public static function valid_fonts(): array
+	{
+		$fonts = glob(self::storage() . '/*.ttf');
+		$list = [];
+		foreach ($fonts as $font) {
+			preg_match('/-w([1-9]00)(-italic)?\./', $font, $m);
+			$base = basename($font, '.ttf');
+			$list[$base] = [
+				'weight' => !empty($m[1]) ? $m[1] : 400,
+				'style' => !empty($m[2]) ? trim($m[2], '-') : 'normal',
+				'name' => self::nice_font_name($base),
+				'valid' => false, // assume error
+				'ttf' => self::storage() . '/' . $base . '.ttf',
+			];
+//			foreach (['woff2', 'woff'] as $ext) {
+//				if (is_file(self::storage() . '/' . $base . '.' . $ext)) {
+//					$list[$base][$ext] = self::storage() . '/' . $base . '.' . $ext;
+//				}
+//			}
+		}
+
+		foreach ($list as &$item) {
+			if (!empty($item['ttf'])/* && (!empty($item['woff']) || !empty($item['woff2']))*/) {
+				$item['valid'] = true;
+			}
+		}
+
+		return $list;
+	}
+
+	public static function google_font_filename($font_family, $font_weight, $font_style, $extention = ''): string
 	{
 		$italic = $font_style == 'italic' ? 'italic' : '';
 		$font_filename = $font_family . '-w' . $font_weight . ($italic ? '-' . $italic : '');
+		if ($extention) {
+			$font_filename .= '.' . $extention;
+		}
+		return $font_filename;
+	}
 
+	public static function google_font_url($font_family, $font_weight, $font_style): string
+	{
 		$italic = $font_style == 'italic' ? 'italic' : '';
-		foreach ([' ' => '.ttf.', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15' => '.woff2'] as $user_agent => $extention) {
-			$font_css = wp_remote_retrieve_body(wp_remote_get('http://fonts.googleapis.com/css?family=' . $font_family . ':' . $font_weight . $italic, ['useragent' => $user_agent]));
+		$font_url = 'http://fonts.googleapis.com/css?family=' . $font_family . ':' . $font_weight . $italic;
 
+		return $font_url;
+	}
+
+	public static function download_google_font($font_family, $font_weight, $font_style)
+	{
+		$font_filename = self::google_font_filename($font_family, $font_weight, $font_style);
+		$font_url = self::google_font_url($font_family, $font_weight, $font_style);
+		$font_url = str_replace(' ', '%20', $font_url);
+//		var_dump ($_SERVER['HTTP_USER_AGENT']);exit;
+//		file_put_contents(self::storage() .'/download.log', date('r') ."\n", FILE_APPEND);
+
+		foreach ([
+			' ' => '.ttf',
+//			 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36' => '.woff',
+		] as $user_agent => $extention) {
+			$font_css = wp_remote_retrieve_body(wp_remote_get($font_url, [
+				'headers' => [
+					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+				],
+				'user-agent' => $user_agent,
+				'httpversion' => '1.1',
+				'referer' => site_url()
+			]));
+//			file_put_contents(self::storage() .'/download.log', $font_url ."\n", FILE_APPEND);
+//			file_put_contents(self::storage() .'/download.log', $user_agent ."\n$extention\n", FILE_APPEND);
 			if (!$font_css) {
 				self::setError('font-family', __('Could not download font from Google Fonts. Please download yourself and upload here.', 'clsogimg'));
 			} else {
+				// count?
+				$count = explode('@font-face', $font_css);
+				if ($count == 1) {
+					// should not happen, it should be 2, but just use as is.
+				} else {
+					$font_css = '@font-face' . end($count); // use the last one, it should be latin.
+				}
+//			file_put_contents(self::storage() .'/download.log', $font_css ."\n", FILE_APPEND);
+
+//				if (preg_match('@https?://[^)]+' . $extention . '2@', $font_css, $n)) { /* we want woff2, but if missing, then use woff */
+////					file_put_contents(self::storage() .'/download.log', $n[0] . '->' . self::storage() . '/' . $font_filename . $extention ."2\n", FILE_APPEND);
+//					$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
+//					self::file_put_contents(self::storage() . '/' . $font_filename . $extention . '2', $font_ttf);
+//				} else
 				if (preg_match('@https?://[^)]+' . $extention . '@', $font_css, $n)) {
+//					file_put_contents(self::storage() .'/download.log', $n[0] . '->' . self::storage() . '/' . $font_filename . $extention ."2\n", FILE_APPEND);
 					$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
 					self::file_put_contents(self::storage() . '/' . $font_filename . $extention, $font_ttf);
 				}
@@ -485,288 +733,46 @@ class Admin_Native
 		// don't know what to do with any other
 		return $font_family;
 	}
-}
 
-class Admin_CarbonFields
-{
-	const OPTION_PREFIX = '_bsi_';
-	const DEFAULTS_PREFIX = '_bsi_default_';
-	const CF_OPTION_PREFIX = 'bsi_';
-	const CF_DEFAULTS_PREFIX = 'bsi_default_';
-	const SCRIPT_STYLE_HANDLE = 'bsi';
-	const BSI_IMAGE_NAME = 'social-image.png';
-
-	public $storage = '';
-
-	public static function getInstance()
+	private static function image_fallback_chain()
 	{
-		static $instance;
-		if (!$instance) {
-			$instance = new static();
+		if (!get_the_ID()) {
+			return [];
 		}
 
-		return $instance;
-	}
-
-	public function __construct()
-	{
-		add_action('carbon_fields_register_fields', [static::class, 'carbon_fields']);
-
-		// be late with this init to allow other instances to take priority. this way,
-		// Carbon is only loaded here if it doesn't already exist
-		add_action('after_setup_theme', [static::class, 'carbon_load'], 0302640605);
-
-		add_filter('wp_check_filetype_and_ext', function ($result, $file, $filename, $mimes, $realmime) {
-			if (substr(strtolower($filename), -4, 4) == '.ttf') {
-				$result['ext'] = 'ttf';
-				$result['type'] = 'font/ttf';
-				$result['proper_filename'] = $filename;
-			}
-			return $result;
-		}, 11, 5);
-		add_filter('upload_mimes', function ($existing_mimes) {
-			$existing_mimes['ttf'] = 'font/ttf';
-			return $existing_mimes;
-		});
-
-		add_action('admin_head', [static::class, 'maybe_move_font']);
-		add_action('admin_enqueue_scripts', function () {
-			wp_enqueue_script(self::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.js', __DIR__), ['jquery', 'jquery-ui-slider'], filemtime(dirname(__DIR__) . '/admin/admin.js'), true);
-			wp_localize_script(self::SCRIPT_STYLE_HANDLE, 'bsi_settings', ['preview_url' => get_permalink() . self::BSI_IMAGE_NAME]);
-
-			wp_enqueue_style(self::SCRIPT_STYLE_HANDLE, plugins_url('css/admin.css', __DIR__), '', filemtime(dirname(__DIR__) . '/css/admin.css'), 'all');
-		});
-	}
-
-	public static function carbon_load()
-	{
-		if (defined('Carbon_Fields\VERSION')) {
-			// carbon already present
-			if (version_compare(constant('Carbon_Fields\VERSION'), '3.0.0', '>=')) {
-				// this is a problem.
-				add_filter('admin_body_class', function ($classList) {
-					$classList .= ' carbon-fields-3';
-					return $classList;
-				});
-			}
+		// layers are stacked in order, bottom first
+		$layers = [];
+		// layer 1: the configured default
+		$settings = self::field_list()['admin'];
+		$layers['settings'] = $settings['image']['current_value'];
+		// layer 2, if enabled, the thumbnail/featured
+		if ('on' ===  $settings['image_use_thumbnail']['current_value']) {
+			$layers['thumbnail'] = get_post_thumbnail_id(get_the_ID());
 		}
+		// layer 3, if available, social plugins
 
-		if (!class_exists(Carbon_Fields::class)) {
-			require_once(__DIR__ . '/../admin/vendor/autoload.php');
-			Carbon_Fields::boot();
-		}
-	}
-
-	public static function carbon_fields()
-	{
-		// TODO: ImageMagick?! for now, GD only
-		$support_webp = function_exists('imagewebp') || Plugin::maybe_fake_support_webp();
-
-		$selection = [];
-		$selection[] = 'The image selected with this plugin at the post-edit page.';
+		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION')) {
-			$selection[] = 'The image selected with Yoast SEO at the post-edit page.';
+			$layers['yoast'] = get_post_meta(get_the_ID(), '_yoast_wpseo_opengraph-image-id', true);
 		}
+
+		// maybe RankMath? // latest rank math uses thumbnail ?????
 		if (class_exists(RankMath::class)) {
-			$selection[] = 'The image selected with RankMath at the post-edit page.';
-		}
-		$selection[] = 'The image selected as featured image at the post-edit page (if enabled below).';
-		$selection[] = 'The image selected here as "Default OG:Image".';
-
-		$selection = '<ul><li>' . implode('</li><li>', $selection) . '</li></ul>';
-
-		$selection .= "You can use " . ($support_webp ? "JPEG, PNG and WEBP" : "JPEG and PNG") . " as a source image, but the output will ALWAYS be PNG because of restrictions on Facebook and LinkedIn.";
-
-		$fields = array(
-			Field::make('image', self::CF_DEFAULTS_PREFIX . 'image', 'The default OG:Image for any page/post/... that has no OG:Image defined.')->set_help_text(
-				'This should be a generic image that is applicable to the entire website.' .
-				'<br />' .
-				'The Image to be used as OG:Image is selected in the following priority;' .
-				'<br />' .
-				$selection),
-			Field::make('checkbox', self::CF_OPTION_PREFIX . 'image_use_thumbnail', 'Use the WordPress Featured image, if selected, before using the default image selected above.')->set_default_value(true),
-			Field::make('text', self::CF_DEFAULTS_PREFIX . 'text', 'The default text to overlay if no other text or title can be found.')->set_help_text('This should be a generic text that is applicable to the entire website.'),
-		);
-
-		self::carbon_field__fonts($fields);
-		$fields[] = self::carbon_field__position(self::CF_DEFAULTS_PREFIX . 'text_position', 'Default text position', true);
-
-		self::carbon_field__color($fields, self::CF_DEFAULTS_PREFIX . 'color', 'Default Text color', '#FFFFFFFF');
-		self::carbon_field__color($fields, self::CF_DEFAULTS_PREFIX . 'background_color', 'Default Text background color', '#66666666');
-
-		if ('on' === Plugin::FEATURE_STROKE) {
-			self::carbon_field__color($fields, self::CF_DEFAULTS_PREFIX . 'text_stroke_color', 'Default Text stroke color', '#00000000');
-			$fields[count($fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
-			$fields[] = Field::make('text', self::CF_DEFAULTS_PREFIX . 'text_stroke', 'Default stroke width')->set_default_value(0);
-		}
-		if ('on' === Plugin::FEATURE_SHADOW) {
-			self::carbon_field__color($fields, self::CF_DEFAULTS_PREFIX . 'text_shadow_color', 'Default Text shadow color', '#00000000');
-			$fields[] = Field::make('text', self::CF_DEFAULTS_PREFIX . 'text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value('-2');
-			$fields[] = Field::make('text', self::CF_DEFAULTS_PREFIX . 'text_shadow_left', 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.')->set_default_value('2');
-		}
-		if ('simple' === Plugin::FEATURE_SHADOW) {
-			$fields[] = Field::make('checkbox', self::CF_DEFAULTS_PREFIX . 'text_shadow_enabled', 'Use a text shadow')->set_default_value('off');
-		}
-		$fields[] = Field::make('image', self::CF_OPTION_PREFIX . 'image_logo', 'Your logo')->set_help_text('For best results, use PNG with transparency at at least (!) 600 pixels wide and/or high. If you get "gritty" results, use higher values.');
-		$fields[] = self::carbon_field__position(self::CF_DEFAULTS_PREFIX . 'logo_position', 'Default logo position', 'bottom-right');
-		$fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'image_logo_size', 'Size')->set_help_text('Logo scale in %')->set_default_value(20)->set_attributes(['type' => 'number', 'maxLength' => 2, 'min' => 5, 'max' => 95, 'step' => 1])->set_classes('add-slider');
-
-		Container::make('theme_options', __('Branded Social Images'))
-			->add_fields($fields);
-
-		// POSTS
-
-		$fields = [];
-		$advanced_fields = [];
-
-		$fields[] = Field::make('image', self::CF_OPTION_PREFIX . 'image', __('You can upload/select a specific OG Image here'))->set_help_text("You can use " . ($support_webp ? "JPEG, PNG and WEBP" : "JPEG and PNG") . " as a source image, but the output will ALWAYS be PNG because of restrictions on Facebook and LinkedIn.");
-
-		$fields[] = Field::make('checkbox', self::CF_OPTION_PREFIX . 'text_enabled', __('Use text on this image?'))->set_default_value('yes')->set_help_text('Uncheck if you do not wish text on this image, or choose a position below');
-		$fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text', __('Text on image'))->set_help_text('If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.');
-		self::carbon_field__color($fields, self::CF_OPTION_PREFIX . 'color', 'Text color', get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF'));
-		$fields[] = self::carbon_field__position(self::CF_OPTION_PREFIX . 'text_position', 'Text position', get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-right'));
-		self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'background_color', 'Text background color', get_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666'));
-		if ('on' === Plugin::FEATURE_STROKE) {
-			self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'text_stroke_color', 'Text stroke color', get_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000'));
-			$advanced_fields[count($advanced_fields) - 1]->set_help_text('Text-stroke in image-software is not a real stroke and will behave weirdly with text-transparency.');
-			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_stroke', 'Stroke width')->set_default_value(get_option(self::DEFAULTS_PREFIX . 'text_stroke', '0'));
-		}
-		if ('on' === Plugin::FEATURE_SHADOW) {
-			self::carbon_field__color($advanced_fields, self::CF_OPTION_PREFIX . 'text_shadow_color', 'Text shadow color', get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000'));
-			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_shadow_top', 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.')->set_default_value(get_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2'));
-			$advanced_fields[] = Field::make('text', self::CF_OPTION_PREFIX . 'text_shadow_left', 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.')->set_default_value(get_option(self::DEFAULTS_PREFIX . 'shadow_left', '2'));
-		}
-		if ('simple' === Plugin::FEATURE_SHADOW) {
-			$advanced_fields[] = Field::make('checkbox', self::CF_OPTION_PREFIX . 'text_shadow_enabled', 'Use a text shadow')->set_default_value(get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off'));
+			$layers['rankmath'] = get_post_meta(get_the_ID(), 'rank_math_facebook_image_id', true);
 		}
 
-		$advanced_fields[] = Field::make('checkbox', self::CF_OPTION_PREFIX . 'logo_enabled', __('Use a logo on this image?'))->set_default_value('yes')->set_help_text('Uncheck if you do not wish a logo on this image, or choose a position below');
-		$advanced_fields[] = self::carbon_field__position(self::CF_OPTION_PREFIX . 'logo_position', 'Logo position', get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right'));
-
-//		$fields[] = self::carbon_field__logo();
-
-		if (defined('WPSEO_VERSION')) {
-			$fields[0]->set_help_text('Yoast SEO has been detected. If you set-up an OG Image with Yoast and not here, the image selected with Yoast SEO will be used.');
-		} // maybe RankMath?
-		elseif (class_exists(RankMath::class)) {
-			$fields[0]->set_help_text('SEO by Rank Math has been detected. If you set-up an OG Image with Rank Math and not here, the image selected with Rank Math will be used.');
-		} elseif (!get_option(self::DEFAULTS_PREFIX . 'image')) {
-			$fields[0]->set_help_text('No Fallback images have been detected. If you do not set-up an image here, no OG:Image will be available for this ' . get_post_type());
-		}
-
-		$killswitch = Field::make('checkbox', self::CF_OPTION_PREFIX . 'disabled', __('Check this box to disable OG by Clearsite for this post/page/item'))->set_help_text('This does NOT disable the OG image url, so you can still test it, but, the Clearsite OG image will not be advertised to browsers.<br /><br />If you use a plugin like Yoast SEO or Rank Math, their OG image might still be advertised. This checkbox does <strong>not</strong>strong> change that.');
-		array_unshift($fields, $killswitch);
-
-		Container::make('post_meta', __('OG Image'))
-			->set_context('advanced')
-			->set_priority('high')
-			->add_fields($fields);
-
-		Container::make('post_meta', __('OG Image (advanced)'))
-			->set_context('advanced')
-			->add_fields($advanced_fields);
-	}
-
-	private static function carbon_field__position($field_name, $field_label, $default = false)
-	{
-		$positions = static::position_grid();
-
-		$default_value = is_string($default) ? $default : reset($positions); // ffing hack!
-
-		return Field::make('radio', $field_name, $field_label)
-			->set_options($positions)->set_default_value($default_value)
-			->set_classes('position-grid');
-	}
-
-	private static function carbon_field__fonts(&$fields)
-	{
-		// google fonts
-		$field = Field::make('text', self::CF_DEFAULTS_PREFIX . 'text__font', 'Font');
-		$field->set_help_text('If you want to use a Google font, search for it here: <a href="https://fonts.google.com" target="_blank">Google Fonts</a> and copy the font Name. Fill it in as <strong>google:the font name</strong>, for example; <strong>google:New Tegomin</strong>');
-		$fields[] = $field;
-
-		// TTF upload
-		$fields[] = Field::make('file', self::CF_DEFAULTS_PREFIX . 'text__ttf_upload', 'Font upload')
-			->set_help_text('You can upload your own font here, but this MUST be a TTF font-file. You <strong>AND YOU ALONE</strong> are responsible for the proper permissions and usage rights of the font on your website.')
-			->set_type(['font/ttf']);
-	}
-
-	private static function carbon_field__color(&$fields, $field_name, $field_label, $default_value = false)
-	{
-		// google fonts
-		$field = Field::make('color', $field_name, $field_label);
-		if ($default_value && strlen($default_value) > 7) { // default has alpha channel
-			$field->set_alpha_enabled(true);
-		}
-		if ($default_value) {
-			$field->set_default_value($default_value);
-		}
-		$field->set_palette([$default_value, '#FFFFFFFF', '#00000000']);
-		list($hex, $dec) = self::hex_to_hex_opacity($default_value);
-		$field->set_help_text('The default color for this option is: ' . $hex . ', ' . $dec . '%');
-		$fields[] = $field;
-	}
-
-	public static function maybe_move_font()
-	{
-		if (is_admin() && ($font_id = get_option(self::DEFAULTS_PREFIX . 'text__ttf_upload'))) {
-			$font = get_attached_file($font_id);
-			if (is_file($font)) {
-				$instance = self::getInstance();
-				update_option(self::DEFAULTS_PREFIX . 'text__ttf_upload', false);
-				update_option(self::DEFAULTS_PREFIX . 'text__font', basename($font));
-				rename($font, $instance->storage . '/' . basename($font));
-				wp_delete_post($font_id);
+		foreach ($layers as &$layer) {
+			if ($layer) {
+				$image = wp_get_attachment_image_src($layer, Plugin::IMAGE_SIZE_NAME);
+				$layer = $image[0];
 			}
 		}
-	}
 
-	private static function hex_to_hex_opacity($hex_color): array
-	{
-		if (substr($hex_color, 0, 1) !== '#') {
-			$hex_color = '#ffffffff';
-		}
-		$hex_values = str_split(substr($hex_color . 'FF', 1, 8), 6);
-
-		return [$hex_values[0], intval((hexdec($hex_values[1]) + 1) / 256 * 100)];
-	}
-
-	public static function font_weights()
-	{
-		return [
-			'thin' => 100,
-			'extra light' => 200,
-			'ultra light' => 200,
-			'light' => 300,
-			'normal' => 400,
-			'book' => 400,
-			'regular' => 400,
-			'medium' => 500,
-			'semi bold' => 600,
-			'demi bold' => 600,
-			'bold' => 700,
-			'extra bold' => 800,
-			'ultra bold' => 800,
-		];
-	}
-
-	private static function position_grid()
-	{
-		return [
-			'top-left' => 'Top Left',
-			'top' => 'Top Center',
-			'top-right' => 'Top Right',
-			'left' => 'Left Middle',
-			'center' => 'Centered',
-			'right' => 'Right Middle',
-			'bottom-left' => 'Bottom Left',
-			'bottom' => 'Bottom Center',
-			'bottom-right' => 'Bottom Right',
-		];
+		return $layers;
 	}
 }
 
-class Admin extends Admin_CarbonFields
+class Admin extends Admin_Native
 {
 	public static function base_settings(): array
 	{
@@ -808,23 +814,23 @@ class Admin extends Admin_CarbonFields
 		return $defaults;
 	}
 
-	public static function hex_to_rgba($hex, $asRGBA=false)
+	public static function hex_to_rgba($hex, $asRGBA = false)
 	{
-		$hex = str_replace( '#', '', $hex );
+		$hex = str_replace('#', '', $hex);
 		if (!$hex) {
 			$hex = '0000';
 		}
 		if (strlen($hex) <= 4) {
-			$hex = str_split($hex.'F');
-			$hex = $hex[0].$hex[0] . $hex[1].$hex[1] . $hex[2].$hex[2] . $hex[3].$hex[3];
+			$hex = str_split($hex . 'F');
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2] . $hex[3] . $hex[3];
 		}
 		$hex = substr($hex . 'FF', 0, 8);
 
-		$int = hexdec( $hex );
-		$red = ( $int >> 24 ) & 255;
-		$green = ( $int >> 16 ) & 255;
-		$blue = ( $int >> 8 ) & 255;
-		$alpha = floatval( $int & 255 ) / 255;
+		$int = hexdec($hex);
+		$red = ($int >> 24) & 255;
+		$green = ($int >> 16) & 255;
+		$blue = ($int >> 8) & 255;
+		$alpha = floatval($int & 255) / 255;
 
 		return $asRGBA ? sprintf('rgba(%d, %d, %d, %0.1f)', $red, $green, $blue, $alpha) : array(
 			'red' => $red,

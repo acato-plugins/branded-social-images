@@ -44,12 +44,30 @@ class GD {
 		$this->target = $target;
 
 		$baseImage = imagecreatefromstring(file_get_contents($this->source));
-		$w = $this->manager->width;
-		$h = $this->manager->height;
+		$w = $this->manager->width * Plugin::AA;
+		$h = $this->manager->height * Plugin::AA;
 		$this->resource = imagecreatetruecolor($w, $h);
 		imagealphablending($this->resource, true);
 		imagesavealpha($this->resource, true);
-		imagecopyresampled($this->resource, $baseImage, 0, 0, 0, 0, $w, $h, imagesx($baseImage), imagesy($baseImage));
+
+		$source_width = imagesx($baseImage);
+		$source_height = imagesy($baseImage);
+
+		// just in time cropping
+
+		$target_ratio = $h/$w;
+		$source_ratio = $source_height/$source_width;
+		$source_x = $source_y = 0;
+		if ($source_ratio > $target_ratio) { // image is too high
+			$source_height = $source_width * $target_ratio;
+			$source_y = (imagesy($baseImage) - $source_height) /2;
+		}
+		if ($source_ratio < $target_ratio) { // image is too wide
+			$source_width = $source_height / $target_ratio;
+			$source_x = (imagesx($baseImage) - $source_width) /2;
+		}
+
+		imagecopyresampled($this->resource, $baseImage, 0, 0, $source_x, $source_y, $w, $h, $source_width, $source_height);
 		imagedestroy($baseImage);
 		if ($this->source_is_temporary) {
 			@unlink($this->source);
@@ -59,7 +77,7 @@ class GD {
 	public function text_overlay($textOptions, $text)
 	{
 		$debug = false; // true;
-		$image_width = imagesx($this->resource);
+		$image_width = imagesx($this->resource); // already is Plugin::AA
 		$image_height = imagesy($this->resource);
 
 		$text_color = $this->manager->hex_to_rgba($textOptions['color'], true);
@@ -106,7 +124,7 @@ class GD {
 		}
 		if ($debug) { exit; }
 		$font = $textOptions['font-file'];
-		$fontSize = $textOptions['font-size'];
+		$fontSize = $textOptions['font-size'] * Plugin::AA;
 
 		$text = str_replace(['<br>', '<br />', '<br/>', '\\n'], "\n", $text); // predefined line breaks
 		$text = str_replace('\\r', '', $text);
@@ -124,7 +142,12 @@ class GD {
 		$text_width += 2;
 		$text_height = $line_height * count($lines);
 
-		$p = $textOptions['padding'];
+		$p = $textOptions['padding'] * Plugin::AA;
+
+		$textOptions['left'] *= Plugin::AA;
+		$textOptions['right'] *= Plugin::AA;
+		$textOptions['top'] *= Plugin::AA;
+		$textOptions['bottom'] *= Plugin::AA;
 
 		if ($textOptions['halign'] == 'center') {
 			$text_posX = ( $image_width - $textOptions['left'] - $textOptions['right']) / 2 - $text_width / 2 + $textOptions['left'];
@@ -156,8 +179,8 @@ class GD {
 		// NOTE: imagettf uses Y position for bottom!! of the text, not the top
 		// ALSO: this is for the text BASE, so some text might stick out below. compensate by 18% of text height.
 		if (false !== $text_shadow_color) {
-			$shiftX = $textOptions['text-shadow-left'];
-			$shiftY = $textOptions['text-shadow-top'];
+			$shiftX = $textOptions['text-shadow-left'] * Plugin::AA;
+			$shiftY = $textOptions['text-shadow-top'] * Plugin::AA;
 			$steps = max(absint($shiftX), absint($shiftY));
 			$start_color = $textOptions['color'];
 			$end_color = $textOptions['text-shadow-color'];
@@ -241,8 +264,13 @@ class GD {
 		$image_height = imagesy($this->resource);
 
 		// logo overlay
-		$w = $logoOptions['w'];
-		$h = $logoOptions['h'];
+		$w = $logoOptions['w'] * Plugin::AA;
+		$h = $logoOptions['h'] * Plugin::AA;
+
+		$logoOptions['left'] *= Plugin::AA;
+		$logoOptions['right'] *= Plugin::AA;
+		$logoOptions['top'] *= Plugin::AA;
+		$logoOptions['bottom'] *= Plugin::AA;
 
 		$p = 0 ; //???
 
@@ -276,7 +304,7 @@ class GD {
 	public function save()
 	{
 		$this->manager->file_put_contents($this->target, ''); // prime the file, creating all directories
-		imagepng($this->resource, $this->target, 2);
+		imagepng(imagescale($this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED), $this->target, 2);
 	}
 
 	public function push_to_browser($filename)

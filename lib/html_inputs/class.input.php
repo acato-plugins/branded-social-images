@@ -10,6 +10,7 @@ class Input {
 	protected $name;
 	protected $id;
 	protected $label;
+	protected $comment;
 	protected $atts = [];
 	protected $content = '';
 	protected $value = null;
@@ -23,6 +24,7 @@ class Input {
 		$this->set_value();
 		$this->set_current_value();
 		$this->set_attribute_name();
+		$this->set_comment();
 	}
 
 	public function set_value()
@@ -52,6 +54,12 @@ class Input {
 		if (!$this->id) {
 			$this->generate_id($id_sufix ? $text : '');
 		}
+	}
+
+	public function set_comment()
+	{
+		$this->comment = !empty($this->atts['comment']) ? $this->atts['comment'] : '';
+		unset($this->atts['comment']);
 	}
 
 	public function set_attributes($atts)
@@ -139,6 +147,7 @@ class Input {
 			$this->id = $this->atts['id'];
 			return $this->id;
 		}
+		$id_suffix = sanitize_title($id_suffix);
 		$id = $this->name . $id_suffix;
 		$i = 0;
 		while (in_array($id, $ids)) {
@@ -149,6 +158,6 @@ class Input {
 	}
 
 	public function __toString() {
-		return $this->generate_html();
+		return $this->generate_html() . '<span class="comment">'. $this->comment .'</span>';
 	}
 }

@@ -7,9 +7,12 @@ class Plugin
 	const FEATURE_STROKE = 'off';
 	const FEATURE_SHADOW = 'simple';
 	const PADDING = 40;
+	const AA=2;
+	const STORAGE = 'bsi-uploads';
+	const IMAGE_SIZE_NAME = 'og-image';
 
-	public $width;
-	public $height;
+	public $width = 1200;
+	public $height = 630;
 	public $logo_options;
 	public $text_options;
 	public $preview;
@@ -85,8 +88,8 @@ class Plugin
 				$overrule_tsenabled = get_post_meta($id, Admin::OPTION_PREFIX . 'text_shadow_enabled', true);
 				if ($overrule_tsenabled === 'on') {
 					$this->text_options['text-shadow-color'] = '#555555DD';
-					$this->text_options['text-shadow-top'] = -2;
-					$this->text_options['text-shadow-left'] = 2;
+					$this->text_options['text-shadow-top'] = 2;
+					$this->text_options['text-shadow-left'] = -2;
 				}
 			}
 
@@ -96,7 +99,8 @@ class Plugin
 
 		add_action('init', function(){
 			add_rewrite_endpoint(Admin::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
-			add_image_size('og-image', $this->width, $this->height, true);
+			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
+			add_image_size(Plugin::IMAGE_SIZE_NAME .'@'. Plugin::AA .'x', $this->width * Plugin::AA, $this->height * Plugin::AA, true);
 		});
 
 		add_action('admin_init', function() {
@@ -237,9 +241,6 @@ class Plugin
 
 	public function setup_defaults() {
 		// thi sis currently THE size for OG images.
-		$this->width = 1200;
-		$this->height = 630;
-
 		$defaults = $this->default_options();
 		$this->logo_options = $defaults['logo_options'];
 
@@ -376,6 +377,14 @@ class Plugin
 
 			if (!$this->text_options['font-file']) {
 				$this->text_options['font-file'] = $this->font_filename($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
+			}
+			if ('.' === dirname($this->text_options['font-file'])) { // just a name
+				$this->text_options['font-file'] = self::storage() .'/'. $this->text_options['font-file'];
+				if (!is_file($this->text_options['font-file']) && is_file($this->text_options['font-file'] .'.ttf')) {
+					$this->text_options['font-file'] .= '.ttf';
+				}
+				// revert back to just a filename for backward compatibility
+				$this->text_options['font-file'] = basename($this->text_options['font-file']);
 			}
 
 			// we need a TTF
@@ -672,10 +681,10 @@ class Plugin
 		return $font_family;
 	}
 
-	private function storage()
+	public function storage()
 	{
 		$dir = wp_upload_dir();
-		$dir = $dir['basedir'] . '/og-images';
+		$dir = $dir['basedir'] . '/' . Plugin::STORAGE;
 		if (!is_dir($dir)) {
 			mkdir($dir);
 		}

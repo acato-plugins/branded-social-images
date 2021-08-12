@@ -88,12 +88,13 @@
 .add-slider {
   input {
     display: inline-block !important;
-    width: auto !important;
+    width: 60px !important;
   }
 
   .a-slider {
     display: inline-block;
-    width: 400px;
+    width: 350px;
+    width: calc( 100% - 66px );
   }
 }
 
@@ -128,22 +129,36 @@
 
 // native interface
 #branded-social-images-editor {
-
   display: grid;
   grid-template-columns: 1200px 1fr;
   grid-template-areas: "image options" "image settings";
+  @media screen and (max-width: 1920px) {
+    grid-template-columns: 600px 600px;
+    grid-template-areas: "image image" "options settings";
+  }
   z-index: 0;
 
-  .area--background {
+  @media screen and (max-width: 1700px) {
+    grid-template-columns: 600px;
+    .area--text, .area--background-alternate, .area--background, .area--background-canvas, .area--logo {
+      zoom: 0.5;
+    }
+    grid-template-areas: "image" "options" "settings";
+  }
+
+  .area--background, .area--background-alternate, .area--background-canvas {
     width: 1200px;
     height: 0;
     padding-bottom: (630/1200)*100%;
     position: relative;
     grid-area: image;
+    z-index: 0;
+  }
+
+  .area--background-canvas {
     background-image: linear-gradient(45deg, #b0b0b0 25%, transparent 25%), linear-gradient(-45deg, #b0b0b0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #b0b0b0 75%), linear-gradient(-45deg, transparent 75%, #b0b0b0 75%);
     background-size: 20px 20px;
     background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-    z-index: 0;
   }
 
   .background {
@@ -152,17 +167,118 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: transparent no-repeat 100%/contain;
+    background: transparent no-repeat 100%/cover;
+  }
+
+  .area--logo {
+    grid-area: image;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto var(--text-width) auto;
+    grid-template-rows: auto var(--text-height) auto;
+    grid-template-areas: ". . ." ". logo ." ". . .";
+    align-items: center;
+    justify-items: center;
+    .logo {
+      grid-area: logo;
+      background: transparent no-repeat center/contain;
+      width: calc( var(--logo-scale)/100 * 1200px );
+      height: calc( var(--logo-scale)/100 * 630px );
+    }
+  }
+
+
+  &.logo_position-top-left, &.logo_position-left, &.logo_position-bottom-left {
+    .area--logo {
+      grid-template-columns: var(--padding) var(--text-width) auto;
+      justify-items: start;
+      .logo {
+        background-position-x: left;
+      }
+    }
+  }
+
+  &.logo_position-top-right, &.logo_position-right, &.logo_position-bottom-right {
+    .area--logo {
+      grid-template-columns: auto var(--text-width) var(--padding);
+      justify-items: end;
+      .logo {
+        background-position-x: right;
+      }
+    }
+  }
+
+  &.logo_position-top-left, &.logo_position-top, &.logo_position-top-right {
+    .area--logo {
+      grid-template-rows: var(--padding) var(--text-height) auto;
+      align-items: start;
+      .logo {
+        background-position-y: top;
+      }
+    }
+  }
+
+  &.logo_position-bottom-left, &.logo_position-bottom, &.logo_position-bottom-right {
+    .area--logo {
+      grid-template-rows: auto var(--text-height) var(--padding);
+      align-items: end;
+      .logo {
+        background-position-y: bottom;
+      }
+    }
   }
 
   .area--text {
     grid-area: image;
-    z-index: 1;
+    z-index: 2;
     display: grid;
-    grid-template-columns: var(--padding) 1200px*.7 auto;
-    grid-template-rows: var(--padding) 630px*.7 auto;
+    grid-template-columns: auto var(--text-width) auto;
+    grid-template-rows: auto var(--text-height) auto;
     grid-template-areas: ". . ." ". edit ." ". . .";
+    align-items: center;
 
+    .editable-container {
+      text-align: center;
+    }
+
+  }
+
+  &.text_position-top-left, &.text_position-left, &.text_position-bottom-left {
+    .area--text {
+      grid-template-columns: var(--padding) var(--text-width) auto;
+
+      .editable-container {
+        text-align: left;
+      }
+    }
+  }
+
+  &.text_position-top-right, &.text_position-right, &.text_position-bottom-right {
+    .area--text {
+      grid-template-columns: auto var(--text-width) var(--padding);
+
+      .editable-container {
+        text-align: right;
+      }
+    }
+  }
+
+  &.text_position-top-left, &.text_position-top, &.text_position-top-right {
+    .area--text {
+      grid-template-rows: var(--padding) var(--text-height) auto;
+      align-items: start;
+
+    }
+  }
+
+  &.text_position-bottom-left, &.text_position-bottom, &.text_position-bottom-right {
+    .area--text {
+      grid-template-rows: auto var(--text-height) var(--padding);
+      align-items: end;
+    }
+  }
+
+  .area--text {
     .editable-container {
       grid-area: edit;
 
@@ -175,10 +291,13 @@
         color: var(--text-color);
         background: var(--text-background);
         display: inline-block;
-        font-size: var(--font-size);
-        line-height: var(--line-height);
+        font-size: calc( var(--font-size) / .75 );
+        line-height: calc( var(--line-height) / .75 );
         padding: var(--text-padding);
         text-shadow: var(--text-shadow-left) var(--text-shadow-top) 0 var(--text-shadow-color);
+        font-family: var(--text-font);
+        font-weight: normal;
+        font-style: normal;
       }
     }
   }
@@ -192,8 +311,8 @@
     grid-area: settings;
   }
 
-  .hidden {
-    display: block;
+  .hidden, .wrap-hidden {
+    display: none !important;
   }
 
   .wrap-position-grid {
@@ -226,12 +345,15 @@
         border-top: 0;
         border-left: 0;
       }
+
       &:nth-child(n+7) label {
         border-bottom: 0;
       }
+
       &:nth-child(3n) label {
         border-right: 0;
       }
+
       input:checked + label {
         background: black;
       }
@@ -254,4 +376,35 @@
       }
     }
   }
+
+  .no-remove ~ .remove {
+    display: none;
+  }
+
+  .image-preview-wrapper {
+    display: none;
+  }
+
+  .input-wrap {
+    box-sizing: border-box;
+    padding: 10px;
+    display: inline-block;
+    width: 50%;
+    > label:first-child {
+      display: block;
+      font-weight: bold;
+    }
+    textarea, input[type=text] {
+      width: 100%;
+    }
+  }
+
+  .filename + .message {
+    display: block;
+  }
+
+  .filename:empty + .message {
+    display: none;
+  }
+
 }
