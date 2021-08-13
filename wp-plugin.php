@@ -5,7 +5,7 @@
  * Plugin URI: https://clearsite.nl/plugin/branded-social-images
  * Author: Internetbureau Clearsite, Remon Pel, Merlijn Ackerstaff, Gijs van Arem
  * Author URI: https://www.clearsite.nl
- * Version: 0.0.1
+ * Version: 0.0.2
  * License: GPL2
  */
 
