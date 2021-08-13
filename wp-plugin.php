@@ -7,8 +7,6 @@
  * Author URI: https://www.clearsite.nl
  * Version: 0.0.1
  * License: GPL2
- * Text Domain: cls-og-image
- * Domain Path: lang/
  */
 
 namespace Clearsite\Plugins\OGImage;
