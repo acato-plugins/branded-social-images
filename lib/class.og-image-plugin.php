@@ -7,7 +7,7 @@ class Plugin
 	const FEATURE_STROKE = 'off';
 	const FEATURE_SHADOW = 'simple';
 	const PADDING = 40;
-	const AA=2;
+	const AA = 2;
 	const STORAGE = 'bsi-uploads';
 	const IMAGE_SIZE_NAME = 'og-image';
 
@@ -28,7 +28,7 @@ class Plugin
 		});
 
 		// phase 1; add the endpoints
-		add_action('wp', function() {
+		add_action('wp', function () {
 			$this->setup_defaults();
 
 			$this->text_options['position'] = get_option(Admin::DEFAULTS_PREFIX . 'text_position', 'top-left');
@@ -97,13 +97,13 @@ class Plugin
 			$this->expand_logo_options();
 		});
 
-		add_action('init', function(){
+		add_action('init', function () {
 			add_rewrite_endpoint(Admin::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
 			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
-			add_image_size(Plugin::IMAGE_SIZE_NAME .'@'. Plugin::AA .'x', $this->width * Plugin::AA, $this->height * Plugin::AA, true);
+			add_image_size(Plugin::IMAGE_SIZE_NAME . '@' . Plugin::AA . 'x', $this->width * Plugin::AA, $this->height * Plugin::AA, true);
 		});
 
-		add_action('admin_init', function() {
+		add_action('admin_init', function () {
 			$font_file = get_option(Admin::DEFAULTS_PREFIX . 'text__font');
 			if (preg_match('/google:(.+)/', $font_file, $m)) {
 				$defaults = $this->default_options();
@@ -123,7 +123,7 @@ class Plugin
 		add_filter('rewrite_rules_array', function ($rules) {
 			$new_rules = [];
 			foreach ($rules as $source => $target) {
-				if (preg_match('/'. strtr(Admin::BSI_IMAGE_NAME, [ '.' => '\\.', '-' => '\\-' ]) .'/', $source)) {
+				if (preg_match('/' . strtr(Admin::BSI_IMAGE_NAME, ['.' => '\\.', '-' => '\\-']) . '/', $source)) {
 					$source = explode(Admin::BSI_IMAGE_NAME, $source);
 					$source = $source[0] . Admin::BSI_IMAGE_NAME . '/?$';
 
@@ -191,7 +191,7 @@ class Plugin
 						$this->text_options['text-shadow-left'] = 2;
 					}
 					if (!empty($_GET['text'])) {
-						add_filter('bsi_text', function($text) {
+						add_filter('bsi_text', function ($text) {
 							return stripslashes_deep(urldecode($_GET['text']));
 						}, PHP_INT_MAX);
 					}
@@ -234,12 +234,13 @@ class Plugin
 			}
 		}, PHP_INT_MAX);
 
-		add_action('admin_init', function() {
+		add_action('admin_init', function () {
 			$this->setup_defaults();
 		});
 	}
 
-	public function setup_defaults() {
+	public function setup_defaults()
+	{
 		// thi sis currently THE size for OG images.
 		$defaults = $this->default_options();
 		$this->logo_options = $defaults['logo_options'];
@@ -263,7 +264,7 @@ class Plugin
 		if ('simple' === Plugin::FEATURE_SHADOW) {
 			$enabled = get_option(Admin::DEFAULTS_PREFIX . 'text_shadow_enabled', 'off');
 			$enabled = 'off' === $enabled ? false : $enabled;
-			$this->text_options['text-shadow-color'] = $enabled?'#555555DD':'#00000000';
+			$this->text_options['text-shadow-color'] = $enabled ? '#555555DD' : '#00000000';
 			$this->text_options['text-shadow-left'] = -2;
 			$this->text_options['text-shadow-top'] = 2;
 		}
@@ -379,8 +380,8 @@ class Plugin
 				$this->text_options['font-file'] = $this->font_filename($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
 			}
 			if ('.' === dirname($this->text_options['font-file'])) { // just a name
-				$this->text_options['font-file'] = self::storage() .'/'. $this->text_options['font-file'];
-				if (!is_file($this->text_options['font-file']) && is_file($this->text_options['font-file'] .'.ttf')) {
+				$this->text_options['font-file'] = self::storage() . '/' . $this->text_options['font-file'];
+				if (!is_file($this->text_options['font-file']) && is_file($this->text_options['font-file'] . '.ttf')) {
 					$this->text_options['font-file'] .= '.ttf';
 				}
 				// revert back to just a filename for backward compatibility
@@ -402,33 +403,37 @@ class Plugin
 		$bottom = &$this->text_options['bottom'];
 		$left = &$this->text_options['left'];
 
-		$top = 'null' === $top || (empty($top) && 0 !== $top && '0' !== $top) ? null : $top;
-		$right = 'null' === $right || (empty($right) && 0 !== $right && '0' !== $right) ? null : $right;
-		$bottom = 'null' === $bottom || (empty($bottom) && 0 !== $bottom && '0' !== $bottom) ? null : $bottom;
-		$left = 'null' === $left || (empty($left) && 0 !== $left && '0' !== $left) ? null : $left;
+		$top = empty($top) || 'null' === $top ? null : $top;
+		$right = empty($right) || 'null' === $right ? null : $right;
+		$bottom = empty($bottom) || 'null' === $bottom ? null : $bottom;
+		$left = empty($left) || 'null' === $left ? null : $left;
 
 		$this->evaluate_vertical($top, $bottom);
 		$this->evaluate_horizontal($left, $right);
 
 		if (null !== $top && null !== $bottom) {
 			$valign = 'center';
-		} elseif (null !== $top) {
+		}
+		elseif (null !== $top) {
 			$valign = 'top';
-		} else {
+		}
+		else {
 			$valign = 'bottom';
 		}
 		if (null !== $left && null !== $right) {
 			$halign = 'center';
-		} elseif (null !== $left) {
+		}
+		elseif (null !== $left) {
 			$halign = 'left';
-		} else {
+		}
+		else {
 			$halign = 'right';
 		}
 		$this->text_options['valign'] = $valign;
 		$this->text_options['halign'] = $halign;
 
 		$shadow_type = 'open';
-		foreach (['left','top'] as $dir) {
+		foreach (['left', 'top'] as $dir) {
 			if (preg_match('/[0-9]+S/', $this->text_options['text-shadow-' . $dir])) {
 				$shadow_type = 'solid';
 			}
@@ -486,13 +491,14 @@ class Plugin
 		if (is_numeric($this->logo_options['file'])) {
 			$this->logo_options['file'] = get_attached_file($this->logo_options['file']);
 		}
-		list($sw, $sh) = is_file($this->logo_options['file']) ? getimagesize($this->logo_options['file']) : [0,0];
+		list($sw, $sh) = is_file($this->logo_options['file']) ? getimagesize($this->logo_options['file']) : [0, 0];
 		if ($sw && $sh) {
 			$sa = $sw / $sh;
 			$this->logo_options['source_width'] = $sw;
 			$this->logo_options['source_height'] = $sh;
 			$this->logo_options['source_aspectratio'] = $sa;
-		} else {
+		}
+		else {
 			// not an image
 			$this->logo_options['file'] = false;
 			$this->logo_options['error'] = 'Not an image';
@@ -506,26 +512,30 @@ class Plugin
 		$bottom = &$this->logo_options['bottom'];
 		$left = &$this->logo_options['left'];
 
-		$top = 'null' === $top || (empty($top) && 0 !== $top && '0' !== $top) ? null : $top;
-		$right = 'null' === $right || (empty($right) && 0 !== $right && '0' !== $right) ? null : $right;
-		$bottom = 'null' === $bottom || (empty($bottom) && 0 !== $bottom && '0' !== $bottom) ? null : $bottom;
-		$left = 'null' === $left || (empty($left) && 0 !== $left && '0' !== $left) ? null : $left;
+		$top = empty($top) || 'null' === $top ? null : $top;
+		$right = empty($right) || 'null' === $right ? null : $right;
+		$bottom = empty($bottom) || 'null' === $bottom ? null : $bottom;
+		$left = empty($left) || 'null' === $left ? null : $left;
 
 		$this->evaluate_vertical($top, $bottom);
 		$this->evaluate_horizontal($left, $right);
 
 		if (null !== $top && null !== $bottom) {
 			$valign = 'center';
-		} elseif (null !== $top) {
+		}
+		elseif (null !== $top) {
 			$valign = 'top';
-		} else {
+		}
+		else {
 			$valign = 'bottom';
 		}
 		if (null !== $left && null !== $right) {
 			$halign = 'center';
-		} elseif (null !== $left) {
+		}
+		elseif (null !== $left) {
 			$halign = 'left';
-		} else {
+		}
+		else {
 			$halign = 'right';
 		}
 		$this->logo_options['valign'] = $valign;
@@ -543,14 +553,16 @@ class Plugin
 			$this->logo_options['w'] = $this->logo_options['size'] / 100 * $this->width;
 			$this->logo_options['h'] = $this->logo_options['size'] / 100 * $this->height;
 			$this->logo_options['size'] .= '%';
-		} elseif (preg_match('/([0-9]+)x([0-9]+)/', $this->logo_options['size'], $m)) {
+		}
+		elseif (preg_match('/([0-9]+)x([0-9]+)/', $this->logo_options['size'], $m)) {
 			$w = $m[1];
 			$w = min($this->width, $w);
 			$this->logo_options['w'] = max(0, $w); // stupid to set 0, but could mean "auto"
 			$h = $m[2];
 			$h = min($this->height, $h);
 			$this->logo_options['h'] = max(0, $h); // stupid to set 0, but could mean "auto"
-		} else { // assume a pixel width
+		}
+		else { // assume a pixel width
 			$w = intval($this->logo_options['size']);
 			$w = min($this->width, $w);
 			$this->logo_options['w'] = max(0, $w); // stupid to set 0, but could mean "auto"
@@ -610,7 +622,8 @@ class Plugin
 		if (!intval($weight)) {
 			if (isset($translate[strtolower($weight)])) {
 				$weight = $translate[strtolower($weight)];
-			} else {
+			}
+			else {
 				$weight = $default;
 			}
 		}
@@ -671,7 +684,8 @@ class Plugin
 				$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
 				$this->file_put_contents($this->storage() . '/' . $font_filename, $font_ttf);
 				return $font_filename;
-			} else {
+			}
+			else {
 				self::setError('font-family', __('This Google Fonts does not offer a TTF file. Sorry, cannot continue at this time.', 'clsogimg'));
 				return false;
 			}
@@ -721,9 +735,11 @@ class Plugin
 			$rgba_color[3] = max(0, $rgba_color[3]); // minimum value = 0
 			$rgba_color[3] = min(255, $rgba_color[3]); // maximum value = 255
 		}
-		$hex_values = array_map(function($in) { return sprintf("%02s", dechex($in)); }, $rgba_color);
+		$hex_values = array_map(function ($in) {
+			return sprintf("%02s", dechex($in));
+		}, $rgba_color);
 
-		return '#' . strtoupper( substr(implode('', $hex_values), 0, 8) );
+		return '#' . strtoupper(substr(implode('', $hex_values), 0, 8));
 	}
 
 	public function file_put_contents($filename, $content)
@@ -764,12 +780,16 @@ class Plugin
 		}
 	}
 
-
+	/**
+	 * @return bool
+	 * @uses exec to execute system command. this might not be supported.
+	 * @see  file php.ini. disable_functions = "show_source,system, shell_exec,exec" <- remove exec
+	 */
 	public static function maybe_fake_support_webp(): bool
 	{
 		$support = false;
 
-		$bin = dirname(__DIR__) .'/bin';
+		$bin = dirname(__DIR__) . '/bin';
 		// not downloaded yet
 		if (!file_exists("$bin/dwebp")) {
 			// can we fake support?
@@ -794,6 +814,12 @@ class Plugin
 		return $support;
 	}
 
+	/**
+	 * @param $source
+	 * @return mixed|string
+	 * @uses exec to execute system command. this might not be supported.
+	 * @see  file php.ini. disable_functions = "show_source,system, shell_exec,exec" <- remove exec
+	 */
 	public static function convert_webp_to_png($source)
 	{
 		$support = self::maybe_fake_support_webp(); // just in case
@@ -806,8 +832,7 @@ class Plugin
 			try {
 				print $command;
 				exec($command);
-			}
-			catch(\Exception $e) {
+			} catch (\Exception $e) {
 
 			}
 			$log = ob_get_clean();

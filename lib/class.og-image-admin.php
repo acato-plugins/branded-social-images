@@ -2,19 +2,15 @@
 
 namespace Clearsite\Plugins\OGImage;
 
-use Carbon_Fields\Carbon_Fields;
-use Carbon_Fields\Container;
-use Carbon_Fields\Field;
 use Clearsite\Tools\HTML_Inputs;
 use RankMath;
-use const Carbon_Fields\PLUGIN_FILE;
 
-class Admin_Native
+// supported but not required. question is, do we need it? RankMath uses the Featured Image... todo: investigate
+
+class Admin
 {
 	const OPTION_PREFIX = '_bsi_';
 	const DEFAULTS_PREFIX = '_bsi_default_';
-	const CF_OPTION_PREFIX = 'bsi_';
-	const CF_DEFAULTS_PREFIX = 'bsi_default_';
 	const SCRIPT_STYLE_HANDLE = 'bsi';
 	const BSI_IMAGE_NAME = 'social-image.png';
 	const ICON = 'clearsite-logo.svg';
@@ -22,6 +18,50 @@ class Admin_Native
 	const DO_NOT_RENDER = 'do_not_render';
 
 	public $storage = '';
+
+	public function __construct()
+	{
+		add_filter('wp_check_filetype_and_ext', function ($result, $file, $filename, $mimes, $realmime) {
+			if (substr(strtolower($filename), -4, 4) == '.ttf') {
+				$result['ext'] = 'ttf';
+				$result['type'] = 'font/ttf';
+				$result['proper_filename'] = $filename;
+			}
+			return $result;
+		}, 11, 5);
+
+		add_filter('upload_mimes', function ($existing_mimes) {
+			$existing_mimes['ttf'] = 'font/ttf';
+			return $existing_mimes;
+		});
+
+		add_action('admin_head', [static::class, 'maybe_move_font']);
+		add_action('admin_head', [static::class, 'add_fontface_definitions']);
+		add_action('admin_init', [static::class, 'process_post'], 11);
+		add_action('admin_enqueue_scripts', function () {
+			wp_register_script('vanilla-picker', plugins_url('admin/vanilla-picker.js', __DIR__), [], filemtime(dirname(__DIR__) . '/admin/vanilla-picker.js'), true);
+			wp_enqueue_script(self::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.js', __DIR__), ['jquery', 'jquery-ui-slider', 'vanilla-picker'], filemtime(dirname(__DIR__) . '/admin/admin.js'), true);
+			wp_localize_script(self::SCRIPT_STYLE_HANDLE, 'bsi_settings', ['preview_url' => get_permalink() . self::BSI_IMAGE_NAME]);
+
+			wp_enqueue_style(self::SCRIPT_STYLE_HANDLE, plugins_url('css/admin.css', __DIR__), '', filemtime(dirname(__DIR__) . '/css/admin.css'), 'all');
+		});
+
+		add_action('admin_menu', function () {
+			add_menu_page('Branded Social Images', 'Branded Social Images', 'edit_posts', self::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
+		});
+
+		add_action('admin_init', [static::class, 'sanitize_fonts']);
+
+		add_filter('image_size_names_choose', function ($default_sizes) {
+			return array_merge($default_sizes, array(
+				Plugin::IMAGE_SIZE_NAME => __('The OG-Image recommended size'),
+			));
+		});
+
+		add_action('save_post', [static::class, 'save_meta_data']);
+		add_action('add_meta_boxes', [static::class, 'add_meta_boxes']);
+		add_action('admin_notices', [static::class, 'admin_notices']);
+	}
 
 	public static function admin_icon(): string
 	{
@@ -55,6 +95,46 @@ class Admin_Native
 		return static::ICON;
 	}
 
+	public static function base_settings(): array
+	{
+		$defaults = [];
+		$defaults['text_options'] = [ // colors are RGBA in hex format
+			'enabled' => 'on',
+			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
+			'font-size' => '32', 'color' => '#ffffffff', 'line-height' => '40',
+			'font-file' => '',
+			'font-family' => '',
+			'font-weight' => 400,
+			'font-style' => 'normal',
+			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
+			'padding' => '10', // background padding
+			'background-color' => '#66666666',
+			'text-shadow-color' => '',
+			'text-shadow-left' => '2',
+			'text-shadow-top' => '-2',
+			'text-shadow-enabled' => 'off',
+			'text-stroke-color' => '',
+			'text-stroke' => '2',
+		];
+		$defaults['logo_options'] = [
+			'enabled' => 'on',
+			'position' => 'bottom-right',
+			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
+			'size' => get_option(self::OPTION_PREFIX . 'image_logo_size', '20%'),
+		];
+
+		// more freemium options to consider;
+		/**
+		 * stroke on text-shadow
+		 * rotation on text
+		 * independant rotation of shadow
+		 * skew?
+		 *
+		 */
+
+		return $defaults;
+	}
+
 	public static function getInstance()
 	{
 		static $instance;
@@ -65,35 +145,33 @@ class Admin_Native
 		return $instance;
 	}
 
-	private static function get_font_list(): array
+	public static function admin_panel()
 	{
-		$fonts = self::valid_fonts();
-		$options = [];
-
-		foreach ($fonts as $font_base => $_) {
-			if (!$_['valid']) {
-				continue;
+		$fields = self::field_list()['admin'];
+		?>
+		<div class="wrap">
+			<h2>Branded Social Images</h2>
+			<?php
+			$errors = self::getErrors();
+			foreach ($errors as $error) {
+				?>
+				<div class="updated error"><p><?php print $error; ?></p></div><?php
 			}
-			$font_name = $_['name'];
-			$options[$font_base] = $font_name;
-		}
+			?>
+			<div>
+				<form method="POST" action="<?php print esc_attr(add_query_arg('bsi-defaults', '1')); ?>">
+					<?php self::show_editor($fields); ?>
+					<br/>
+					<br/>
+					<button class="action button-primary"><?php _e('Save settings'); ?></button>
+				</form>
+			</div>
 
-		return $options;
-	}
-
-	private static function position_grid(): array
-	{
-		return [
-			'top-left' => 'Top Left',
-			'top' => 'Top Center',
-			'top-right' => 'Top Right',
-			'left' => 'Left Middle',
-			'center' => 'Centered',
-			'right' => 'Right Middle',
-			'bottom-left' => 'Bottom Left',
-			'bottom' => 'Bottom Center',
-			'bottom-right' => 'Bottom Right',
-		];
+			<p>Branded Social Images is a free plugin by Clearsite. We are working on a full-featured Pro version,
+				please let us know what you think of this plugin and what you wish to see in the Pro version. <a
+					href="mailto:branded-social-images@clearsite.nl">Contact us here</a>.</p>
+		</div>
+		<?php
 	}
 
 	private static function field_list()
@@ -114,7 +192,8 @@ class Admin_Native
 		} // maybe RankMath?
 		elseif (class_exists(RankMath::class)) {
 			$image_comment = '<br />SEO by Rank Math has been detected. If you set-up an OG Image with Rank Math and not here, the image selected with Rank Math will be used.';
-		} elseif (!get_option(self::DEFAULTS_PREFIX . 'image')) {
+		}
+		elseif (!get_option(self::DEFAULTS_PREFIX . 'image')) {
 			$image_comment = '<br />No Fallback images have been detected. If you do not set-up an image here, no OG:Image will be available for this ' . get_post_type();
 		}
 
@@ -203,37 +282,97 @@ class Admin_Native
 		return $options;
 	}
 
-	public static function render_options($options, $filter = [])
+	private static function position_grid(): array
 	{
-		static $seen = [];
-		require_once __DIR__ . '/class.html_inputs.php';
-		if (!$filter) {
-			$filter = array_keys($options);
-		}
-
-		$filter = array_diff($filter, $seen);
-
-		foreach ($filter as $option_name) {
-			if (!empty ($options[$option_name])) {
-				$seen[] = $option_name;
-				self::render_option($option_name, $options[$option_name]);
-			}
-		}
+		return [
+			'top-left' => 'Top Left',
+			'top' => 'Top Center',
+			'top-right' => 'Top Right',
+			'left' => 'Left Middle',
+			'center' => 'Centered',
+			'right' => 'Right Middle',
+			'bottom-left' => 'Bottom Left',
+			'bottom' => 'Bottom Center',
+			'bottom-right' => 'Bottom Right',
+		];
 	}
 
-	private static function render_option($option_name, $option_atts)
+	private static function get_font_list(): array
 	{
-		if (!empty($option_atts['namespace']) && $option_atts['namespace'] == self::DO_NOT_RENDER) {
-			return;
+		$fonts = self::valid_fonts();
+		$options = [];
+
+		foreach ($fonts as $font_base => $_) {
+			if (!$_['valid']) {
+				continue;
+			}
+			$font_name = $_['name'];
+			$options[$font_base] = $font_name;
 		}
-		print '<span data-name="' . esc_attr($option_name) . '" class="input-wrap name-' . esc_attr($option_name) . ' input-' . $option_atts['type'] . (!empty($option_atts['class']) ? str_replace(' ', ' wrap-', ' ' . $option_atts['class']) : '') . '">';
-		$label = '';
-		if (!empty($option_atts['label'])) {
-			$label = $option_atts['label'];
-			unset($option_atts['label']);
+
+		return $options;
+	}
+
+	public static function valid_fonts(): array
+	{
+		$fonts = glob(self::storage() . '/*.ttf');
+		$list = [];
+		foreach ($fonts as $font) {
+			preg_match('/-w([1-9]00)(-italic)?\./', $font, $m);
+			$base = basename($font, '.ttf');
+			$list[$base] = [
+				'weight' => !empty($m[1]) ? $m[1] : 400,
+				'style' => !empty($m[2]) ? trim($m[2], '-') : 'normal',
+				'name' => self::nice_font_name($base),
+				'valid' => false, // assume error
+				'ttf' => self::storage() . '/' . $base . '.ttf',
+			];
+//			foreach (['woff2', 'woff'] as $ext) {
+//				if (is_file(self::storage() . '/' . $base . '.' . $ext)) {
+//					$list[$base][$ext] = self::storage() . '/' . $base . '.' . $ext;
+//				}
+//			}
 		}
-		HTML_Inputs::render($option_name, $option_atts, $label);
-		print '</span>';
+
+		foreach ($list as &$item) {
+			if (!empty($item['ttf'])/* && (!empty($item['woff']) || !empty($item['woff2']))*/) {
+				$item['valid'] = true;
+			}
+		}
+
+		return $list;
+	}
+
+	private static function storage($as_url = false)
+	{
+		$dir = wp_upload_dir();
+		$dir = $dir['basedir'] . '/' . Plugin::STORAGE;
+		if (!is_dir($dir)) {
+			mkdir($dir);
+		}
+		if (!is_dir($dir)) {
+			self::setError('storage', __('Could not create the storage directory in the uploads folder. In a WordPress site the uploads folder should always be writable. Please fix this. This error will disappear once the problem has been corrected.', 'clsogimg'));
+		}
+
+		if ($as_url) {
+			return str_replace(trailingslashit(ABSPATH), '/', $dir);
+		}
+
+		return $dir;
+	}
+
+	public static function nice_font_name($font)
+	{
+		// w400 to normal, w700 to bold etc
+		list($name, $_) = explode('-w', $font . '-w400', 2);
+		return $name;
+	}
+
+	public static function getErrors()
+	{
+		$errors = get_option(Admin::DEFAULTS_PREFIX . '_admin_errors', []);
+		update_option(Admin::DEFAULTS_PREFIX . '_admin_errors', []);
+		return $errors;
 	}
 
 	public static function show_editor($fields)
@@ -278,7 +417,8 @@ class Admin_Native
 			}
 
 		</style>
-		<div id="branded-social-images-editor" data-use-thumbnail="<?php print self::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
+		<div id="branded-social-images-editor"
+			 data-use-thumbnail="<?php print self::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
 			<div class="area--background-canvas"></div>
 			<?php foreach (self::image_fallback_chain() as $kind => $fallback_image) { ?>
 				<div class="area--background-alternate image-source-<?php print $kind; ?>">
@@ -317,33 +457,100 @@ class Admin_Native
 		<?php
 	}
 
-	public static function admin_panel()
+	public static function render_options($options, $filter = [])
 	{
-		$fields = self::field_list()['admin'];
-		?>
-		<div class="wrap">
-			<h2>Branded Social Images</h2>
-			<?php
-			$errors = self::getErrors();
-			foreach ($errors as $error) {
-				?>
-				<div class="updated error"><p><?php print $error; ?></p></div><?php
-			}
-			?>
-			<div>
-				<form method="POST" action="<?php print esc_attr(add_query_arg('bsi-defaults', '1')); ?>">
-					<?php self::show_editor($fields); ?>
-					<br/>
-					<br/>
-					<button class="action button-primary"><?php _e('Save settings'); ?></button>
-				</form>
-			</div>
+		static $seen = [];
+		require_once __DIR__ . '/class.html_inputs.php';
+		if (!$filter) {
+			$filter = array_keys($options);
+		}
 
-			<p>Branded Social Images is a free plugin by Clearsite. We are working on a full-featured Pro version,
-				please let us know what you think of this plugin and what you wish to see in the Pro version. <a
-					href="mailto:branded-social-images@clearsite.nl">Contact us here</a>.</p>
-		</div>
-		<?php
+		$filter = array_diff($filter, $seen);
+
+		foreach ($filter as $option_name) {
+			if (!empty ($options[$option_name])) {
+				$seen[] = $option_name;
+				self::render_option($option_name, $options[$option_name]);
+			}
+		}
+	}
+
+	private static function render_option($option_name, $option_atts)
+	{
+		if (!empty($option_atts['namespace']) && $option_atts['namespace'] == self::DO_NOT_RENDER) {
+			return;
+		}
+		print '<span data-name="' . esc_attr($option_name) . '" class="input-wrap name-' . esc_attr($option_name) . ' input-' . $option_atts['type'] . (!empty($option_atts['class']) ? str_replace(' ', ' wrap-', ' ' . $option_atts['class']) : '') . '">';
+		$label = '';
+		if (!empty($option_atts['label'])) {
+			$label = $option_atts['label'];
+			unset($option_atts['label']);
+		}
+		HTML_Inputs::render($option_name, $option_atts, $label);
+		print '</span>';
+	}
+
+	public static function hex_to_rgba($hex, $asRGBA = false)
+	{
+		$hex = str_replace('#', '', $hex);
+		if (!$hex) {
+			$hex = '0000';
+		}
+		if (strlen($hex) <= 4) {
+			$hex = str_split($hex . 'F');
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2] . $hex[3] . $hex[3];
+		}
+		$hex = substr($hex . 'FF', 0, 8);
+
+		$int = hexdec($hex);
+		$red = ($int >> 24) & 255;
+		$green = ($int >> 16) & 255;
+		$blue = ($int >> 8) & 255;
+		$alpha = floatval($int & 255) / 255;
+
+		return $asRGBA ? sprintf('rgba(%d, %d, %d, %0.1f)', $red, $green, $blue, $alpha) : array(
+			'red' => $red,
+			'green' => $green,
+			'blue' => $blue,
+			'alpha' => $alpha,
+		);
+	}
+
+	private static function image_fallback_chain()
+	{
+		if (!get_the_ID()) {
+			return [];
+		}
+
+		// layers are stacked in order, bottom first
+		$layers = [];
+		// layer 1: the configured default
+		$settings = self::field_list()['admin'];
+		$layers['settings'] = $settings['image']['current_value'];
+		// layer 2, if enabled, the thumbnail/featured
+		if ('on' === $settings['image_use_thumbnail']['current_value']) {
+			$layers['thumbnail'] = get_post_thumbnail_id(get_the_ID());
+		}
+		// layer 3, if available, social plugins
+
+		// maybe Yoast SEO?
+		if (defined('WPSEO_VERSION')) {
+			$layers['yoast'] = get_post_meta(get_the_ID(), '_yoast_wpseo_opengraph-image-id', true);
+		}
+
+		// maybe RankMath? // latest rank math uses thumbnail ?????
+		if (class_exists(RankMath::class)) {
+			$layers['rankmath'] = get_post_meta(get_the_ID(), 'rank_math_facebook_image_id', true);
+		}
+
+		foreach ($layers as &$layer) {
+			if ($layer) {
+				$image = wp_get_attachment_image_src($layer, Plugin::IMAGE_SIZE_NAME);
+				$layer = $image[0];
+			}
+		}
+
+		return $layers;
 	}
 
 	public static function add_meta_boxes()
@@ -377,68 +584,20 @@ class Admin_Native
 		$fields = self::field_list()['meta'];
 		self::show_editor($fields); ?>
 
-			<p>Branded Social Images is a free plugin by Clearsite. We are working on a full-featured Pro version,
-				please let us know what you think of this plugin and what you wish to see in the Pro version. <a
-					href="mailto:branded-social-images@clearsite.nl">Contact us here</a>.</p>
+		<p>Branded Social Images is a free plugin by Clearsite. We are working on a full-featured Pro version,
+			please let us know what you think of this plugin and what you wish to see in the Pro version. <a
+				href="mailto:branded-social-images@clearsite.nl">Contact us here</a>.</p>
 		<?php
-	}
-
-	public function __construct()
-	{
-		add_filter('wp_check_filetype_and_ext', function ($result, $file, $filename, $mimes, $realmime) {
-			if (substr(strtolower($filename), -4, 4) == '.ttf') {
-				$result['ext'] = 'ttf';
-				$result['type'] = 'font/ttf';
-				$result['proper_filename'] = $filename;
-			}
-			return $result;
-		}, 11, 5);
-
-		add_filter('upload_mimes', function ($existing_mimes) {
-			$existing_mimes['ttf'] = 'font/ttf';
-			return $existing_mimes;
-		});
-
-		add_action('admin_head', [static::class, 'maybe_move_font']);
-		add_action('admin_head', [static::class, 'add_fontface_definitions']);
-		add_action('admin_init', [static::class, 'process_post'], 11);
-		add_action('admin_enqueue_scripts', function () {
-			wp_register_script('vanilla-picker', plugins_url('admin/vanilla-picker.js', __DIR__), [], filemtime(dirname(__DIR__) . '/admin/vanilla-picker.js'), true);
-			wp_enqueue_script(self::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.js', __DIR__), ['jquery', 'jquery-ui-slider', 'vanilla-picker'], filemtime(dirname(__DIR__) . '/admin/admin.js'), true);
-			wp_localize_script(self::SCRIPT_STYLE_HANDLE, 'bsi_settings', ['preview_url' => get_permalink() . self::BSI_IMAGE_NAME]);
-
-			wp_enqueue_style(self::SCRIPT_STYLE_HANDLE, plugins_url('css/admin.css', __DIR__), '', filemtime(dirname(__DIR__) . '/css/admin.css'), 'all');
-		});
-
-		add_action('admin_menu', function () {
-			add_menu_page('Branded Social Images', 'Branded Social Images', 'edit_posts', self::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
-		});
-
-		add_action('admin_init', [static::class, 'sanitize_fonts']);
-
-		add_filter('image_size_names_choose', function ($default_sizes) {
-			return array_merge($default_sizes, array(
-				Plugin::IMAGE_SIZE_NAME => __('The OG-Image recommended size'),
-			));
-		});
-
-		add_action('save_post', [static::class, 'save_meta_data']);
-		add_action('add_meta_boxes', [static::class, 'add_meta_boxes']);
-		add_action('admin_notices', [static::class, 'admin_notices']);
 	}
 
 	public static function admin_notices()
 	{
 		$errors = self::getErrors();
 		foreach ($errors as $error) {
-			?><div class="updated error"><p><?php print $error; ?></p></div><?php
+			?>
+			<div class="updated error"><p><?php print $error; ?></p></div><?php
 		}
 
-	}
-
-	public static function default_google_fonts(): array
-	{
-		return ['Open Sans', 'Roboto', 'Montserrat', 'PT Sans', 'Merriweather', 'Oswald', 'Anton', 'Work Sans', 'Courgette', 'Josefin Sans'];
 	}
 
 	public static function add_fontface_definitions()
@@ -479,7 +638,7 @@ EOCSS;
 		foreach (self::default_google_fonts() as $font_family) {
 			foreach (['400'] as $font_weight) {
 				foreach (['normal'/*, 'italic'*/] as $font_style) {
-					foreach ([/*'woff', */'ttf'] as $extention) {
+					foreach ([/*'woff', */ 'ttf'] as $extention) {
 						$local_filename = self::google_font_filename($font_family, $font_weight, $font_style, $extention);
 						if (!is_file($storage . $local_filename)/* && !is_file($storage . $local_filename . '2' / * facking hack * /)*/) {
 							self::download_google_font($font_family, $font_weight, $font_style);
@@ -490,6 +649,102 @@ EOCSS;
 		}
 	}
 
+	public static function default_google_fonts(): array
+	{
+		return ['Open Sans', 'Roboto', 'Montserrat', 'PT Sans', 'Merriweather', 'Oswald', 'Anton', 'Work Sans', 'Courgette', 'Josefin Sans'];
+	}
+
+	public static function google_font_filename($font_family, $font_weight, $font_style, $extention = ''): string
+	{
+		$italic = $font_style == 'italic' ? 'italic' : '';
+		$font_filename = $font_family . '-w' . $font_weight . ($italic ? '-' . $italic : '');
+		if ($extention) {
+			$font_filename .= '.' . $extention;
+		}
+		return $font_filename;
+	}
+
+	public static function download_google_font($font_family, $font_weight, $font_style)
+	{
+		$font_filename = self::google_font_filename($font_family, $font_weight, $font_style);
+		$font_url = self::google_font_url($font_family, $font_weight, $font_style);
+		$font_url = str_replace(' ', '%20', $font_url);
+
+		/** @var $formats array User-Agent => file extention */
+		$formats = [' ' => '.ttf'];
+		// also get woff2? doesn't seem required as all browsers currently support rendering ttf...
+//		$formats['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36'] = '.woff';
+
+		foreach ($formats as $user_agent => $extention) {
+			$font_css = wp_remote_retrieve_body(wp_remote_get($font_url, [
+				'headers' => [
+					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', // emulate browser
+				],
+				'user-agent' => $user_agent,  // emulate browser
+				'httpversion' => '1.1',  // emulate browser
+				'referer' => site_url(),  // emulate browser
+			]));
+
+			if (!$font_css) {
+				self::setError('font-family', __('Could not download font from Google Fonts. Please download yourself and upload here.', 'clsogimg'));
+			}
+			else {
+				$font_css_parts = explode('@font-face', $font_css);
+				$font_css = '@font-face' . end($font_css_parts);
+				// use the last one, it should be latin. todo: verify; if not always latin last, build checks to actually GET latin.
+
+				if (preg_match('@https?://[^)]+' . $extention . '@', $font_css, $n)) {
+					$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
+					self::file_put_contents(self::storage() . '/' . $font_filename . $extention, $font_ttf);
+				}
+			}
+		}
+
+		return $font_family;
+	}
+
+	public static function google_font_url($font_family, $font_weight, $font_style): string
+	{
+		$italic = $font_style == 'italic' ? 'italic' : '';
+		$font_url = 'http://fonts.googleapis.com/css?family=' . $font_family . ':' . $font_weight . $italic;
+
+		return $font_url;
+	}
+
+	public static function setError($tag, $text)
+	{
+		if ('generic' == $tag) {
+			$errors = get_option(Admin::DEFAULTS_PREFIX . '_admin_errors', []);
+			$errors[] = $text;
+			$errors = array_filter($errors);
+			$errors = array_unique($errors);
+			update_option(Admin::DEFAULTS_PREFIX . '_admin_errors', $errors);
+		}
+		else {
+			$errors = get_option(Admin::DEFAULTS_PREFIX . '_errors', []);
+			$errors[$tag] = $text;
+			$errors = array_filter($errors);
+			update_option(Admin::DEFAULTS_PREFIX . '_errors', $errors);
+		}
+	}
+
+	public static function file_put_contents($filename, $content)
+	{
+		// for security reasons, $filename must be in $this->storage()
+		if (substr(trim($filename), 0, strlen(self::storage())) !== self::storage()) {
+			return false;
+		}
+		$dirs = [];
+		$dir = $filename; // we will be dirname-ing this
+
+		while (($dir = dirname($dir)) && $dir && $dir !== '.' && $dir !== self::storage() && !is_dir($dir)) {
+			array_unshift($dirs, $dir);
+		}
+
+		array_map('mkdir', $dirs);
+
+		return file_put_contents($filename, $content);
+	}
 
 	public static function maybe_move_font()
 	{
@@ -522,17 +777,7 @@ EOCSS;
 		}
 	}
 
-	private static function hex_to_hex_opacity($hex_color): array
-	{
-		if (substr($hex_color, 0, 1) !== '#') {
-			$hex_color = '#ffffffff';
-		}
-		$hex_values = str_split(substr($hex_color . 'FF', 1, 8), 6);
-
-		return [$hex_values[0], intval((hexdec($hex_values[1]) + 1) / 256 * 100)];
-	}
-
-	public static function font_weights()
+	public static function font_weights(): array
 	{
 		return [
 			'thin' => 100,
@@ -551,65 +796,6 @@ EOCSS;
 		];
 	}
 
-	private static function storage($as_url = false)
-	{
-		$dir = wp_upload_dir();
-		$dir = $dir['basedir'] . '/' . Plugin::STORAGE;
-		if (!is_dir($dir)) {
-			mkdir($dir);
-		}
-		if (!is_dir($dir)) {
-//			self::setError('storage', __('Could not create the storage directory in the uploads folder. In a WordPress site the uploads folder should always be writable. Please fix this. This error will disappear once the problem has been corrected.', 'clsogimg'));
-		}
-
-		if ($as_url) {
-			return str_replace(trailingslashit(ABSPATH), '/', $dir);
-		}
-
-		return $dir;
-	}
-
-	public static function file_put_contents($filename, $content)
-	{
-		// for security reasons, $filename must be in $this->storage()
-		if (substr(trim($filename), 0, strlen(self::storage())) !== self::storage()) {
-			return false;
-		}
-		$dirs = [];
-		$dir = $filename; // we will be dirname-ing this
-
-		while (($dir = dirname($dir)) && $dir && $dir !== '.' && $dir !== self::storage() && !is_dir($dir)) {
-			array_unshift($dirs, $dir);
-		}
-
-		array_map('mkdir', $dirs);
-
-		return file_put_contents($filename, $content);
-	}
-
-	public static function setError($tag, $text)
-	{
-		if ('generic' == $tag) {
-			$errors = get_option(Admin::DEFAULTS_PREFIX . '_admin_errors', []);
-			$errors[] = $text;
-			$errors = array_filter($errors);
-			$errors = array_unique($errors);
-			update_option(Admin::DEFAULTS_PREFIX . '_admin_errors', $errors);
-		} else {
-			$errors = get_option(Admin::DEFAULTS_PREFIX . '_errors', []);
-			$errors[$tag] = $text;
-			$errors = array_filter($errors);
-			update_option(Admin::DEFAULTS_PREFIX . '_errors', $errors);
-		}
-	}
-
-	public static function getErrors()
-	{
-		$errors = get_option(Admin::DEFAULTS_PREFIX . '_admin_errors', []);
-		update_option(Admin::DEFAULTS_PREFIX . '_admin_errors', []);
-		return $errors;
-	}
-
 	public static function getError($tag = null)
 	{
 		$errors = get_option(Admin::DEFAULTS_PREFIX . '_errors', []);
@@ -618,7 +804,8 @@ EOCSS;
 			$return = $errors[$tag];
 			unset($errors[$tag]);
 			$errors = array_filter($errors);
-		} else {
+		}
+		else {
 			$return = $errors;
 			$errors = [];
 		}
@@ -628,215 +815,13 @@ EOCSS;
 		return $return;
 	}
 
-	public static function nice_font_name($font)
+	private static function hex_to_hex_opacity($hex_color): array
 	{
-		// w400 to normal, w700 to bold etc
-		list($name, $_) = explode('-w', $font . '-w400', 2);
-		return $name;
-	}
-
-	public static function valid_fonts(): array
-	{
-		$fonts = glob(self::storage() . '/*.ttf');
-		$list = [];
-		foreach ($fonts as $font) {
-			preg_match('/-w([1-9]00)(-italic)?\./', $font, $m);
-			$base = basename($font, '.ttf');
-			$list[$base] = [
-				'weight' => !empty($m[1]) ? $m[1] : 400,
-				'style' => !empty($m[2]) ? trim($m[2], '-') : 'normal',
-				'name' => self::nice_font_name($base),
-				'valid' => false, // assume error
-				'ttf' => self::storage() . '/' . $base . '.ttf',
-			];
-//			foreach (['woff2', 'woff'] as $ext) {
-//				if (is_file(self::storage() . '/' . $base . '.' . $ext)) {
-//					$list[$base][$ext] = self::storage() . '/' . $base . '.' . $ext;
-//				}
-//			}
+		if (substr($hex_color, 0, 1) !== '#') {
+			$hex_color = '#ffffffff';
 		}
+		$hex_values = str_split(substr($hex_color . 'FF', 1, 8), 6);
 
-		foreach ($list as &$item) {
-			if (!empty($item['ttf'])/* && (!empty($item['woff']) || !empty($item['woff2']))*/) {
-				$item['valid'] = true;
-			}
-		}
-
-		return $list;
-	}
-
-	public static function google_font_filename($font_family, $font_weight, $font_style, $extention = ''): string
-	{
-		$italic = $font_style == 'italic' ? 'italic' : '';
-		$font_filename = $font_family . '-w' . $font_weight . ($italic ? '-' . $italic : '');
-		if ($extention) {
-			$font_filename .= '.' . $extention;
-		}
-		return $font_filename;
-	}
-
-	public static function google_font_url($font_family, $font_weight, $font_style): string
-	{
-		$italic = $font_style == 'italic' ? 'italic' : '';
-		$font_url = 'http://fonts.googleapis.com/css?family=' . $font_family . ':' . $font_weight . $italic;
-
-		return $font_url;
-	}
-
-	public static function download_google_font($font_family, $font_weight, $font_style)
-	{
-		$font_filename = self::google_font_filename($font_family, $font_weight, $font_style);
-		$font_url = self::google_font_url($font_family, $font_weight, $font_style);
-		$font_url = str_replace(' ', '%20', $font_url);
-//		var_dump ($_SERVER['HTTP_USER_AGENT']);exit;
-//		file_put_contents(self::storage() .'/download.log', date('r') ."\n", FILE_APPEND);
-
-		foreach ([
-			' ' => '.ttf',
-//			 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36' => '.woff',
-		] as $user_agent => $extention) {
-			$font_css = wp_remote_retrieve_body(wp_remote_get($font_url, [
-				'headers' => [
-					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-				],
-				'user-agent' => $user_agent,
-				'httpversion' => '1.1',
-				'referer' => site_url()
-			]));
-//			file_put_contents(self::storage() .'/download.log', $font_url ."\n", FILE_APPEND);
-//			file_put_contents(self::storage() .'/download.log', $user_agent ."\n$extention\n", FILE_APPEND);
-			if (!$font_css) {
-				self::setError('font-family', __('Could not download font from Google Fonts. Please download yourself and upload here.', 'clsogimg'));
-			} else {
-				// count?
-				$count = explode('@font-face', $font_css);
-				if ($count == 1) {
-					// should not happen, it should be 2, but just use as is.
-				} else {
-					$font_css = '@font-face' . end($count); // use the last one, it should be latin.
-				}
-//			file_put_contents(self::storage() .'/download.log', $font_css ."\n", FILE_APPEND);
-
-//				if (preg_match('@https?://[^)]+' . $extention . '2@', $font_css, $n)) { /* we want woff2, but if missing, then use woff */
-////					file_put_contents(self::storage() .'/download.log', $n[0] . '->' . self::storage() . '/' . $font_filename . $extention ."2\n", FILE_APPEND);
-//					$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
-//					self::file_put_contents(self::storage() . '/' . $font_filename . $extention . '2', $font_ttf);
-//				} else
-				if (preg_match('@https?://[^)]+' . $extention . '@', $font_css, $n)) {
-//					file_put_contents(self::storage() .'/download.log', $n[0] . '->' . self::storage() . '/' . $font_filename . $extention ."2\n", FILE_APPEND);
-					$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
-					self::file_put_contents(self::storage() . '/' . $font_filename . $extention, $font_ttf);
-				}
-			}
-		}
-
-		// don't know what to do with any other
-		return $font_family;
-	}
-
-	private static function image_fallback_chain()
-	{
-		if (!get_the_ID()) {
-			return [];
-		}
-
-		// layers are stacked in order, bottom first
-		$layers = [];
-		// layer 1: the configured default
-		$settings = self::field_list()['admin'];
-		$layers['settings'] = $settings['image']['current_value'];
-		// layer 2, if enabled, the thumbnail/featured
-		if ('on' ===  $settings['image_use_thumbnail']['current_value']) {
-			$layers['thumbnail'] = get_post_thumbnail_id(get_the_ID());
-		}
-		// layer 3, if available, social plugins
-
-		// maybe Yoast SEO?
-		if (defined('WPSEO_VERSION')) {
-			$layers['yoast'] = get_post_meta(get_the_ID(), '_yoast_wpseo_opengraph-image-id', true);
-		}
-
-		// maybe RankMath? // latest rank math uses thumbnail ?????
-		if (class_exists(RankMath::class)) {
-			$layers['rankmath'] = get_post_meta(get_the_ID(), 'rank_math_facebook_image_id', true);
-		}
-
-		foreach ($layers as &$layer) {
-			if ($layer) {
-				$image = wp_get_attachment_image_src($layer, Plugin::IMAGE_SIZE_NAME);
-				$layer = $image[0];
-			}
-		}
-
-		return $layers;
-	}
-}
-
-class Admin extends Admin_Native
-{
-	public static function base_settings(): array
-	{
-		$defaults = [];
-		$defaults['text_options'] = [ // colors are RGBA in hex format
-			'enabled' => 'on',
-			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'font-size' => '32', 'color' => '#ffffffff', 'line-height' => '40',
-			'font-file' => '',
-			'font-family' => '',
-			'font-weight' => 400,
-			'font-style' => 'normal',
-			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
-			'padding' => '10', // background padding
-			'background-color' => '#66666666',
-			'text-shadow-color' => '',
-			'text-shadow-left' => '2',
-			'text-shadow-top' => '-2',
-			'text-shadow-enabled' => 'off',
-			'text-stroke-color' => '',
-			'text-stroke' => '2',
-		];
-		$defaults['logo_options'] = [
-			'enabled' => 'on',
-			'position' => 'bottom-right',
-			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'size' => get_option(self::OPTION_PREFIX . 'image_logo_size', '20%'),
-		];
-
-		// more freemium options to consider;
-		/**
-		 * stroke on text-shadow
-		 * rotation on text
-		 * independant rotation of shadow
-		 * skew?
-		 *
-		 */
-
-		return $defaults;
-	}
-
-	public static function hex_to_rgba($hex, $asRGBA = false)
-	{
-		$hex = str_replace('#', '', $hex);
-		if (!$hex) {
-			$hex = '0000';
-		}
-		if (strlen($hex) <= 4) {
-			$hex = str_split($hex . 'F');
-			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2] . $hex[3] . $hex[3];
-		}
-		$hex = substr($hex . 'FF', 0, 8);
-
-		$int = hexdec($hex);
-		$red = ($int >> 24) & 255;
-		$green = ($int >> 16) & 255;
-		$blue = ($int >> 8) & 255;
-		$alpha = floatval($int & 255) / 255;
-
-		return $asRGBA ? sprintf('rgba(%d, %d, %d, %0.1f)', $red, $green, $blue, $alpha) : array(
-			'red' => $red,
-			'green' => $green,
-			'blue' => $blue,
-			'alpha' => $alpha,
-		);
+		return [$hex_values[0], intval((hexdec($hex_values[1]) + 1) / 256 * 100)];
 	}
 }
