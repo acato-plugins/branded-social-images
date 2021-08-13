@@ -268,7 +268,6 @@
     color: var(--text-color);
     position: relative;
     background: var(--text-background);
-    border: 1px solid red;
     display: inline-block;
     font-size: calc(var(--font-size) / .75);
     line-height: calc(var(--line-height) / .75);

@@ -329,6 +329,7 @@
       grid-area: edit;
       .editable {
         br:last-child {
+          // to allow a semi-functional line-break
           display: block;
           content: ' ';
         }
@@ -343,9 +344,6 @@
         color: var(--text-color);
         position: relative;
         background: var(--text-background);
-
-        border: 1px solid red;
-
         display: inline-block;
         font-size: calc(var(--font-size) / .75);
         line-height: calc(var(--line-height) / .75);
@@ -354,7 +352,6 @@
         font-family: var(--text-font);
         font-weight: normal;
         font-style: normal;
-        //letter-spacing: -1.5px;
       }
     }
   }
