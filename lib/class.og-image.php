@@ -192,14 +192,14 @@ class Image {
 
 	public function getTextForPost($post_id)
 	{
-		$enabled = get_post_meta($post_id, Admin::OPTION_PREFIX . 'text_enabled', true);
+		$enabled = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text_enabled', true);
 		if ('off' === $enabled) { // sorry, this was before normalisation to "on"
 			return '';
 		}
 		$text = '';
 		$type = 'none';
 
-		$meta = get_post_meta($post_id, Admin::OPTION_PREFIX . 'text', true);
+		$meta = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text', true);
 		if ($meta) {
 			$type = 'meta';
 			$text = trim($meta);
@@ -232,7 +232,7 @@ class Image {
 	private function getImageIdForPost($post_id)
 	{
 		$the_img = 'meta';
-		$image_id = get_post_meta($post_id, Admin::OPTION_PREFIX . 'image', true);
+		$image_id = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'image', true);
 
 		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION') && !$image_id) {
@@ -245,14 +245,14 @@ class Image {
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if (!$image_id && ('yes' === get_option(Admin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if (!$image_id && ('yes' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($post_id);
 		}
 		// global Image?
 		if (!$image_id) {
 			$the_img = 'global';
-			$image_id = get_option(Admin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
+			$image_id = get_option(Plugin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
 		}
 
 		if ($image_id) { // this is for LOCAL DEBUGGING ONLY

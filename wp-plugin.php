@@ -3,9 +3,9 @@
  * Plugin Name: Branded Social Images
  * Description: Spice up your OpenGraph Social Images to be meaningful.
  * Plugin URI: https://clearsite.nl/plugin/branded-social-images
- * Author: Internetbureau Clearsite, Remon Pel, Merlijn Ackerstaff, Gijs van Arem
+ * Author: Internetbureau Clearsite
  * Author URI: https://www.clearsite.nl
- * Version: 0.0.2
+ * Version: 0.0.3
  * License: GPL2
  */
 

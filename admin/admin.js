@@ -62,9 +62,12 @@ function hex_to_rgba(hex) {
 							button: {
 								text: 'Use this image',
 							},
+							library: {
+								type: wrap.data('types').split(',')
+							},
 							multiple: false // Set to true to allow multiple files to be selected
 						});
-						console.log(file_frame);
+
 						// When an image is selected, run a callback.
 						file_frame.on('select', function () {
 							// We set multiple to false so only get one image from the uploader
@@ -265,6 +268,10 @@ function hex_to_rgba(hex) {
 
 		editor.find("#text__ttf_upload").on('file:select', function (event, attachment) {
 			$(this).parent().find('.filename').html(attachment.filename);
+		});
+
+		editor.find("i.toggle-info").on('click touchend', function(){
+			$(this).toggleClass('active');
 		});
 
 		editor.find('#text__font').on('keyup blur paste input change', function () {

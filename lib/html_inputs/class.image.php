@@ -20,12 +20,14 @@ class image extends text
 			$label = '<label for="' . $this->id . '">' . $this->label . '</label>';
 			$this->atts['id'] = $this->id;
 		}
+		$types = $this->atts['types'] ?? '';
+		unset($this->atts['types']);
 
 		$this->atts['value'] = $this->get_current_value();
 		$atts = $this->attributes(); // builds HTML attributes
 
 
-		return $label . '<span class="add-image-select">
+		return $label . '<span class="add-image-select" data-types="'. $types .'">
 			<input type="' . $this->type . '" ' . $atts . '/>
 			<div class="image-preview-wrapper">
 				<img src="'. esc_attr(wp_get_attachment_url($this->get_current_value())) .'" width="200">

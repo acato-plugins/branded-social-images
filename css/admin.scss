@@ -474,7 +474,7 @@
   }
 
   .add-image-select {
-    input[value='0'] ~ .remove {
+    input[value='0'] ~ .remove, input[value=''] ~ .remove {
       display: none;
     }
   }
@@ -493,12 +493,16 @@
     }
     &.name-text_enabled .comment, &.name-text_shadow_enabled .comment { display: inline; margin-left: 1em; }
 
-    i + .comment {
-      display: none;
-    }
+    i.toggle-info {
+      cursor: help;
 
-    i.active + .comment {
-      display: block;
+      + .comment {
+        display: none;
+      }
+
+      &.active + .comment {
+        display: block;
+      }
     }
 
     > label:first-child {

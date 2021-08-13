@@ -11,6 +11,7 @@ class Input {
 	protected $id;
 	protected $label;
 	protected $comment;
+	protected $comment_icon;
 	protected $atts = [];
 	protected $content = '';
 	protected $value = null;
@@ -25,6 +26,7 @@ class Input {
 		$this->set_current_value();
 		$this->set_attribute_name();
 		$this->set_comment();
+		$this->set_comment_icon();
 	}
 
 	public function set_value()
@@ -60,6 +62,12 @@ class Input {
 	{
 		$this->comment = !empty($this->atts['comment']) ? $this->atts['comment'] : '';
 		unset($this->atts['comment']);
+	}
+
+	public function set_comment_icon()
+	{
+		$this->comment_icon = !empty($this->atts['comment-icon']) ? $this->atts['comment-icon'] : '';
+		unset($this->atts['comment-icon']);
 	}
 
 	public function set_attributes($atts)
@@ -158,6 +166,13 @@ class Input {
 	}
 
 	public function __toString() {
-		return $this->generate_html() . '<span class="comment">'. $this->comment .'</span>';
+		$comment = '';
+		if ($this->comment) {
+			$comment = '<span class="comment">'. $this->comment .'</span>';
+		}
+		if (!empty($this->comment_icon)) {
+			$comment = '<i class="toggle-info dashicons-before '. $this->comment_icon .'"></i>' . $comment;
+		}
+		return $this->generate_html() . $comment;
 	}
 }
