@@ -18,7 +18,7 @@ class Image {
 		$this->post_id = get_the_ID();
 		// hack for front-page
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-		if ('/'. Admin::BSI_IMAGE_NAME . '/' === $current_url) {
+		if ('/'. Plugin::BSI_IMAGE_NAME . '/' === $current_url) {
 			$front = get_option('page_on_front');
 			if ($front) {
 				$this->post_id = $front;
@@ -37,7 +37,7 @@ class Image {
 		}
 	}
 
-	public function getManager()
+	public function getManager(): Plugin
 	{
 		return $this->manager;
 	}
@@ -56,7 +56,7 @@ class Image {
 			// we have cache, or have created cache. In any way, we have an image :)
 			// serve-type = redirect?
 			header('Content-Type: image/png');
-			header('Content-Disposition: inline; filename='. Admin::BSI_IMAGE_NAME);
+			header('Content-Disposition: inline; filename='. Plugin::BSI_IMAGE_NAME);
 			header('Content-Length: '. filesize($image_cache['file']));
 			readfile($image_cache['file']);
 			exit;
@@ -77,8 +77,8 @@ class Image {
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Admin::BSI_IMAGE_NAME .'.lock';
-		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Admin::BSI_IMAGE_NAME;
+		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Plugin::BSI_IMAGE_NAME .'.lock';
+		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Plugin::BSI_IMAGE_NAME;
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
 			unlink($lock_file);
@@ -118,8 +118,8 @@ class Image {
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Admin::BSI_IMAGE_NAME . '.lock';
-		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Admin::BSI_IMAGE_NAME;
+		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
+		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
 
 		$source = '';
 		for ($i = Plugin::AA; $i > 1; $i--) {
@@ -192,7 +192,14 @@ class Image {
 
 	public function getTextForPost($post_id)
 	{
-		$meta = get_post_meta($post_id, '_bsi_text', true);
+		$enabled = get_post_meta($post_id, Admin::OPTION_PREFIX . 'text_enabled', true);
+		if ('off' === $enabled) { // sorry, this was before normalisation to "on"
+			return '';
+		}
+		$text = '';
+		$type = 'none';
+
+		$meta = get_post_meta($post_id, Admin::OPTION_PREFIX . 'text', true);
 		if ($meta) {
 			$type = 'meta';
 			$text = trim($meta);
@@ -213,15 +220,13 @@ class Image {
 				$type = 'scraped';
 			}
 		}
-		// default text
-		if (!$text && trim($this->manager->text_options['text'])) {
-			$type = 'default';
+
+		if (!$text) {
 			$text = $this->manager->text_options['text'];
+			$type = 'default';
 		}
 
-		$text = apply_filters('bsi_text', $text, $post_id, $this->getImageIdForPost($post_id), $type);
-
-		return $text;
+		return apply_filters('bsi_text', $text, $post_id, $this->getImageIdForPost($post_id), $type);
 	}
 
 	private function getImageIdForPost($post_id)

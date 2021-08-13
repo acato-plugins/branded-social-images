@@ -269,12 +269,21 @@ function hex_to_rgba(hex) {
 
 		editor.find('#text__font').on('keyup blur paste input change', function () {
 			editor.get(0).style.setProperty('--text-font', $(this).val());
+			editor.attr('data-font', $(this).val());
 		}).trigger('blur'); // font face is defined in *admin.php
+
+		editor.find('#text_enabled').on('change', function () {
+			$('.area--text').toggleClass('invisible', !$(this).is(':checked'));
+			if ($(this).is(':checked')) {
+				$('.editable').focus();
+			}
+		}).trigger('change'); // font face is defined in *admin.php
 
 		$('.input-color', editor).each(function () {
 			var $input = $(this).find('input');
 			new Picker({
 				parent: this,
+				popup: 'top',
 				color: $input.val(),
 				onChange: function (color) {
 					$input.val(color.hex).css('background-color', hex_to_rgba(color.hex)).trigger('blur');
@@ -288,24 +297,27 @@ function hex_to_rgba(hex) {
 		// yoast?? no events on the input, use polling
 		var external_images_maybe_changed = function(){
 			setTimeout(function(){
+				var url;
 				// yoast
-				var url = $('#facebook-url-input-metabox').val();
-				if (url) {
-					$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = 'url("' + url + '")';
-				}
-				else {
-					$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = '';
+				if ($('.area--background-alternate.image-source-yoast').length) {
+					url = $('#facebook-url-input-metabox').val();
+					if (url) {
+						$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = 'url("' + url + '")';
+					} else {
+						$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = '';
+					}
 				}
 
 				// Rank Math; latest rank math uses thumbnail ?????
 
 				// thumbnail
-				url = $('#set-post-thumbnail img').attr('src') || '';
-				if (url) {
-					$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = 'url("' + url + '")';
-				}
-				else {
-					$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = '';
+				if ($('.area--background-alternate.image-source-thumbnail').length) {
+					url = $('#set-post-thumbnail img').attr('src') || '';
+					if (url) {
+						$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = 'url("' + url + '")';
+					} else {
+						$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = '';
+					}
 				}
 
 				$('#remove-post-thumbnail').not('.b').addClass('b').on('click touchend', function() { external_images_maybe_changed(); });

@@ -32,3 +32,7 @@ add_action('plugins_loaded', function(){
 		update_option('bsi_version', 1);
 	}
 }, ~PHP_INT_MAX);
+
+/**
+ * @see https://www.cssscript.com/color-picker-alpha-selection/
+ */

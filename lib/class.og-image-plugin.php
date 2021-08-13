@@ -4,6 +4,7 @@ namespace Clearsite\Plugins\OGImage;
 
 class Plugin
 {
+	const BSI_IMAGE_NAME = 'social-image.png';
 	const FEATURE_STROKE = 'off';
 	const FEATURE_SHADOW = 'simple';
 	const PADDING = 40;
@@ -98,7 +99,7 @@ class Plugin
 		});
 
 		add_action('init', function () {
-			add_rewrite_endpoint(Admin::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
+			add_rewrite_endpoint(self::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
 			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
 			add_image_size(Plugin::IMAGE_SIZE_NAME . '@' . Plugin::AA . 'x', $this->width * Plugin::AA, $this->height * Plugin::AA, true);
 		});
@@ -123,9 +124,9 @@ class Plugin
 		add_filter('rewrite_rules_array', function ($rules) {
 			$new_rules = [];
 			foreach ($rules as $source => $target) {
-				if (preg_match('/' . strtr(Admin::BSI_IMAGE_NAME, ['.' => '\\.', '-' => '\\-']) . '/', $source)) {
-					$source = explode(Admin::BSI_IMAGE_NAME, $source);
-					$source = $source[0] . Admin::BSI_IMAGE_NAME . '/?$';
+				if (preg_match('/' . strtr(self::BSI_IMAGE_NAME, ['.' => '\\.', '-' => '\\-']) . '/', $source)) {
+					$source = explode(self::BSI_IMAGE_NAME, $source);
+					$source = $source[0] . self::BSI_IMAGE_NAME . '/?$';
 
 					$target = explode('clsogimg=', $target);
 					$target = $target[0] . 'clsogimg=1';
@@ -279,7 +280,7 @@ class Plugin
 	{
 //		var_dump($old);exit;
 		self::getInstance()->page_has_og_image = true;
-		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . Admin::BSI_IMAGE_NAME;
+		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::BSI_IMAGE_NAME;
 	}
 
 	public static function late_head()
@@ -844,4 +845,49 @@ class Plugin
 
 		return $target;
 	}
+
+	public static function font_rendering_tweaks($write_json = false): array
+	{
+		$tweaks = [
+			/** letter-spacing: px, line-height: factor */
+			'Anton-w400' => ['admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => 1]],
+			'Courgette-w400' => ['admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => .86]],
+			'Josefin Sans-w400' => ['admin' => ['letter-spacing' => '-0.4px'], 'gd' => ['line-height' => .96]],
+			'Merriweather-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .86]],
+			'Open Sans-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .95, 'text-area-width' => '.67']],
+			'Oswald-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .92, 'text-area-width' => '.67']],
+			'PT Sans-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1.03]],
+			'Roboto-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .97]],
+			'Work Sans-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1]],
+			'Akaya Kanadaka-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .98]],
+		];
+
+		$json_files = glob(self::getInstance()->storage() .'/*.json');
+		foreach ($json_files as $file) {
+			$font = basename($file, '.json');
+			if (empty($tweaks[ $font ])) {
+				$tweaks[ $font ] = [];
+			}
+			$tweaks[ $font ] = array_merge( $tweaks[ $font ], json_decode(file_get_contents($file), true) );
+		}
+
+		if ($write_json) {
+			foreach ($tweaks as $font => $data) {
+				self::getInstance()->file_put_contents(self::getInstance()->storage() .'/'. $font .'.json', json_encode($data, JSON_PRETTY_PRINT));
+			}
+		}
+
+		return $tweaks;
+	}
+
+	public static function font_rendering_tweaks_for($font, $section)
+	{
+		$tweaks = self::font_rendering_tweaks();
+		$font = basename($font, '.ttf');
+		if (!empty($tweaks[$font]) && !empty($tweaks[$font][$section])) {
+			return $tweaks[$font][$section];
+		}
+		return false;
+	}
+
 }

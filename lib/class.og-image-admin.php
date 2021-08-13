@@ -12,7 +12,6 @@ class Admin
 	const OPTION_PREFIX = '_bsi_';
 	const DEFAULTS_PREFIX = '_bsi_default_';
 	const SCRIPT_STYLE_HANDLE = 'bsi';
-	const BSI_IMAGE_NAME = 'social-image.png';
 	const ICON = 'clearsite-logo.svg';
 	const ADMIN_SLUG = 'branded-social-images';
 	const DO_NOT_RENDER = 'do_not_render';
@@ -41,7 +40,7 @@ class Admin
 		add_action('admin_enqueue_scripts', function () {
 			wp_register_script('vanilla-picker', plugins_url('admin/vanilla-picker.js', __DIR__), [], filemtime(dirname(__DIR__) . '/admin/vanilla-picker.js'), true);
 			wp_enqueue_script(self::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.js', __DIR__), ['jquery', 'jquery-ui-slider', 'vanilla-picker'], filemtime(dirname(__DIR__) . '/admin/admin.js'), true);
-			wp_localize_script(self::SCRIPT_STYLE_HANDLE, 'bsi_settings', ['preview_url' => get_permalink() . self::BSI_IMAGE_NAME]);
+			wp_localize_script(self::SCRIPT_STYLE_HANDLE, 'bsi_settings', ['preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME]);
 
 			wp_enqueue_style(self::SCRIPT_STYLE_HANDLE, plugins_url('css/admin.css', __DIR__), '', filemtime(dirname(__DIR__) . '/css/admin.css'), 'all');
 		});
@@ -185,16 +184,16 @@ class Admin
 
 		$image_comment = '';
 		if ($support_webp) {
-			$image_comment = 'When using WEBP, you MUST upload your image in 1200x630 pixels';
+			$image_comment = '<br />When using WEBP, you MUST upload your image in 1200x630 or 2400x1260 pixels';
 		}
 		if (defined('WPSEO_VERSION')) {
-			$image_comment = '<br />Yoast SEO has been detected. If you set-up an OG Image with Yoast and not here, the image selected with Yoast SEO will be used.';
+			$image_comment .= '<br />Yoast SEO has been detected. If you set-up an OG Image with Yoast and not here, the image selected with Yoast SEO will be used.';
 		} // maybe RankMath?
 		elseif (class_exists(RankMath::class)) {
-			$image_comment = '<br />SEO by Rank Math has been detected. If you set-up an OG Image with Rank Math and not here, the image selected with Rank Math will be used.';
+			$image_comment .= '<br />SEO by Rank Math has been detected. If you set-up an OG Image with Rank Math and not here, the image selected with Rank Math will be used.';
 		}
 		elseif (!get_option(self::DEFAULTS_PREFIX . 'image')) {
-			$image_comment = '<br />No Fallback images have been detected. If you do not set-up an image here, no OG:Image will be available for this ' . get_post_type();
+			$image_comment .= '<br />No Fallback images have been detected. If you do not set-up an image here, no OG:Image will be available for this ' . get_post_type();
 		}
 
 		$options = [
@@ -224,10 +223,11 @@ class Admin
 				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'value' => 'on', 'default' => 'off'],
 			],
 			'meta' => [
-				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Check this box to disable OG by Clearsite for this post/page/item'],
+				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Check if you don\'t want a Social Image with this ' . get_post_type()],
+				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use text on this image?', 'default' => 'yes', 'value' => 'yes', 'comment' => 'Uncheck if you do not wish text on this image.'],
+
 				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'label' => 'You can upload/select a specific OG Image here', 'comment' => 'You can use ' . ($support_webp ? "JPEG, PNG and WEBP" : "JPEG and PNG") . ' as a source image, but the output will ALWAYS be PNG because of restrictions on Facebook and LinkedIn.' . $image_comment],
 
-				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use text on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish text on this image.'],
 				'text' => ['namespace' => self::OPTION_PREFIX, 'type' => 'textarea', 'class' => 'hidden editable-target', 'label' => 'Text on image', 'If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.'],
 				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text color', 'default' => get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
 				'text_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'Text position', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-right')],
@@ -240,7 +240,7 @@ class Admin
 				'text_shadow_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'label' => 'Text shadow color', get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000')],
 				'text_shadow_top' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2')],
 				'text_shadow_left' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_left', '2')],
-				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'value' => 'on', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
+				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'comment' => 'Will improve readability of light text on light background.', 'value' => 'on', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
 
 				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a logo on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish a logo on this image, or choose a position below'],
 				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'label' => 'Logo position', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
@@ -398,60 +398,81 @@ class Admin
 		?>
 		<?php self::render_options($fields, ['disabled']); ?>
 		<style>
-			#branded-social-images-editor {
-				--padding: <?php print Plugin::PADDING; ?>px;
-				--text-width: <?php print ceil(Plugin::getInstance()->width * .7 - 2 * $text_settings['padding']); ?>px;
-				--text-height: <?php print ceil(Plugin::getInstance()->height * .7 - 2 * $text_settings['padding']); ?>px;
+		#branded-social-images-editor {
+			--padding: <?php print Plugin::PADDING; ?>px;
+			--text-width: <?php print ceil(Plugin::getInstance()->width * .7 - 2 * $text_settings['padding']); ?>px;
+			--text-height: <?php print ceil(Plugin::getInstance()->height * .7 - 2 * $text_settings['padding']); ?>px;
 
-				--text-background: none;
-				--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
-				--text-font: <?php print $text_settings['font-file']; ?>;
-				--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
-				--text-shadow-top: <?php print intval($text_settings['text-shadow-top']); ?>px;
-				--text-shadow-left: <?php print intval($text_settings['text-shadow-left']); ?>px;
-				--font-size: <?php print $text_settings['font-size']; ?>px;
-				--text-padding: <?php print $text_settings['padding']; ?>px;
-				--line-height: <?php print $text_settings['line-height']; ?>px;
+			--text-background: none;
+			--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
+			--text-font: <?php print $text_settings['font-file']; ?>;
+			--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
+			--text-shadow-top: <?php print intval($text_settings['text-shadow-top']); ?>px;
+			--text-shadow-left: <?php print intval($text_settings['text-shadow-left']); ?>px;
+			--font-size: <?php print $text_settings['font-size']; ?>px;
+			--text-padding: <?php print $text_settings['padding']; ?>px;
+			--line-height: <?php print $text_settings['line-height']; ?>px;
 
-				--logo-scale: <?php print $logo_settings['size']; ?>;
-			}
+			--logo-scale: <?php print $logo_settings['size']; ?>;
+		}
 
-		</style>
+		</style><?php
+
+
+		?>
 		<div id="branded-social-images-editor"
+			 data-font="<?php print $text_settings['font-file']; ?>"
 			 data-use-thumbnail="<?php print self::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
-			<div class="area--background-canvas"></div>
-			<?php foreach (self::image_fallback_chain() as $kind => $fallback_image) { ?>
-				<div class="area--background-alternate image-source-<?php print $kind; ?>">
-					<div class="background"
-						 <?php if ($fallback_image) { ?>style="background-image:url('<?php print esc_attr($fallback_image); ?>')"<?php } ?>>
+			<div class="grid">
+				<div class="area--background-canvas"></div>
+				<?php foreach (self::image_fallback_chain() as $kind => $fallback_image) { ?>
+					<div class="area--background-alternate image-source-<?php print $kind; ?>">
+						<div class="background"
+							 <?php if ($fallback_image) { ?>style="background-image:url('<?php print esc_attr($fallback_image); ?>')"<?php } ?>>
+						</div>
+					</div>
+				<?php } ?>
+				<div class="area--background">
+					<div class="background" style="background-image:url('<?php print esc_attr($image); ?>')"></div>
+				</div>
+				<div class="area--logo">
+					<div class="logo" style="background-image:url('<?php print esc_attr($logo); ?>')"></div>
+				</div>
+				<div class="area--text">
+					<div class="editable-container">
+						<div contenteditable="true"
+							 class="editable"><?php print $fields['text']['current_value']; ?></div>
+						<?php foreach (self::text_fallback_chain() as $type => $text) {
+							?>
+							<div class="text-alternate type-<?php print $type; ?>"><?php print $text; ?></div><?php
+						} ?>
 					</div>
 				</div>
-			<?php } ?>
-			<div class="area--background">
-				<div class="background" style="background-image:url('<?php print esc_attr($image); ?>')"></div>
 			</div>
-			<div class="area--logo">
-				<div class="logo" style="background-image:url('<?php print esc_attr($logo); ?>')"></div>
-			</div>
-			<div class="area--text">
-				<div class="editable-container">
-					<div contenteditable="true" class="editable"><?php print $fields['text']['current_value']; ?></div>
+			<div class="settings">
+				<div class="area--options">
+					<h2>Image/Logo options</h2>
+					<div class="inner">
+						<?php self::render_options($fields, [
+							'image', 'image_use_thumbnail',
+							'image_logo', 'logo_position', 'image_logo_size',
+						]); ?>
+					</div>
 				</div>
-			</div>
-			<div class="area--options">
-				<?php self::render_options($fields, [
-					'image', 'image_use_thumbnail',
-					'image_logo', 'logo_position', 'image_logo_size',
-					'background_color',
-				]); ?>
-			</div>
-			<div class="area--settings">
-				<?php self::render_options($fields, [
-					'text', 'text__font', 'text__ttf_upload', 'text_position', 'color',
-					'text__google_download',
-					'text_shadow_color', 'text_shadow_top', 'text_shadow_left', 'text_shadow_enabled',
-					'text_stroke_color', 'text_stroke',
-				]); ?>
+				<div class="area--settings">
+					<h2>Text settings</h2>
+					<div class="inner">
+						<?php self::render_options($fields, [
+							'text', 'text_enabled',
+							'text_shadow_enabled',
+							'text__font', 'text__ttf_upload', 'text_position', 'color',
+							'background_color',
+							'text_shadow_color', 'text_shadow_top', 'text_shadow_left',
+							'text_stroke_color', 'text_stroke',
+							'text__google_download',
+						]); ?>
+					</div>
+				</div>
 			</div>
 		</div>
 		<?php
@@ -553,6 +574,32 @@ class Admin
 		return $layers;
 	}
 
+	private static function text_fallback_chain(): array
+	{
+		$post_id = get_the_ID();
+		$layers = [];
+		if ($post_id) {
+			try {
+				$page = wp_remote_retrieve_body(wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]));
+			} catch (\Exception $e) {
+				$page = '';
+			}
+			// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
+			// also; poor excuse for tag parsing. sorry.
+			if ($page && false !== strpos($page, 'og:title')) {
+				preg_match('/og:title.+content=(.)([^\n]+)/', $page, $m);
+				$title = $m[2];
+				$quote = $m[1];
+
+				$layers['scraped'] = trim($title, ' />' . $quote);
+			}
+
+			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text');
+		}
+
+		return $layers;
+	}
+
 	public static function add_meta_boxes()
 	{
 		$post_types = apply_filters('bsi_post_types', ['post', 'page']);
@@ -568,10 +615,14 @@ class Admin
 
 	public static function save_meta_data($post_id)
 	{
+
 		if (array_key_exists('branded_social_images', $_POST)) {
 			foreach ($_POST['branded_social_images'] as $namespace => $values) {
 				if (is_array($values)) {
 					foreach ($values as $key => $value) {
+						if ($key === 'text' && !empty($value)) {
+							$value = strip_tags($value, '<br>');
+						}
 						update_post_meta($post_id, "$namespace$key", $value);
 					}
 				}
@@ -629,12 +680,23 @@ class Admin
 EOCSS;
 		}
 
-		print '<style id="font-face-definitions-for-branded-social-images">' . implode("\n\n", $faces) . '</style>';
+		$tweaks = Plugin::font_rendering_tweaks();
+		foreach ($tweaks as $font => &$tweak) {
+			$tweak = $tweak['admin'];
+			foreach ($tweak as $prop => &$val) {
+				$val = "$prop: $val;";
+			}
+			$tweak = implode("\n", $tweak);
+			$tweak = "#branded-social-images-editor[data-font='$font'] .editable-container {\n$tweak}\n";
+		}
+
+		print '<style id="branded-social-images-css">' . implode("\n\n", $faces) . "\n\n" . implode("\n\n", $tweaks) .'</style>';
 	}
 
 	public static function sanitize_fonts()
 	{
 		$storage = trailingslashit(self::storage());
+		$missed_one = false;
 		foreach (self::default_google_fonts() as $font_family) {
 			foreach (['400'] as $font_weight) {
 				foreach (['normal'/*, 'italic'*/] as $font_style) {
@@ -642,10 +704,14 @@ EOCSS;
 						$local_filename = self::google_font_filename($font_family, $font_weight, $font_style, $extention);
 						if (!is_file($storage . $local_filename)/* && !is_file($storage . $local_filename . '2' / * facking hack * /)*/) {
 							self::download_google_font($font_family, $font_weight, $font_style);
+							$missed_one = true;
 						}
 					}
 				}
 			}
+		}
+		if ($missed_one) {
+			Plugin::font_rendering_tweaks( true );
 		}
 	}
 
@@ -768,6 +834,9 @@ EOCSS;
 			foreach ($_POST['branded_social_images'] as $namespace => $values) {
 				if (is_array($values)) {
 					foreach ($values as $key => $value) {
+						if ($key === 'text' && !empty($value)) {
+							$value = strip_tags($value, '<br>');
+						}
 						update_option("$namespace$key", $value);
 					}
 				}

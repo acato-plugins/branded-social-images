@@ -16,6 +16,9 @@ class GD {
 	private $source_is_temporary;
 	private $target;
 
+	private $line_height_factor = 1;
+	private $text_area_width = 0.7;
+
 	private $resource;
 
 	public function __construct(Image $handler, $source, $target)
@@ -124,11 +127,23 @@ class GD {
 		}
 		if ($debug) { exit; }
 		$font = $textOptions['font-file'];
+		$tweaks = Plugin::font_rendering_tweaks_for($font, 'gd');
+		if ($tweaks) {
+			if (!empty($tweaks['line-height'])) {
+				$this->line_height_factor = $tweaks['line-height'];
+			}
+			if (!empty($tweaks['text-area-width'])) {
+				$this->text_area_width = $tweaks['text-area-width'];
+			}
+		}
 		$fontSize = $textOptions['font-size'] * Plugin::AA;
+		if (!trim($text)) {
+			$background_color = false;
+		}
 
 		$text = str_replace(['<br>', '<br />', '<br/>', '\\n'], "\n", $text); // predefined line breaks
 		$text = str_replace('\\r', '', $text);
-		$text = $this->wrapTextByPixels($text, $image_width * .7, $fontSize, $font);
+		$text = $this->wrapTextByPixels($text, $image_width * $this->text_area_width, $fontSize, $font);
 
 		$textDim = imagettfbbox($fontSize, 0, $font, implode(' ', explode("\n", $text)));
 		$line_height = $textDim[1] - $textDim[7];
@@ -140,6 +155,7 @@ class GD {
 			$text_width = max($text_width, $textDim[2] - $textDim[0]);
 		}
 		$text_width += 2;
+		$line_height *= $this->line_height_factor;
 		$text_height = $line_height * count($lines);
 
 		$p = $textOptions['padding'] * Plugin::AA;
@@ -359,6 +375,9 @@ class GD {
 
 	// Returns expected width of rendered text in pixels
 	private function getWidthPixels(string $text, string $font, int $font_size): int {
+		if (!trim($text)) {
+			return 0;
+		}
 		static $widthCorrection;
 		$bbox = imageftbbox($font_size, 0, $font, $text);
 		$width = ($bbox[2] - $bbox[0]);

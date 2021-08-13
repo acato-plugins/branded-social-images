@@ -94,7 +94,7 @@
   .a-slider {
     display: inline-block;
     width: 350px;
-    width: calc( 100% - 66px );
+    width: calc(100% - 66px);
   }
 }
 
@@ -129,21 +129,25 @@
 
 // native interface
 #branded-social-images-editor {
-  display: grid;
-  grid-template-columns: 1200px 1fr;
-  grid-template-areas: "image options" "image settings";
-  @media screen and (max-width: 1920px) {
-    grid-template-columns: 600px 600px;
-    grid-template-areas: "image image" "options settings";
+  label {
+    vertical-align: unset;
   }
-  z-index: 0;
-
-  @media screen and (max-width: 1700px) {
-    grid-template-columns: 600px;
-    .area--text, .area--background-alternate, .area--background, .area--background-canvas, .area--logo {
-      zoom: 0.5;
+  .grid {
+    display: grid;
+    grid-template-columns: 1200px 1fr;
+    grid-template-areas: "image ." "image .";
+    @media screen and (max-width: 1920px) {
+      grid-template-columns: 1200px;
+      grid-template-areas: "image";
     }
-    grid-template-areas: "image" "options" "settings";
+    z-index: 0;
+
+    @media screen and (max-width: 1700px) {
+      grid-template-columns: 600px;
+      .area--text, .area--background-alternate, .area--background, .area--background-canvas, .area--logo {
+        zoom: 0.5;
+      }
+    }
   }
 
   .area--background, .area--background-alternate, .area--background-canvas {
@@ -179,11 +183,12 @@
     grid-template-areas: ". . ." ". logo ." ". . .";
     align-items: center;
     justify-items: center;
+
     .logo {
       grid-area: logo;
       background: transparent no-repeat center/contain;
-      width: calc( var(--logo-scale)/100 * 1200px );
-      height: calc( var(--logo-scale)/100 * 630px );
+      width: calc(var(--logo-scale) / 100 * 1200px);
+      height: calc(var(--logo-scale) / 100 * 630px);
     }
   }
 
@@ -192,6 +197,7 @@
     .area--logo {
       grid-template-columns: var(--padding) var(--text-width) auto;
       justify-items: start;
+
       .logo {
         background-position-x: left;
       }
@@ -202,6 +208,7 @@
     .area--logo {
       grid-template-columns: auto var(--text-width) var(--padding);
       justify-items: end;
+
       .logo {
         background-position-x: right;
       }
@@ -212,6 +219,7 @@
     .area--logo {
       grid-template-rows: var(--padding) var(--text-height) auto;
       align-items: start;
+
       .logo {
         background-position-y: top;
       }
@@ -222,6 +230,7 @@
     .area--logo {
       grid-template-rows: auto var(--text-height) var(--padding);
       align-items: end;
+
       .logo {
         background-position-y: bottom;
       }
@@ -239,8 +248,26 @@
 
     .editable-container {
       text-align: center;
+      position: relative;
     }
 
+    &.invisible {
+      display: none;
+    }
+
+    .editable ~ .text-alternate {
+      display: none !important;
+    }
+
+    .editable:empty + .text-alternate {
+      display: block !important;
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.4;
+      top: 50%;
+      transform: translateY(-50%);
+      max-height: unset;
+    }
   }
 
   &.text_position-top-left, &.text_position-left, &.text_position-bottom-left {
@@ -249,6 +276,10 @@
 
       .editable-container {
         text-align: left;
+      }
+
+      .editable:empty + .text-alternate {
+        left: 0;
       }
     }
   }
@@ -260,6 +291,10 @@
       .editable-container {
         text-align: right;
       }
+
+      .editable:empty + .text-alternate {
+        right: 0;
+      }
     }
   }
 
@@ -268,6 +303,11 @@
       grid-template-rows: var(--padding) var(--text-height) auto;
       align-items: start;
 
+      .editable:empty + .text-alternate {
+        top: 0;
+        transform: translateY(0);
+      }
+
     }
   }
 
@@ -275,29 +315,84 @@
     .area--text {
       grid-template-rows: auto var(--text-height) var(--padding);
       align-items: end;
+
+      .editable:empty + .text-alternate {
+        top: initial;
+        bottom: 0;
+        transform: translateY(0);
+      }
     }
   }
 
   .area--text {
     .editable-container {
       grid-area: edit;
-
       .editable {
+        br:last-child {
+          display: block;
+          content: ' ';
+        }
+      }
+
+      .editable, .text-alternate {
         width: auto;
         height: auto;
         max-width: 100%;
         max-height: 100%;
         border: none;
         color: var(--text-color);
+        position: relative;
         background: var(--text-background);
+
+        border: 1px solid red;
+
         display: inline-block;
-        font-size: calc( var(--font-size) / .75 );
-        line-height: calc( var(--line-height) / .75 );
+        font-size: calc(var(--font-size) / .75);
+        line-height: calc(var(--line-height) / .75);
         padding: var(--text-padding);
         text-shadow: var(--text-shadow-left) var(--text-shadow-top) 0 var(--text-shadow-color);
         font-family: var(--text-font);
         font-weight: normal;
         font-style: normal;
+        //letter-spacing: -1.5px;
+      }
+    }
+  }
+
+  .settings {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-areas: "options settings";
+    width: 1200px;
+    @media screen and (max-width: 1920px) {
+    }
+    @media screen and (max-width: 1700px) {
+      width: 600px;
+      grid-template-columns: 1fr;
+      grid-template-areas: "options" "settings";
+    }
+  }
+
+  .area--options, .area--settings {
+    display: flex;
+    flex-direction: column;
+      .inner {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        > span {
+          width: 50%;
+          @media screen and (max-width: 1200px) {
+            width: 100%;
+          }
+          &.name-text_enabled, &.name-text_shadow_enabled {
+            width: 100%;
+          }
+        }
+      }
+    @media screen and (max-width: 1700px) {
+      .inner {
       }
     }
   }
@@ -381,6 +476,12 @@
     display: none;
   }
 
+  .add-image-select {
+    input[value='0'] ~ .remove {
+      display: none;
+    }
+  }
+
   .image-preview-wrapper {
     display: none;
   }
@@ -389,11 +490,25 @@
     box-sizing: border-box;
     padding: 10px;
     display: inline-block;
-    width: 50%;
+
+    .comment {
+      display: block
+    }
+    &.name-text_enabled .comment, &.name-text_shadow_enabled .comment { display: inline; margin-left: 1em; }
+
+    i + .comment {
+      display: none;
+    }
+
+    i.active + .comment {
+      display: block;
+    }
+
     > label:first-child {
       display: block;
       font-weight: bold;
     }
+
     textarea, input[type=text] {
       width: 100%;
     }
@@ -406,5 +521,4 @@
   .filename:empty + .message {
     display: none;
   }
-
 }
