@@ -394,7 +394,7 @@ class Admin
 			preg_match('/src="(.+)"/U', $logo, $m);
 			$logo = $m[1];
 		}
-
+		
 		?>
 		<?php self::render_options($fields, ['disabled']); ?>
 		<style>
@@ -403,7 +403,7 @@ class Admin
 			--text-width: <?php print ceil(Plugin::getInstance()->width * .7 - 2 * $text_settings['padding']); ?>px;
 			--text-height: <?php print ceil(Plugin::getInstance()->height * .7 - 2 * $text_settings['padding']); ?>px;
 
-			--text-background: none;
+			--text-background: <?php print Admin::hex_to_rgba($text_settings['background-color'], true); ?>;
 			--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
 			--text-font: <?php print $text_settings['font-file']; ?>;
 			--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
@@ -418,9 +418,14 @@ class Admin
 
 		</style><?php
 
+			$editor_class = [];
+			$editor_class[] = 'logo_position-' . $fields['logo_position']['current_value'];
+			$editor_class[] = 'text_position-' . $fields['text_position']['current_value'];
 
+			$editor_class = implode(' ', $editor_class);
 		?>
 		<div id="branded-social-images-editor"
+			 class="<?php print $editor_class; ?>"
 			 data-font="<?php print $text_settings['font-file']; ?>"
 			 data-use-thumbnail="<?php print self::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
 			<div class="grid">
