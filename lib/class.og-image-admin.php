@@ -394,7 +394,7 @@ class Admin
 			preg_match('/src="(.+)"/U', $logo, $m);
 			$logo = $m[1];
 		}
-		
+
 		?>
 		<?php self::render_options($fields, ['disabled']); ?>
 		<style>
