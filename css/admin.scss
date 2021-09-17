@@ -133,21 +133,23 @@
     vertical-align: unset;
   }
   .grid {
+    zoom: 0.5; // enabling this line this disables the large view
     display: grid;
-    grid-template-columns: 1200px 1fr;
-    grid-template-areas: "image ." "image .";
-    @media screen and (max-width: 1920px) {
+    //grid-template-columns: 1200px 1fr;
+    //grid-template-areas: "image ." "image .";
+    //@media screen and (max-width: 1920px) {
       grid-template-columns: 1200px;
-      grid-template-areas: "image";
-    }
+      grid-template-areas: "image" ".";
+    //}
     z-index: 0;
 
-    @media screen and (max-width: 1700px) {
-      grid-template-columns: 600px;
-      .area--text, .area--background-alternate, .area--background, .area--background-canvas, .area--logo {
-        zoom: 0.5;
-      }
-    }
+    // enable this @media section when using the large view above
+    //@media screen and (max-width: 1700px) {
+    //  grid-template-columns: 600px;
+    //  .area--text, .area--background-alternate, .area--background, .area--background-canvas, .area--logo {
+    //    zoom: 0.5;
+    //  }
+    //}
   }
 
   .area--background, .area--background-alternate, .area--background-canvas {
@@ -359,7 +361,7 @@
 
   .settings {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
     grid-template-areas: "options settings";
     width: 1200px;
     @media screen and (max-width: 1920px) {

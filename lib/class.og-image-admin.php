@@ -259,8 +259,8 @@ class Admin
 		<style>
 		#branded-social-images-editor {
 			--padding: <?php print Plugin::PADDING; ?>px;
-			--text-width: <?php print ceil(Plugin::getInstance()->width * .7 - 2 * $text_settings['padding']); ?>px;
-			--text-height: <?php print ceil(Plugin::getInstance()->height * .7 - 2 * $text_settings['padding']); ?>px;
+			--text-width: <?php print ceil(Plugin::getInstance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']); ?>px;
+			--text-height: <?php print ceil(Plugin::getInstance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']); ?>px;
 
 			--text-background: <?php print Admin::hex_to_rgba($text_settings['background-color'], true); ?>;
 			--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;

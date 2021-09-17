@@ -17,7 +17,7 @@ class GD {
 	private $target;
 
 	private $line_height_factor = 1;
-	private $text_area_width = 0.7;
+	private $text_area_width;
 
 	private $resource;
 
@@ -26,6 +26,7 @@ class GD {
 		$this->handler = $handler;
 		$this->manager = $handler->getManager();
 		$this->source_is_temporary = false;
+		$this->text_area_width = Plugin::TEXT_AREA_WIDTH;
 
 		// use this construction so we don't have to check file mime
 		if (is_file($source) && preg_match('@\.webp$@', strtolower(trim($source)))) {
