@@ -27,6 +27,8 @@ class Input {
 		$this->set_attribute_name();
 		$this->set_comment();
 		$this->set_comment_icon();
+		$this->set_info();
+		$this->set_info_icon();
 	}
 
 	public function set_value()
@@ -68,6 +70,18 @@ class Input {
 	{
 		$this->comment_icon = !empty($this->atts['comment-icon']) ? $this->atts['comment-icon'] : '';
 		unset($this->atts['comment-icon']);
+	}
+
+	public function set_info()
+	{
+		$this->info = !empty($this->atts['info']) ? $this->atts['info'] : '';
+		unset($this->atts['info']);
+	}
+
+	public function set_info_icon()
+	{
+		$this->info_icon = !empty($this->atts['info-icon']) ? $this->atts['info-icon'] : '';
+		unset($this->atts['info-icon']);
 	}
 
 	public function set_attributes($atts)
@@ -165,14 +179,33 @@ class Input {
 		return $id;
 	}
 
-	public function __toString() {
+	public function the_comment()
+	{
 		$comment = '';
 		if ($this->comment) {
 			$comment = '<span class="comment">'. $this->comment .'</span>';
 		}
 		if (!empty($this->comment_icon)) {
-			$comment = '<i class="toggle-info dashicons-before '. $this->comment_icon .'"></i>' . $comment;
+			$comment = '<i class="toggle-comment dashicons-before '. $this->comment_icon .'"></i>' . $comment;
 		}
-		return $this->generate_html() . $comment;
+
+		return $comment;
+	}
+
+	public function the_info()
+	{
+		$info = '';
+		if ($this->info) {
+			$info = '<span class="info">'. $this->info .'</span>';
+		}
+		if (!empty($this->info_icon)) {
+			$info = '<i class="toggle-info dashicons-before '. $this->info_icon .'"></i>' . $info;
+		}
+
+		return $info;
+	}
+
+	public function __toString() {
+		return $this->generate_html() . $this->the_comment() . $this->the_info();
 	}
 }

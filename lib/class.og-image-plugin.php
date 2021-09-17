@@ -128,7 +128,7 @@ class Plugin
 				$this->expand_text_options();
 				if ($this->text_options['font-file'] && is_file($this->text_options['font-file']) && $this->text_options['font-file'] !== $font_file) { // PROCESSED!
 					update_option(self::DEFAULTS_PREFIX . 'text__font', basename($this->text_options['font-file']));
-					wp_redirect(remove_query_arg('asdadasd'));
+					wp_redirect(remove_query_arg(''));
 					exit;
 				}
 			}
@@ -155,73 +155,7 @@ class Plugin
 			if (get_query_var('clsogimg')) {
 				require_once __DIR__ . '/class.og-image.php';
 				$og_image = new Image($this);
-				if (current_user_can('edit_posts') && isset($_GET['_preview'])) {
-					$this->preview = true;
-
-					$this->text_options = shortcode_atts($this->text_options, $_GET); // picks appropriate items from _GET and uses the current settings as default
-					$this->logo_options = shortcode_atts($this->logo_options, $_GET); // picks appropriate items from _GET and uses the current settings as default
-
-					$this->validate_text_options();
-					$this->validate_logo_options();
-
-					if (isset($_GET['logo_position'])) {
-						$this->logo_options['position'] = $_GET['logo_position'];
-						unset($this->logo_options['top'], $this->logo_options['left'], $this->logo_options['bottom'], $this->logo_options['right']);
-					}
-					if (!empty($_GET['logo_enabled'])) {
-						$this->logo_options['enabled'] = $_GET['logo_enabled'] === 'yes';
-					}
-					if (isset($_GET['text_position'])) {
-						$this->text_options['position'] = $_GET['text_position'];
-						unset($this->text_options['top'], $this->text_options['left'], $this->text_options['bottom'], $this->text_options['right']);
-					}
-					if (!empty($_GET['text_enabled'])) {
-						$this->text_options['enabled'] = $_GET['text_enabled'] === 'yes';
-					}
-					if (!empty($_GET['color'])) {
-						$this->text_options['color'] = '#' . ltrim(urldecode($_GET['color']), '#');
-					}
-					if (!empty($_GET['background_color'])) {
-						$this->text_options['background-color'] = '#' . ltrim(urldecode($_GET['background_color']), '#');
-					}
-					if (isset($_GET['text_stroke']) && '' !== $_GET['text_stroke']) {
-						$this->text_options['text-stroke'] = intval($_GET['text_stroke']);
-					}
-					if (!empty($_GET['text_stroke_color'])) {
-						$this->text_options['text-stroke-color'] = '#' . ltrim(urldecode($_GET['text_stroke_color']), '#');
-					}
-					if (!empty($_GET['text_shadow_color'])) {
-						$this->text_options['text-shadow-color'] = '#' . ltrim(urldecode($_GET['text_shadow_color']), '#');
-					}
-					if (isset($_GET['text_shadow_left']) && '' !== $_GET['text_shadow_left']) {
-						$this->text_options['text-shadow-left'] = $_GET['text_shadow_left'];
-					}
-					if (isset($_GET['text_shadow_top']) && '' !== $_GET['text_shadow_top']) {
-						$this->text_options['text-shadow-top'] = $_GET['text_shadow_top'];
-					}
-
-					if (isset($_GET['text_shadow_enabled']) && 'on' === $_GET['text_shadow_enabled']) {
-						$this->text_options['text-shadow-color'] = '#555555DD';
-						$this->text_options['text-shadow-top'] = -2;
-						$this->text_options['text-shadow-left'] = 2;
-					}
-					if (!empty($_GET['text'])) {
-						add_filter('bsi_text', function ($text) {
-							return stripslashes_deep(urldecode($_GET['text']));
-						}, PHP_INT_MAX);
-					}
-					if (!empty($_GET['image'])) {
-						$id = intval($_GET['image']);
-						if ($id && 'attachment' === get_post_type($id) && wp_get_attachment_image($id)) {
-							$og_image->image_id = $id;
-						}
-					}
-					$this->expand_text_options($fast = true);
-					$this->expand_logo_options();
-				}
-
 				$og_image->serve();
-
 				exit;
 			}
 		});
@@ -231,8 +165,12 @@ class Plugin
 			if (!is_admin() && $id) {
 				$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
 				$go = true;
-				if ('on' === $killswitch) { $go = false; }
-				if (!Plugin::getInstance()->og_image_available) { $go = false; }
+				if ('on' === $killswitch) {
+					$go = false;
+				}
+				if (!Plugin::getInstance()->og_image_available) {
+					$go = false;
+				}
 				if ($go) {
 					// overrule RankMath
 					add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
@@ -898,29 +836,27 @@ class Plugin
 
 		$image_comment = '';
 		if ($support_webp) {
-			$image_comment = '<br />When using WEBP, you MUST upload your image in 1200x630 or 2400x1260 pixels';
+			$image_comment = 'You can upload WEBP but you MUST upload your image in 1200x630 pixels EXACTLY! <br />';
 		}
+		$image_comment .= 'The following process is used to determine the OG Image (in order of importance):
+<ol><li>Branded Social Image on page/post</li>';
 		if (defined('WPSEO_VERSION')) {
-			$image_comment .= '<br />Yoast SEO has been detected. If you set-up an OG Image with Yoast and not here, the image selected with Yoast SEO will be used.';
-		} // maybe RankMath?
-		elseif (class_exists(RankMath::class)) {
-			$image_comment .= '<br />SEO by Rank Math has been detected. If you set-up an OG Image with Rank Math and not here, the image selected with Rank Math will be used.';
+			$image_comment .= '<li>Yoast Social image on page/post</li>';
 		}
-		elseif (!get_option(self::DEFAULTS_PREFIX . 'image')) {
-			$image_comment .= '<br />No Fallback images have been detected. If you do not set-up an image here, no OG:Image will be available for this ' . get_post_type();
-		}
+		$image_comment .= '<li>Featured image on page/post (when checked in general settings)</li>';
+		$image_comment .= '<li>Fallback Branded Social image in general settings</li></ol>';
 
 		$options = [
 			'admin' => [
-				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => 'The default OG:Image for any page/post/... that has no OG:Image defined.', 'comment-icon' => 'dashicons-info', 'comment' => 'You can use ' . ($support_webp ? "JPEG, PNG and WEBP" : "JPEG and PNG") . ' as a source image, but the output will ALWAYS be PNG because of restrictions on Facebook and LinkedIn.' . $image_comment],
+				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => 'The default OG:Image for any page/post/... that has no OG:Image defined.', 'info-icon' => 'dashicons-info', 'comment' => 'You can use JPEG and PNG.', 'info' => $image_comment],
 				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use the WordPress Featured image, if selected, before using the default image selected above.', 'default' => 'on'],
 
-				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'For best results, use PNG with transparency at at least (!) 600 pixels wide and/or high. If you get "gritty" results, use higher values.'],
+				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels. Use a transparent PNG for best results.'],
 				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => 'Default logo position', 'default' => 'bottom-right'],
 				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale', 'comment' => '', 'default' => '20%', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
 
 				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The default text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.', 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
-				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Font', 'options' => self::get_font_list(), 'comment' => 'Fonts are stored in your uploads folder. You can manage them there.'],
+				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Font', 'options' => self::get_font_list()],
 				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf', 'label' => 'Font upload', 'upload' => 'Upload .ttf file'],
 //				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
 
@@ -940,7 +876,7 @@ class Plugin
 				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Check if you don\'t want a Social Image with this ' . get_post_type()],
 				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use text on this image?', 'default' => 'yes', 'value' => 'yes', 'comment' => 'Uncheck if you do not wish text on this image.'],
 
-				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'label' => 'You can upload/select a specific OG Image here', 'comment' => 'You can use ' . ($support_webp ? "JPEG, PNG and WEBP" : "JPEG and PNG") . ' as a source image, but the output will ALWAYS be PNG because of restrictions on Facebook and LinkedIn.' . $image_comment],
+				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'label' => 'You can upload/select a specific OG Image here', 'comment' => 'You can use JPEG and PNG.', 'info-icon' => 'dashicons-info', 'info' => $image_comment],
 
 				'text' => ['namespace' => self::OPTION_PREFIX, 'type' => 'textarea', 'class' => 'hidden editable-target', 'label' => 'Text on image', 'If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.'],
 				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text color', 'default' => get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
@@ -959,7 +895,7 @@ class Plugin
 				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a logo on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish a logo on this image, or choose a position below'],
 				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'label' => 'Logo position', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
 
-				'image_logo' => ['namespace' => Admin::DO_NOT_RENDER, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'For best results, use PNG with transparency at at least (!) 600 pixels wide and/or high. If you get "gritty" results, use higher values.', 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
+				'image_logo' => ['namespace' => Admin::DO_NOT_RENDER, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels. Use a transparent PNG for best results.', 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
 			]
 		];
 
@@ -1109,33 +1045,37 @@ class Plugin
 	public static function admin_bar_script()
 	{
 		?>
-<style>
-	.<?php print Admin::ADMIN_SLUG; ?>-view-preview {
-		display: none;
-		z-index: 0;
-	}
-	body.<?php print Admin::ADMIN_SLUG; ?>-view-active .<?php print Admin::ADMIN_SLUG; ?>-view-preview {
-		display: block;
-		position: fixed;
-		z-index: <?php print PHP_INT_MAX; ?>;
-		top: 40px;
-		left: 50%;
-		transform: translateX(-50%);
-	}
-</style>
-<script>
-	;(function($,a){
-		$('.'+a).on('click touchend', function(e){ e.preventDefault(); $('body').toggleClass(a+'-active'); })
-		var preview = $('.'+a+'-preview');
-		if (preview.length < 1) {
-			var div = $('<div/>');
-			div.addClass(a+'-preview');
-			$('body').append(div);
-			div.append('<img src="./<?php print Plugin::BSI_IMAGE_NAME; ?>/" />');
-			preview = $('.'+a+'-preview');
-		}
-	})(jQuery, <?php print json_encode(Admin::ADMIN_SLUG . '-view'); ?>);
-</script>
+		<style>
+			.<?php print Admin::ADMIN_SLUG; ?>-view-preview {
+				display: none;
+				z-index: 0;
+			}
+
+			body.<?php print Admin::ADMIN_SLUG; ?>-view-active .<?php print Admin::ADMIN_SLUG; ?>-view-preview {
+				display: block;
+				position: fixed;
+				z-index: <?php print PHP_INT_MAX; ?>;
+				top: 40px;
+				left: 50%;
+				transform: translateX(-50%);
+			}
+		</style>
+		<script>
+			;(function ($, a) {
+				$('.' + a).on('click touchend', function (e) {
+					e.preventDefault();
+					$('body').toggleClass(a + '-active');
+				})
+				var preview = $('.' + a + '-preview');
+				if (preview.length < 1) {
+					var div = $('<div/>');
+					div.addClass(a + '-preview');
+					$('body').append(div);
+					div.append('<img src="./<?php print Plugin::BSI_IMAGE_NAME; ?>/" />');
+					preview = $('.' + a + '-preview');
+				}
+			})(jQuery, <?php print json_encode(Admin::ADMIN_SLUG . '-view'); ?>);
+		</script>
 		<?php
 	}
 
