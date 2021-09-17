@@ -175,26 +175,38 @@ class Admin
 		$fonts = glob(self::storage() . '/*.ttf');
 		$list = [];
 		foreach ($fonts as $font) {
-			preg_match('/-w([1-9]00)(-italic)?\./', $font, $m);
 			$base = basename($font, '.ttf');
-			$list[$base] = [
+			$json = preg_replace('/\.ttf$/', '.json', $font);
+			$meta = [];
+			if (is_file($json)) {
+				$meta = json_decode(file_get_contents($json));
+			}
+			preg_match('/-w([1-9]00)(-italic)?\./', $font, $m);
+			$entry = [
 				'weight' => !empty($m[1]) ? $m[1] : 400,
 				'style' => !empty($m[2]) ? trim($m[2], '-') : 'normal',
-				'name' => self::nice_font_name($base),
-				'valid' => false, // assume error
+				'name' => $meta && !empty($meta->font_name) ? $meta->font_name : self::nice_font_name($base),
+				'valid' => true,
 				'ttf' => self::storage() . '/' . $base . '.ttf',
 			];
-//			foreach (['woff2', 'woff'] as $ext) {
-//				if (is_file(self::storage() . '/' . $base . '.' . $ext)) {
-//					$list[$base][$ext] = self::storage() . '/' . $base . '.' . $ext;
-//				}
-//			}
-		}
-
-		foreach ($list as &$item) {
-			if (!empty($item['ttf'])/* && (!empty($item['woff']) || !empty($item['woff2']))*/) {
-				$item['valid'] = true;
+			$weights = implode('|', self::font_name_weights());
+			preg_match("/-({$weights})?(Italic)?$/", $base, $m);
+			if ($m[1]) {
+				$weight = array_search($m[1], self::font_name_weights());
+				if ($weight) {
+					$entry['weight'] = $weight;
+				}
 			}
+			if (!empty($m[2]) && $m[2] === 'Italic') {
+				$entry['style'] = 'italic';
+			}
+//			$entry[]
+
+			// display name
+			$entry['display_name'] = $entry['name'] . ' - ' . self::weight_to_suffix($entry['weight'], $entry['style'] == 'italic');
+			$entry['display_name'] = str_replace('Italic', ' Italic', $entry['display_name']);
+			$entry['display_name'] = str_replace('  Italic', ' Italic', $entry['display_name']);
+			$list[$base] = $entry;
 		}
 
 		return $list;
@@ -222,6 +234,8 @@ class Admin
 	{
 		// w400 to normal, w700 to bold etc
 		list($name, $_) = explode('-w', $font . '-w400', 2);
+		$weights = implode('|', self::font_name_weights());
+		$name = preg_replace("/-({$weights})?(Italic)?$/", '', $name);
 		return $name;
 	}
 
@@ -504,7 +518,7 @@ EOCSS;
 	{
 		$storage = trailingslashit(self::storage());
 		$missed_one = false;
-		foreach (self::default_google_fonts() as $font_family) {
+		foreach (Plugin::default_google_fonts() as $font_family) {
 			foreach (['400'] as $font_weight) {
 				foreach (['normal'/*, 'italic'*/] as $font_style) {
 					foreach ([/*'woff', */ 'ttf'] as $extention) {
@@ -522,19 +536,47 @@ EOCSS;
 		}
 	}
 
-	public static function default_google_fonts(): array
-	{
-		return ['Open Sans', 'Roboto', 'Montserrat', 'PT Sans', 'Merriweather', 'Oswald', 'Anton', 'Work Sans', 'Courgette', 'Josefin Sans'];
-	}
-
 	public static function google_font_filename($font_family, $font_weight, $font_style, $extention = ''): string
 	{
 		$italic = $font_style == 'italic' ? 'italic' : '';
-		$font_filename = $font_family . '-w' . $font_weight . ($italic ? '-' . $italic : '');
+		$suffix = self::weight_to_suffix($font_weight, $italic);
+		$font_filename = str_replace(' ', '', $font_family) . '-' . $suffix;
 		if ($extention) {
 			$font_filename .= '.' . $extention;
 		}
 		return $font_filename;
+	}
+
+	private static function weight_to_suffix($weight, $is_italic)
+	{
+		$weight = round($weight/100)*100;
+		$weights = self::font_name_weights();
+		if (!array_key_exists($weight, $weights) || (/* Special case; RegularItalic is just called Italic */ 400 == $weight && $is_italic)) {
+			$suffix = '';
+		}
+		else {
+			$suffix = $weights[ $weight ];
+		}
+		if ($is_italic) {
+			$suffix .= 'Italic';
+		}
+
+		return $suffix;
+	}
+
+	private static function font_name_weights()
+	{
+		return [
+			100 => 'Thin',
+			200 => 'ExtraLight',
+			300 => 'Light',
+			400 => 'Regular',
+			500 => 'Medium',
+			600 => 'SemiBold',
+			700 => 'Bold',
+			800 => 'ExtraBold',
+			900 => 'Black',
+		];
 	}
 
 	public static function download_google_font($font_family, $font_weight, $font_style)
@@ -626,7 +668,7 @@ EOCSS;
 			if (is_file($font)) {
 				$instance = Plugin::getInstance();
 				update_option(Plugin::DEFAULTS_PREFIX . 'text__ttf_upload', false);
-				update_option(Plugin::DEFAULTS_PREFIX . 'text__font', basename($font));
+				update_option(Plugin::DEFAULTS_PREFIX . 'text__font', basename($font, '.ttf'));
 				rename($font, $instance->storage() . '/' . basename($font));
 				wp_delete_post($font_id);
 			}
@@ -668,7 +710,7 @@ EOCSS;
 			'demi bold' => 600,
 			'bold' => 700,
 			'extra bold' => 800,
-			'ultra bold' => 800,
+			'ultra bold' => 900,
 		];
 	}
 

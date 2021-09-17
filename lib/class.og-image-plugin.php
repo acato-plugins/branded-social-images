@@ -811,20 +811,47 @@ class Plugin
 		return false;
 	}
 
+	public static function default_google_fonts(): array
+	{
+		return array_map(function($font) {
+			return $font['font_name'];
+		}, self::font_rendering_tweaks());
+	}
+
 	public static function font_rendering_tweaks($write_json = false): array
 	{
 		$tweaks = [
 			/** letter-spacing: px, line-height: factor */
-			'Anton-w400' => ['admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => 1]],
-			'Courgette-w400' => ['admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => .86]],
-			'Josefin Sans-w400' => ['admin' => ['letter-spacing' => '-0.4px'], 'gd' => ['line-height' => .96]],
-			'Merriweather-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .86]],
-			'Open Sans-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .95, 'text-area-width' => '.67']],
-			'Oswald-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .92, 'text-area-width' => '.67']],
-			'PT Sans-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1.03]],
-			'Roboto-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .97]],
-			'Work Sans-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1]],
-			'Akaya Kanadaka-w400' => ['admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .98]],
+			'Anton-Regular' => [
+				'font_name' => 'Anton', 'admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => 1]
+			],
+			'Courgette-Regular' => [
+				'font_name' => 'Courgette', 'admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => .86]
+			],
+			'JosefinSans-Regular' => [
+				'font_name' => 'Josefin Sans', 'admin' => ['letter-spacing' => '-0.4px'], 'gd' => ['line-height' => .96]
+			],
+			'Merriweather-Regular' => [
+				'font_name' => 'Merriweather', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .86]
+			],
+			'OpenSans-Regular' => [
+				'font_name' => 'Open Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .95, 'text-area-width' => '.67']
+			],
+			'Oswald-Regular' => [
+				'font_name' => 'Oswald', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .92, 'text-area-width' => '.67']
+			],
+			'PTSans-Regular' => [
+				'font_name' => 'PT Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1.03]
+			],
+			'Roboto-Regular' => [
+				'font_name' => 'Roboto', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .97]
+			],
+			'WorkSans-Regular' => [
+				'font_name' => 'Work Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1]
+			],
+			'AkayaKanadaka-Regular' => [
+				'font_name' => 'Akaya Kanadaka', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .98]
+			],
 		];
 
 		$json_files = glob(self::getInstance()->storage() . '/*.json');
@@ -1055,7 +1082,7 @@ class Plugin
 			if (!$_['valid']) {
 				continue;
 			}
-			$font_name = $_['name'];
+			$font_name = $_['display_name'];
 			$options[$font_base] = $font_name;
 		}
 
