@@ -235,6 +235,8 @@ class Admin
 	public static function show_editor($fields)
 	{
 
+		$fields['text']['current_value'] = trim($fields['text']['current_value']) ? $fields['text']['current_value'] : self::array_first(Plugin::text_fallback_chain());
+
 		$text_settings = Plugin::getInstance()->text_options;
 		$logo_settings = Plugin::getInstance()->logo_options;
 
@@ -280,8 +282,8 @@ class Admin
 		</style><?php
 
 			$editor_class = [];
-			$editor_class[] = 'logo_position-' . $fields['logo_position']['current_value'];
-			$editor_class[] = 'text_position-' . $fields['text_position']['current_value'];
+			$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
+			$editor_class[] = 'text_position-' . (!empty($fields['text_position']) ? $fields['text_position']['current_value'] : $text_settings['position']);
 
 			$editor_class = implode(' ', $editor_class);
 		?>
@@ -425,6 +427,9 @@ class Admin
 					foreach ($values as $key => $value) {
 						if ($key === 'text' && !empty($value)) {
 							$value = strip_tags($value, '<br>');
+						}
+						if ($key === 'text' && self::text_is_identical($value, self::array_first(Plugin::text_fallback_chain()))) {
+							$value = '';
 						}
 						update_post_meta($post_id, "$namespace$key", $value);
 					}
@@ -694,5 +699,18 @@ EOCSS;
 		$hex_values = str_split(substr($hex_color . 'FF', 1, 8), 6);
 
 		return [$hex_values[0], intval((hexdec($hex_values[1]) + 1) / 256 * 100)];
+	}
+
+	private static function array_first(array $array)
+	{
+		return reset($array);
+	}
+
+	private static function text_is_identical($value1, $value2)
+	{
+		$value1 = trim(str_replace(["\n", "\r"], '', $value1));
+		$value2 = trim(str_replace(["\n", "\r"], '', $value2));
+
+		return strip_tags($value1) == strip_tags($value2);
 	}
 }
