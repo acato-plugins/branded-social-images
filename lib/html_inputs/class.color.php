@@ -18,4 +18,19 @@ class color extends Input {
 	{
 		return $this->current_value; // a text field had it's current value in value;
 	}
+
+	public function generate_html(): string
+	{
+		$label = '';
+		if ($this->label) {
+			$label = '<label for="'. $this->id .'">'. $this->label .'</label>';
+			$this->atts['id'] = $this->id;
+		}
+
+		$this->atts['value'] = $this->get_tag_value();
+		$atts = $this->attributes();
+
+
+		return $label  .'<span class="field-wrap"><input type="'. $this->type .'" '. $atts .'/><span class="swatch"></span></span>';
+	}
 }

@@ -293,7 +293,8 @@ function hex_to_rgba(hex) {
 				popup: 'top',
 				color: $input.val(),
 				onChange: function (color) {
-					$input.val(color.hex).css('background-color', hex_to_rgba(color.hex)).trigger('blur');
+					$input.val(color.hex.toUpperCase()).parent().get(0).style.setProperty('--the-color', hex_to_rgba(color.hex));
+					$input.trigger('blur');
 				},
 				// onDone: function(color){},
 				// onOpen: function(color){},

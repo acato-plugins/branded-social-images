@@ -513,6 +513,30 @@
     textarea, input[type=text] {
       width: 100%;
     }
+
+
+    &.input-color {
+      .field-wrap{
+        position: relative;
+        display: inline-block;
+      }
+    }
+
+    input.color-picker {
+      padding-left: 30px;
+      //background-color: var(--the-color);
+      + .swatch {
+        background-color: var(--the-color);
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        bottom: 2px;
+        left: 3px;
+        border-radius: 3px;
+        border: 1px solid #8c8f94;
+        pointer-events: none;
+      }
+    }
   }
 
   .filename + .message {
