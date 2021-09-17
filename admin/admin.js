@@ -274,7 +274,7 @@ function hex_to_rgba(hex) {
 			$(this).parent().find('.filename').html(attachment.filename);
 		});
 
-		editor.find("i.toggle-info").on('click touchend', function(){
+		editor.find("i.toggle-comment,i.toggle-info").on('click touchend', function(){
 			$(this).toggleClass('active');
 		});
 
