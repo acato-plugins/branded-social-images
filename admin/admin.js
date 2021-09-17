@@ -226,11 +226,13 @@ function hex_to_rgba(hex) {
 		// logo size
 		$('#image_logo_size').on('keyup blur paste input', function () {
 			var v = parseInt("0" + $(this).val(), 10);
-			if (v < 5) {
-				v = 5;
+			var logo_min = parseInt( $(this).attr('min'), 10 );
+			var logo_max = parseInt( $(this).attr('max'), 10 );
+			if (v < logo_min) {
+				v = logo_min;
 			}
-			if (v > 95) {
-				v = 95;
+			if (v > logo_max) {
+				v = logo_max;
 			}
 			editor.get(0).style.setProperty('--logo-scale', v);
 
@@ -263,6 +265,8 @@ function hex_to_rgba(hex) {
 		});
 
 		editor.find("#image_logo").on('image:select', function (event, attachment) {
+			editor.get(0).style.setProperty('--logo-width', attachment.width);
+			editor.get(0).style.setProperty('--logo-height', attachment.height);
 			logoeditor.get(0).style.backgroundImage = 'url("' + attachment.url + '")';
 		});
 

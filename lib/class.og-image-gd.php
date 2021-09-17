@@ -280,8 +280,8 @@ class GD {
 		$image_height = imagesy($this->resource);
 
 		// logo overlay
-		$w = $logoOptions['w'] * Plugin::AA;
-		$h = $logoOptions['h'] * Plugin::AA;
+		$w = $logoOptions['w'] * Plugin::AA * 0.5;
+		$h = $logoOptions['h'] * Plugin::AA * 0.5;
 
 		$logoOptions['left'] *= Plugin::AA;
 		$logoOptions['right'] *= Plugin::AA;

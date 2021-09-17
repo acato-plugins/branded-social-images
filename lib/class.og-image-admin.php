@@ -248,6 +248,8 @@ class Admin
 		$logo = $fields['image_logo']['current_value'];
 		if ($logo && is_numeric($logo)) {
 			$logo = wp_get_attachment_image($logo, 'full');
+			preg_match('/width="(.+)"/U', $logo, $width); $width = $width[1];
+			preg_match('/height="(.+)"/U', $logo, $height); $height = $height[1];
 			preg_match('/src="(.+)"/U', $logo, $m);
 			$logo = $m[1];
 		}
@@ -271,6 +273,8 @@ class Admin
 			--line-height: <?php print $text_settings['line-height']; ?>px;
 
 			--logo-scale: <?php print $logo_settings['size']; ?>;
+			--logo-width: <?php print $width; ?>;
+			--logo-height: <?php print $height; ?>;
 		}
 
 		</style><?php

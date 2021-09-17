@@ -679,45 +679,14 @@ class Plugin
 		$this->logo_options['valign'] = $valign;
 		$this->logo_options['halign'] = $halign;
 
-		// update july 2021: logo size is ALWAYS a percentage
-		if (intval($this->logo_options['size']) < 100) {
-			$this->logo_options['size'] = trim($this->logo_options['size'], '%') . '%';
-		}
-
 		// size w and h are bounding box!
-		if (preg_match('/[0-9]+%/', $this->logo_options['size'])) {
-			$this->logo_options['size'] = min(100, intval($this->logo_options['size']));
-			$this->logo_options['size'] = max(0, intval($this->logo_options['size']));
-			$this->logo_options['w'] = $this->logo_options['size'] / 100 * $this->width;
-			$this->logo_options['h'] = $this->logo_options['size'] / 100 * $this->height;
-			$this->logo_options['size'] .= '%';
-		}
-		elseif (preg_match('/([0-9]+)x([0-9]+)/', $this->logo_options['size'], $m)) {
-			$w = $m[1];
-			$w = min($this->width, $w);
-			$this->logo_options['w'] = max(0, $w); // stupid to set 0, but could mean "auto"
-			$h = $m[2];
-			$h = min($this->height, $h);
-			$this->logo_options['h'] = max(0, $h); // stupid to set 0, but could mean "auto"
-		}
-		else { // assume a pixel width
-			$w = intval($this->logo_options['size']);
-			$w = min($this->width, $w);
-			$this->logo_options['w'] = max(0, $w); // stupid to set 0, but could mean "auto"
-			$this->logo_options['h'] = 0; // auto
-		}
-		// resolve "unset"
-		if (!$this->logo_options['w'] && !$this->logo_options['h']) {
-			$this->logo_options['w'] = $sw;
-			$this->logo_options['h'] = $sh;
-		}
-		// resolve "auto"
-		if ($this->logo_options['w'] && !$this->logo_options['h']) { // auto height
-			$this->logo_options['h'] = $this->logo_options['w'] / $sa;
-		}
-		if (!$this->logo_options['w'] && $this->logo_options['h']) { // auto height
-			$this->logo_options['w'] = $this->logo_options['h'] * $sa;
-		}
+		$this->logo_options['size'] = intval($this->logo_options['size']);
+		$this->logo_options['size'] = min(Plugin::MAX_LOGO_SCALE, intval($this->logo_options['size']));
+		$this->logo_options['size'] = max(Plugin::MIN_LOGO_SCALE, intval($this->logo_options['size']));
+		$this->logo_options['w'] = $this->logo_options['size'] / 100 * $sw;
+		$this->logo_options['h'] = $this->logo_options['size'] / 100 * $sh;
+		$this->logo_options['size'] .= '%';
+
 		// resolve aspect issues
 		// -> this makes bounding box actual image size
 		$scale = min($this->logo_options['w'] / $sw, $this->logo_options['h'] / $sh);
@@ -915,7 +884,7 @@ class Plugin
 
 				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'For best results, use PNG with transparency at at least (!) 600 pixels wide and/or high. If you get "gritty" results, use higher values.'],
 				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => 'Default logo position', 'default' => 'bottom-right'],
-				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale', 'comment' => '', 'default' => '20%', 'min' => 5, 'max' => 95, 'step' => 1],
+				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale', 'comment' => '', 'default' => '20%', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
 
 				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The default text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.', 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
 				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Font', 'options' => self::get_font_list(), 'comment' => 'Fonts are stored in your uploads folder. You can manage them there.'],
