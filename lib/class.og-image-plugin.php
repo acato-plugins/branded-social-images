@@ -9,13 +9,18 @@ class Plugin
 	const BSI_IMAGE_NAME = 'social-image.png';
 	const FEATURE_STROKE = 'off';
 	const FEATURE_SHADOW = 'simple';
+	const FEATURE_META_TEXT_OPTIONS = 'off';
+	const FEATURE_META_LOGO_OPTIONS = 'off';
+	const TEXT_AREA_WIDTH = .95;
 	const PADDING = 40;
 	const AA = 2;
 	const STORAGE = 'bsi-uploads';
 	const IMAGE_SIZE_NAME = 'og-image';
-	public const DEFAULTS_PREFIX = '_bsi_default_';
-	public const OPTION_PREFIX = '_bsi_';
-	public const SCRIPT_STYLE_HANDLE = 'bsi';
+	const DEFAULTS_PREFIX = '_bsi_default_';
+	const OPTION_PREFIX = '_bsi_';
+	const SCRIPT_STYLE_HANDLE = 'bsi';
+	const MIN_LOGO_SCALE = 10;
+	const MAX_LOGO_SCALE = 200;
 
 	public $width = 1200;
 	public $height = 630;
@@ -267,6 +272,7 @@ class Plugin
 
 		$this->text_options['font-file'] = $font_file;
 
+		$this->text_options['position'] = get_option(self::DEFAULTS_PREFIX . 'text_position');
 		$this->text_options['color'] = get_option(self::DEFAULTS_PREFIX . 'color');
 		$this->text_options['background-color'] = get_option(self::DEFAULTS_PREFIX . 'background_color');
 		$this->text_options['text-stroke'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke');
@@ -283,7 +289,6 @@ class Plugin
 			$this->text_options['text-shadow-left'] = -2;
 			$this->text_options['text-shadow-top'] = 2;
 		}
-
 		$this->validate_text_options();
 		$this->validate_logo_options();
 	}
@@ -297,6 +302,7 @@ class Plugin
 	{
 		$all_possible_options = $this->default_options();
 		$all_possible_options = $all_possible_options['text_options'];
+		$all_possible_options['position'] = 'left';
 
 		$this->text_options = shortcode_atts($all_possible_options, $this->text_options);
 
@@ -935,6 +941,16 @@ class Plugin
 			unset($options['admin']['text_stroke']);
 			unset($options['meta']['text_stroke_color']);
 			unset($options['meta']['text_stroke']);
+		}
+
+		if ('on' !== Plugin::FEATURE_META_LOGO_OPTIONS) {
+			unset($options['meta']['logo_position']);
+		}
+
+		if ('on' !== Plugin::FEATURE_META_TEXT_OPTIONS) {
+			unset($options['meta']['color']);
+			unset($options['meta']['text_position']);
+			unset($options['meta']['background_color']);
 		}
 
 		if ('on' !== Plugin::FEATURE_SHADOW) {
