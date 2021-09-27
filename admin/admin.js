@@ -238,6 +238,22 @@ function hex_to_rgba(hex) {
 
 		}).trigger('blur');
 
+		// font size
+		$('#text__font_size').on('keyup blur paste input', function () {
+			var v = parseInt("0" + $(this).val(), 10);
+			var fs_min = parseInt( $(this).attr('min'), 10 );
+			var fs_max = parseInt( $(this).attr('max'), 10 );
+			if (v < fs_min) {
+				v = fs_min;
+			}
+			if (v > fs_max) {
+				v = fs_max;
+			}
+			editor.get(0).style.setProperty('--font-size', v + "px");
+			editor.get(0).style.setProperty('--line-height', (v*1.25) + "px");
+
+		}).trigger('blur');
+
 		// sliders
 		$('.add-slider').each(function () {
 			var $input = $(this).find('input');

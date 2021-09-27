@@ -180,7 +180,7 @@ class GD {
 			$text_posY = ( $image_height - $textOptions['top'] - $textOptions['bottom'] ) / 2 - $text_height / 2 + $textOptions['top'];
 		}
 		if ($textOptions['valign'] == 'bottom') {
-			$text_posY = $image_height - $textOptions['bottom'] - $text_height - $p;
+			$text_posY = $image_height - $textOptions['bottom'] - ($text_height / .75) - $p;
 		}
 		if ($textOptions['valign'] == 'top') {
 			$text_posY = $textOptions['top'] + $p;

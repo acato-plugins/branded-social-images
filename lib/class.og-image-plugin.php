@@ -21,6 +21,9 @@ class Plugin
 	const SCRIPT_STYLE_HANDLE = 'bsi';
 	const MIN_LOGO_SCALE = 10;
 	const MAX_LOGO_SCALE = 200;
+	const MIN_FONT_SIZE = 16;
+	const MAX_FONT_SIZE = 64;
+	const DEF_FONT_SIZE = 32;
 
 	public $width = 1200;
 	public $height = 630;
@@ -48,6 +51,7 @@ class Plugin
 
 			$this->text_options['position'] = get_option(self::DEFAULTS_PREFIX . 'text_position', 'top-left');
 			$this->logo_options['position'] = get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right');
+
 			$id = get_the_ID();
 			if ($id) {
 				$overrule_text_position = get_post_meta($id, self::OPTION_PREFIX . 'text_position', true);
@@ -215,6 +219,10 @@ class Plugin
 		$this->text_options['background-color'] = get_option(self::DEFAULTS_PREFIX . 'background_color');
 		$this->text_options['text-stroke'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke');
 		$this->text_options['text-stroke-color'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke_color');
+
+		$this->text_options['font-size'] = get_option(self::OPTION_PREFIX . 'text__font_size', Plugin::DEF_FONT_SIZE);
+		$this->text_options['line-height'] = get_option(self::OPTION_PREFIX . 'text__font_size', Plugin::DEF_FONT_SIZE) * 1.25;
+
 		if ('on' === Plugin::FEATURE_SHADOW) {
 			$this->text_options['text-shadow-color'] = get_option(self::DEFAULTS_PREFIX . 'text_shadow_color');
 			$this->text_options['text-shadow-left'] = get_option(self::DEFAULTS_PREFIX . 'text_shadow_left');
@@ -862,6 +870,7 @@ class Plugin
 
 				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'The default text position', 'options' => self::position_grid(), 'default' => 'center'],
 				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text color', 'default' => '#FFFFFFFF'],
+				'text__font_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Font-size', 'comment' => '', 'default' => Plugin::DEF_FONT_SIZE, 'min' => Plugin::MIN_FONT_SIZE, 'max' => Plugin::MAX_FONT_SIZE, 'step' => 1],
 				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text background color', 'default' => '#66666666'],
 
 				'text_stroke_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'color', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => '#00000000'],

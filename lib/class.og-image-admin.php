@@ -97,7 +97,8 @@ class Admin
 		$defaults['text_options'] = [ // colors are RGBA in hex format
 			'enabled' => 'on',
 			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'font-size' => '32', 'color' => '#ffffffff', 'line-height' => '40',
+			'font-size' => Plugin::DEF_FONT_SIZE,
+			'color' => '#ffffffff', 'line-height' => Plugin::DEF_FONT_SIZE * 1.25,
 			'font-file' => '',
 			'font-family' => '',
 			'font-weight' => 400,
@@ -190,8 +191,7 @@ class Admin
 				'ttf' => self::storage() . '/' . $base . '.ttf',
 			];
 			$weights = implode('|', self::font_name_weights());
-			preg_match("/-({$weights})?(Italic)?$/", $base, $m);
-			if ($m[1]) {
+			if (preg_match("/-({$weights})?(Italic)?$/", $base, $m) && !empty($m[1])) {
 				$weight = array_search($m[1], self::font_name_weights());
 				if ($weight) {
 					$entry['weight'] = $weight;
@@ -347,7 +347,7 @@ class Admin
 						<?php self::render_options($fields, [
 							'text', 'text_enabled',
 							'text_shadow_enabled',
-							'text__font', 'text__ttf_upload', 'text_position', 'color',
+							'text__font', 'text__ttf_upload', 'text_position', 'color', 'text__font_size',
 							'background_color',
 							'text_shadow_color', 'text_shadow_top', 'text_shadow_left',
 							'text_stroke_color', 'text_stroke',
@@ -477,6 +477,7 @@ class Admin
 		$fonts = self::valid_fonts();
 		$faces = [];
 		$storage = self::storage(true);
+
 		foreach ($fonts as $font_base => $font) {
 			if (!$font['valid']) {
 				continue;
@@ -549,8 +550,9 @@ EOCSS;
 
 	private static function weight_to_suffix($weight, $is_italic)
 	{
-		$weight = round($weight/100)*100;
+		$weight = intval(round($weight/100)*100);
 		$weights = self::font_name_weights();
+
 		if (!array_key_exists($weight, $weights) || (/* Special case; RegularItalic is just called Italic */ 400 == $weight && $is_italic)) {
 			$suffix = '';
 		}
