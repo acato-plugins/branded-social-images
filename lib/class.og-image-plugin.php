@@ -24,6 +24,9 @@ class Plugin
 	const MIN_FONT_SIZE = 16;
 	const MAX_FONT_SIZE = 64;
 	const DEF_FONT_SIZE = 32;
+	const PLUGIN_URL_WPORG = 'https://wordpress.org/plugins/branded-social-images/';
+	const CLEARSITE_URL_INFO = 'https://www.clearsite.nl/';
+	const CLEARSITE_URL_CONTACT = 'https://wordpress.org/support/plugins/branded-social-images/';
 
 	public $width = 1200;
 	public $height = 630;
@@ -217,6 +220,7 @@ class Plugin
 		$this->text_options['position'] = get_option(self::DEFAULTS_PREFIX . 'text_position');
 		$this->text_options['color'] = get_option(self::DEFAULTS_PREFIX . 'color');
 		$this->text_options['background-color'] = get_option(self::DEFAULTS_PREFIX . 'background_color');
+		$this->text_options['background-enabled'] = get_option(self::DEFAULTS_PREFIX . 'background_enabled');
 		$this->text_options['text-stroke'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke');
 		$this->text_options['text-stroke-color'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke_color');
 
@@ -856,22 +860,23 @@ class Plugin
 
 		$options = [
 			'admin' => [
-				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => 'The default OG:Image for any page/post/... that has no OG:Image defined.', 'info-icon' => 'dashicons-info', 'comment' => 'You can use JPEG and PNG.', 'info' => $image_comment],
-				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use the WordPress Featured image, if selected, before using the default image selected above.', 'default' => 'on'],
+				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => 'Fallback OG:ImageUsed for any page/post that has no OG image selected.', 'info-icon' => 'dashicons-info', 'comment' => 'You can use JPEG and PNG.', 'info' => $image_comment],
+				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use the WordPress Featured image.', 'default' => 'on'],
 
 				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels. Use a transparent PNG for best results.'],
 				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => 'Default logo position', 'default' => 'bottom-right'],
 				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale', 'comment' => '', 'default' => '20%', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
 
 				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The default text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.', 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
-				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Font', 'options' => self::get_font_list()],
-				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf', 'label' => 'Font upload', 'upload' => 'Upload .ttf file'],
+				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Select a font', 'options' => self::get_font_list()],
+				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf', 'label' => 'Font upload', 'upload' => 'Upload .ttf file', 'info-icon' => 'dashicons-info', 'info' => 'Custom font must be a .ttf file. You\'re responsible for the proper permissions and usage rights of the font.'],
 //				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
 
 				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'The default text position', 'options' => self::position_grid(), 'default' => 'center'],
 				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text color', 'default' => '#FFFFFFFF'],
 				'text__font_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Font-size', 'comment' => '', 'default' => Plugin::DEF_FONT_SIZE, 'min' => Plugin::MIN_FONT_SIZE, 'max' => Plugin::MAX_FONT_SIZE, 'step' => 1],
 				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text background color', 'default' => '#66666666'],
+				'background_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a background', 'value' => 'on', 'default' => 'on'],
 
 				'text_stroke_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'color', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => '#00000000'],
 				'text_stroke' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Default stroke width', 'default' => 0],

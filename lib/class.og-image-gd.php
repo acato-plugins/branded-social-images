@@ -92,7 +92,7 @@ class GD {
 
 		if ($debug) { print 'TextOptions debug: <pre>'; var_dump($textOptions); }
 		$background_color = false;
-		if ($textOptions['background-color']) {
+		if ('on' === $textOptions['background-enabled'] && $textOptions['background-color']) {
 			$background_color_rgba = $this->manager->hex_to_rgba($textOptions['background-color'], true);
 			if ($background_color_rgba[3] < 127) { // not 100% transparent
 				//		var_dump($background_color);exit;
@@ -166,6 +166,7 @@ class GD {
 		$textOptions['top'] *= Plugin::AA;
 		$textOptions['bottom'] *= Plugin::AA;
 
+		$text_posX = $text_posY = 0;
 		if ($textOptions['halign'] == 'center') {
 			$text_posX = ( $image_width - $textOptions['left'] - $textOptions['right']) / 2 - $text_width / 2 + $textOptions['left'];
 		}

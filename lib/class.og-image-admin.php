@@ -57,6 +57,13 @@ class Admin
 		add_action('save_post', [static::class, 'save_meta_data']);
 		add_action('add_meta_boxes', [static::class, 'add_meta_boxes']);
 		add_action('admin_notices', [static::class, 'admin_notices']);
+
+		add_action('bsi_footer', function() {
+			?><p><?php print sprintf('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.
+				Please let us know what you think of this plugin and what you wish to see in the Pro version. <a
+					href="%s">Contact us here</a>.',
+				Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO, Plugin::CLEARSITE_URL_CONTACT); ?></p><?php
+		});
 	}
 
 	public static function admin_icon(): string
@@ -164,9 +171,7 @@ class Admin
 				</form>
 			</div>
 
-			<p>Branded Social Images is a free plugin by Clearsite. We are working on a full-featured Pro version,
-				please let us know what you think of this plugin and what you wish to see in the Pro version. <a
-					href="mailto:branded-social-images@clearsite.nl">Contact us here</a>.</p>
+			<?php do_action('bsi_footer'); ?>
 		</div>
 		<?php
 	}
@@ -346,9 +351,11 @@ class Admin
 					<div class="inner">
 						<?php self::render_options($fields, [
 							'text', 'text_enabled',
+							'color',
 							'text_shadow_enabled',
-							'text__font', 'text__ttf_upload', 'text_position', 'color', 'text__font_size',
-							'background_color',
+							'text__font', 'text__ttf_upload', 'text_position',
+							'text__font_size',
+							'background_enabled', 'background_color',
 							'text_shadow_color', 'text_shadow_top', 'text_shadow_left',
 							'text_stroke_color', 'text_stroke',
 							'text__google_download',
@@ -455,12 +462,8 @@ class Admin
 	public static function meta_panel()
 	{
 		$fields = Plugin::field_list()['meta'];
-		self::show_editor($fields); ?>
-
-		<p>Branded Social Images is a free plugin by Clearsite. We are working on a full-featured Pro version,
-			please let us know what you think of this plugin and what you wish to see in the Pro version. <a
-				href="mailto:branded-social-images@clearsite.nl">Contact us here</a>.</p>
-		<?php
+		self::show_editor($fields);
+		do_action('bsi_footer');
 	}
 
 	public static function admin_notices()

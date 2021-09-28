@@ -282,7 +282,7 @@
       @media screen and (max-width: 1200px) {
         #branded-social-images-editor .area--options .inner > span, #branded-social-images-editor .area--settings .inner > span {
           width: 100%; } }
-      #branded-social-images-editor .area--options .inner > span.name-text_enabled, #branded-social-images-editor .area--options .inner > span.name-text_shadow_enabled, #branded-social-images-editor .area--settings .inner > span.name-text_enabled, #branded-social-images-editor .area--settings .inner > span.name-text_shadow_enabled {
+      #branded-social-images-editor .area--options .inner > span.name-text_enabled, #branded-social-images-editor .area--settings .inner > span.name-text_enabled {
         width: 100%; }
 
 #branded-social-images-editor .area--options {
