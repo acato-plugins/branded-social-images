@@ -146,7 +146,7 @@ class GD {
 		$text = str_replace('\\r', '', $text);
 		$text = $this->wrapTextByPixels($text, $image_width * $this->text_area_width, $fontSize, $font);
 
-		$textDim = imagettfbbox($fontSize, 0, $font, implode(' ', explode("\n", $text)));
+		$textDim = imagettfbbox($fontSize, 0, $font, implode(' ', explode("\n", $text.'Hj'))); // Hj is to make sure the correct line-height is calculated.
 		$line_height = $textDim[1] - $textDim[7];
 
 		$lines = explode("\n", $text);
