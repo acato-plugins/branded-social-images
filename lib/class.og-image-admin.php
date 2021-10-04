@@ -9,7 +9,7 @@ use RankMath;
 
 class Admin
 {
-	const ICON = 'clearsite-logo.svg';
+	const ICON = 'logo.svg';
 	const ADMIN_SLUG = 'branded-social-images';
 	const DO_NOT_RENDER = 'do_not_render';
 
@@ -79,12 +79,11 @@ class Admin
 					}
 
 					.toplevel_page_branded-social-images .wp-menu-image svg {
-						width: 80%;
 						height: 110%;
 					}
 
-					.wp-not-current-submenu:not(:hover) .wp-menu-image svg path {
-						fill: #eee;
+					.wp-menu-image svg path {
+						fill: currentColor;
 					}
 				</style><?php
 			});
