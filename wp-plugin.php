@@ -42,6 +42,24 @@ add_action('check_ajax_referer', function($action){
 });
 
 /**
+ * Save permalinks on plugin activation
+ */
+
+register_activation_hook( __FILE__, 'bsi_plugin_activation' );
+function bsi_plugin_activation($network_wide) {
+	global $wp_rewrite, $wpdb;
+	$wp_rewrite->flush_rules( true );
+	if ( $network_wide && function_exists( 'is_multisite' ) && is_multisite() ) {
+		$blog_ids = $wpdb->get_col( "SELECT blog_id FROM {$wpdb->base_prefix}blogs" );
+		foreach ( $blog_ids as $blog_id ) {
+			switch_to_blog( $blog_id );
+			$wp_rewrite->flush_rules( true );
+			restore_current_blog();
+		}
+	}
+}
+
+/**
  * Reference list
  * @see https://www.cssscript.com/color-picker-alpha-selection/
  */
