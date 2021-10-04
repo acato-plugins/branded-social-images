@@ -164,11 +164,11 @@ function hex_to_rgba(hex) {
 	})(jQuery);
 
 	$(document).ready(function () {
-		$('div[contenteditable]').keydown(function (e) {
+		$('.editable[contenteditable]').keydown(function (e) {
 			// trap the return key being pressed
 			if (e.keyCode === 13) {
 				// insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
-				document.execCommand('insertHTML', false, '<br/>');
+				document.execCommand('insertHTML', false, '\n');
 				// prevent the default behaviour of return key pressed
 				return false;
 			}

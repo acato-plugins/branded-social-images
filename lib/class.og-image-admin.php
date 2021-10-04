@@ -327,8 +327,8 @@ class Admin
 				</div>
 				<div class="area--text">
 					<div class="editable-container">
-						<div contenteditable="true"
-							 class="editable"><?php print $fields['text']['current_value']; ?></div>
+						<pre contenteditable="true"
+							 class="editable"><?php print $fields['text']['current_value']; ?></pre>
 						<?php foreach (Plugin::text_fallback_chain() as $type => $text) {
 							?>
 							<div class="text-alternate type-<?php print $type; ?>"><?php print $text; ?></div><?php
@@ -447,7 +447,7 @@ class Admin
 				if (is_array($values)) {
 					foreach ($values as $key => $value) {
 						if ($key === 'text' && !empty($value)) {
-							$value = strip_tags($value, '<br>');
+							$value = strip_tags($value);
 						}
 						if ($key === 'text' && self::text_is_identical($value, self::array_first(Plugin::text_fallback_chain()))) {
 							$value = '';
