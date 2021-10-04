@@ -252,7 +252,7 @@ class Image {
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if (!$image_id && ('yes' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if (!$image_id && ('on' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($post_id);
 		}
