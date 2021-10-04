@@ -46,7 +46,6 @@ class Plugin
 			return $vars;
 		});
 
-		// phase 1; add the endpoints
 		add_action('wp', function () {
 			$this->setup_defaults();
 			$image_layers = self::image_fallback_chain(true);
@@ -121,6 +120,13 @@ class Plugin
 
 		add_action('init', function () {
 			add_rewrite_endpoint(self::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
+
+			if (get_option( "bsi_needs_rewrite_rules")) {
+				delete_option( "bsi_needs_rewrite_rules");
+				global $wp_rewrite;
+				update_option( "rewrite_rules", FALSE );
+				$wp_rewrite->flush_rules( true );
+			}
 			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
 			add_image_size(Plugin::IMAGE_SIZE_NAME . '@' . Plugin::AA . 'x', $this->width * Plugin::AA, $this->height * Plugin::AA, true);
 		});

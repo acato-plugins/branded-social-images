@@ -9,7 +9,7 @@
  * License: GPL2
  */
 
-namespace Clearsite\Plugins\OGImage;
+use Clearsite\Plugins\OGImage\Plugin;
 
 require_once __DIR__ . '/lib/class.og-image-plugin.php';
 require_once __DIR__ . '/lib/class.og-image-admin.php';
@@ -42,18 +42,18 @@ add_action('check_ajax_referer', function($action){
 });
 
 /**
- * Save permalinks on plugin activation
+ * On plugin activation, register a flag to rewrite permalinks.
+ * THe plugin will do so after adding the post-endpoint.
  */
-
 register_activation_hook( __FILE__, 'bsi_plugin_activation' );
 function bsi_plugin_activation($network_wide) {
-	global $wp_rewrite, $wpdb;
-	$wp_rewrite->flush_rules( true );
-	if ( $network_wide && function_exists( 'is_multisite' ) && is_multisite() ) {
-		$blog_ids = $wpdb->get_col( "SELECT blog_id FROM {$wpdb->base_prefix}blogs" );
-		foreach ( $blog_ids as $blog_id ) {
-			switch_to_blog( $blog_id );
-			$wp_rewrite->flush_rules( true );
+	global $wpdb;
+	update_option( "bsi_needs_rewrite_rules", true );
+	if ($network_wide && function_exists('is_multisite') && is_multisite()) {
+		$blog_ids = $wpdb->get_col("SELECT blog_id FROM {$wpdb->base_prefix}blogs");
+		foreach ($blog_ids as $blog_id) {
+			switch_to_blog($blog_id);
+			update_option( "bsi_needs_rewrite_rules", true );
 			restore_current_blog();
 		}
 	}
