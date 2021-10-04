@@ -32,5 +32,16 @@ add_action('plugins_loaded', function(){
 }, ~PHP_INT_MAX);
 
 /**
+ * This will fix the "You are not allowed to upload to this post" error when in admin settings.
+ * This only happens sometimes, but once it happens, it keeps happening.
+ */
+add_action('check_ajax_referer', function($action){
+	if ('media-form' === $action && !empty($_REQUEST['action']) && 'upload-attachment' === $_REQUEST['action'] && isset($_REQUEST['post_id']) && empty($_REQUEST['post_id'])) {
+		unset($_REQUEST['post_id']);
+	}
+});
+
+/**
+ * Reference list
  * @see https://www.cssscript.com/color-picker-alpha-selection/
  */
