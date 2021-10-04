@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: clearsite
-Donate link: paypal.me/clearsite
+Donate link: https://paypal.me/clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
