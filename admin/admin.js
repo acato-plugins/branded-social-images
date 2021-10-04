@@ -304,9 +304,9 @@ function hex_to_rgba(hex) {
 			editor.attr('data-font', $(this).val());
 		}).trigger('blur'); // font face is defined in *admin.php
 
-		editor.on('inview', function(){
-			$('.editable').focus();
-		});
+		// editor.on('inview', function(){
+		// 	$('.editable').focus();
+		// });
 
 		editor.find('#text_enabled').on('change', function () {
 			$('.area--text').toggleClass('invisible', !$(this).is(':checked'));
