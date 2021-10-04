@@ -1052,8 +1052,9 @@ class Plugin
 			$args = array(
 				'id' => Admin::ADMIN_SLUG . '-view',
 				'title' => 'View Social Image',
-				'href' => '#',
+				'href' => get_permalink( get_the_ID() ) . Plugin::BSI_IMAGE_NAME .'/',
 				'meta' => [
+					'target' => '_blank',
 					'class' => Admin::ADMIN_SLUG . '-view'
 				]
 			);

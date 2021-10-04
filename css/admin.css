@@ -248,6 +248,7 @@
     padding: var(--text-padding);
     text-shadow: var(--text-shadow-left) var(--text-shadow-top) 0 var(--text-shadow-color);
     font-family: var(--text-font);
+    letter-spacing: var(--letter-spacing);
     font-weight: normal;
     font-style: normal; }
 

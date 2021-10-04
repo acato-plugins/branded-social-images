@@ -287,6 +287,7 @@ class Admin
 			--text-background: <?php print Admin::hex_to_rgba($text_settings['background-color'], true); ?>;
 			--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
 			--text-font: <?php print $text_settings['font-file']; ?>;
+			--letter-spacing: 1px;
 			--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
 			--text-shadow-top: <?php print intval($text_settings['text-shadow-top']); ?>px;
 			--text-shadow-left: <?php print intval($text_settings['text-shadow-left']); ?>px;
