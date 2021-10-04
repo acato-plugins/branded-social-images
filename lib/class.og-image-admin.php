@@ -113,6 +113,7 @@ class Admin
 			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
 			'padding' => '10', // background padding
 			'background-color' => '#66666666',
+			'background-enabled' => 'on',
 			'text-shadow-color' => '',
 			'text-shadow-left' => '2',
 			'text-shadow-top' => '-2',
@@ -124,7 +125,7 @@ class Admin
 			'enabled' => 'on',
 			'position' => 'bottom-right',
 			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'size' => get_option(Plugin::OPTION_PREFIX . 'image_logo_size', '20%'),
+			'size' => get_option(Plugin::OPTION_PREFIX . 'image_logo_size', '100'),
 		];
 
 		// more freemium options to consider;

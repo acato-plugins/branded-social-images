@@ -209,6 +209,7 @@ class Plugin
 		// thi sis currently THE size for OG images.
 		$defaults = $this->default_options();
 		$this->logo_options = $defaults['logo_options'];
+		$this->logo_options['position'] = get_option(self::DEFAULTS_PREFIX . 'logo_position');
 
 		// text options
 		$this->text_options = $defaults['text_options'];
@@ -220,7 +221,7 @@ class Plugin
 		$this->text_options['position'] = get_option(self::DEFAULTS_PREFIX . 'text_position');
 		$this->text_options['color'] = get_option(self::DEFAULTS_PREFIX . 'color');
 		$this->text_options['background-color'] = get_option(self::DEFAULTS_PREFIX . 'background_color');
-		$this->text_options['background-enabled'] = get_option(self::DEFAULTS_PREFIX . 'background_enabled');
+		$this->text_options['background-enabled'] = get_option(self::DEFAULTS_PREFIX . 'background_enabled', 'on');
 		$this->text_options['text-stroke'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke');
 		$this->text_options['text-stroke-color'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke_color');
 
@@ -865,7 +866,7 @@ class Plugin
 
 				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels. Use a transparent PNG for best results.'],
 				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => 'Default logo position', 'default' => 'bottom-right'],
-				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale', 'comment' => '', 'default' => '20%', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
+				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale (%)', 'comment' => '', 'default' => '100', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
 
 				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The default text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.', 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
 				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Select a font', 'options' => self::get_font_list()],
@@ -874,7 +875,7 @@ class Plugin
 
 				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'The default text position', 'options' => self::position_grid(), 'default' => 'center'],
 				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text color', 'default' => '#FFFFFFFF'],
-				'text__font_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Font-size', 'comment' => '', 'default' => Plugin::DEF_FONT_SIZE, 'min' => Plugin::MIN_FONT_SIZE, 'max' => Plugin::MAX_FONT_SIZE, 'step' => 1],
+				'text__font_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Font-size (px)', 'comment' => '', 'default' => Plugin::DEF_FONT_SIZE, 'min' => Plugin::MIN_FONT_SIZE, 'max' => Plugin::MAX_FONT_SIZE, 'step' => 1],
 				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text background color', 'default' => '#66666666'],
 				'background_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a background', 'value' => 'on', 'default' => 'on'],
 
