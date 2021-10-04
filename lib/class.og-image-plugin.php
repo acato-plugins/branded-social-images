@@ -975,6 +975,12 @@ class Plugin
 
 				$layers['scraped'] = trim($title, ' />' . $quote);
 			}
+			if ($page && !$title && false !== strpos($page, '<title')) {
+				preg_match('/<title>(.+)<\/title>/U', $page, $m);
+				$title = $m[1];
+
+				$layers['scraped'] = trim($title);
+			}
 
 			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text');
 		}

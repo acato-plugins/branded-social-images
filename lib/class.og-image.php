@@ -219,6 +219,13 @@ class Image {
 				$text = trim($title, ' />' . $quote);
 				$type = 'scraped';
 			}
+			if ($head && !$text && false !== strpos($head, '<title')) {
+				preg_match('/<title>(.+)<\/title>/U', $head, $m);
+				$title = $m[1];
+
+				$text = trim($title);
+				$type = 'scraped';
+			}
 		}
 
 		if (!$text) {
