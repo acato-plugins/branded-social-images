@@ -174,22 +174,34 @@ function hex_to_rgba(hex) {
 			}
 		});
 
-		// bind editable
 		var texteditor = editor.find('.editable');
 		var texteditor_target = editor.find('textarea.editable-target');
+
+		editor.find('h2 .toggle').on('click touchend', function() {
+			$(this).closest('[class^="area"]').toggleClass('closed');
+		});
 
 		// on load set text to editable
 		texteditor.html(texteditor_target.val());
 
 		// update target when edited
-		texteditor.on('blur keyup paste input', function () {
+
+		// native JS solution for paste-fix
+		texteditor.get(0).addEventListener('paste', function(e) {
+			e.preventDefault();
+			var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+			texteditor_target.val(text).trigger('keyup');
+		});
+
+		texteditor.on('blur keyup input', function () {
 			texteditor_target.val(texteditor.html().replace(/&nbsp;<br/g, '<br'));
 		});
 
 		// update editor when target edited
 		texteditor_target.on('blur keyup paste', function () {
-			texteditor.html(texteditor_target.val().replace(/\n/g, '<br />'));
+			texteditor.html(texteditor_target.val());
 		});
+
 
 		// text color
 		editor.find('#color').on('keyup blur paste input', function () {
@@ -262,7 +274,7 @@ function hex_to_rgba(hex) {
 		// sliders
 		$('.add-slider').each(function () {
 			var $input = $(this).find('input');
-			$input.attr('size', 4).on('keyup change', function () {
+			$input.attr('size', 4).on('blur change', function () {
 				$(this).next('.a-slider').slider("value", parseInt($(this).val(), 10));
 				$(this).trigger('input');
 			}).after('<div class="a-slider"></div>');

@@ -226,6 +226,10 @@
     .editable-container {
       text-align: center;
       position: relative;
+      pre {
+        margin: 0;
+        white-space: break-spaces;
+      }
     }
 
     &.invisible {
@@ -336,19 +340,70 @@
 
   .settings {
     display: grid;
+    gap: 20px;
+    margin-top: 20px;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: "options settings";
+    grid-template-areas: "settings options";
     width: 1200px;
     @media screen and (max-width: 1920px) {
     }
-    @media screen and (max-width: 1700px) {
+    @media screen and (max-width: 1400px) {
       width: 600px;
       grid-template-columns: 1fr;
-      grid-template-areas: "options" "settings";
+      grid-template-areas: "settings" "options" ;
     }
   }
 
   .area--options, .area--settings {
+    border-radius: 7px;
+    h2 {
+      background: #fcfcfc;
+      border: 1px solid #ddd;
+      display: block;
+      margin: 0;
+      padding: 1em 30px;
+      border-top-left-radius: 7px;
+      border-top-right-radius: 7px;
+      position: relative;
+      .toggle {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border: 11px solid transparent;
+        border-left-width: 6px;
+        border-right-width: 6px;
+        border-top-color: currentColor;
+        position: absolute;
+        transform: rotate(180deg);
+        // following padding;
+        top: 0.5em;
+        right: 30px;
+        &:hover {
+          border-top-color: #888;
+          cursor: pointer;
+        }
+      }
+    }
+    &.closed {
+      h2 .toggle {
+        top: 1em;
+        transform: rotate(0);
+      }
+    }
+    .inner {
+      border-bottom-left-radius: 7px;
+      border-bottom-right-radius: 7px;
+      padding: 20px;
+      background: white ;
+      border: 1px solid #ddd;
+      border-top: 0;
+    }
+    &.closed .inner {
+      overflow: hidden;
+      height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
     display: flex;
     flex-direction: column;
       .inner {
@@ -361,7 +416,7 @@
           @media screen and (max-width: 1200px) {
             width: 100%;
           }
-          &.name-text_enabled {
+          &.name-text_enabled, &.name-image, &.name-image_logo {
             width: 100%;
           }
         }
@@ -465,6 +520,16 @@
     box-sizing: border-box;
     padding: 10px;
     display: inline-block;
+    &.name-text_shadow_enabled, &.name-background_enabled {
+      > .field-wrap:first-child {
+      &:before {
+        content: '';
+        display: block;
+        width: 100%;
+        margin-top: 2em;
+      }
+      }
+    }
 
     .comment {
       display: block
@@ -498,6 +563,7 @@
     > label:first-child {
       display: block;
       font-weight: bold;
+      line-height: 2;
     }
 
     textarea, input[type=text] {

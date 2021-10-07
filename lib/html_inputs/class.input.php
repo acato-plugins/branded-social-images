@@ -10,6 +10,8 @@ class Input {
 	protected $name;
 	protected $id;
 	protected $label;
+	protected $info;
+	protected $info_icon;
 	protected $comment;
 	protected $comment_icon;
 	protected $atts = [];
@@ -183,7 +185,13 @@ class Input {
 	{
 		$comment = '';
 		if ($this->comment) {
-			$comment = '<span class="comment">'. $this->comment .'</span>';
+			$comment = '<span class="comment">'. $this->comment;
+			if ($this->the_info()){
+				$comment .= $this->the_info();
+				$this->info = false;
+				$this->info_icon = false;
+			}
+			$comment .= '</span>';
 		}
 		if (!empty($this->comment_icon)) {
 			$comment = '<i class="toggle-comment dashicons-before '. $this->comment_icon .'"></i>' . $comment;

@@ -30,7 +30,7 @@ class checkbox extends Input {
 
 		$atts = $this->attributes(); // builds HTML attributes
 
-		return '<input type="hidden" name="'. $this->atts['name'] .'" value="off" />' .
-			'<input type="'. $this->type .'" '. $atts .'>' . ($this->empty ? '' : $this->content . '</'. $this->type .'>') . $label;
+		return '<span class="field-wrap"><input type="hidden" name="'. $this->atts['name'] .'" value="off" />' .
+			'<input type="'. $this->type .'" '. $atts .'>' . ($this->empty ? '' : $this->content . '</'. $this->type .'>') . $label .'</span>';
 	}
 }

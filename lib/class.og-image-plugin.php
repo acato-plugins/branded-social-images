@@ -23,7 +23,7 @@ class Plugin
 	const MAX_LOGO_SCALE = 200;
 	const MIN_FONT_SIZE = 16;
 	const MAX_FONT_SIZE = 64;
-	const DEF_FONT_SIZE = 32;
+	const DEF_FONT_SIZE = 40;
 	const PLUGIN_URL_WPORG = 'https://wordpress.org/plugins/branded-social-images/';
 	const CLEARSITE_URL_INFO = 'https://www.clearsite.nl/';
 	const CLEARSITE_URL_CONTACT = 'https://wordpress.org/support/plugins/branded-social-images/';
@@ -196,6 +196,11 @@ class Plugin
 					// overrule Yoast SEO
 					add_filter('wpseo_opengraph_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
 					add_filter('wpseo_twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+
+					// overrule WordPress JetPack recently acquired SocialImageGenerator, because, hey, we were here first!
+					add_filter('sig_image_url', function($url, $post_id) {
+						return static::get_og_image_url($post_id);
+					}, PHP_INT_MAX, 2);
 
 					// if an overrule did not take, we need to define our own.
 					add_action('wp_head', [static::class, 'late_head'], PHP_INT_MAX);
@@ -684,6 +689,11 @@ class Plugin
 		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::BSI_IMAGE_NAME . '/'; // yes, slash, WP will add it with a redirect anyway
 	}
 
+	public static function get_og_image_url($post_id)
+	{
+		return get_permalink($post_id) ? get_permalink($post_id) . self::BSI_IMAGE_NAME .'/' : false;
+	}
+
 	public static function init()
 	{
 		$instance = self::getInstance();
@@ -853,11 +863,7 @@ class Plugin
 			$once = true;
 		}
 
-		$image_comment = '';
-		if ($support_webp) {
-			$image_comment = 'You can upload WEBP but you MUST upload your image in 1200x630 pixels EXACTLY! <br />';
-		}
-		$image_comment .= 'The following process is used to determine the OG Image (in order of importance):
+		$image_comment = 'The following process is used to determine the OG Image (in order of importance):
 <ol><li>Branded Social Image on page/post</li>';
 		if (defined('WPSEO_VERSION')) {
 			$image_comment .= '<li>Yoast Social image on page/post</li>';
@@ -867,22 +873,22 @@ class Plugin
 
 		$options = [
 			'admin' => [
-				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => 'Fallback OG:ImageUsed for any page/post that has no OG image selected.', 'info-icon' => 'dashicons-info', 'comment' => 'You can use JPEG and PNG.', 'info' => $image_comment],
-				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use the WordPress Featured image.', 'default' => 'on'],
+				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => 'Fallback OG:Image.', 'comment' => 'Used for any page/post that has no OG image selected. You can use JPEG and PNG. Recommended size: 1200x630 pixels.'],
+				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use the WordPress Featured image.', 'default' => 'on', 'info-icon' => 'dashicons-info', 'info' => $image_comment],
 
-				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels. Use a transparent PNG for best results.'],
+				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels wide/high. Use a transparent PNG for best results.'],
 				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => 'Default logo position', 'default' => 'bottom-right'],
 				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale (%)', 'comment' => '', 'default' => '100', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
 
-				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The default text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.', 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
-				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Select a font', 'options' => self::get_font_list()],
+				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.', 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
+				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Select a font', 'options' => self::get_font_list(), 'default' => 'Roboto-Regular'],
 				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf', 'label' => 'Font upload', 'upload' => 'Upload .ttf file', 'info-icon' => 'dashicons-info', 'info' => 'Custom font must be a .ttf file. You\'re responsible for the proper permissions and usage rights of the font.'],
 //				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
 
-				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'The default text position', 'options' => self::position_grid(), 'default' => 'center'],
+				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'Text position', 'options' => self::position_grid(), 'default' => 'center'],
 				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text color', 'default' => '#FFFFFFFF'],
 				'text__font_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Font-size (px)', 'comment' => '', 'default' => Plugin::DEF_FONT_SIZE, 'min' => Plugin::MIN_FONT_SIZE, 'max' => Plugin::MAX_FONT_SIZE, 'step' => 1],
-				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text background color', 'default' => '#66666666'],
+				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text background color', 'default' => '#66666666'],
 				'background_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a background', 'value' => 'on', 'default' => 'on'],
 
 				'text_stroke_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'color', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => '#00000000'],
@@ -916,7 +922,7 @@ class Plugin
 				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a logo on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish a logo on this image, or choose a position below'],
 				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'label' => 'Logo position', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
 
-				'image_logo' => ['namespace' => Admin::DO_NOT_RENDER, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels. Use a transparent PNG for best results.', 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
+				'image_logo' => ['namespace' => Admin::DO_NOT_RENDER, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels wide/high. Use a transparent PNG for best results.', 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
 			]
 		];
 
@@ -968,6 +974,7 @@ class Plugin
 		$post_id = get_the_ID();
 		$layers = [];
 		if ($post_id) {
+			$title = '';
 			try {
 				$page = wp_remote_retrieve_body(wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]));
 			} catch (\Exception $e) {
@@ -975,18 +982,20 @@ class Plugin
 			}
 			// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
 			// also; poor excuse for tag parsing. sorry.
-			if ($page && false !== strpos($page, 'og:title')) {
-				preg_match('/og:title.+content=(.)([^\n]+)/', $page, $m);
-				$title = $m[2];
-				$quote = $m[1];
+			if ($page && (false !== strpos($page, 'og:title'))) {
+				if (preg_match('/og:title.+content=(.)([^\n]+)/', $page, $m)) {
+					$title = $m[2];
+					$quote = $m[1];
+					$layers['scraped'] = trim($title, ' />' . $quote);
+				}
 
-				$layers['scraped'] = trim($title, ' />' . $quote);
 			}
-			if ($page && !$title && false !== strpos($page, '<title')) {
-				preg_match('/<title>(.+)<\/title>/U', $page, $m);
-				$title = $m[1];
+			if ($page && !$title && (false !== strpos($page, '<title'))) {
+				if (preg_match('/<title>(.+)<\/title>/U', $page, $m)) {
+					$title = $m[1];
+					$layers['scraped'] = trim($title);
+				}
 
-				$layers['scraped'] = trim($title);
 			}
 
 			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text');
@@ -1105,6 +1114,11 @@ class Plugin
 			})(jQuery, <?php print json_encode(Admin::ADMIN_SLUG . '-view'); ?>);
 		</script>
 		<?php
+	}
+
+	public static function get_plugin_file()
+	{
+		return str_replace(trailingslashit(WP_PLUGIN_DIR), '', BSI_PLUGIN_FILE);
 	}
 
 	public function hex_to_rgba($hex_color, $alpha_is_gd = false): array

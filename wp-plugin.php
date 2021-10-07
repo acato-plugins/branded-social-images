@@ -1,15 +1,16 @@
 <?php
 /**
  * Plugin Name: Branded Social Images
- * Description: Spice up your OpenGraph Social Images to be meaningful.
+ * Description: The simplest way to brand your social images. Provide all your social images (Open Graph Images) with your brand en text. In just a few clicks.
  * Plugin URI: https://clearsite.nl/plugin/branded-social-images
  * Author: Internetbureau Clearsite
  * Author URI: https://www.clearsite.nl
- * Version: 0.0.4
+ * Version: 0.0.5
  * License: GPL2
  */
 
 use Clearsite\Plugins\OGImage\Plugin;
+define('BSI_PLUGIN_FILE', __FILE__);
 
 require_once __DIR__ . '/lib/class.og-image-plugin.php';
 require_once __DIR__ . '/lib/class.og-image-admin.php';

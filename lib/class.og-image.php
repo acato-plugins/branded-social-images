@@ -79,6 +79,11 @@ class Image {
 		$base_dir = $cache_file['basedir'];
 		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Plugin::BSI_IMAGE_NAME .'.lock';
 		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Plugin::BSI_IMAGE_NAME;
+
+		// debugging
+		if (is_file($cache_file)) { unlink($cache_file); }
+		if (is_file($lock_file)) { unlink($lock_file); }
+
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
 			unlink($lock_file);

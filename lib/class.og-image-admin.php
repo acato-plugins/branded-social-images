@@ -58,9 +58,12 @@ class Admin
 		add_action('add_meta_boxes', [static::class, 'add_meta_boxes']);
 		add_action('admin_notices', [static::class, 'admin_notices']);
 
-		add_action('bsi_footer', function() {
+		add_filter('plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
+		add_filter('network_admin_plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
+
+		add_action('bsi_footer', function () {
 			?><p><?php print sprintf('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.
-				Please let us know what you think of this plugin and what you wish to see in the Pro version. <a
+				Please let us know what you think of this plugin and what you wish to see in future versions. <a
 					href="%s">Contact us here</a>.',
 				Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO, Plugin::CLEARSITE_URL_CONTACT); ?></p><?php
 		});
@@ -103,10 +106,11 @@ class Admin
 		$defaults['text_options'] = [ // colors are RGBA in hex format
 			'enabled' => 'on',
 			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
+			'position' => 'bottom-left',
 			'font-size' => Plugin::DEF_FONT_SIZE,
 			'color' => '#ffffffff', 'line-height' => Plugin::DEF_FONT_SIZE * 1.25,
 			'font-file' => '',
-			'font-family' => '',
+			'font-family' => 'Roboto-Regular',
 			'font-weight' => 400,
 			'font-style' => 'normal',
 			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
@@ -122,7 +126,7 @@ class Admin
 		];
 		$defaults['logo_options'] = [
 			'enabled' => 'on',
-			'position' => 'bottom-right',
+			'position' => 'top-left',
 			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
 			'size' => get_option(Plugin::OPTION_PREFIX . 'image_logo_size', '100'),
 		];
@@ -174,6 +178,23 @@ class Admin
 			<?php do_action('bsi_footer'); ?>
 		</div>
 		<?php
+	}
+
+
+	/**
+	 * Add a link to the settings on the Plugins screen.
+	 */
+	public static function add_settings_link($links, $file)
+	{
+		if ($file === Plugin::get_plugin_file() && current_user_can('edit_posts')) {
+			$url = add_query_arg('page', 'branded-social-images', admin_url('admin.php'));
+			if (!is_array($links)) {
+				$links = (array)$links;
+			}
+			$links[] = sprintf('<a href="%s">%s</a>', $url, __('Settings'));
+		}
+
+		return $links;
 	}
 
 	public static function valid_fonts(): array
@@ -269,8 +290,10 @@ class Admin
 		$logo = $fields['image_logo']['current_value'];
 		if ($logo && is_numeric($logo)) {
 			$logo = wp_get_attachment_image($logo, 'full');
-			preg_match('/width="(.+)"/U', $logo, $width); $width = $width[1];
-			preg_match('/height="(.+)"/U', $logo, $height); $height = $height[1];
+			preg_match('/width="(.+)"/U', $logo, $width);
+			$width = $width[1];
+			preg_match('/height="(.+)"/U', $logo, $height);
+			$height = $height[1];
 			preg_match('/src="(.+)"/U', $logo, $m);
 			$logo = $m[1];
 		}
@@ -301,11 +324,11 @@ class Admin
 
 		</style><?php
 
-			$editor_class = [];
-			$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
-			$editor_class[] = 'text_position-' . (!empty($fields['text_position']) ? $fields['text_position']['current_value'] : $text_settings['position']);
+		$editor_class = [];
+		$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
+		$editor_class[] = 'text_position-' . (!empty($fields['text_position']) ? $fields['text_position']['current_value'] : $text_settings['position']);
 
-			$editor_class = implode(' ', $editor_class);
+		$editor_class = implode(' ', $editor_class);
 		?>
 		<div id="branded-social-images-editor"
 			 class="<?php print $editor_class; ?>"
@@ -339,7 +362,7 @@ class Admin
 			</div>
 			<div class="settings">
 				<div class="area--options">
-					<h2>Image/Logo options</h2>
+					<h2>Image/Logo options<span class="toggle"></span></h2>
 					<div class="inner">
 						<?php self::render_options($fields, [
 							'image', 'image_use_thumbnail',
@@ -348,7 +371,7 @@ class Admin
 					</div>
 				</div>
 				<div class="area--settings">
-					<h2>Text settings</h2>
+					<h2>Text settings<span class="toggle"></span></h2>
 					<div class="inner">
 						<?php self::render_options($fields, [
 							'text', 'text_enabled',
@@ -444,6 +467,7 @@ class Admin
 	{
 
 		if (array_key_exists('branded_social_images', $_POST)) {
+			// save new BSI meta values
 			foreach ($_POST['branded_social_images'] as $namespace => $values) {
 				if (is_array($values)) {
 					foreach ($values as $key => $value) {
@@ -457,6 +481,13 @@ class Admin
 					}
 				}
 			}
+			// clean the cache
+			$cache_file = wp_upload_dir();
+			$base_url = $cache_file['baseurl'];
+			$base_dir = $cache_file['basedir'];
+			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
+			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
+			array_map('unlink', array_merge(glob($lock_files), glob($cache_files)));
 		}
 	}
 
@@ -516,7 +547,7 @@ EOCSS;
 			$tweak = "#branded-social-images-editor[data-font='$font'] .editable-container {\n$tweak}\n";
 		}
 
-		print '<style id="branded-social-images-css">' . implode("\n\n", $faces) . "\n\n" . implode("\n\n", $tweaks) .'</style>';
+		print '<style id="branded-social-images-css">' . implode("\n\n", $faces) . "\n\n" . implode("\n\n", $tweaks) . '</style>';
 	}
 
 	public static function sanitize_fonts()
@@ -537,7 +568,7 @@ EOCSS;
 			}
 		}
 		if ($missed_one) {
-			Plugin::font_rendering_tweaks( true );
+			Plugin::font_rendering_tweaks(true);
 		}
 	}
 
@@ -554,14 +585,14 @@ EOCSS;
 
 	private static function weight_to_suffix($weight, $is_italic)
 	{
-		$weight = intval(round($weight/100)*100);
+		$weight = intval(round($weight / 100) * 100);
 		$weights = self::font_name_weights();
 
 		if (!array_key_exists($weight, $weights) || (/* Special case; RegularItalic is just called Italic */ 400 == $weight && $is_italic)) {
 			$suffix = '';
 		}
 		else {
-			$suffix = $weights[ $weight ];
+			$suffix = $weights[$weight];
 		}
 		if ($is_italic) {
 			$suffix .= 'Italic';
