@@ -1,6 +1,5 @@
 === Plugin Name ===
 Contributors: clearsite
-Donate link: https://paypal.me/clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
@@ -9,43 +8,33 @@ Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
+The simplest way to brand your social images. Provide all your social images (Open Graph images) with your brand en text. In just a few clicks.
 
 == Description ==
 
-This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
-
-For backwards compatibility, if this section is missing, the full length of the short description will be used, and
-Markdown parsed.
-
-A few notes about the sections above:
-
-* "Contributors" is a comma separated list of wordpress.org usernames
-* "Tags" is a comma separated list of tags that apply to the plugin
-* "Requires at least" is the lowest version that the plugin will work on
-* "Tested up to" is the highest version that you've *successfully used to test the plugin*
-* Stable tag must indicate the Subversion "tag" of the latest stable version
-
-Note that the `readme.txt` value of stable tag is the one that is the defining one for the plugin.  If the `/trunk/readme.txt` file says that the stable tag is `4.3`, then it is `/tags/4.3/readme.txt` that'll be used for displaying information about the plugin.
-
-If you develop in trunk, you can update the trunk `readme.txt` to reflect changes in your in-development version, without having that information incorrectly disclosed about the current stable version that lacks those changes -- as long as the trunk's `readme.txt` points to the correct stable tag.
-
-If no stable tag is provided, your users may not get the correct version of your code.
+# Rich social images with just a few clicks.
+This plugin creates rich social images to match with your company’s style. Including a company logo and title.
+The images can either be auto-generated for the entire site or you have the option to overrule this per page/post.
+# Works with every post-type in WordPress!
+For more information, visit our [website](https://clearsite.nl/branded-social-images/ "Our webpage about BRanded Social Images")
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= Does this plugin work with third party plugins like Yoast etc.? =
 
-An answer to that question.
+This plugin will take the title from the page as it is created by ANY SEO-plugin, and if you want, you can change it. E.g. If you have used Yoast-SEO to choose an OG:Image, this plugin will use it as well.
 
-= What about foo bar? =
+= How do I configure the plugin? =
 
-Answer to foo bar dilemma.
+After installing the plugin, go to the "Branded social images" configuration page and set your fallback image, font, -color and -size, add your logo, and you are done.
+
+= How do I add my own fonts? =
+
+To use your own font, you need a .TTF (True Type Font) file. You can get this from any source you wish, just make sure it is an ordinary font (Google's variable fonts will not work). Upload the font with the "Upload custom font" feature.
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Screenshots are stored in the /assets directory.
-2. This is the second screen shot
+1. Enrich your social images, automatically.
 
 == Changelog ==
 
