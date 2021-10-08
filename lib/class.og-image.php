@@ -200,11 +200,16 @@ class Image {
 	public function getTextForPost($post_id)
 	{
 		$enabled = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text_enabled', true);
-		if ('off' === $enabled) { // sorry, this was before normalisation to "on"
+		if ('off' === $enabled) {
 			return '';
 		}
 		$text = '';
 		$type = 'none';
+
+		if (Plugin::setting('use_bare_post_title')) {
+			$type = 'wordpress';
+			$text = apply_filters('the_title', get_the_title($post_id), $post_id);
+		}
 
 		$meta = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text', true);
 		if ($meta) {

@@ -30,6 +30,7 @@ class Plugin
 	const CLEARSITE_URL_INFO = 'https://www.clearsite.nl/';
 	const BSI_URL_CONTACT = 'https://wordpress.org/support/plugins/branded-social-images/';
 	const BSI_URL_CONTRIBUTE = 'https://github.com/clearsite/branded-social-images/';
+	const EXTERNAL_INSPECTOR_NAME = 'opengraph.xyz';
 	const EXTERNAL_INSPECTOR = 'https://www.opengraph.xyz/url/%s/';
 	public const DO_NOT_RENDER = 'do_not_render';
 	public const ADMIN_SLUG = 'branded-social-images';
@@ -1001,29 +1002,38 @@ class Plugin
 	{
 		$post_id = get_the_ID();
 		$layers = [];
+
+		$title = '';
+		if (Plugin::setting('use_bare_post_title')) {
+			$layers['wordpress'] = apply_filters('the_title', get_the_title($post_id), $post_id);
+		}
+
 		if ($post_id) {
-			$title = '';
-			try {
-				$page = wp_remote_retrieve_body(wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]));
-			} catch (\Exception $e) {
-				$page = '';
-			}
-			// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
-			// also; poor excuse for tag parsing. sorry.
-			if ($page && (false !== strpos($page, 'og:title'))) {
-				if (preg_match('/og:title.+content=(.)([^\n]+)/', $page, $m)) {
-					$title = $m[2];
-					$quote = $m[1];
-					$layers['scraped'] = trim($title, ' />' . $quote);
+			if (!$title) {
+				$title = '';
+				try {
+					$page = wp_remote_retrieve_body(wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]));
+				} catch (\Exception $e) {
+					$page = '';
 				}
+				$page = str_replace(["\n", "\r"], '', $page);
+				// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
+				// also; poor excuse for tag parsing. sorry.
+				if ($page && (false !== strpos($page, 'og:title'))) {
+					if (preg_match('/og:title.+content=([\'"])(.+)([\'"])([ \/>])/mU', $page, $m)) {
+						$title = $m[2];
+						$quote = $m[1];
+						$layers['scraped'] = trim($title, ' />' . $quote);
+					}
 
-			}
-			if ($page && !$title && (false !== strpos($page, '<title'))) {
-				if (preg_match('/<title>(.+)<\/title>/U', $page, $m)) {
-					$title = $m[1];
-					$layers['scraped'] = trim($title);
 				}
+				if ($page && !$title && (false !== strpos($page, '<title'))) {
+					if (preg_match('/<title>(.+)<\/title>/mU', $page, $m)) {
+						$title = $m[1];
+						$layers['scraped'] = trim($title);
+					}
 
+				}
 			}
 
 			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text');
@@ -1091,39 +1101,37 @@ class Plugin
 
 	public static function admin_bar($admin_bar)
 	{
-		if (!is_admin()) {
-			if (
-				defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
-				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
-			) {
-				$args = array(
-					'id' => self::ADMIN_SLUG . '-view',
-					'title' => 'View Social Image',
-					'href' => get_permalink(get_the_ID()) . Plugin::BSI_IMAGE_NAME . '/',
-					'meta' => [
-						'target' => '_blank',
-						'class' => self::ADMIN_SLUG . '-view'
-					]
-				);
-				$admin_bar->add_node($args);
-			}
-
+		if (
+			defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
+			true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
+		) {
 			$args = array(
-				'id' => self::ADMIN_SLUG . '-inspector',
-				'title' => self::icon() . 'Inspect Social Image',
-				'href' => Plugin::EXTERNAL_INSPECTOR,
+				'id' => self::ADMIN_SLUG . '-view',
+				'title' => 'View Social Image',
+				'href' => get_permalink(get_the_ID()) . Plugin::BSI_IMAGE_NAME . '/',
 				'meta' => [
 					'target' => '_blank',
-					'title' => 'Shows how this post is shared using an external, unaffiliated service.',
+					'class' => self::ADMIN_SLUG . '-view'
 				]
 			);
-
-			$args['href'] = sprintf($args['href'], urlencode(get_permalink(get_the_ID())));
 			$admin_bar->add_node($args);
-
-			add_action('wp_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
-			add_action('admin_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
 		}
+
+		$args = array(
+			'id' => self::ADMIN_SLUG . '-inspector',
+			'title' => self::icon() . 'Inspect Social Image',
+			'href' => Plugin::EXTERNAL_INSPECTOR,
+			'meta' => [
+				'target' => '_blank',
+				'title' => 'Shows how this post is shared using an external, unaffiliated service.',
+			]
+		);
+
+		$args['href'] = sprintf($args['href'], urlencode(get_permalink(get_the_ID())));
+		$admin_bar->add_node($args);
+
+		add_action('wp_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
+		add_action('admin_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
 	}
 
 	public static function admin_bar_icon_style()
@@ -1161,6 +1169,20 @@ class Plugin
 		}
 
 		return $permission;
+	}
+
+	/**
+	 * @function Will eventually handle all settings, but for now, this allows you to overrule...
+	 * @param $setting string can be one of ...
+	 * $setting = use_bare_post_title, filter = bsi_settings_use_bare_post_title, expects true or false
+	 *                                 with true, the WordPress title is used as default
+	 *                                 with false, the default title is scraped from the HTML and will therefore be
+	 *                                             influenced by plugins like Yoast SEO. This is standard behavior.
+	 * @return mixed|void
+	 */
+	public static function setting($setting)
+	{
+		return apply_filters('bsi_settings_' . $setting, false);
 	}
 
 	public function hex_to_rgba($hex_color, $alpha_is_gd = false): array

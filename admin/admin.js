@@ -340,47 +340,113 @@ function hex_to_rgba(hex) {
 			});
 		});
 
+		var getFeaturedImage = function(){};
+		// window.getFeaturedImage = getFeaturedImage;
+		var subscribe;
+
+		if (jQuery('body').is('.block-editor-page')) {
+
+			var select = wp.data.select;
+			subscribe = wp.data.subscribe;
+
+			var _coreDataSelect, _coreEditorSelect;
+
+			var getMediaById = function(mediaId) {
+				if (!_coreDataSelect) {
+					_coreDataSelect = select("core");
+				}
+
+				return _coreDataSelect.getMedia(mediaId);
+			};
+
+			var getPostAttribute = function(attribute) {
+				if (!_coreEditorSelect) {
+					_coreEditorSelect = select("core/editor");
+				}
+
+				return _coreEditorSelect.getEditedPostAttribute(attribute);
+			};
+
+			getFeaturedImage = function () {
+				const featuredImage = getPostAttribute("featured_media");
+				if (featuredImage) {
+					const mediaObj = getMediaById(featuredImage);
+
+					if (mediaObj) {
+						if (bsi_settings.image_size_name in mediaObj.media_details.sizes) {
+							return mediaObj.media_details.sizes[bsi_settings.image_size_name].source_url;
+						}
+						return mediaObj.source_url;
+					}
+				}
+
+				return null;
+			};
+		}
+		else {
+			getFeaturedImage = function () {
+				return $('#set-post-thumbnail img').attr('src') || '';
+			};
+		}
+
 		// yoast?? no events on the input, use polling
+		var getYoastFacebookImage = function(){
+			var $field = $('#facebook-url-input-metabox');
+			var $preview = $('#wpseo-section-social > div:nth(0) .yoast-image-select__preview--image');
+			if (!$field.length && !$preview.length) {
+				return false;
+			}
+			url = $field.val();
+			if (!url) {
+				url = $preview.attr('src');
+			}
+
+			return url;
+		};
+		var state = { yoast: getYoastFacebookImage(), featured: getFeaturedImage() };
+
+		window.i_state = state;
+		window.i_gyfi = getYoastFacebookImage;
+		window.i_gfi = getFeaturedImage;
+
 		var external_images_maybe_changed = function(){
 			setTimeout(function(){
 				var url;
 				// yoast
 				if ($('.area--background-alternate.image-source-yoast').length) {
-					url = $('#facebook-url-input-metabox').val();
-					if (url) {
-						$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = 'url("' + url + '")';
-					} else {
-						$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = '';
+					url = getYoastFacebookImage();
+					if (state.yoast !== url) {
+						state.yoast = url;
+						if (url) {
+							$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = 'url("' + url + '")';
+						} else {
+							$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = '';
+						}
 					}
 				}
-
-				// Rank Math; latest rank math uses thumbnail ?????
 
 				// thumbnail
 				if ($('.area--background-alternate.image-source-thumbnail').length) {
-					url = $('#set-post-thumbnail img').attr('src') || '';
-					if (url) {
-						$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = 'url("' + url + '")';
-					} else {
-						$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = '';
+					url = getFeaturedImage();
+					if (state.featured !== url) {
+						state.featured = url;
+						if (url) {
+							$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = 'url("' + url + '")';
+						} else {
+							$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = '';
+						}
 					}
 				}
-
-				$('#remove-post-thumbnail').not('.b').addClass('b').on('click touchend', function() { external_images_maybe_changed(); });
 			}, 500);
 		};
-		var bind_file_browser_button = function(){
-			console.log('binding');
-			setTimeout(function (){
-				$('button.media-button-select').on('click touchend', external_images_maybe_changed);
-			}, 1500);
-		};
-		setTimeout(function(){
-			$(document).on('click touchend', '#facebook-remove-button-metabox', external_images_maybe_changed);
-			$(document).on('click touchend', '#remove-post-thumbnail', external_images_maybe_changed);
 
-			$('#facebook-replace-button-metabox').on('click touchend', bind_file_browser_button);
-			$('#set-post-thumbnail').on('click touchend', bind_file_browser_button);
-		}, 1500);
+		if (jQuery('body').is('.block-editor-page')) {
+			var debounce;
+			subscribe(function() {
+				if (debounce) { clearTimeout(debounce); }
+				debounce = setTimeout(function() { external_images_maybe_changed(); }, 1000);
+			});
+		}
+		setInterval(external_images_maybe_changed, 5000);
 	});
 })(jQuery, 'branded-social-images-editor');

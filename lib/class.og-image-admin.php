@@ -35,7 +35,10 @@ class Admin
 		add_action('admin_enqueue_scripts', function () {
 			wp_register_script('vanilla-picker', plugins_url('admin/vanilla-picker.js', __DIR__), [], filemtime(dirname(__DIR__) . '/admin/vanilla-picker.js'), true);
 			wp_enqueue_script(Plugin::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.js', __DIR__), ['jquery', 'jquery-ui-slider', 'vanilla-picker'], filemtime(dirname(__DIR__) . '/admin/admin.js'), true);
-			wp_localize_script(Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', ['preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME]);
+			wp_localize_script(Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', [
+				'preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME,
+				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
+			]);
 
 			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url('css/admin.css', __DIR__), '', filemtime(dirname(__DIR__) . '/css/admin.css'), 'all');
 		});
@@ -64,6 +67,10 @@ class Admin
 				Please let us know what you think of this plugin and what you wish to see in future versions. <a
 					href="%s">Contact us here</a>.',
 				Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO, Plugin::BSI_URL_CONTACT); ?></p><?php
+			if (get_the_ID()) {
+				?><p><?php print sprintf('Use <a href="%s" target="_blank">%s</a> to preview what your social image looks like on social media.',
+					sprintf(Plugin::EXTERNAL_INSPECTOR, urlencode(get_permalink(get_the_ID()))), Plugin::EXTERNAL_INSPECTOR_NAME); ?></p><?php
+			}
 		});
 	}
 
@@ -279,7 +286,6 @@ class Admin
 
 	public static function show_editor($fields)
 	{
-
 		$fields['text']['current_value'] = trim($fields['text']['current_value']) ? $fields['text']['current_value'] : self::array_first(Plugin::text_fallback_chain());
 
 		$text_settings = Plugin::getInstance()->text_options;
@@ -304,7 +310,6 @@ class Admin
 		}
 
 		?>
-		<?php self::render_options($fields, ['disabled']); ?>
 		<style>
 		#branded-social-images-editor {
 			--padding: <?php print Plugin::PADDING; ?>px;
@@ -327,7 +332,8 @@ class Admin
 			--logo-height: <?php print $height; ?>;
 		}
 
-		</style><?php
+		</style>
+		<?php self::render_options($fields, ['disabled']);
 
 		$editor_class = [];
 		$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
@@ -344,7 +350,7 @@ class Admin
 				<?php foreach (Plugin::image_fallback_chain() as $kind => $fallback_image) { ?>
 					<div class="area--background-alternate image-source-<?php print $kind; ?>">
 						<div class="background"
-							 <?php if ($fallback_image) { ?>style="background-image:url('<?php print esc_attr($fallback_image); ?>')"<?php } ?>>
+							<?php if ($fallback_image) { ?>style="background-image:url('<?php print esc_attr($fallback_image); ?>')"<?php } ?>>
 						</div>
 					</div>
 				<?php } ?>
