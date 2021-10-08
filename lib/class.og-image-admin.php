@@ -2,6 +2,8 @@
 
 namespace Clearsite\Plugins\OGImage;
 
+defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+
 use Clearsite\Tools\HTML_Inputs;
 use RankMath;
 
@@ -9,10 +11,6 @@ use RankMath;
 
 class Admin
 {
-	const ICON = 'logo.svg';
-	const ADMIN_SLUG = 'branded-social-images';
-	const DO_NOT_RENDER = 'do_not_render';
-
 	public $storage = '';
 
 	public function __construct()
@@ -43,7 +41,7 @@ class Admin
 		});
 
 		add_action('admin_menu', function () {
-			add_menu_page('Branded Social Images', 'Branded Social Images', 'edit_posts', self::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
+			add_menu_page('Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
 		});
 
 		add_action('admin_init', [static::class, 'sanitize_fonts']);
@@ -65,7 +63,7 @@ class Admin
 			?><p><?php print sprintf('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.
 				Please let us know what you think of this plugin and what you wish to see in future versions. <a
 					href="%s">Contact us here</a>.',
-				Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO, Plugin::CLEARSITE_URL_CONTACT); ?></p><?php
+				Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO, Plugin::BSI_URL_CONTACT); ?></p><?php
 		});
 	}
 
@@ -91,13 +89,13 @@ class Admin
 				</style><?php
 			});
 		}
-		if (preg_match('/\.svg$/', static::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . static::ICON))) {
-			return '" alt="" />' . file_get_contents(dirname(__DIR__) . '/img/' . basename('/' . static::ICON)) . '<link href="';
+		if (preg_match('/\.svg$/', Plugin::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON))) {
+			return '" alt="" />' . file_get_contents(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON)) . '<link href="';
 		}
-		if (preg_match('/\.svg$/', static::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . static::ICON))) {
-			return plugins_url('/img/' . basename('/' . static::ICON), __DIR__);
+		if (preg_match('/\.svg$/', Plugin::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON))) {
+			return plugins_url('/img/' . basename('/' . Plugin::ICON), __DIR__);
 		}
-		return static::ICON;
+		return Plugin::ICON;
 	}
 
 	public static function base_settings(): array
@@ -186,12 +184,19 @@ class Admin
 	 */
 	public static function add_settings_link($links, $file)
 	{
-		if ($file === Plugin::get_plugin_file() && current_user_can('edit_posts')) {
+		if ($file === Plugin::get_plugin_file() && current_user_can(Plugin::get_management_permission())) {
+			// add setting link for anyone that is allowed to alter the settings.
 			$url = add_query_arg('page', 'branded-social-images', admin_url('admin.php'));
 			if (!is_array($links)) {
 				$links = (array)$links;
 			}
 			$links[] = sprintf('<a href="%s">%s</a>', $url, __('Settings'));
+
+			// add support link
+			$links[] = sprintf('<a href="%s">%s</a>', Plugin::BSI_URL_CONTACT, __('Support'));
+
+			// add contribute link
+			$links[] = sprintf('<a href="%s">%s</a>', Plugin::BSI_URL_CONTRIBUTE, __('Contribute'));
 		}
 
 		return $links;
@@ -362,7 +367,7 @@ class Admin
 			</div>
 			<div class="settings">
 				<div class="area--options">
-					<h2>Image/Logo options<span class="toggle"></span></h2>
+					<h2>Image options<span class="toggle"></span></h2>
 					<div class="inner">
 						<?php self::render_options($fields, [
 							'image', 'image_use_thumbnail',
@@ -411,7 +416,7 @@ class Admin
 
 	private static function render_option($option_name, $option_atts)
 	{
-		if (!empty($option_atts['namespace']) && $option_atts['namespace'] == self::DO_NOT_RENDER) {
+		if (!empty($option_atts['namespace']) && $option_atts['namespace'] == Plugin::DO_NOT_RENDER) {
 			return;
 		}
 		print '<span data-name="' . esc_attr($option_name) . '" class="input-wrap name-' . esc_attr($option_name) . ' input-' . $option_atts['type'] . (!empty($option_atts['class']) ? str_replace(' ', ' wrap-', ' ' . $option_atts['class']) : '') . '">';
@@ -455,7 +460,7 @@ class Admin
 		$post_types = apply_filters('bsi_post_types', ['post', 'page']);
 		foreach ($post_types as $post_type) {
 			add_meta_box(
-				self::ADMIN_SLUG,
+				Plugin::ADMIN_SLUG,
 				'Branded Social Images',
 				[static::class, 'meta_panel'],
 				$post_type
@@ -468,9 +473,14 @@ class Admin
 
 		if (array_key_exists('branded_social_images', $_POST)) {
 			// save new BSI meta values
+			$valid_post_keys = Plugin::get_valid_POST_keys('meta');
+
 			foreach ($_POST['branded_social_images'] as $namespace => $values) {
 				if (is_array($values)) {
 					foreach ($values as $key => $value) {
+						if (!in_array($key, $valid_post_keys[ $namespace ])) {
+							continue;
+						}
 						if ($key === 'text' && !empty($value)) {
 							$value = strip_tags($value);
 						}
@@ -622,12 +632,12 @@ EOCSS;
 		$font_url = self::google_font_url($font_family, $font_weight, $font_style);
 		$font_url = str_replace(' ', '%20', $font_url);
 
-		/** @var $formats array User-Agent => file extention */
+		/** @var $formats array User-Agent => file extension */
 		$formats = [' ' => '.ttf'];
 		// also get woff2? doesn't seem required as all browsers currently support rendering ttf...
 //		$formats['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36'] = '.woff';
 
-		foreach ($formats as $user_agent => $extention) {
+		foreach ($formats as $user_agent => $extension) {
 			$font_css = wp_remote_retrieve_body(wp_remote_get($font_url, [
 				'headers' => [
 					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', // emulate browser
@@ -645,9 +655,9 @@ EOCSS;
 				$font_css = '@font-face' . end($font_css_parts);
 				// use the last one, it should be latin. todo: verify; if not always latin last, build checks to actually GET latin.
 
-				if (preg_match('@https?://[^)]+' . $extention . '@', $font_css, $n)) {
+				if (preg_match('@https?://[^)]+' . $extension . '@', $font_css, $n)) {
 					$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
-					self::file_put_contents(self::storage() . '/' . $font_filename . $extention, $font_ttf);
+					self::file_put_contents(self::storage() . '/' . $font_filename . $extension, $font_ttf);
 				}
 			}
 		}
@@ -658,9 +668,7 @@ EOCSS;
 	public static function google_font_url($font_family, $font_weight, $font_style): string
 	{
 		$italic = $font_style == 'italic' ? 'italic' : '';
-		$font_url = 'http://fonts.googleapis.com/css?family=' . $font_family . ':' . $font_weight . $italic;
-
-		return $font_url;
+		return 'https://fonts.googleapis.com/css?family=' . $font_family . ':' . $font_weight . $italic;
 	}
 
 	public static function setError($tag, $text)
@@ -714,12 +722,15 @@ EOCSS;
 
 	public static function process_post()
 	{
-		if (is_admin() && !empty($_GET['page']) && $_GET['page'] === self::ADMIN_SLUG && !empty($_POST)) {
-			// bsi-defaults
-			// handle $_POST
+		if (is_admin() && !empty($_GET['page']) && $_GET['page'] === Plugin::ADMIN_SLUG && !empty($_POST)) {
+			$valid_post_keys = Plugin::get_valid_POST_keys('admin');
+
 			foreach ($_POST['branded_social_images'] as $namespace => $values) {
 				if (is_array($values)) {
 					foreach ($values as $key => $value) {
+						if (!in_array($key, $valid_post_keys[ $namespace ])) {
+							continue;
+						}
 						if ($key === 'text' && !empty($value)) {
 							$value = strip_tags($value, '<br>');
 						}

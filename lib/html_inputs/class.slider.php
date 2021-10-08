@@ -2,6 +2,8 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
+defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+
 require_once __DIR__ .'/class.text.php'; // dependency
 
 class slider extends text {

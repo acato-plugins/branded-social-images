@@ -2,6 +2,8 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
+defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+
 class Input {
 
 	protected $type = 'text';

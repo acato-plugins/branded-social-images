@@ -2,6 +2,8 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
+defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+
 class color extends Input {
 	public function __construct($attribute_name, $atts)
 	{

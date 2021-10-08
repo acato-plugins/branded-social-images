@@ -1,9 +1,9 @@
 {
   "Plugin Name": "Branded Social Images",
   "Description": "Spice up your OpenGraph Social Images to be meaningful.",
-  "Plugin URI": "https://clearsite.nl/plugin/branded-social-images",
+  "Plugin URI": "https://clearsite.nl/plugin/branded-social-images/",
   "Author": "Internetbureau Clearsite",
-  "Author URI": "https://www.clearsite.nl",
-  "Version": "0.0.5",
+  "Author URI": "https://www.clearsite.nl/",
+  "Version": "0.0.6",
   "License": "GPL2"
 }

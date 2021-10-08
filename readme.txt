@@ -52,6 +52,14 @@ Answer to foo bar dilemma.
 = 1.0.0 =
 * First public release to wordpress.org
 
+= 0.0.6 =
+* Bugfixes and changes as per brainstorm session october 2021
+* First round of code-hardening
+* New icon
+
+= 0.0.4 =
+* Bugfixes per third user-test
+
 = 0.0.3 =
 * Many interface changes to reflect the results of the second user-test
 

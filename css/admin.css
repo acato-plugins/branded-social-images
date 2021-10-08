@@ -330,7 +330,7 @@
       @media screen and (max-width: 1200px) {
         #branded-social-images-editor .area--options .inner > span, #branded-social-images-editor .area--settings .inner > span {
           width: 100%; } }
-      #branded-social-images-editor .area--options .inner > span.name-text_enabled, #branded-social-images-editor .area--options .inner > span.name-image, #branded-social-images-editor .area--options .inner > span.name-image_logo, #branded-social-images-editor .area--settings .inner > span.name-text_enabled, #branded-social-images-editor .area--settings .inner > span.name-image, #branded-social-images-editor .area--settings .inner > span.name-image_logo {
+      #branded-social-images-editor .area--options .inner > span.name-text_enabled, #branded-social-images-editor .area--options .inner > span.name-image, #branded-social-images-editor .area--options .inner > span.name-image_logo, #branded-social-images-editor .area--options .inner > span.name-image_use_thumbnail, #branded-social-images-editor .area--settings .inner > span.name-text_enabled, #branded-social-images-editor .area--settings .inner > span.name-image, #branded-social-images-editor .area--settings .inner > span.name-image_logo, #branded-social-images-editor .area--settings .inner > span.name-image_use_thumbnail {
         width: 100%; }
 
 #branded-social-images-editor .area--options {

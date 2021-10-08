@@ -4,6 +4,8 @@ namespace Clearsite\Tools;
 
 use Clearsite\Tools\HTML_Inputs\Input;
 
+defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+
 require __DIR__ .'/html_inputs/class.input.php';
 require __DIR__ .'/html_inputs/class.text.php';
 require __DIR__ .'/html_inputs/class.textarea.php';

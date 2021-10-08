@@ -2,6 +2,8 @@
 
 namespace Clearsite\Plugins\OGImage;
 
+defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+
 use RankMath;
 
 class Image {

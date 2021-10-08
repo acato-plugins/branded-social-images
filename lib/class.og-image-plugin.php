@@ -4,6 +4,8 @@ namespace Clearsite\Plugins\OGImage;
 
 use RankMath;
 
+defined('ABSPATH') or die('You cannot be here.');
+
 class Plugin
 {
 	const BSI_IMAGE_NAME = 'social-image.png';
@@ -26,7 +28,12 @@ class Plugin
 	const DEF_FONT_SIZE = 40;
 	const PLUGIN_URL_WPORG = 'https://wordpress.org/plugins/branded-social-images/';
 	const CLEARSITE_URL_INFO = 'https://www.clearsite.nl/';
-	const CLEARSITE_URL_CONTACT = 'https://wordpress.org/support/plugins/branded-social-images/';
+	const BSI_URL_CONTACT = 'https://wordpress.org/support/plugins/branded-social-images/';
+	const BSI_URL_CONTRIBUTE = 'https://github.com/clearsite/branded-social-images/';
+	const EXTERNAL_INSPECTOR = 'https://www.opengraph.xyz/url/%s/';
+	public const DO_NOT_RENDER = 'do_not_render';
+	public const ADMIN_SLUG = 'branded-social-images';
+	public const ICON = 'icon.svg';
 
 	public $width = 1200;
 	public $height = 630;
@@ -38,8 +45,6 @@ class Plugin
 
 	public function __construct()
 	{
-		// todo: actions that add a meta box to a post for post-specific settings, like text
-		// todo: actions that add a settings panel for configuring the plugin
 		add_filter('query_vars', function ($vars) {
 			$vars[] = 'clsogimg';
 			$vars[] = '_preview';
@@ -47,6 +52,10 @@ class Plugin
 		});
 
 		add_action('wp', function () {
+			// oh, my, this is a mess.
+			// ...
+			// todo: create new settings manager that handles all this.
+
 			$this->setup_defaults();
 			$image_layers = self::image_fallback_chain(true);
 			$this->og_image_available = !!array_filter($image_layers);
@@ -121,11 +130,11 @@ class Plugin
 		add_action('init', function () {
 			add_rewrite_endpoint(self::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
 
-			if (get_option( "bsi_needs_rewrite_rules")) {
-				delete_option( "bsi_needs_rewrite_rules");
+			if (get_option("bsi_needs_rewrite_rules")) {
+				delete_option("bsi_needs_rewrite_rules");
 				global $wp_rewrite;
-				update_option( "rewrite_rules", FALSE );
-				$wp_rewrite->flush_rules( true );
+				update_option("rewrite_rules", FALSE);
+				$wp_rewrite->flush_rules(true);
 			}
 			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
 			add_image_size(Plugin::IMAGE_SIZE_NAME . '@' . Plugin::AA . 'x', $this->width * Plugin::AA, $this->height * Plugin::AA, true);
@@ -198,7 +207,7 @@ class Plugin
 					add_filter('wpseo_twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
 
 					// overrule WordPress JetPack recently acquired SocialImageGenerator, because, hey, we were here first!
-					add_filter('sig_image_url', function($url, $post_id) {
+					add_filter('sig_image_url', function ($url, $post_id) {
 						return static::get_og_image_url($post_id);
 					}, PHP_INT_MAX, 2);
 
@@ -691,7 +700,7 @@ class Plugin
 
 	public static function get_og_image_url($post_id)
 	{
-		return get_permalink($post_id) ? get_permalink($post_id) . self::BSI_IMAGE_NAME .'/' : false;
+		return get_permalink($post_id) ? get_permalink($post_id) . self::BSI_IMAGE_NAME . '/' : false;
 	}
 
 	public static function init()
@@ -780,7 +789,7 @@ class Plugin
 
 	public static function default_google_fonts(): array
 	{
-		return array_map(function($font) {
+		return array_map(function ($font) {
 			return $font['font_name'];
 		}, self::font_rendering_tweaks());
 	}
@@ -854,6 +863,24 @@ class Plugin
 		];
 	}
 
+	public static function get_valid_POST_keys($section = false)
+	{
+		$list = self::field_list();
+		$valid = [];
+		foreach ($list as $_section => $sublist) {
+			if ($section && $_section !== $section) {
+				continue;
+			}
+			foreach ($sublist as $key => $item) {
+				if (empty($valid[$item['namespace']])) {
+					$valid[$item['namespace']] = [];
+				}
+				$valid[$item['namespace']][] = $key;
+			}
+		}
+		return $valid;
+	}
+
 	public static function field_list()
 	{
 		static $once, $support_webp;
@@ -900,10 +927,10 @@ class Plugin
 				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'value' => 'on', 'default' => 'off'],
 			],
 			'meta' => [
-				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Check if you don\'t want a Social Image with this ' . get_post_type()],
+				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Select if you don\'t want a Social Image with this ' . get_post_type()],
 				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use text on this image?', 'default' => 'yes', 'value' => 'yes', 'comment' => 'Uncheck if you do not wish text on this image.'],
 
-				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'label' => 'You can upload/select a specific OG Image here', 'comment' => 'You can use JPEG and PNG.', 'info-icon' => 'dashicons-info', 'info' => $image_comment],
+				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'label' => 'You can upload/select a specific OG Image here', 'comment' => 'You can use JPEG and PNG. Recommended size: 1200x630 pixels.', 'info-icon' => 'dashicons-info', 'info' => $image_comment],
 
 				'text' => ['namespace' => self::OPTION_PREFIX, 'type' => 'textarea', 'class' => 'hidden editable-target', 'label' => 'Text on image', 'If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.'],
 				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text color', 'default' => get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
@@ -922,7 +949,7 @@ class Plugin
 				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a logo on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish a logo on this image, or choose a position below'],
 				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'label' => 'Logo position', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right')],
 
-				'image_logo' => ['namespace' => Admin::DO_NOT_RENDER, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels wide/high. Use a transparent PNG for best results.', 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
+				'image_logo' => ['namespace' => self::DO_NOT_RENDER, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels wide/high. Use a transparent PNG for best results.', 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
 			]
 		];
 
@@ -941,6 +968,7 @@ class Plugin
 			unset($options['meta']['color']);
 			unset($options['meta']['text_position']);
 			unset($options['meta']['background_color']);
+			unset($options['meta']['text_shadow_enabled']);
 		}
 
 		if ('on' !== Plugin::FEATURE_SHADOW) {
@@ -953,8 +981,8 @@ class Plugin
 		}
 		if ('simple' !== Plugin::FEATURE_SHADOW) {
 			unset($options['admin']['text_shadow_enabled']);
-			unset($options['meta']['text_shadow_enabled']);
 		}
+
 
 		foreach ($options['admin'] as $field => $_) {
 			$options['admin'][$field]['current_value'] = get_option($_['namespace'] . $field, !empty($_['default']) ? $_['default'] : null);
@@ -1063,62 +1091,76 @@ class Plugin
 
 	public static function admin_bar($admin_bar)
 	{
-		if (!is_admin() && array_filter(Plugin::image_fallback_chain(true))) {
+		if (!is_admin()) {
+			if (
+				defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
+				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
+			) {
+				$args = array(
+					'id' => self::ADMIN_SLUG . '-view',
+					'title' => 'View Social Image',
+					'href' => get_permalink(get_the_ID()) . Plugin::BSI_IMAGE_NAME . '/',
+					'meta' => [
+						'target' => '_blank',
+						'class' => self::ADMIN_SLUG . '-view'
+					]
+				);
+				$admin_bar->add_node($args);
+			}
+
 			$args = array(
-				'id' => Admin::ADMIN_SLUG . '-view',
-				'title' => 'View Social Image',
-				'href' => get_permalink( get_the_ID() ) . Plugin::BSI_IMAGE_NAME .'/',
+				'id' => self::ADMIN_SLUG . '-inspector',
+				'title' => self::icon() . 'Inspect Social Image',
+				'href' => Plugin::EXTERNAL_INSPECTOR,
 				'meta' => [
 					'target' => '_blank',
-					'class' => Admin::ADMIN_SLUG . '-view'
+					'title' => 'Shows how this post is shared using an external, unaffiliated service.',
 				]
 			);
+
+			$args['href'] = sprintf($args['href'], urlencode(get_permalink(get_the_ID())));
 			$admin_bar->add_node($args);
 
-			add_action('wp_footer', [static::class, 'admin_bar_script'], PHP_INT_MAX);
+			add_action('wp_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
+			add_action('admin_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
 		}
 	}
 
-	public static function admin_bar_script()
+	public static function admin_bar_icon_style()
 	{
-		?>
-		<style>
-			.<?php print Admin::ADMIN_SLUG; ?>-view-preview {
-				display: none;
-				z-index: 0;
-			}
+		?><style>#wp-admin-bar-<?php print self::ADMIN_SLUG; ?>-inspector svg {
+			position: relative;
+			top: 3px;
+		}</style><?php
+	}
 
-			body.<?php print Admin::ADMIN_SLUG; ?>-view-active .<?php print Admin::ADMIN_SLUG; ?>-view-preview {
-				display: block;
-				position: fixed;
-				z-index: <?php print PHP_INT_MAX; ?>;
-				top: 40px;
-				left: 50%;
-				transform: translateX(-50%);
-			}
-		</style>
-		<script>
-			;(function ($, a) {
-				$('.' + a).on('click touchend', function (e) {
-					e.preventDefault();
-					$('body').toggleClass(a + '-active');
-				})
-				var preview = $('.' + a + '-preview');
-				if (preview.length < 1) {
-					var div = $('<div/>');
-					div.addClass(a + '-preview');
-					$('body').append(div);
-					div.append('<img src="./<?php print Plugin::BSI_IMAGE_NAME; ?>/" />');
-					preview = $('.' + a + '-preview');
-				}
-			})(jQuery, <?php print json_encode(Admin::ADMIN_SLUG . '-view'); ?>);
-		</script>
-		<?php
+	private static function icon()
+	{
+		if (preg_match('/\.svg$/',Plugin::ICON)) {
+			$icon = file_get_contents(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON));
+			$icon = str_replace('<path', '<path fill="currentColor"', $icon);
+
+			return $icon;
+		}
+		else {
+			return '<img src="'. esc_attr(plugins_url('/img/' . basename('/' . Plugin::ICON), __DIR__)) . '" />';
+		}
 	}
 
 	public static function get_plugin_file()
 	{
 		return str_replace(trailingslashit(WP_PLUGIN_DIR), '', BSI_PLUGIN_FILE);
+	}
+
+	public static function get_management_permission()
+	{
+		// @todo: improve this. This is crap.
+		$permission = apply_filters('bsi_management_permission', 'edit_posts');
+		if (!$permission || trim($permission) == 'read') {
+			$permission = 'edit_posts';
+		}
+
+		return $permission;
 	}
 
 	public function hex_to_rgba($hex_color, $alpha_is_gd = false): array
