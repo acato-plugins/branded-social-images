@@ -21,11 +21,17 @@ class Admin
 				$result['type'] = 'font/ttf';
 				$result['proper_filename'] = $filename;
 			}
+			if (substr(strtolower($filename), -4, 4) == '.otf') {
+				$result['ext'] = 'otf';
+				$result['type'] = 'font/otf';
+				$result['proper_filename'] = $filename;
+			}
 			return $result;
 		}, 11, 5);
 
 		add_filter('upload_mimes', function ($existing_mimes) {
 			$existing_mimes['ttf'] = 'font/ttf';
+			$existing_mimes['otf'] = 'font/otf';
 			return $existing_mimes;
 		});
 
@@ -211,11 +217,17 @@ class Admin
 
 	public static function valid_fonts(): array
 	{
-		$fonts = glob(self::storage() . '/*.ttf');
+		$fonts = glob(self::storage() . '/*.?tf');
 		$list = [];
 		foreach ($fonts as $font) {
+            $b = basename($font);
 			$base = basename($font, '.ttf');
-			$json = preg_replace('/\.ttf$/', '.json', $font);
+            $t = 'ttf';
+            if ($base === $b) {
+			    $base = basename($font, '.otf');
+                $t = 'otf';
+            }
+			$json = preg_replace('/\.[ot]tf$/', '.json', $font);
 			$meta = [];
 			if (is_file($json)) {
 				$meta = json_decode(file_get_contents($json));
@@ -226,7 +238,7 @@ class Admin
 				'style' => !empty($m[2]) ? trim($m[2], '-') : 'normal',
 				'name' => $meta && !empty($meta->font_name) ? $meta->font_name : self::nice_font_name($base),
 				'valid' => true,
-				'ttf' => self::storage() . '/' . $base . '.ttf',
+				$t => self::storage() . '/' . $base . '.' . $t,
 			];
 			$weights = implode('|', self::font_name_weights());
 			if (preg_match("/-({$weights})?(Italic)?$/", $base, $m) && !empty($m[1])) {
@@ -536,7 +548,7 @@ class Admin
 			$style = $font['style'];
 			$weight = $font['weight'];
 			$sources = [];
-			foreach (['ttf' => 'truetype'/*, 'woff2' => 'woff2', 'woff' => 'woff'*/] as $extention => $format) {
+			foreach (['ttf' => 'truetype', 'otf' => 'opentype'/*, 'woff2' => 'woff2', 'woff' => 'woff'*/] as $extention => $format) {
 				if (empty($font[$extention])) {
 					continue;
 				}
@@ -719,7 +731,12 @@ EOCSS;
 			if (is_file($font)) {
 				$instance = Plugin::getInstance();
 				update_option(Plugin::DEFAULTS_PREFIX . 'text__ttf_upload', false);
-				update_option(Plugin::DEFAULTS_PREFIX . 'text__font', basename($font, '.ttf'));
+                $b = basename($font);
+                $base = basename($font, '.ttf');
+                if ($base === $b) {
+                    $base = basename($font, '.otf');
+                }
+				update_option(Plugin::DEFAULTS_PREFIX . 'text__font', $base);
 				rename($font, $instance->storage() . '/' . basename($font));
 				wp_delete_post($font_id);
 			}

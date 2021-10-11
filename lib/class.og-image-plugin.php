@@ -360,12 +360,16 @@ class Plugin
 				if (!is_file($this->text_options['font-file']) && is_file($this->text_options['font-file'] . '.ttf')) {
 					$this->text_options['font-file'] .= '.ttf';
 				}
+				if (!is_file($this->text_options['font-file']) && is_file($this->text_options['font-file'] . '.otf')) {
+					$this->text_options['font-file'] .= '.otf';
+				}
 				// revert back to just a filename for backward compatibility
 				$this->text_options['font-file'] = basename($this->text_options['font-file']);
 			}
 
 			// we need a TTF
-			if (!is_file($this->storage() . '/' . $this->text_options['font-file']) || substr($this->text_options['font-file'], -4) !== '.ttf') {
+			if (!is_file($this->storage() . '/' . $this->text_options['font-file']) || (
+                    substr($this->text_options['font-file'], -4) !== '.ttf' && substr($this->text_options['font-file'], -4) !== '.otf') ) {
 				$this->text_options['font-file'] = $this->download_font($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
 			}
 			if (is_file($this->storage() . '/' . $this->text_options['font-file'])) {
@@ -507,7 +511,7 @@ class Plugin
 			}
 			// grab any url
 			self::setError('font-family', null);
-			if (preg_match('@https?://[^)]+ttf@', $font_css, $n)) {
+			if (preg_match('@https?://[^)]+[ot]tf@', $font_css, $n)) {
 				$font_ttf = wp_remote_retrieve_body(wp_remote_get($n[0]));
 				$this->file_put_contents($this->storage() . '/' . $font_filename, $font_ttf);
 				return $font_filename;
@@ -781,7 +785,12 @@ class Plugin
 	public static function font_rendering_tweaks_for($font, $section)
 	{
 		$tweaks = self::font_rendering_tweaks();
-		$font = basename($font, '.ttf');
+		$b = basename($font);
+        $base = basename($font, '.ttf');
+        if ($b === $base) {
+            $base = basename($font, '.otf');
+        }
+        $font = $base;
 		if (!empty($tweaks[$font]) && !empty($tweaks[$font][$section])) {
 			return $tweaks[$font][$section];
 		}
@@ -910,7 +919,7 @@ class Plugin
 
 				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.', 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
 				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Select a font', 'options' => self::get_font_list(), 'default' => 'Roboto-Regular'],
-				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf', 'label' => 'Font upload', 'upload' => 'Upload .ttf file', 'info-icon' => 'dashicons-info', 'info' => 'Custom font must be a .ttf file. You\'re responsible for the proper permissions and usage rights of the font.'],
+				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf,font/otf', 'label' => 'Font upload', 'upload' => 'Upload .ttf/.otf file', 'info-icon' => 'dashicons-info', 'info' => 'Custom font must be a .ttf or .otf file. You\'re responsible for the proper permissions and usage rights of the font.'],
 //				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
 
 				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'Text position', 'options' => self::position_grid(), 'default' => 'center'],
