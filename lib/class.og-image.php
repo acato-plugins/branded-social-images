@@ -274,11 +274,7 @@ class Image {
 			$image_id = get_option(Plugin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
 		}
 
-		if ($image_id) { // this is for LOCAL DEBUGGING ONLY
-//			add_filter('bsi_text', function() use ($the_img) { return $the_img; }, PHP_INT_MAX);
-		}
-
-		return $image_id;
+        return apply_filters('bsi_image', $image_id, $post_id, $the_img);
 	}
 
 	/**
