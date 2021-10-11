@@ -30,7 +30,27 @@ After installing the plugin, go to the "Branded social images" configuration pag
 
 = How do I add my own fonts? =
 
-To use your own font, you need a .TTF (True Type Font) file. You can get this from any source you wish, just make sure it is an ordinary font (Google's variable fonts will not work). Upload the font with the "Upload custom font" feature.
+To use your own font, you need a .TTF (True Type Font) or .OTF (OpenType Font) file. You can get this from any source you wish, just make sure it is an ordinary font (Google's variable fonts will not work). Upload the font with the "Upload custom font" feature.
+
+= Does the plugin work with international character sets like Kanji (Chinese, Japanese, etc.)? =
+
+Yes, it does, but you have to make sure you upload the appropriate font. If you see "empty square" or "square with a cross" symbols in the image, your font is not compatible.
+
+= Is the plugin MultiSite compatible? =
+
+Yes and no. The plugin can be installed without problems in a MultiSite environment and can be activated per site or network-wide, but the settings are not network-wide.
+Although this might be a feature for a future version; there currently is no way to set-up Branded Social Images in one single place for the entire network.
+
+= Is the plugin WPML compatible? =
+
+Yes, as long as your font supports the languages. The supplied fonts are "Western" only. If you need character sets for languages like Korean or Japanese, you need to upload an approriate font.
+
+= I am using plugin XYZ for SEO and your plugin does not use the selected image or configured text, what can I do? =
+
+You can always set-up Branded Social Image on every post/page manually, but an automatic solution is always possible.
+You can use WordPress filters to influence the text- and image selection process;
+1. Filter `bsi_text` with parameters `$text`, `$post_id` and `$image_id`
+1. Filter `bsi_image` with parameters `$image_id` and `$post_id`
 
 == Screenshots ==
 
