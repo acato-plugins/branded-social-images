@@ -88,13 +88,13 @@ class Image {
 
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
-			unlink($lock_file);
+            if (is_file($lock_file)) { unlink($lock_file); }
 			return false;
 		}
 
 		if (!$retry && !$this->use_cache) {
-			@unlink($cache_file);
-			@unlink($lock_file);
+            if (is_file($cache_file)) { unlink($cache_file); }
+            if (is_file($lock_file)) { unlink($lock_file); }
 		}
 
 		if (is_file($cache_file)) {
@@ -148,6 +148,7 @@ class Image {
 				header('X-OG-Error-Size: Image sizes do not match, web-master should rebuild thumbnails and use images of sufficient size.');
 			}
 			$image_file = str_replace($base_url, $base_dir, $image);
+
 			if (!is_file($image_file)) {
 				header('X-OG-Error-File: Source image not found. This is a 404 on the source image.');
 				unlink($lock_file);
