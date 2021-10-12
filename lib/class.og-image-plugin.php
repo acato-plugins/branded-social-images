@@ -42,14 +42,12 @@ class Plugin
 	public $height = 630;
 	public $logo_options;
 	public $text_options;
-	public $preview;
 	public $page_already_has_og_image = false;
 	public $og_image_available;
 
 	public function __construct()
 	{
 		add_filter('query_vars', function ($vars) {
-			$vars[] = '_preview';
 			$vars[] = Plugin::QUERY_VAR;
 			return $vars;
 		});

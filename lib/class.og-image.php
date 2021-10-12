@@ -33,10 +33,6 @@ class Image {
 		if (defined('WP_DEBUG') && WP_DEBUG) {
 			$this->use_cache = false;
 		}
-
-		if (isset($_GET['_preview'])) {
-			$this->use_cache = false;
-		}
 	}
 
 	public function getManager(): Plugin
@@ -69,12 +65,6 @@ class Image {
 
 	public function cache($image_id, $post_id, $retry=0)
 	{
-		if ($this->manager->preview) {
-			// skip caching, build and serve image.
-			// yes, PREVIEW ALWAYS SERVES THE IMAGE INLINE!
-			$this->build($image_id, $post_id, true);
-		}
-
 		// do we have cache?
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
