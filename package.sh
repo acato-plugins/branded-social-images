@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 
 VERSION=$1
 
-# [ 1 -gt $(git status | grep 'nothing to commit, working tree clean' | wc -l) ] && echo "GIT checkout not clean, aborting" && exit 1;
+[ 1 -gt $(git status | grep 'nothing to commit, working tree clean' | wc -l) ] && echo "GIT checkout not clean, aborting" && exit 1;
 [ 1 -gt $(cat wp-plugin.php | grep Version: | head -n 1 | grep $VERSION | wc -l) ] && echo "Version number given ($VERSION) does not match Version tag in wp-plugin.php" && exit 2;
 [ 1 -gt $(cat info.json | grep '"Version":' | head -n 1 | grep $VERSION | wc -l) ] && echo "Version number given ($VERSION) does not match Version tag in info.json" && exit 3;
 [ 1 -gt $(cat readme.txt | grep 'Stable tag:' | head -n 1 | grep $VERSION | wc -l) ] && echo "Version number given ($VERSION) does not match Stable tag in readme.txt" && exit 4;
@@ -46,9 +46,9 @@ for i in node_modules composer.json composer.lock package.sh tmp .git package.js
 done
 
 # added files
-svn status | grep '?' | xargs svn add {} \;
+svn status | grep '?' | xargs svn add
 # removed or conflicted, how to proceed here?
-svn status | grep '!' | xargs svn rm {} \;
+svn status | grep '!' | xargs svn rm
 # remains are modified
 svn commit -m "Import changes from GitHub for version $VERSION"
 svn cp $SVN_PROJECT$SVN_TRUNK $SVN_PROJECT$SVN_TAG -m "version $VERSION"
