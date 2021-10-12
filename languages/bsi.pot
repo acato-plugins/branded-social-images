@@ -1,0 +1,367 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Branded Social Images\n"
+"POT-Creation-Date: 2021-10-12 16:44+0200\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.11\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: bin\n"
+"X-Poedit-SearchPathExcluded-1: node_modules\n"
+"X-Poedit-SearchPathExcluded-2: vendor\n"
+
+#: lib/class.og-image-admin.php:60
+msgid "The OG:Image recommended size"
+msgstr ""
+
+#: lib/class.og-image-admin.php:72
+#, php-format
+msgid ""
+"<a href=\"%s\" target=\"_blank\">Branded Social Images</a> is a free plugin "
+"by <a href=\"%s\" target=\"_blank\">Clearsite</a>."
+msgstr ""
+
+#: lib/class.og-image-admin.php:73
+msgid ""
+"Please let us know what you think of this plugin and what you wish to see in "
+"future versions."
+msgstr ""
+
+#: lib/class.og-image-admin.php:74
+#, php-format
+msgid "<a href=\"%s\">Contact us here</a>."
+msgstr ""
+
+#: lib/class.og-image-admin.php:77
+#, php-format
+msgid ""
+"Use <a href=\"%s\" target=\"_blank\">%s</a> to preview what your social "
+"image looks like on social media."
+msgstr ""
+
+#: lib/class.og-image-admin.php:189
+msgid "Save settings"
+msgstr ""
+
+#: lib/class.og-image-admin.php:210
+msgid "Settings"
+msgstr ""
+
+#: lib/class.og-image-admin.php:213
+msgid "Support"
+msgstr ""
+
+#: lib/class.og-image-admin.php:216
+msgid "Contribute"
+msgstr ""
+
+#: lib/class.og-image-admin.php:277 lib/class.og-image-plugin.php:482
+msgid "Could not create the storage directory in the uploads folder."
+msgstr ""
+
+#: lib/class.og-image-admin.php:277 lib/class.og-image-plugin.php:482
+msgid "In a WordPress site the uploads folder should always be writable."
+msgstr ""
+
+#: lib/class.og-image-admin.php:277 lib/class.og-image-plugin.php:482
+msgid "Please fix this."
+msgstr ""
+
+#: lib/class.og-image-admin.php:277 lib/class.og-image-plugin.php:482
+msgid "This error will disappear once the problem has been corrected."
+msgstr ""
+
+#: lib/class.og-image-admin.php:392
+msgid "Image options"
+msgstr ""
+
+#: lib/class.og-image-admin.php:401
+msgid "Text settings"
+msgstr ""
+
+#: lib/class.og-image-admin.php:673 lib/class.og-image-plugin.php:511
+msgid "Could not download font from Google Fonts."
+msgstr ""
+
+#: lib/class.og-image-admin.php:673 lib/class.og-image-plugin.php:511
+msgid "Please download yourself and upload here."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:500
+msgid "Don't know where to get this font."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:500
+msgid "Sorry."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:522
+msgid "This Google Fonts does not offer a TTF or OTF file."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:522
+msgid "Sorry, cannot continue at this time."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:868
+msgid "Top Left"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:869
+msgid "Top Center"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:870
+msgid "Top Right"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:871
+msgid "Left Middle"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:872
+msgid "Centered"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:873
+msgid "Right Middle"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:874
+msgid "Bottom Left"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:875
+msgid "Bottom Center"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:876
+msgid "Bottom Right"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:907
+msgid ""
+"The following process is used to determine the OG:Image (in order of "
+"importance)"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:908
+msgid "Branded Social Image on page/post"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:910
+msgid "Yoast Social image on page/post"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:912
+msgid "Featured image on page/post (when checked in general settings)"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:913
+msgid "Fallback Branded Social image in general settings"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:917
+msgid "Fallback OG:Image."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:917
+msgid "Used for any page/post that has no OG image selected."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:917 lib/class.og-image-plugin.php:947
+msgid "You can use JPEG and PNG."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:917 lib/class.og-image-plugin.php:947
+msgid "Recommended size: 1200x630 pixels."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:918
+msgid "Use the WordPress Featured image."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:920 lib/class.og-image-plugin.php:966
+msgid "Your logo"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:920 lib/class.og-image-plugin.php:966
+msgid "Image should be approximately 600 pixels wide/high."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:920 lib/class.og-image-plugin.php:966
+msgid "Use a transparent PNG for best results."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:921
+msgid "Default logo position"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:922
+msgid "Logo-scale (%)"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:924
+msgid "The text to overlay if no other text or title can be found."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:924
+msgid "This should be a generic text that is applicable to the entire website."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:925
+msgid "Select a font"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:926
+msgid "Font upload"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:926
+msgid "Upload .ttf/.otf file"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:926
+msgid "Custom font must be a .ttf or .otf file."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:926
+msgid ""
+"You're responsible for the proper permissions and usage rights of the font."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:929 lib/class.og-image-plugin.php:951
+msgid "Text position"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:930
+msgid "Default Text color"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:931
+msgid "Font-size (px)"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:932 lib/class.og-image-plugin.php:953
+msgid "Text background color"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:933
+msgid "Use a background"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:935 lib/class.og-image-plugin.php:955
+msgid "Stroke color"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:936 lib/class.og-image-plugin.php:956
+msgid "Default stroke width"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:938
+msgid "Default Text shadow color"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:939 lib/class.og-image-plugin.php:959
+msgid "Shadow offset - vertical."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:939 lib/class.og-image-plugin.php:959
+msgid "Negative numbers to top, Positive numbers to bottom."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:940 lib/class.og-image-plugin.php:960
+msgid "Shadow offset - horizontal."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:940 lib/class.og-image-plugin.php:960
+msgid "Negative numbers to left, Positive numbers to right."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:941 lib/class.og-image-plugin.php:961
+msgid "Use a text shadow"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:944
+#, php-format
+msgctxt "post-type"
+msgid "Select if you don't want a Social Image with this %s"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:945
+msgid "Use text on this image?"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:945
+msgid "Uncheck if you do not wish text on this image."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:947
+msgid "You can upload/select a specific Social Image here"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:949
+msgid "Text on image"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:950
+msgid "Text color"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:958
+msgid "Text shadow color"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:961
+msgid "Will improve readability of light text on light background."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:963
+msgid "Use a logo on this image?"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:963
+msgid ""
+"Uncheck if you do not wish a logo on this image, or choose a position below."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:964
+msgid "Logo position"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:1123
+msgid "View Social Image"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:1135
+msgid "Inspect Social Image"
+msgstr ""
+
+#: lib/class.og-image-plugin.php:1139
+msgid "Shows how this post is shared using an external, unaffiliated service."
+msgstr ""
+
+#: lib/class.og-image.php:48
+msgid "Sorry, could not find an OG Image configured."
+msgstr ""
+
+#: lib/class.og-image.php:48 lib/class.og-image.php:62
+msgid "This is probably a temporary error."
+msgstr ""
+
+#: lib/class.og-image.php:62
+msgid "Sorry, we could not create the image."
+msgstr ""
+
+#: lib/html_inputs/class.file.php:27
+msgid "Choose file"
+msgstr ""

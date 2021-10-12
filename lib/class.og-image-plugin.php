@@ -35,6 +35,8 @@ class Plugin
 	public const DO_NOT_RENDER = 'do_not_render';
 	public const ADMIN_SLUG = 'branded-social-images';
 	public const ICON = 'icon.svg';
+	public const TEXT_DOMAIN = 'bsi';
+	public const QUERY_VAR = 'bsi_img';
 
 	public $width = 1200;
 	public $height = 630;
@@ -47,8 +49,8 @@ class Plugin
 	public function __construct()
 	{
 		add_filter('query_vars', function ($vars) {
-			$vars[] = 'clsogimg';
 			$vars[] = '_preview';
+			$vars[] = Plugin::QUERY_VAR;
 			return $vars;
 		});
 
@@ -129,7 +131,7 @@ class Plugin
 		});
 
 		add_action('init', function () {
-			add_rewrite_endpoint(self::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, 'clsogimg');
+			add_rewrite_endpoint(self::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, Plugin::QUERY_VAR);
 
 			if (get_option("bsi_needs_rewrite_rules")) {
 				delete_option("bsi_needs_rewrite_rules");
@@ -175,7 +177,7 @@ class Plugin
 		});
 
 		add_action('template_redirect', function () {
-			if (get_query_var('clsogimg')) {
+			if (get_query_var(Plugin::QUERY_VAR)) {
 				require_once __DIR__ . '/class.og-image.php';
 				$og_image = new Image($this);
 				$og_image->serve();
@@ -368,8 +370,10 @@ class Plugin
 			}
 
 			// we need a TTF
-			if (!is_file($this->storage() . '/' . $this->text_options['font-file']) || (
-                    substr($this->text_options['font-file'], -4) !== '.ttf' && substr($this->text_options['font-file'], -4) !== '.otf') ) {
+			if (
+				!is_file($this->storage() . '/' . $this->text_options['font-file']) || (
+					substr($this->text_options['font-file'], -4) !== '.ttf' && substr($this->text_options['font-file'], -4) !== '.otf')
+			) {
 				$this->text_options['font-file'] = $this->download_font($this->text_options['font-family'], $this->text_options['font-weight'], $this->text_options['font-style']);
 			}
 			if (is_file($this->storage() . '/' . $this->text_options['font-file'])) {
@@ -477,7 +481,7 @@ class Plugin
 		}
 		self::setError('storage', null);
 		if (!is_dir($dir)) {
-			self::setError('storage', __('Could not create the storage directory in the uploads folder. In a WordPress site the uploads folder should always be writable. Please fix this. This error will disappear once the problem has been corrected.', 'clsogimg'));
+			self::setError('storage', __('Could not create the storage directory in the uploads folder.', Plugin::TEXT_DOMAIN) .' ' . __('In a WordPress site the uploads folder should always be writable.', Plugin::TEXT_DOMAIN) .' '. __('Please fix this.', Plugin::TEXT_DOMAIN) .' '. __('This error will disappear once the problem has been corrected.', Plugin::TEXT_DOMAIN));
 		}
 		return $dir;
 	}
@@ -495,7 +499,7 @@ class Plugin
 		self::setError('font-family', null);
 		$font_filename = $this->font_filename($font_family, $font_weight, $font_style);
 		if (!$font_filename) {
-			self::setError('font-family', __('Don\'t know where to get this font. Sorry.', 'clsogimg'));
+			self::setError('font-family', __('Don\'t know where to get this font.', Plugin::TEXT_DOMAIN) .' ' . __('Sorry.', Plugin::TEXT_DOMAIN));
 			return false;
 		}
 		if (is_file($this->storage() . '/' . $font_filename)) {
@@ -506,7 +510,7 @@ class Plugin
 			$font_css = wp_remote_retrieve_body(wp_remote_get('http://fonts.googleapis.com/css?family=' . urlencode($m[1]) . ':' . $font_weight . $italic, ['useragent' => ' ']));
 
 			if (!$font_css) {
-				self::setError('font-family', __('Could not download font from Google Fonts. Please download yourself and upload here.', 'clsogimg'));
+				self::setError('font-family', __('Could not download font from Google Fonts.', Plugin::TEXT_DOMAIN) .' ' . __('Please download yourself and upload here.', Plugin::TEXT_DOMAIN));
 				return false;
 			}
 			// grab any url
@@ -517,7 +521,7 @@ class Plugin
 				return $font_filename;
 			}
 			else {
-				self::setError('font-family', __('This Google Fonts does not offer a TTF file. Sorry, cannot continue at this time.', 'clsogimg'));
+				self::setError('font-family', __('This Google Fonts does not offer a TTF or OTF file.', Plugin::TEXT_DOMAIN) .' ' . __('Sorry, cannot continue at this time.', Plugin::TEXT_DOMAIN));
 				return false;
 			}
 		}
@@ -715,6 +719,8 @@ class Plugin
 			$admin = Admin::getInstance();
 			$admin->storage = $instance->storage();
 		}
+
+		load_plugin_textdomain(Plugin::TEXT_DOMAIN, FALSE, basename(dirname(__DIR__)) . '/languages');
 	}
 
 	/**
@@ -786,11 +792,11 @@ class Plugin
 	{
 		$tweaks = self::font_rendering_tweaks();
 		$b = basename($font);
-        $base = basename($font, '.ttf');
-        if ($b === $base) {
-            $base = basename($font, '.otf');
-        }
-        $font = $base;
+		$base = basename($font, '.ttf');
+		if ($b === $base) {
+			$base = basename($font, '.otf');
+		}
+		$font = $base;
 		if (!empty($tweaks[$font]) && !empty($tweaks[$font][$section])) {
 			return $tweaks[$font][$section];
 		}
@@ -861,15 +867,15 @@ class Plugin
 	public static function position_grid(): array
 	{
 		return [
-			'top-left' => 'Top Left',
-			'top' => 'Top Center',
-			'top-right' => 'Top Right',
-			'left' => 'Left Middle',
-			'center' => 'Centered',
-			'right' => 'Right Middle',
-			'bottom-left' => 'Bottom Left',
-			'bottom' => 'Bottom Center',
-			'bottom-right' => 'Bottom Right',
+			'top-left' => __('Top Left', Plugin::TEXT_DOMAIN),
+			'top' => __('Top Center', Plugin::TEXT_DOMAIN),
+			'top-right' => __('Top Right', Plugin::TEXT_DOMAIN),
+			'left' => __('Left Middle', Plugin::TEXT_DOMAIN),
+			'center' => __('Centered', Plugin::TEXT_DOMAIN),
+			'right' => __('Right Middle', Plugin::TEXT_DOMAIN),
+			'bottom-left' => __('Bottom Left', Plugin::TEXT_DOMAIN),
+			'bottom' => __('Bottom Center', Plugin::TEXT_DOMAIN),
+			'bottom-right' => __('Bottom Right', Plugin::TEXT_DOMAIN),
 		];
 	}
 
@@ -900,66 +906,66 @@ class Plugin
 			$once = true;
 		}
 
-		$image_comment = 'The following process is used to determine the OG Image (in order of importance):
-<ol><li>Branded Social Image on page/post</li>';
+		$image_comment = __('The following process is used to determine the OG:Image (in order of importance)', Plugin::TEXT_DOMAIN) . ':
+<ol><li>' . __('Branded Social Image on page/post', Plugin::TEXT_DOMAIN) . '</li>';
 		if (defined('WPSEO_VERSION')) {
-			$image_comment .= '<li>Yoast Social image on page/post</li>';
+			$image_comment .= '<li>' . __('Yoast Social image on page/post', Plugin::TEXT_DOMAIN) . '</li>';
 		}
-		$image_comment .= '<li>Featured image on page/post (when checked in general settings)</li>';
-		$image_comment .= '<li>Fallback Branded Social image in general settings</li></ol>';
+		$image_comment .= '<li>' . __('Featured image on page/post (when checked in general settings)', Plugin::TEXT_DOMAIN) . '</li>';
+		$image_comment .= '<li>' . __('Fallback Branded Social image in general settings', Plugin::TEXT_DOMAIN) . '</li></ol>';
 
 		$options = [
 			'admin' => [
-				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => 'Fallback OG:Image.', 'comment' => 'Used for any page/post that has no OG image selected. You can use JPEG and PNG. Recommended size: 1200x630 pixels.'],
-				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use the WordPress Featured image.', 'default' => 'on', 'info-icon' => 'dashicons-info', 'info' => $image_comment],
+				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => __('Fallback OG:Image.', Plugin::TEXT_DOMAIN), 'comment' => __('Used for any page/post that has no OG image selected.', Plugin::TEXT_DOMAIN) . ' ' . __('You can use JPEG and PNG.', Plugin::TEXT_DOMAIN) . ' ' . __('Recommended size: 1200x630 pixels.', Plugin::TEXT_DOMAIN)],
+				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Use the WordPress Featured image.', Plugin::TEXT_DOMAIN), 'default' => 'on', 'info-icon' => 'dashicons-info', 'info' => $image_comment],
 
-				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels wide/high. Use a transparent PNG for best results.'],
-				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => 'Default logo position', 'default' => 'top-left'],
-				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Logo-scale (%)', 'comment' => '', 'default' => '100', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
+				'image_logo' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => __('Your logo', Plugin::TEXT_DOMAIN), 'comment' => __('Image should be approximately 600 pixels wide/high.', Plugin::TEXT_DOMAIN) . ' ' . __('Use a transparent PNG for best results.', Plugin::TEXT_DOMAIN)],
+				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => __('Default logo position', Plugin::TEXT_DOMAIN), 'default' => 'top-left'],
+				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => __('Logo-scale (%)', Plugin::TEXT_DOMAIN), 'comment' => '', 'default' => '100', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
 
-				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => 'The text to overlay if no other text or title can be found.', 'comment' => 'This should be a generic text that is applicable to the entire website.', 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
-				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => 'Select a font', 'options' => self::get_font_list(), 'default' => 'Roboto-Regular'],
-				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf,font/otf', 'label' => 'Font upload', 'upload' => 'Upload .ttf/.otf file', 'info-icon' => 'dashicons-info', 'info' => 'Custom font must be a .ttf or .otf file. You\'re responsible for the proper permissions and usage rights of the font.'],
+				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => __('The text to overlay if no other text or title can be found.', Plugin::TEXT_DOMAIN), 'comment' => __('This should be a generic text that is applicable to the entire website.', Plugin::TEXT_DOMAIN), 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
+				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => __('Select a font', Plugin::TEXT_DOMAIN), 'options' => self::get_font_list(), 'default' => 'Roboto-Regular'],
+				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf,font/otf', 'label' => __('Font upload', Plugin::TEXT_DOMAIN), 'upload' => __('Upload .ttf/.otf file', Plugin::TEXT_DOMAIN), 'info-icon' => 'dashicons-info', 'info' => __('Custom font must be a .ttf or .otf file.', Plugin::TEXT_DOMAIN) . ' ' . __('You\'re responsible for the proper permissions and usage rights of the font.', Plugin::TEXT_DOMAIN)],
 //				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
 
-				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'Text position', 'options' => self::position_grid(), 'default' => 'bottom-left'],
-				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Default Text color', 'default' => '#FFFFFFFF'],
-				'text__font_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => 'Font-size (px)', 'comment' => '', 'default' => Plugin::DEF_FONT_SIZE, 'min' => Plugin::MIN_FONT_SIZE, 'max' => Plugin::MAX_FONT_SIZE, 'step' => 1],
-				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text background color', 'default' => '#66666666'],
-				'background_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a background', 'value' => 'on', 'default' => 'on'],
+				'text_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => __('Text position', Plugin::TEXT_DOMAIN), 'options' => self::position_grid(), 'default' => 'bottom-left'],
+				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => __('Default Text color', Plugin::TEXT_DOMAIN), 'default' => '#FFFFFFFF'],
+				'text__font_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => __('Font-size (px)', Plugin::TEXT_DOMAIN), 'comment' => '', 'default' => Plugin::DEF_FONT_SIZE, 'min' => Plugin::MIN_FONT_SIZE, 'max' => Plugin::MAX_FONT_SIZE, 'step' => 1],
+				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => __('Text background color', Plugin::TEXT_DOMAIN), 'default' => '#66666666'],
+				'background_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => __('Use a background', Plugin::TEXT_DOMAIN), 'value' => 'on', 'default' => 'on'],
 
-				'text_stroke_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'color', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => '#00000000'],
-				'text_stroke' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Default stroke width', 'default' => 0],
+				'text_stroke_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'color', 'attributes' => 'rgba', 'label' => __('Stroke color', Plugin::TEXT_DOMAIN), 'default' => '#00000000'],
+				'text_stroke' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => __('Default stroke width', Plugin::TEXT_DOMAIN), 'default' => 0],
 
-				'text_shadow_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'label' => 'Default Text shadow color', '#00000000'],
-				'text_shadow_top' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => '-2'],
-				'text_shadow_left' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => '2'],
-				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'value' => 'on', 'default' => 'off'],
+				'text_shadow_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'label' => __('Default Text shadow color', Plugin::TEXT_DOMAIN), '#00000000'],
+				'text_shadow_top' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => __('Shadow offset - vertical.', Plugin::TEXT_DOMAIN) . ' ' . __('Negative numbers to top, Positive numbers to bottom.', Plugin::TEXT_DOMAIN), 'default' => '-2'],
+				'text_shadow_left' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => __('Shadow offset - horizontal.', Plugin::TEXT_DOMAIN) . ' ' . __('Negative numbers to left, Positive numbers to right.', Plugin::TEXT_DOMAIN), 'default' => '2'],
+				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => __('Use a text shadow', Plugin::TEXT_DOMAIN), 'value' => 'on', 'default' => 'off'],
 			],
 			'meta' => [
-				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Select if you don\'t want a Social Image with this ' . get_post_type()],
-				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use text on this image?', 'default' => 'yes', 'value' => 'yes', 'comment' => 'Uncheck if you do not wish text on this image.'],
+				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => sprintf(_x('Select if you don\'t want a Social Image with this %s', 'post-type', Plugin::TEXT_DOMAIN), get_post_type()) ],
+				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Use text on this image?', Plugin::TEXT_DOMAIN), 'default' => 'yes', 'value' => 'yes', 'comment' => __('Uncheck if you do not wish text on this image.', Plugin::TEXT_DOMAIN)],
 
-				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'label' => 'You can upload/select a specific OG Image here', 'comment' => 'You can use JPEG and PNG. Recommended size: 1200x630 pixels.', 'info-icon' => 'dashicons-info', 'info' => $image_comment],
+				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'label' => __('You can upload/select a specific Social Image here', Plugin::TEXT_DOMAIN), 'comment' => __('You can use JPEG and PNG.', Plugin::TEXT_DOMAIN) . ' ' . __('Recommended size: 1200x630 pixels.', Plugin::TEXT_DOMAIN), 'info-icon' => 'dashicons-info', 'info' => $image_comment],
 
-				'text' => ['namespace' => self::OPTION_PREFIX, 'type' => 'textarea', 'class' => 'hidden editable-target', 'label' => 'Text on image', 'If you leave this blank, the current page title is used as it appears in the webpage HTML. If you have Yoast SEO or RankMath installed, the title is taken from that.'],
-				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text color', 'default' => get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
-				'text_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => 'Text position', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-left')],
+				'text' => ['namespace' => self::OPTION_PREFIX, 'type' => 'textarea', 'class' => 'hidden editable-target', 'label' => __('Text on image', Plugin::TEXT_DOMAIN)],
+				'color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => __('Text color', Plugin::TEXT_DOMAIN), 'default' => get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF')],
+				'text_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'label' => __('Text position', Plugin::TEXT_DOMAIN), 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-left')],
 
-				'background_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Text background color', 'default' => get_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666')],
+				'background_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => __('Text background color', Plugin::TEXT_DOMAIN), 'default' => get_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666')],
 
-				'text_stroke_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => 'Stroke color', 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000')],
-				'text_stroke' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Default stroke width', 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke', '0')],
+				'text_stroke_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => __('Stroke color', Plugin::TEXT_DOMAIN), 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000')],
+				'text_stroke' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => __('Default stroke width', Plugin::TEXT_DOMAIN), 'default' => get_option(self::DEFAULTS_PREFIX . 'text_stroke', '0')],
 
-				'text_shadow_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'label' => 'Text shadow color', get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000')],
-				'text_shadow_top' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - vertical. Negative numbers to top, Positive numbers to bottom.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2')],
-				'text_shadow_left' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => 'Shadow offset - horizontal. Negative numbers to left, Positive numbers to right.', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_left', '2')],
-				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a text shadow', 'comment' => 'Will improve readability of light text on light background.', 'value' => 'on', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
+				'text_shadow_color' => ['namespace' => self::OPTION_PREFIX, 'type' => 'color', 'label' => __('Text shadow color', Plugin::TEXT_DOMAIN), get_option(self::DEFAULTS_PREFIX . 'text_shadow', '#00000000')],
+				'text_shadow_top' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => __('Shadow offset - vertical.', Plugin::TEXT_DOMAIN) . ' ' . __('Negative numbers to top, Positive numbers to bottom.', Plugin::TEXT_DOMAIN), 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_top', '-2')],
+				'text_shadow_left' => ['namespace' => self::OPTION_PREFIX, 'type' => 'text', 'label' => __('Shadow offset - horizontal.', Plugin::TEXT_DOMAIN) . ' ' . __('Negative numbers to left, Positive numbers to right.', Plugin::TEXT_DOMAIN), 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_left', '2')],
+				'text_shadow_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Use a text shadow', Plugin::TEXT_DOMAIN), 'comment' => __('Will improve readability of light text on light background.', Plugin::TEXT_DOMAIN), 'value' => 'on', 'default' => get_option(self::DEFAULTS_PREFIX . 'shadow_enabled', 'off')],
 
-				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => 'Use a logo on this image?', 'default' => 'yes', 'comment' => 'Uncheck if you do not wish a logo on this image, or choose a position below'],
-				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'label' => 'Logo position', 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'top-left')],
+				'logo_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Use a logo on this image?', Plugin::TEXT_DOMAIN), 'default' => 'yes', 'comment' => __('Uncheck if you do not wish a logo on this image, or choose a position below.', Plugin::TEXT_DOMAIN)],
+				'logo_position' => ['namespace' => self::OPTION_PREFIX, 'type' => 'radios', 'label' => __('Logo position', Plugin::TEXT_DOMAIN), 'class' => 'position-grid', 'options' => self::position_grid(), 'default' => get_option(self::DEFAULTS_PREFIX . 'logo_position', 'top-left')],
 
-				'image_logo' => ['namespace' => self::DO_NOT_RENDER, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => 'Your logo', 'comment' => 'Image should be approximately 600 pixels wide/high. Use a transparent PNG for best results.', 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
+				'image_logo' => ['namespace' => self::DO_NOT_RENDER, 'type' => 'image', 'types' => 'image/gif,image/png', 'label' => __('Your logo', Plugin::TEXT_DOMAIN), 'comment' => __('Image should be approximately 600 pixels wide/high.', Plugin::TEXT_DOMAIN) . ' ' . __('Use a transparent PNG for best results.', Plugin::TEXT_DOMAIN), 'default' => get_option(self::OPTION_PREFIX . 'image_logo')],
 			]
 		];
 
@@ -1116,7 +1122,7 @@ class Plugin
 		) {
 			$args = array(
 				'id' => self::ADMIN_SLUG . '-view',
-				'title' => 'View Social Image',
+				'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
 				'href' => get_permalink(get_the_ID()) . Plugin::BSI_IMAGE_NAME . '/',
 				'meta' => [
 					'target' => '_blank',
@@ -1128,11 +1134,11 @@ class Plugin
 
 		$args = array(
 			'id' => self::ADMIN_SLUG . '-inspector',
-			'title' => self::icon() . 'Inspect Social Image',
+			'title' => self::icon() . __('Inspect Social Image', Plugin::TEXT_DOMAIN),
 			'href' => Plugin::EXTERNAL_INSPECTOR,
 			'meta' => [
 				'target' => '_blank',
-				'title' => 'Shows how this post is shared using an external, unaffiliated service.',
+				'title' => __('Shows how this post is shared using an external, unaffiliated service.', Plugin::TEXT_DOMAIN),
 			]
 		);
 
@@ -1145,7 +1151,8 @@ class Plugin
 
 	public static function admin_bar_icon_style()
 	{
-		?><style>#wp-admin-bar-<?php print self::ADMIN_SLUG; ?>-inspector svg {
+		?>
+		<style>#wp-admin-bar-<?php print self::ADMIN_SLUG; ?>-inspector svg {
 			position: relative;
 			top: 3px;
 		}</style><?php
@@ -1153,14 +1160,14 @@ class Plugin
 
 	private static function icon()
 	{
-		if (preg_match('/\.svg$/',Plugin::ICON)) {
+		if (preg_match('/\.svg$/', Plugin::ICON)) {
 			$icon = file_get_contents(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON));
 			$icon = str_replace('<path', '<path fill="currentColor"', $icon);
 
 			return $icon;
 		}
 		else {
-			return '<img src="'. esc_attr(plugins_url('/img/' . basename('/' . Plugin::ICON), __DIR__)) . '" />';
+			return '<img src="' . esc_attr(plugins_url('/img/' . basename('/' . Plugin::ICON), __DIR__)) . '" />';
 		}
 	}
 

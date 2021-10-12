@@ -49,7 +49,7 @@ class Image {
 		// well, we tried :(
 		if (!$this->image_id) {
 			header('HTTP/1.1 404 Not found');
-			echo 'Sorry, could not find an OG Image configured. This is probably a temporary error.';
+			echo __('Sorry, could not find an OG Image configured.', Plugin::TEXT_DOMAIN) .' '. __('This is probably a temporary error.', Plugin::TEXT_DOMAIN);
 			exit;
 		}
 
@@ -63,7 +63,7 @@ class Image {
 			readfile($image_cache['file']);
 			exit;
 		}
-		echo 'Sorry, we could not create the image. This is probably a temporary error.';
+		echo __('Sorry, we could not create the image.', Plugin::TEXT_DOMAIN) .' '. __('This is probably a temporary error.', Plugin::TEXT_DOMAIN);
 		exit;
 	}
 

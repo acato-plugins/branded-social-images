@@ -57,7 +57,7 @@ class Admin
 
 		add_filter('image_size_names_choose', function ($default_sizes) {
 			return array_merge($default_sizes, array(
-				Plugin::IMAGE_SIZE_NAME => __('The OG-Image recommended size'),
+				Plugin::IMAGE_SIZE_NAME => __('The OG:Image recommended size', Plugin::TEXT_DOMAIN),
 			));
 		});
 
@@ -69,12 +69,12 @@ class Admin
 		add_filter('network_admin_plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
 
 		add_action('bsi_footer', function () {
-			?><p><?php print sprintf('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.
-				Please let us know what you think of this plugin and what you wish to see in future versions. <a
-					href="%s">Contact us here</a>.',
+			?><p><?php print sprintf(__('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.', Plugin::TEXT_DOMAIN)
+				. ' ' . __('Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN) 
+				. ' ' . __('<a href="%s">Contact us here</a>.', Plugin::TEXT_DOMAIN),
 				Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO, Plugin::BSI_URL_CONTACT); ?></p><?php
 			if (get_the_ID()) {
-				?><p><?php print sprintf('Use <a href="%s" target="_blank">%s</a> to preview what your social image looks like on social media.',
+				?><p><?php print sprintf(__('Use <a href="%s" target="_blank">%s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN),
 					sprintf(Plugin::EXTERNAL_INSPECTOR, urlencode(get_permalink(get_the_ID()))), Plugin::EXTERNAL_INSPECTOR_NAME); ?></p><?php
 			}
 		});
@@ -111,6 +111,10 @@ class Admin
 		return Plugin::ICON;
 	}
 
+	/**
+	 * todo: This does not change the defaults, nor is it used in this fashion anymore
+	 * todo: This needs to be refactored!
+	 */
 	public static function base_settings(): array
 	{
 		$defaults = [];
@@ -182,7 +186,7 @@ class Admin
 					<?php self::show_editor($fields); ?>
 					<br/>
 					<br/>
-					<button class="action button-primary"><?php _e('Save settings'); ?></button>
+					<button class="action button-primary"><?php _e('Save settings', Plugin::TEXT_DOMAIN); ?></button>
 				</form>
 			</div>
 
@@ -203,13 +207,13 @@ class Admin
 			if (!is_array($links)) {
 				$links = (array)$links;
 			}
-			$links[] = sprintf('<a href="%s">%s</a>', $url, __('Settings'));
+			$links[] = sprintf('<a href="%s">%s</a>', $url, __('Settings', Plugin::TEXT_DOMAIN));
 
 			// add support link
-			$links[] = sprintf('<a href="%s">%s</a>', Plugin::BSI_URL_CONTACT, __('Support'));
+			$links[] = sprintf('<a href="%s">%s</a>', Plugin::BSI_URL_CONTACT, __('Support', Plugin::TEXT_DOMAIN));
 
 			// add contribute link
-			$links[] = sprintf('<a href="%s">%s</a>', Plugin::BSI_URL_CONTRIBUTE, __('Contribute'));
+			$links[] = sprintf('<a href="%s">%s</a>', Plugin::BSI_URL_CONTRIBUTE, __('Contribute', Plugin::TEXT_DOMAIN));
 		}
 
 		return $links;
@@ -217,7 +221,7 @@ class Admin
 
 	public static function valid_fonts(): array
 	{
-		$fonts = glob(self::storage() . '/*.?tf');
+		$fonts = glob(self::storage() . '/*.?tf'); // matches ttf and otf, and more, but this is checked better later on
 		$list = [];
 		foreach ($fonts as $font) {
             $b = basename($font);
@@ -270,7 +274,7 @@ class Admin
 			mkdir($dir);
 		}
 		if (!is_dir($dir)) {
-			self::setError('storage', __('Could not create the storage directory in the uploads folder. In a WordPress site the uploads folder should always be writable. Please fix this. This error will disappear once the problem has been corrected.', 'clsogimg'));
+			self::setError('storage', __('Could not create the storage directory in the uploads folder.', Plugin::TEXT_DOMAIN) .' ' . __('In a WordPress site the uploads folder should always be writable.', Plugin::TEXT_DOMAIN) .' '. __('Please fix this.', Plugin::TEXT_DOMAIN) .' '. __('This error will disappear once the problem has been corrected.', Plugin::TEXT_DOMAIN));
 		}
 
 		if ($as_url) {
@@ -385,7 +389,7 @@ class Admin
 			</div>
 			<div class="settings">
 				<div class="area--options">
-					<h2>Image options<span class="toggle"></span></h2>
+					<h2><?php _e('Image options', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
 					<div class="inner">
 						<?php self::render_options($fields, [
 							'image', 'image_use_thumbnail',
@@ -394,7 +398,7 @@ class Admin
 					</div>
 				</div>
 				<div class="area--settings">
-					<h2>Text settings<span class="toggle"></span></h2>
+					<h2><?php _e('Text settings', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
 					<div class="inner">
 						<?php self::render_options($fields, [
 							'text', 'text_enabled',
@@ -666,7 +670,7 @@ EOCSS;
 			]));
 
 			if (!$font_css) {
-				self::setError('font-family', __('Could not download font from Google Fonts. Please download yourself and upload here.', 'clsogimg'));
+				self::setError('font-family', __('Could not download font from Google Fonts.', Plugin::TEXT_DOMAIN) .' '. __('Please download yourself and upload here.', Plugin::TEXT_DOMAIN));
 			}
 			else {
 				$font_css_parts = explode('@font-face', $font_css);
