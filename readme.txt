@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 0.0.4
+Stable tag: 0.0.7
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -60,6 +60,9 @@ You can use WordPress filters to influence the text- and image selection process
 
 = 1.0.0 =
 * First public release to wordpress.org
+
+= 0.0.7 =
+* Added .otf support
 
 = 0.0.6 =
 * Bugfixes and changes as per brainstorm session october 2021
