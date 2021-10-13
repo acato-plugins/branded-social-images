@@ -1011,7 +1011,7 @@ EODOC;
 				'logo_position' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'radios', 'class' => 'position-grid', 'options' => self::position_grid(), 'label' => __('Default logo position', Plugin::TEXT_DOMAIN), 'default' => 'top-left'],
 				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => __('Logo-scale (%)', Plugin::TEXT_DOMAIN), 'comment' => '', 'default' => '100', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
 
-				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => __('The text to overlay if no other text or title can be found.', Plugin::TEXT_DOMAIN), 'comment' => __('This should be a generic text that is applicable to the entire website.', Plugin::TEXT_DOMAIN), 'default' => get_bloginfo('name') . ' - ' . get_bloginfo('description')],
+				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => __('The text to overlay if no other text or title can be found.', Plugin::TEXT_DOMAIN), 'comment' => __('This should be a generic text that is applicable to the entire website.', Plugin::TEXT_DOMAIN), 'default' => Plugin::getInstance()->dummy_data('text')],
 				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => __('Select a font', Plugin::TEXT_DOMAIN), 'options' => self::get_font_list(), 'default' => 'Roboto-Regular'],
 				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf,font/otf', 'label' => __('Font upload', Plugin::TEXT_DOMAIN), 'upload' => __('Upload .ttf/.otf file', Plugin::TEXT_DOMAIN), 'info-icon' => 'dashicons-info', 'info' => __('Custom font must be a .ttf or .otf file.', Plugin::TEXT_DOMAIN) . ' ' . __('You\'re responsible for the proper permissions and usage rights of the font.', Plugin::TEXT_DOMAIN)],
 //				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
@@ -1322,4 +1322,15 @@ EODOC;
 		return '#' . strtoupper(substr(implode('', $hex_values), 0, 8));
 	}
 
+	/**
+	 * @param $what
+	 * @return string|void
+	 */
+	public function dummy_data($what)
+	{
+		switch($what) {
+			case 'text':
+				return __('Type here to change the text on the image', Plugin::TEXT_DOMAIN);
+		}
+	}
 }
