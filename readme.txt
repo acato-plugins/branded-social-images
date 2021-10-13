@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== Branded Social Images ===
 Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7

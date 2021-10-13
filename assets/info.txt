@@ -1,0 +1,6 @@
+see
+
+https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/
+
+
+this assets folder eventually needs to be located in svn on svn.plugins.wordpress.org/branded-social-images/assets and NOT in /trunk/assets or /tags/xxx/assets
