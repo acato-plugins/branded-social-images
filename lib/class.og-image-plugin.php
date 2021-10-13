@@ -8,41 +8,81 @@ defined('ABSPATH') or die('You cannot be here.');
 
 class Plugin
 {
+	/** @var string Defines the URL-endpoint. After changing, re-save permalinks to take effect */
 	const BSI_IMAGE_NAME = 'social-image.png';
+	/** @var string Experimental feature text-stroke. (off|on) */
 	const FEATURE_STROKE = 'off';
+	/** @var string Reduced functionality for clarity. (off|simple|on) */
 	const FEATURE_SHADOW = 'simple';
+	/** @var string Enable text-options in post-meta. Turned off to reduce confusion. (off|on) */
 	const FEATURE_META_TEXT_OPTIONS = 'off';
+	/** @var string Enable logo-options in post-meta. Turned off to reduce confusion. (off|on) */
 	const FEATURE_META_LOGO_OPTIONS = 'off';
+	/** @var float fraction of 1, maximum width of the text-field on the image. values from .7 to .95 work fine. Future feature: setting in interface. */
 	const TEXT_AREA_WIDTH = .95;
+	/** @var int logo and text offset from image edge. This is a value in pixels */
 	const PADDING = 40;
-	const AA = 2;
+	/** @var int Experimental feature: attempt a smoother end result by using higher scale materials. Image and logo are pixel based and therefore need
+	 * to be of higher than average resolution for this to work;
+	 * For example, if set to 2; 2400x1260 for the image and min 1200 w/h for the logo. You can even use 3 or 4 ;)
+	 * After changing, you will need to use a 3rd party plugin to "rebuild thumbnails" to re-generate the proper formats.
+	 */
+	const AA = 1;
+	/** @var string The name of the folder in /wp-uploads (/wp-content/uploads) */
 	const STORAGE = 'bsi-uploads';
+	/** @var string The name of the WordPress "image-size", visible in the interface with plugins like "ajax thumbnail rebuild" */
 	const IMAGE_SIZE_NAME = 'og-image';
-	const DEFAULTS_PREFIX = '_bsi_default_';
-	const OPTION_PREFIX = '_bsi_';
+	/** @var string The script and style names */
 	const SCRIPT_STYLE_HANDLE = 'bsi';
+	/** @var int lower boundary for logo scaling, a percentage value (positive number, 100 = 1:1 scale) */
 	const MIN_LOGO_SCALE = 10;
+	/** @var int upper boundary for logo scaling, a percentage value (positive number, 100 = 1:1 scale) */
 	const MAX_LOGO_SCALE = 200;
+	/** @var int lower boundary for font-size, a points value. (Yes, points. GD2 works in points, 100 pixels = 75 points) */
 	const MIN_FONT_SIZE = 16;
+	/** @var int upper boundary for font-size, a points value. */
 	const MAX_FONT_SIZE = 64;
+	/** @var int default value for font-size, a points value. */
 	const DEF_FONT_SIZE = 40;
+	/** @var string External URL: the WP Plugin repository URL */
 	const PLUGIN_URL_WPORG = 'https://wordpress.org/plugins/branded-social-images/';
+	/** @var string External URL: Our website */
 	const CLEARSITE_URL_INFO = 'https://www.clearsite.nl/';
+	/** @var string External URL: the WP Plugin support URL */
 	const BSI_URL_CONTACT = 'https://wordpress.org/support/plugins/branded-social-images/';
+	/** @var string External URL: the GitHub  repository URL */
 	const BSI_URL_CONTRIBUTE = 'https://github.com/clearsite/branded-social-images/';
+	/** @var string External tool for post-inspection, the name */
 	const EXTERNAL_INSPECTOR_NAME = 'opengraph.xyz';
+	/** @var string External tool for post-inspection, the url-pattern */
 	const EXTERNAL_INSPECTOR = 'https://www.opengraph.xyz/url/%s/';
-	public const DO_NOT_RENDER = 'do_not_render';
-	public const ADMIN_SLUG = 'branded-social-images';
-	public const ICON = 'icon.svg';
-	public const TEXT_DOMAIN = 'bsi';
-	public const QUERY_VAR = 'bsi_img';
+	/** @var string Admin Slug */
+	const ADMIN_SLUG = 'branded-social-images';
+	/** @var string Which image to use in admin */
+	const ICON = 'icon.svg';
+	/** @var string The WordPress text-domain. If you change this, you also must change the filenames of the po and mo files in the 'languages' folder.  */
+	const TEXT_DOMAIN = 'bsi';
+	/** @var string The WordPress query-var variable name. In the rare case there is a conflict, this can be changed, but re-save permalinks after.  */
+	const QUERY_VAR = 'bsi_img';
+	/** @var string Internal value for a special options rendering case. Do not change. */
+	const DO_NOT_RENDER = 'do_not_render';
+	/** @var string options prefix */
+	const DEFAULTS_PREFIX = '_bsi_default_';
+	/** @var string meta prefix */
+	const OPTION_PREFIX = '_bsi_';
 
+	/** @var int Output width. Cannot remember why this is not a constant... */
 	public $width = 1200;
+	/** @var int Output height. same deal... */
 	public $height = 630;
+
+	/** @var array holds the logo_options */
 	public $logo_options;
+	/** @var array holds the text_options */
 	public $text_options;
+	/** @var bool keeps track of existence of an og:image */
 	public $page_already_has_og_image = false;
+	/** @var bool keeps track of availability of an og:image */
 	public $og_image_available;
 
 	public function __construct()
@@ -56,6 +96,7 @@ class Plugin
 			// oh, my, this is a mess.
 			// ...
 			// todo: create new settings manager that handles all this.
+			// todo: this code runs too often, should only run on either admin, or when the image endpoint is accessed.
 
 			$this->setup_defaults();
 			$image_layers = self::image_fallback_chain(true);
@@ -138,13 +179,19 @@ class Plugin
 				$wp_rewrite->flush_rules(true);
 			}
 			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
-			add_image_size(Plugin::IMAGE_SIZE_NAME . '@' . Plugin::AA . 'x', $this->width * Plugin::AA, $this->height * Plugin::AA, true);
+			if (Plugin::AA > 1) {
+				for ($i = Plugin::AA; $i > 1; $i--) {
+					add_image_size(Plugin::IMAGE_SIZE_NAME . "@{$i}x", $this->width * $i, $this->height * $i, true);
+				}
+			}
 		});
 
 		add_action('admin_init', function () {
 			$font_file = get_option(self::DEFAULTS_PREFIX . 'text__font');
+
+			// legacy code follows, todo: investigate removal.
 			if (preg_match('/google:(.+)/', $font_file, $m)) {
-				$defaults = $this->default_options();
+				$defaults = Admin::base_settings();
 				$this->text_options = $defaults['text_options'];
 				$this->text_options['font-file'] = $font_file;
 				$this->text_options['font-family'] = $font_file;
@@ -157,7 +204,8 @@ class Plugin
 			}
 		});
 
-		// phase 2; alter the endpoints to be data-less (like /feed)
+		// this filter is used when a re-save permalink occurs
+		// it changes the rewrite rules so the endpoint is value-less and more a tag, like 'feed' is for WordPress.
 		add_filter('rewrite_rules_array', function ($rules) {
 			$new_rules = [];
 			foreach ($rules as $source => $target) {
@@ -174,6 +222,9 @@ class Plugin
 			return $new_rules;
 		});
 
+		// WordPress will not know what to do with the endpoint urls, and look for a template
+		// at this time, we detect the endpoint and push an image to the browser.
+		// todo: what to do when we don't have an image??
 		add_action('template_redirect', function () {
 			if (get_query_var(Plugin::QUERY_VAR)) {
 				require_once __DIR__ . '/class.og-image.php';
@@ -183,6 +234,7 @@ class Plugin
 			}
 		});
 
+		// yes, a second hook on 'wp', but note; this runs absolute last using priority PHP_INT_MAX.
 		add_action('wp', function () {
 			$id = get_the_ID();
 			if (!is_admin() && $id) {
@@ -227,14 +279,12 @@ class Plugin
 
 	public function setup_defaults()
 	{
-		// thi sis currently THE size for OG images.
-		$defaults = $this->default_options();
+		$defaults = Admin::base_settings();
 		$this->logo_options = $defaults['logo_options'];
 		$this->logo_options['position'] = get_option(self::DEFAULTS_PREFIX . 'logo_position');
 
 		// text options
 		$this->text_options = $defaults['text_options'];
-//			var_dump( get_attached_file(get_option(Admin::DEFAULTS_PREFIX . 'text__ttf_upload')));exit;
 		$font_file = get_option(self::DEFAULTS_PREFIX . 'text__font');
 
 		$this->text_options['font-file'] = $font_file;
@@ -265,14 +315,9 @@ class Plugin
 		$this->validate_logo_options();
 	}
 
-	public function default_options(): array
-	{
-		return Admin::base_settings();
-	}
-
 	public function validate_text_options()
 	{
-		$all_possible_options = $this->default_options();
+		$all_possible_options = Admin::base_settings();
 		$all_possible_options = $all_possible_options['text_options'];
 		$all_possible_options['position'] = 'left';
 
@@ -301,7 +346,7 @@ class Plugin
 
 	public function validate_logo_options()
 	{
-		$all_possible_options = $this->default_options();
+		$all_possible_options = Admin::base_settings();
 		$all_possible_options = $all_possible_options['logo_options'];
 		$this->logo_options = shortcode_atts($all_possible_options, $this->logo_options);
 	}
@@ -722,6 +767,7 @@ class Plugin
 	}
 
 	/**
+	 * EXPERIMENTAL
 	 * @param $source
 	 * @return mixed|string
 	 * @uses exec to execute system command. this might not be supported.
@@ -777,7 +823,7 @@ class Plugin
 			// could not download
 		}
 		else {
-			// downloaded but did not run conversion tool succesfully
+			// downloaded but did not run conversion tool successfully
 			if (file_exists($bin . '/can-execute-binaries-from-php.success')) {
 				$support = true;
 			}
@@ -825,10 +871,10 @@ class Plugin
 				'font_name' => 'Merriweather', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .86]
 			],
 			'OpenSans-Regular' => [
-				'font_name' => 'Open Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .95, 'text-area-width' => '.67']
+				'font_name' => 'Open Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .95, 'text-area-width' => .96]
 			],
 			'Oswald-Regular' => [
-				'font_name' => 'Oswald', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .92, 'text-area-width' => '.67']
+				'font_name' => 'Oswald', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .92, 'text-area-width' => .96]
 			],
 			'PTSans-Regular' => [
 				'font_name' => 'PT Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1.03]
@@ -857,6 +903,47 @@ class Plugin
 			foreach ($tweaks as $font => $data) {
 				self::getInstance()->file_put_contents(self::getInstance()->storage() . '/' . $font . '.json', json_encode($data, JSON_PRETTY_PRINT));
 			}
+			$DOCUMENTATION = <<< EODOC
+Files in here:
+- *.otf, *.ttf:             These are the fonts :) You can place any TTF or OTF font here.
+                            Just make sure you have the proper license for the font(s).
+                            We only put Google Fonts here for you, which are licensed for web.
+- *.json:                   for tweaking the rendering of the font in CSS and in image generation, see
+                            below for more details.
+- what-are-these-files.txt: well, that's this file
+
+Info on the .json files;
+Some fonts render different (some even VERY different) in GD2 than they do in HTML/CSS.
+Sample content:
+
+{
+    "font_name": "Open Sans",
+    "admin": {
+        "letter-spacing": "0px"
+    },
+    "gd": {
+        "line-height": 0.95,
+        "text-area-width": .96
+    }
+}
+
+Here are defined; the readable font-name. Useful when the font-name has a space.
+
+The admin sub-tree can contain:
+- letter-spacing:  a CSS compatible value to tweak the rendering of the font in the
+                   admin interface.
+Need more? Let us know. See the WordPress BSI Settings panel for details on contacting us.
+
+The gd sub-tree can contain:
+- line-height:     a FACTOR (absent or  a value of 1 means "no change") to tweak the
+                   line-height as calculated by GD.
+- text-area-width: a factor (again) to tweak the width of the text-area.
+                   This is useful when fonts render slightly to narrow or to wide.
+Need more? Let us know. See the WordPress BSI Settings panel for details on contacting us.
+EODOC;
+			// force Windows line endings, because I KNOW that most users that need this documentation are not Linux, Unix or macOS users.
+			$DOCUMENTATION = str_replace("\n", "\r\n", str_replace("\r", "", $DOCUMENTATION));
+			self::getInstance()->file_put_contents(self::getInstance()->storage() . '/what-are-these-files.txt', $DOCUMENTATION);
 		}
 
 		return $tweaks;
@@ -877,6 +964,9 @@ class Plugin
 		];
 	}
 
+	/**
+	 * @function used to combat injection/request forgery
+	 */
 	public static function get_valid_POST_keys($section = false)
 	{
 		$list = self::field_list();
@@ -1017,11 +1107,11 @@ class Plugin
 		$layers = [];
 
 		$title = '';
-		if (Plugin::setting('use_bare_post_title')) {
-			$layers['wordpress'] = apply_filters('the_title', get_the_title($post_id), $post_id);
-		}
-
 		if ($post_id) {
+			if (Plugin::setting('use_bare_post_title')) {
+				$layers['wordpress'] = $title = apply_filters('the_title', get_the_title($post_id), $post_id);
+			}
+
 			if (!$title) {
 				$title = '';
 				try {

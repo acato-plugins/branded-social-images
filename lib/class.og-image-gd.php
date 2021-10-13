@@ -136,7 +136,7 @@ class GD {
 				$this->line_height_factor = $tweaks['line-height'];
 			}
 			if (!empty($tweaks['text-area-width'])) {
-				$this->text_area_width = $tweaks['text-area-width'];
+				$this->text_area_width = $tweaks['text-area-width'] * $this->text_area_width;
 			}
 		}
 		$fontSize = $textOptions['font-size'] * Plugin::AA;

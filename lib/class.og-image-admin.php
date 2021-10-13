@@ -56,6 +56,7 @@ class Admin
 		add_action('admin_init', [static::class, 'sanitize_fonts']);
 
 		add_filter('image_size_names_choose', function ($default_sizes) {
+			// todo: support the experimental ::AA feature here.
 			return array_merge($default_sizes, array(
 				Plugin::IMAGE_SIZE_NAME => __('The OG:Image recommended size', Plugin::TEXT_DOMAIN),
 			));
@@ -69,10 +70,10 @@ class Admin
 		add_filter('network_admin_plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
 
 		add_action('bsi_footer', function () {
-			?><p><?php print sprintf(__('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.', Plugin::TEXT_DOMAIN)
-				. ' ' . __('Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN) 
-				. ' ' . __('<a href="%s">Contact us here</a>.', Plugin::TEXT_DOMAIN),
-				Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO, Plugin::BSI_URL_CONTACT); ?></p><?php
+			?><p><?php
+			print sprintf(__('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.', Plugin::TEXT_DOMAIN), Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO)
+				. ' ' . __('Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN)
+				. ' ' . sprintf(__('<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN), Plugin::BSI_URL_CONTACT); ?></p><?php
 			if (get_the_ID()) {
 				?><p><?php print sprintf(__('Use <a href="%s" target="_blank">%s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN),
 					sprintf(Plugin::EXTERNAL_INSPECTOR, urlencode(get_permalink(get_the_ID()))), Plugin::EXTERNAL_INSPECTOR_NAME); ?></p><?php
@@ -102,12 +103,15 @@ class Admin
 				</style><?php
 			});
 		}
+
 		if (preg_match('/\.svg$/', Plugin::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON))) {
+			// this is absolute horror; why can't WordPress allow inline html images ?!
 			return '" alt="" />' . file_get_contents(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON)) . '<link href="';
 		}
-		if (preg_match('/\.svg$/', Plugin::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON))) {
-			return plugins_url('/img/' . basename('/' . Plugin::ICON), __DIR__);
-		}
+//
+//		if (preg_match('/\.svg$/', Plugin::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON))) {
+//			return plugins_url('/img/' . basename('/' . Plugin::ICON), __DIR__);
+//		}
 		return Plugin::ICON;
 	}
 
@@ -145,15 +149,6 @@ class Admin
 			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
 			'size' => get_option(Plugin::OPTION_PREFIX . 'image_logo_size', '100'),
 		];
-
-		// more freemium options to consider;
-		/**
-		 * stroke on text-shadow
-		 * rotation on text
-		 * independant rotation of shadow
-		 * skew?
-		 *
-		 */
 
 		return $defaults;
 	}
@@ -513,10 +508,9 @@ class Admin
 					}
 				}
 			}
+
 			// clean the cache
 			$cache_file = wp_upload_dir();
-			$base_url = $cache_file['baseurl'];
-			$base_dir = $cache_file['basedir'];
 			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
 			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
 			array_map('unlink', array_merge(glob($lock_files), glob($cache_files)));
