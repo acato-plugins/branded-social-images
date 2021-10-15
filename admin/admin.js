@@ -20,7 +20,7 @@ function hex_to_rgba(hex) {
 	}
 
 	var imageeditor = editor.find('.area--background .background');
-	var logoeditor = editor.find('.area--logo .logo');
+	var logoeditor = editor.find('.area--logo:not(.logo-alternate) .logo');
 
 	;(function ($) {
 		$.fn.attachMediaUpload = function () {
@@ -292,9 +292,18 @@ function hex_to_rgba(hex) {
 		});
 
 		editor.find("#image_logo").on('image:select', function (event, attachment) {
-			editor.get(0).style.setProperty('--logo-width', attachment.width);
-			editor.get(0).style.setProperty('--logo-height', attachment.height);
-			logoeditor.get(0).style.backgroundImage = 'url("' + attachment.url + '")';
+			if ('id' in attachment && parseInt(""+attachment.id, 10) > 0) {
+				editor.get(0).style.setProperty('--logo-width', attachment.width);
+				editor.get(0).style.setProperty('--logo-height', attachment.height);
+				logoeditor.get(0).style.backgroundImage = 'url("' + attachment.url + '")';
+				editor.addClass('with-logo');
+			}
+			else {
+				editor.get(0).style.setProperty('--logo-width', 410); // this is the example logo
+				editor.get(0).style.setProperty('--logo-height', 82);
+				logoeditor.get(0).style.backgroundImage = '';
+				editor.removeClass('with-logo');
+			}
 		});
 
 		editor.find("#text__ttf_upload").on('file:select', function (event, attachment) {

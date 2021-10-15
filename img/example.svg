@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 1200 630">
+  <path fill="#00EED1" d="M0 0h1200v625.9H0z" class="scenery"/>
+	<path fill="#FEDB41" d="M806.7 79.6a95.8 95.8 0 1 1 0 191.6 95.8 95.8 0 0 1 0-191.6z" class="sun"/>
+	<path fill="#0365DD" d="M986.9 187.7a115.8 115.8 0 0 0-188-1.6l-197.1 269A115.8 115.8 0 0 1 444 482.9l-147.4-98.6a115.7 115.7 0 0 0-128-.5L0 496.1v133.8h1200V489.6L986.9 187.7z" class="mountains"/>
+</svg>

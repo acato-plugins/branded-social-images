@@ -97,8 +97,16 @@
   grid-area: image;
   z-index: 0; }
 
-#branded-social-images-editor .area--background-canvas {
-  background: url(../img/example.jpg) no-repeat top left 100%/cover; }
+#branded-social-images-editor.with-logo .area--background-canvas svg .logo {
+  display: none; }
+
+#branded-social-images-editor.logo_position-top-right .area--background-canvas svg .mountains, #branded-social-images-editor.logo_position-right .area--background-canvas svg .mountains, #branded-social-images-editor.logo_position-bottom-right .area--background-canvas svg .mountains {
+  -ms-transform: translate(1200px) scale(-1, 1);
+      transform: translate(1200px) scale(-1, 1); }
+
+#branded-social-images-editor.logo_position-top-right .area--background-canvas svg .sun, #branded-social-images-editor.logo_position-right .area--background-canvas svg .sun, #branded-social-images-editor.logo_position-bottom-right .area--background-canvas svg .sun {
+  -ms-transform: translate(-420px);
+      transform: translate(-420px); }
 
 #branded-social-images-editor .background {
   position: absolute;
@@ -127,6 +135,15 @@
     background: transparent no-repeat center/contain;
     width: calc(var(--logo-scale) * .005px * var(--logo-width));
     height: calc(var(--logo-scale) * .005px * var(--logo-height)); }
+  #branded-social-images-editor .area--logo.logo-alternate .logo {
+    width: calc(var(--logo-scale) * .01px * var(--logo-width));
+    height: calc(var(--logo-scale) * .01px * var(--logo-height)); }
+
+#branded-social-images-editor.with-logo .area--logo.logo-alternate {
+  display: none; }
+
+#branded-social-images-editor:not(.with-logo) .area--logo:not(.logo-alternate) {
+  display: none; }
 
 #branded-social-images-editor.logo_position-top-left .area--logo, #branded-social-images-editor.logo_position-left .area--logo, #branded-social-images-editor.logo_position-bottom-left .area--logo {
   -ms-grid-columns: var(--padding) var(--text-width) auto;

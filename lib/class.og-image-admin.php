@@ -340,8 +340,8 @@ class Admin
 			--line-height: <?php print $text_settings['line-height']; ?>px;
 
 			--logo-scale: <?php print $logo_settings['size']; ?>;
-			--logo-width: <?php print $width; ?>;
-			--logo-height: <?php print $height; ?>;
+			--logo-width: <?php print $logo ? $width : 410; /* example logo */ ?>;
+			--logo-height: <?php print $logo ? $height : 82; ?>;
 		}
 
 		</style>
@@ -350,6 +350,9 @@ class Admin
 		$editor_class = [];
 		$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
 		$editor_class[] = 'text_position-' . (!empty($fields['text_position']) ? $fields['text_position']['current_value'] : $text_settings['position']);
+		if ($logo) {
+			$editor_class[] = 'with-logo';
+		}
 
 		$editor_class = implode(' ', $editor_class);
 		?>
@@ -358,7 +361,7 @@ class Admin
 			 data-font="<?php print $text_settings['font-file']; ?>"
 			 data-use-thumbnail="<?php print Plugin::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
 			<div class="grid">
-				<div class="area--background-canvas"></div>
+				<div class="area--background-canvas"><?php include __DIR__ .'/../img/example.svg'; ?></div>
 				<?php foreach (Plugin::image_fallback_chain() as $kind => $fallback_image) { ?>
 					<div class="area--background-alternate image-source-<?php print $kind; ?>">
 						<div class="background"
@@ -366,6 +369,9 @@ class Admin
 						</div>
 					</div>
 				<?php } ?>
+				<div class="area--logo logo-alternate">
+					<div class="logo" style="background-image:url('<?php print plugins_url('img/example-logo.svg', __DIR__) ?>')"></div>
+				</div>
 				<div class="area--background">
 					<div class="background" style="background-image:url('<?php print esc_attr($image); ?>')"></div>
 				</div>
