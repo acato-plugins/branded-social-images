@@ -181,11 +181,6 @@ function hex_to_rgba(hex) {
 			$(this).closest('[class^="area"]').toggleClass('closed');
 		});
 
-		// on load set text to editable
-		texteditor.html(texteditor_target.val());
-
-		// update target when edited
-
 		// native JS solution for paste-fix
 		texteditor.get(0).addEventListener('paste', function(e) {
 			e.preventDefault();
@@ -199,9 +194,8 @@ function hex_to_rgba(hex) {
 
 		// update editor when target edited
 		texteditor_target.on('blur keyup paste', function () {
-			texteditor.html(texteditor_target.val());
-		});
-
+			texteditor.text(texteditor_target.val());
+		}).trigger('paste');
 
 		// text color
 		editor.find('#color').on('keyup blur paste input', function () {
