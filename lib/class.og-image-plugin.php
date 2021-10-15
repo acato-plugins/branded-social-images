@@ -281,17 +281,17 @@ class Plugin
 	{
 		$defaults = Admin::base_settings();
 		$this->logo_options = $defaults['logo_options'];
-		$this->logo_options['position'] = get_option(self::DEFAULTS_PREFIX . 'logo_position');
+		$this->logo_options['position'] = get_option(self::DEFAULTS_PREFIX . 'logo_position', 'top-left');
 
 		// text options
 		$this->text_options = $defaults['text_options'];
-		$font_file = get_option(self::DEFAULTS_PREFIX . 'text__font');
+		$font_file = get_option(self::DEFAULTS_PREFIX . 'text__font', 'Roboto-Bold');
 
 		$this->text_options['font-file'] = $font_file;
 
-		$this->text_options['position'] = get_option(self::DEFAULTS_PREFIX . 'text_position');
-		$this->text_options['color'] = get_option(self::DEFAULTS_PREFIX . 'color');
-		$this->text_options['background-color'] = get_option(self::DEFAULTS_PREFIX . 'background_color');
+		$this->text_options['position'] = get_option(self::DEFAULTS_PREFIX . 'text_position', 'bottom-left');
+		$this->text_options['color'] = get_option(self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF');
+		$this->text_options['background-color'] = get_option(self::DEFAULTS_PREFIX . 'background_color', '#66666666');
 		$this->text_options['background-enabled'] = get_option(self::DEFAULTS_PREFIX . 'background_enabled', 'on');
 		$this->text_options['text-stroke'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke');
 		$this->text_options['text-stroke-color'] = get_option(self::DEFAULTS_PREFIX . 'text_stroke_color');
@@ -849,54 +849,63 @@ class Plugin
 
 	public static function default_google_fonts(): array
 	{
-		return array_map(function ($font) {
-			return $font['font_name'];
-		}, self::font_rendering_tweaks());
+		$fonts = array_map(function ($font) {
+			// PATCH THE DATA
+			$font['font_family'] = $font['font_name'];
+			unset($font['admin'], $font['gd']);
+			return $font;
+		}, self::font_rendering_tweaks(false, false));
+
+		return $fonts;
 	}
 
-	public static function font_rendering_tweaks($write_json = false): array
+	public static function font_rendering_tweaks($write_json = false, $read_disk = true): array
 	{
 		$tweaks = [
 			/** letter-spacing: px, line-height: factor */
-			'Anton-Regular' => [
-				'font_name' => 'Anton', 'admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => 1]
+			'Anton' => [
+				'font_name' => 'Anton', 'font_weight' => 400, 'admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => 1]
 			],
-			'Courgette-Regular' => [
-				'font_name' => 'Courgette', 'admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => .86]
+			'Courgette' => [
+				'font_name' => 'Courgette', 'font_weight' => 400, 'admin' => ['letter-spacing' => '-0.32px'], 'gd' => ['line-height' => .86]
 			],
-			'JosefinSans-Regular' => [
-				'font_name' => 'Josefin Sans', 'admin' => ['letter-spacing' => '-0.4px'], 'gd' => ['line-height' => .96]
+			'JosefinSans-Bold' => [
+				'font_name' => 'Josefin Sans', 'font_weight' => 700, 'admin' => ['letter-spacing' => '-0.4px'], 'gd' => ['line-height' => .96]
 			],
-			'Merriweather-Regular' => [
-				'font_name' => 'Merriweather', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .86]
+			'Merriweather-Bold' => [
+				'font_name' => 'Merriweather', 'font_weight' => 700, 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .86]
 			],
-			'OpenSans-Regular' => [
-				'font_name' => 'Open Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .95, 'text-area-width' => .96]
+			'OpenSans-Bold' => [
+				'font_name' => 'Open Sans', 'font_weight' => 700, 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .95, 'text-area-width' => .96]
 			],
-			'Oswald-Regular' => [
-				'font_name' => 'Oswald', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .92, 'text-area-width' => .96]
+			'Oswald-Bold' => [
+				'font_name' => 'Oswald', 'font_weight' => 700, 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .92, 'text-area-width' => .96]
 			],
-			'PTSans-Regular' => [
-				'font_name' => 'PT Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1.03]
+			'PTSans-Bold' => [
+				'font_name' => 'PT Sans', 'font_weight' => 700, 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1.03]
 			],
-			'Roboto-Regular' => [
-				'font_name' => 'Roboto', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .97]
+			'Roboto-Bold' => [
+				'font_name' => 'Roboto', 'font_weight' => 700, 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .97]
 			],
-			'WorkSans-Regular' => [
-				'font_name' => 'Work Sans', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1]
+			'WorkSans-Bold' => [
+				'font_name' => 'Work Sans', 'font_weight' => 700, 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => 1]
 			],
-			'AkayaKanadaka-Regular' => [
-				'font_name' => 'Akaya Kanadaka', 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .98]
+			'AkayaKanadaka' => [
+				'font_name' => 'Akaya Kanadaka', 'font_weight' => 400, 'admin' => ['letter-spacing' => '0px'], 'gd' => ['line-height' => .98]
 			],
 		];
 
-		$json_files = glob(self::getInstance()->storage() . '/*.json');
-		foreach ($json_files as $file) {
-			$font = basename($file, '.json');
-			if (empty($tweaks[$font])) {
-				$tweaks[$font] = [];
+		if ($read_disk) {
+
+			$json_files = glob(self::getInstance()->storage() . '/*.json');
+			foreach ($json_files as $file) {
+				$font = basename($file, '.json');
+				if (empty($tweaks[$font])) {
+					$tweaks[$font] = [];
+				}
+				$tweaks[$font] = array_merge($tweaks[$font], json_decode(file_get_contents($file), true));
 			}
-			$tweaks[$font] = array_merge($tweaks[$font], json_decode(file_get_contents($file), true));
+
 		}
 
 		if ($write_json) {
@@ -1012,7 +1021,7 @@ EODOC;
 				'image_logo_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => __('Logo-scale (%)', Plugin::TEXT_DOMAIN), 'comment' => '', 'default' => '100', 'min' => Plugin::MIN_LOGO_SCALE, 'max' => Plugin::MAX_LOGO_SCALE, 'step' => 1],
 
 				'text' => ['namespace' => self::DEFAULTS_PREFIX, 'class' => 'hidden editable-target', 'type' => 'textarea', 'label' => __('The text to overlay if no other text or title can be found.', Plugin::TEXT_DOMAIN), 'comment' => __('This should be a generic text that is applicable to the entire website.', Plugin::TEXT_DOMAIN), 'default' => Plugin::getInstance()->dummy_data('text')],
-				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => __('Select a font', Plugin::TEXT_DOMAIN), 'options' => self::get_font_list(), 'default' => 'Roboto-Regular'],
+				'text__font' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => __('Select a font', Plugin::TEXT_DOMAIN), 'options' => self::get_font_list(), 'default' => 'Roboto-Bold'],
 				'text__ttf_upload' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'file', 'types' => 'font/ttf,font/otf', 'label' => __('Font upload', Plugin::TEXT_DOMAIN), 'upload' => __('Upload .ttf/.otf file', Plugin::TEXT_DOMAIN), 'info-icon' => 'dashicons-info', 'info' => __('Custom font must be a .ttf or .otf file.', Plugin::TEXT_DOMAIN) . ' ' . __('You\'re responsible for the proper permissions and usage rights of the font.', Plugin::TEXT_DOMAIN)],
 //				'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
 
@@ -1330,7 +1339,8 @@ EODOC;
 	{
 		switch($what) {
 			case 'text':
-				return __('Type here to change the text on the image', Plugin::TEXT_DOMAIN);
+				return __('Type here to change the text on the image', Plugin::TEXT_DOMAIN) . "\n" .
+					__('Change logo and image below', Plugin::TEXT_DOMAIN);
 		}
 	}
 }

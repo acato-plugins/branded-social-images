@@ -129,11 +129,11 @@ class Admin
 			'font-size' => Plugin::DEF_FONT_SIZE,
 			'color' => '#ffffffff', 'line-height' => Plugin::DEF_FONT_SIZE * 1.25,
 			'font-file' => '',
-			'font-family' => 'Roboto-Regular',
-			'font-weight' => 400,
+			'font-family' => 'Roboto-Bold',
+			'font-weight' => 700,
 			'font-style' => 'normal',
 			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
-			'padding' => '10', // background padding
+			'padding' => '20', // background padding
 			'background-color' => '#66666666',
 			'background-enabled' => 'on',
 			'text-shadow-color' => '',
@@ -310,6 +310,7 @@ class Admin
 		}
 
 		$logo = $fields['image_logo']['current_value'];
+		$width = $height = 0;
 		if ($logo && is_numeric($logo)) {
 			$logo = wp_get_attachment_image($logo, 'full');
 			preg_match('/width="(.+)"/U', $logo, $width);
@@ -580,17 +581,14 @@ EOCSS;
 	{
 		$storage = trailingslashit(self::storage());
 		$missed_one = false;
-		foreach (Plugin::default_google_fonts() as $font_family) {
-			foreach (['400'] as $font_weight) {
-				foreach (['normal'/*, 'italic'*/] as $font_style) {
-					foreach ([/*'woff', */ 'ttf'] as $extention) {
-						$local_filename = self::google_font_filename($font_family, $font_weight, $font_style, $extention);
-						if (!is_file($storage . $local_filename)/* && !is_file($storage . $local_filename . '2' / * facking hack * /)*/) {
-							self::download_google_font($font_family, $font_weight, $font_style);
-							$missed_one = true;
-						}
-					}
-				}
+		foreach (Plugin::default_google_fonts() as $font) {
+			$font_family = $font['font_family'];
+			$font_weight = !empty($font['font_weight']) ? $font['font_weight'] : 400;
+			$font_style = !empty($font['font_style']) ? $font['font_style'] : 'normal';
+			$local_filename = self::google_font_filename($font_family, $font_weight, $font_style, 'ttf');
+			if (!is_file($storage . $local_filename)) {
+				self::download_google_font($font_family, $font_weight, $font_style);
+				$missed_one = true;
 			}
 		}
 		if ($missed_one) {
@@ -662,7 +660,10 @@ EOCSS;
 				'httpversion' => '1.1',  // emulate browser
 				'referer' => site_url(),  // emulate browser
 			]));
-
+			if (false !== strpos($font_css, 'Font family not found')) {
+				var_dump($font_family, $font_weight, $font_style, $font_css, $font_url);
+				exit;
+			}
 			if (!$font_css) {
 				self::setError('font-family', __('Could not download font from Google Fonts.', Plugin::TEXT_DOMAIN) .' '. __('Please download yourself and upload here.', Plugin::TEXT_DOMAIN));
 			}

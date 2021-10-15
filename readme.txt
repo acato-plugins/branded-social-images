@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 0.0.9
+Stable tag: 0.1.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -55,11 +55,16 @@ You can use WordPress filters to influence the text- and image selection process
 == Screenshots ==
 
 1. Enrich your social images, automatically.
+2. The settings panel.
+3. Post-meta
 
 == Changelog ==
 
 = 1.0.0 =
 * First public release to wordpress.org
+
+= 0.1.0 =
+Last tweaks and polish before shipping to WordPress
 
 = 0.0.9 =
 * more code cleanup
@@ -96,32 +101,5 @@ You can use WordPress filters to influence the text- and image selection process
 = 0.0.2 =
 This version renames all option keys and is therefore not backward compatible.
 
-== A brief Markdown Example ==
-
-Markdown is what the parser uses to process much of the readme file.
-
-[markdown syntax]: https://daringfireball.net/projects/markdown/syntax
-
-Ordered list:
-
-1. Some feature
-1. Another feature
-1. Something else about the plugin
-
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Links require brackets and parenthesis:
-
-Here's a link to [WordPress](https://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax]. Link titles are optional, naturally.
-
-Blockquotes are email style:
-
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-And Backticks for code:
-
-`<?php code(); ?>`
+= 0.0.1 =
+Internal proof of concept
