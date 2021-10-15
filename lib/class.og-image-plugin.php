@@ -1213,37 +1213,41 @@ EODOC;
 
 	public static function admin_bar($admin_bar)
 	{
-		if (
-			defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
-			true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
-		) {
+		global $pagenow;
+		if (!is_admin() || $pagenow == 'post.php' || $pagenow == 'post-new.php') {
+
+			if (
+				defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
+				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
+			) {
+				$args = array(
+					'id' => self::ADMIN_SLUG . '-view',
+					'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
+					'href' => get_permalink(get_the_ID()) . Plugin::BSI_IMAGE_NAME . '/',
+					'meta' => [
+						'target' => '_blank',
+						'class' => self::ADMIN_SLUG . '-view'
+					]
+				);
+				$admin_bar->add_node($args);
+			}
+
 			$args = array(
-				'id' => self::ADMIN_SLUG . '-view',
-				'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
-				'href' => get_permalink(get_the_ID()) . Plugin::BSI_IMAGE_NAME . '/',
+				'id' => self::ADMIN_SLUG . '-inspector',
+				'title' => self::icon() . __('Inspect Social Image', Plugin::TEXT_DOMAIN),
+				'href' => Plugin::EXTERNAL_INSPECTOR,
 				'meta' => [
 					'target' => '_blank',
-					'class' => self::ADMIN_SLUG . '-view'
+					'title' => __('Shows how this post is shared using an external, unaffiliated service.', Plugin::TEXT_DOMAIN),
 				]
 			);
+
+			$args['href'] = sprintf($args['href'], urlencode(get_permalink(get_the_ID())));
 			$admin_bar->add_node($args);
+
+			add_action('wp_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
+			add_action('admin_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
 		}
-
-		$args = array(
-			'id' => self::ADMIN_SLUG . '-inspector',
-			'title' => self::icon() . __('Inspect Social Image', Plugin::TEXT_DOMAIN),
-			'href' => Plugin::EXTERNAL_INSPECTOR,
-			'meta' => [
-				'target' => '_blank',
-				'title' => __('Shows how this post is shared using an external, unaffiliated service.', Plugin::TEXT_DOMAIN),
-			]
-		);
-
-		$args['href'] = sprintf($args['href'], urlencode(get_permalink(get_the_ID())));
-		$admin_bar->add_node($args);
-
-		add_action('wp_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
-		add_action('admin_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
 	}
 
 	public static function admin_bar_icon_style()
