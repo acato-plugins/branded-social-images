@@ -18,7 +18,39 @@ The images can either be auto-generated for the entire site or you have the opti
 # Works with every post-type in WordPress!
 For more information, visit our [website](https://clearsite.nl/branded-social-images/ "Our webpage about Branded Social Images")
 
+== Installation ==
+
+Installation is as easy as 
+1. In the plugins panel of your website click the "Add New"
+2. Find the plugin in the list by typing "Branded Social Images"
+3. Click Install and follow up with Activate
+
+Manual installation is almost as easy
+1. Click the "Download" button on the right
+2. In the plugins panel of your website click the "Add New" and "Upload Plugin"
+3. Upload the ZIP downloaded in step 1
+4. Activate the plugin.
+
+Please note:
+*This plugin requires the GD2 library to be installed*
+This is usually the case. If not, contact your hosting company or internet agency.
+
 == Frequently Asked Questions ==
+
+= Your plugin is not the first I've seen, why bother creating this plugin? =
+
+The plugins we've seen all use an external service to generate the images, or are very complex to use.
+We aim for a simple, elegant solution that is completely self-contained.
+
+= Does Branded Social Images use external services? =
+
+For image generation; NO. The plugin is self-contained in that manner.
+
+The plugin does use external services, namely the following, and only ONCE.
+1. Google Fonts - to download a set of sample fonts for you to use,
+2. Google APIs - to download image conversion software for converting WEBP to PNG so the images can be used by GD2.
+
+Number 2 might fail silently, resulting in not being able to use WEBP, but this will in no way affect the plugin itself when using PNG and JPEG.
 
 = Does this plugin work with third party plugins like Yoast etc.? =
 
