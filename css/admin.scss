@@ -325,11 +325,9 @@
         border: none;
         color: var(--text-color);
         position: relative;
-        background: var(--text-background);
         display: inline-block;
         font-size: calc(var(--font-size) / .75);
         line-height: calc(var(--line-height) / .75);
-        padding: var(--text-padding);
         text-shadow: var(--text-shadow-left) var(--text-shadow-top) 0 var(--text-shadow-color);
         font-family: var(--text-font);
         letter-spacing: var(--letter-spacing);
@@ -338,6 +336,14 @@
       }
     }
   }
+
+  &.with-text-background .area--text .editable-container {
+    .editable, .text-alternate {
+      background: var(--text-background);
+      padding: var(--text-padding);
+    }
+  }
+
 
   .settings {
     display: grid;

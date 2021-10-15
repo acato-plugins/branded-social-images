@@ -103,6 +103,9 @@ class GD {
 				if ($debug) { print "\n" . 'background-color:'; var_dump($background_color_rgba, $background_color); }
 			}
 		}
+		else {
+			$textOptions['padding'] = 0;
+		}
 
 		$text_shadow_color = false;
 		if ($textOptions['text-shadow-color']) {

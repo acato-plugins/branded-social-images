@@ -203,9 +203,9 @@ function hex_to_rgba(hex) {
 		});
 		// text background color
 		editor.find('#background_enabled,#background_color').on('keyup blur paste input change', function () {
-			editor.find('#background_enabled').is(':checked') ?
-				editor.get(0).style.setProperty('--text-background', hex_to_rgba(editor.find('#background_color').val())) :
-				editor.get(0).style.setProperty('--text-background', hex_to_rgba('#00000000'));
+			var use_background = editor.find('#background_enabled').is(':checked');
+			editor.toggleClass('with-text-background', use_background);
+			editor.get(0).style.setProperty('--text-background', hex_to_rgba(editor.find('#background_color').val()));
 		}).trigger('blur');
 		// text shadow options
 		editor.find('#text_shadow_color').on('keyup blur paste input', function () {
