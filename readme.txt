@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 0.1.0
+Stable tag: 1.0.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,7 +16,7 @@ The simplest way to brand your social images. Provide all your social images (Op
 This plugin creates rich social images to match with your company’s style. Including a company logo and title.
 The images can either be auto-generated for the entire site or you have the option to overrule this per page/post.
 # Works with every post-type in WordPress!
-For more information, visit our [website](https://clearsite.nl/branded-social-images/ "Our webpage about BRanded Social Images")
+For more information, visit our [website](https://clearsite.nl/branded-social-images/ "Our webpage about Branded Social Images")
 
 == Frequently Asked Questions ==
 

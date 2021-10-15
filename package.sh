@@ -44,11 +44,12 @@ done
 for i in node_modules composer.json composer.lock package.sh tmp .git package.json package-lock.json gulpfile.js; do
 	rm -rf "$SVN_DIRECTORY"/$i
 done
+find . -name '.DS_Store' -exec rm {} \;
 
 # added files
-svn status | grep '?' | xargs svn add
+svn status | grep '?' | awk '{print $2}' | xargs svn add
 # removed or conflicted, how to proceed here?
-svn status | grep '!' | xargs svn rm
+svn status | grep '!' | awk '{print $2}' | xargs svn rm
 # remains are modified
 svn commit -m "Import changes from GitHub for version $VERSION"
 svn cp $SVN_PROJECT$SVN_TRUNK $SVN_PROJECT$SVN_TAG -m "version $VERSION"
