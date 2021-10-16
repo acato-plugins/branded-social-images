@@ -11,8 +11,8 @@ VERSION=$1
 [ 1 -gt $(cat info.json | grep '"Version":' | head -n 1 | grep $VERSION | wc -l) ] && echo "Version number given ($VERSION) does not match Version tag in info.json" && exit 3;
 [ 1 -gt $(cat readme.txt | grep 'Stable tag:' | head -n 1 | grep $VERSION | wc -l) ] && echo "Version number given ($VERSION) does not match Stable tag in readme.txt" && exit 4;
 
-SVN_PROJECT=http://plugins.svn.wordpress.org/branded-social-images
-SVN_PROJECT=svn://svn.clearsite.nl/wp_plugins/__test/branded-social-images
+SVN_PROJECT=https://plugins.svn.wordpress.org/branded-social-images
+# SVN_PROJECT=svn://svn.clearsite.nl/wp_plugins/__test/branded-social-images
 SVN_TRUNK=/trunk
 SVN_TAGS=/tags
 SVN_TAG=$SVN_TAGS/$VERSION
@@ -41,7 +41,7 @@ for i in bin; do
 done
 
 # don't want these
-for i in node_modules composer.json composer.lock package.sh tmp .git package.json package-lock.json gulpfile.js; do
+for i in node_modules assets composer.json composer.lock package.sh tmp .git package.json package-lock.json gulpfile.js; do
 	rm -rf "$SVN_DIRECTORY"/$i
 done
 find . -name '.DS_Store' -exec rm {} \;
