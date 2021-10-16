@@ -746,7 +746,10 @@ class Plugin
 
 	public static function overrule_og_image($old = null): string
 	{
-		self::getInstance()->page_already_has_og_image = true;
+		// ignore twitter image; we want to overrule, but only skip our late head when the opengraph image is set
+		if (current_action() !== 'wpseo_twitter_image') { 
+			self::getInstance()->page_already_has_og_image = true;
+		}
 		return trailingslashit(remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::BSI_IMAGE_NAME . '/'; // yes, slash, WP will add it with a redirect anyway
 	}
 
