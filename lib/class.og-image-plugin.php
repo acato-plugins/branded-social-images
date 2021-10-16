@@ -237,7 +237,7 @@ class Plugin
 		// yes, a second hook on 'wp', but note; this runs absolute last using priority PHP_INT_MAX.
 		add_action('wp', function () {
 			$id = get_the_ID();
-			if (!is_admin() && $id) {
+			if (!is_admin() && $id || is_home()) {
 				$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
 				$go = true;
 				if ('on' === $killswitch) {
@@ -1156,7 +1156,7 @@ EODOC;
 
 	public static function image_fallback_chain($with_post = false): array
 	{
-		if (!get_the_ID()) {
+		if (!get_the_ID() && !is_home()) {
 			return [];
 		}
 

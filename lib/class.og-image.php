@@ -18,6 +18,10 @@ class Image {
 		$this->manager = $manager;
 
 		$this->post_id = get_the_ID();
+		// hack for home (posts on front)
+		if (is_home()) {
+			$this->post_id = 0;
+		}
 		// hack for front-page
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		if ('/'. Plugin::BSI_IMAGE_NAME . '/' === $current_url) {
@@ -208,7 +212,7 @@ class Image {
 			$text = trim($meta);
 		}
 
-		if (!$text) {
+		if (!$text && $post_id) {
 			ob_start();
 			do_action('wp_head');
 			$head = ob_get_clean();
