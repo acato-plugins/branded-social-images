@@ -92,6 +92,10 @@ You can use WordPress filters to influence the text- and image selection process
 
 == Changelog ==
 
+= 1.0.3 =
+* fixed: html entities in scraped title decoded
+* fixed: php error regarding non-static method called statically
+
 = 1.0.2 =
 * fixed: url to support page
 * added: support homepage when it is not a page but the index of all posts ( is_home() )
