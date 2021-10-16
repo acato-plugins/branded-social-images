@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -91,6 +91,10 @@ You can use WordPress filters to influence the text- and image selection process
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.2 =
+* fixed: url to support page
+* added: support homepage when it is not a page but the index of all posts ( is_home() )
 
 = 1.0.1 =
 * fixed: dummy logo showing up on post-meta
