@@ -49,7 +49,7 @@ class Plugin
 	/** @var string External URL: Our website */
 	const CLEARSITE_URL_INFO = 'https://www.clearsite.nl/';
 	/** @var string External URL: the WP Plugin support URL */
-	const BSI_URL_CONTACT = 'https://wordpress.org/support/plugins/branded-social-images/';
+	const BSI_URL_CONTACT = 'https://wordpress.org/support/plugin/branded-social-images/';
 	/** @var string External URL: the GitHub  repository URL */
 	const BSI_URL_CONTRIBUTE = 'https://github.com/clearsite/branded-social-images/';
 	/** @var string External tool for post-inspection, the name */
