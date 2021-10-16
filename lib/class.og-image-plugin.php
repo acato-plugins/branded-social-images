@@ -1133,23 +1133,23 @@ EODOC;
 				// also; poor excuse for tag parsing. sorry.
 				if ($page && (false !== strpos($page, 'og:title'))) {
 					if (preg_match('/og:title.+content=([\'"])(.+)([\'"])([ \/>])/mU', $page, $m)) {
-						$title = $m[2];
+						$title = html_entity_decode($m[2]);
 						$quote = $m[1];
 						$layers['scraped'] = trim($title, ' />' . $quote);
 					}
 
 				}
 				if ($page && !$title && (false !== strpos($page, '<title'))) {
-					if (preg_match('/<title>(.+)<\/title>/mU', $page, $m)) {
-						$title = $m[1];
+					if (preg_match('/<title[^>]*>(.+)<\/title>/mU', $page, $m)) {
+						$title = html_entity_decode($m[1]);
 						$layers['scraped'] = trim($title);
 					}
-
 				}
 			}
 
-			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text');
+			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text', esc_attr(Plugin::dummy_data('text')));
 		}
+
 
 		return $layers;
 	}

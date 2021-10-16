@@ -182,6 +182,9 @@
       height: calc(var(--logo-scale) * .005px * var(--logo-height));
     }
     &.logo-alternate {
+      .postbox & {
+        display: none;
+      }
       .logo {
         width: calc(var(--logo-scale) * .01px * var(--logo-width));
         height: calc(var(--logo-scale) * .01px * var(--logo-height));
@@ -374,16 +377,9 @@
     display: grid;
     gap: 20px;
     margin-top: 20px;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas: "settings options";
-    width: 1200px;
-    @media screen and (max-width: 1920px) {
-    }
-    @media screen and (max-width: 1400px) {
-      width: 600px;
-      grid-template-columns: 1fr;
-      grid-template-areas: "settings" "options" ;
-    }
+    width: 600px;
+    grid-template-columns: 1fr;
+    grid-template-areas: "settings" "options" ;
   }
 
   .area--options, .area--settings {

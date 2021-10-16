@@ -135,6 +135,8 @@
     background: transparent no-repeat center/contain;
     width: calc(var(--logo-scale) * .005px * var(--logo-width));
     height: calc(var(--logo-scale) * .005px * var(--logo-height)); }
+  .postbox #branded-social-images-editor .area--logo.logo-alternate {
+    display: none; }
   #branded-social-images-editor .area--logo.logo-alternate .logo {
     width: calc(var(--logo-scale) * .01px * var(--logo-width));
     height: calc(var(--logo-scale) * .01px * var(--logo-height)); }
@@ -277,16 +279,10 @@
   display: grid;
   gap: 20px;
   margin-top: 20px;
-  -ms-grid-columns: 1fr 1fr;
-      grid-template-columns: 1fr 1fr;
-  grid-template-areas: "settings options";
-  width: 1200px; }
-  @media screen and (max-width: 1400px) {
-    #branded-social-images-editor .settings {
-      width: 600px;
-      -ms-grid-columns: 1fr;
-          grid-template-columns: 1fr;
-      grid-template-areas: "settings" "options"; } }
+  width: 600px;
+  -ms-grid-columns: 1fr;
+      grid-template-columns: 1fr;
+  grid-template-areas: "settings" "options"; }
 
 #branded-social-images-editor .area--options, #branded-social-images-editor .area--settings {
   border-radius: 7px;
