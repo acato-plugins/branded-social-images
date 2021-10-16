@@ -1150,7 +1150,7 @@ EODOC;
 				}
 			}
 
-			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text', esc_attr(Plugin::dummy_data('text')));
+			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text', esc_attr(Plugin::getInstance()->dummy_data('text')));
 		}
 
 
