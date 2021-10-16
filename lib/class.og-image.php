@@ -220,15 +220,15 @@ class Image {
 			// also; poor excuse for tag parsing. sorry.
 			if ($head && false !== strpos($head, 'og:title')) {
 				preg_match('/og:title.+content=(.)([^\n]+)/', $head, $m);
-				$title = $m[2];
+				$title = html_entity_decode($m[2]);
 				$quote = $m[1];
 
 				$text = trim($title, ' />' . $quote);
 				$type = 'scraped';
 			}
 			if ($head && !$text && false !== strpos($head, '<title')) {
-				preg_match('/<title>(.+)<\/title>/U', $head, $m);
-				$title = $m[1];
+				preg_match('/<title[^>]*>(.+)<\/title>/U', $head, $m);
+				$title = html_entity_decode($m[1]);
 
 				$text = trim($title);
 				$type = 'scraped';
