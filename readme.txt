@@ -37,28 +37,13 @@ This is usually the case. If not, contact your hosting company or internet agenc
 
 == Frequently Asked Questions ==
 
-= Your plugin is not the first I've seen, why bother creating this plugin? =
-
-The plugins we've seen all use an external service to generate the images, or are very complex to use.
-We aim for a simple, elegant solution that is completely self-contained.
-
-= Does Branded Social Images use external services? =
-
-For image generation; NO. The plugin is self-contained in that manner.
-
-The plugin does use external services, namely the following, and only ONCE.
-1. Google Fonts - to download a set of sample fonts for you to use,
-2. Google APIs - to download image conversion software for converting WEBP to PNG so the images can be used by GD2.
-
-Number 2 might fail silently, resulting in not being able to use WEBP, but this will in no way affect the plugin itself when using PNG and JPEG.
-
 = Does this plugin work with third party plugins like Yoast etc.? =
 
-This plugin will take the title from the page as it is created by ANY SEO-plugin, and if you want, you can change it. E.g. If you have used Yoast-SEO to choose an OG:Image, this plugin will use it as well.
+This plugin will take the title from the page as it is created by ANY SEO-plugin, and if you want, you can change it. And if you have used Yoast-SEO to choose an OG:Image, this plugin will use it as well.
 
 = How do I configure the plugin? =
 
-After installing the plugin, go to the "Branded social images" configuration page and set your fallback image, font, -color and -size, add your logo, and you are done.
+After installing the plugin, go to the "Branded Social Images" configuration page and set your fallback image, font, -color and -size, add your logo, and you are done.
 
 = How do I add my own fonts? =
 
@@ -76,6 +61,21 @@ Although this might be a feature for a future version; there currently is no way
 = Is the plugin WPML compatible? =
 
 Yes, as long as your font supports the languages. The supplied fonts are "Western" only. If you need character sets for languages like Korean or Japanese, you need to upload an approriate font.
+
+= Your plugin is not the first I've seen, why bother creating this plugin? =
+
+The plugins we've seen all use an external service to generate the images, or are very complex to use.
+We aim for a simple, elegant solution that is completely self-contained.
+
+= Does Branded Social Images use external services? =
+
+For image generation; NO. The plugin is self-contained in that manner.
+
+The plugin does use external services, namely the following, and only ONCE.
+1. Google Fonts - to download a set of sample fonts for you to use,
+2. Google APIs - to download image conversion software for converting WEBP to PNG so the images can be used by GD2.
+
+Number 2 might fail silently, resulting in not being able to use WEBP, but this will in no way affect the plugin itself when using PNG and JPEG.
 
 = I am using plugin XYZ for SEO and your plugin does not use the selected image or configured text, what can I do? =
 
