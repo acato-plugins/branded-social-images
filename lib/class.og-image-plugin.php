@@ -1314,6 +1314,14 @@ EODOC;
 		}
 	}
 
+	public static function text_is_identical($value1, $value2)
+	{
+		$value1 = trim(str_replace(["\n", "\r"], '', $value1));
+		$value2 = trim(str_replace(["\n", "\r"], '', $value2));
+
+		return strip_tags($value1) == strip_tags($value2);
+	}
+
 	public function hex_to_rgba($hex_color, $alpha_is_gd = false): array
 	{
 		if (substr($hex_color, 0, 1) !== '#') {

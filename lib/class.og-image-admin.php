@@ -522,7 +522,10 @@ class Admin
 						if ($key === 'text' && !empty($value)) {
 							$value = strip_tags($value);
 						}
-						if ($key === 'text' && self::text_is_identical($value, self::array_first(Plugin::text_fallback_chain()))) {
+						if ($key === 'text' && Plugin::text_is_identical($value, self::array_first(Plugin::text_fallback_chain()))) {
+							$value = '';
+						}
+						if ($key === 'text' && Plugin::text_is_identical($value, Plugin::getInstance()->dummy_data('text'))) {
 							$value = '';
 						}
 						update_post_meta($post_id, "$namespace$key", $value);
@@ -856,11 +859,4 @@ EOCSS;
 		return reset($array);
 	}
 
-	private static function text_is_identical($value1, $value2)
-	{
-		$value1 = trim(str_replace(["\n", "\r"], '', $value1));
-		$value2 = trim(str_replace(["\n", "\r"], '', $value2));
-
-		return strip_tags($value1) == strip_tags($value2);
-	}
 }
