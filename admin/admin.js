@@ -164,37 +164,83 @@ function hex_to_rgba(hex) {
 	})(jQuery);
 
 	$(document).ready(function () {
-		$('.editable[contenteditable]').keydown(function (e) {
-			// trap the return key being pressed
-			if (e.keyCode === 13) {
-				// insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
-				document.execCommand('insertHTML', false, '\n');
-				// prevent the default behaviour of return key pressed
-				return false;
-			}
-		});
+		// $('.editable[contenteditable]').keydown(function (e) {
+		// 	// trap the return key being pressed
+		// 	if (e.keyCode === 13) {
+		// 		// insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
+		// 		document.execCommand('insertHTML', false, '\n');
+		// 		// prevent the default behaviour of return key pressed
+		// 		return false;
+		// 	}
+		// });
 
 		var texteditor = editor.find('.editable');
 		var texteditor_target = editor.find('textarea.editable-target');
+
+		var decodeEntities = (function() {
+			// this prevents any overhead from creating the object each time
+			var element = document.createElement('div');
+
+			function decodeHTMLEntities (str) {
+				if(str && typeof str === 'string') {
+					// strip script/html tags
+					str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+					str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+					element.innerHTML = str;
+					str = element.textContent;
+					element.textContent = '';
+				}
+
+				return str;
+			}
+
+			return decodeHTMLEntities;
+		})();
 
 		editor.find('h2 .toggle').on('click touchend', function() {
 			$(this).closest('[class^="area"]').toggleClass('closed');
 		});
 
-		// native JS solution for paste-fix
-		texteditor.get(0).addEventListener('paste', function(e) {
-			e.preventDefault();
-			var text = (e.originalEvent || e).clipboardData.getData('text/plain');
-			texteditor_target.val(text).trigger('keyup');
+		// bugfix: compose.js is preventing things like undo.
+		editor.on('keypress keyup keydown', function (e) {
+			e.stopPropagation();
 		});
 
-		texteditor.on('blur keyup input', function () {
-			texteditor_target.val(texteditor.html().replace(/&nbsp;<br/g, '<br'));
+		// native JS solution for paste-fix
+		texteditor.get(0).addEventListener('paste', function(e) {
+			// console.log('PASTE with visual editor');
+			setTimeout(function() {
+				// strip all HTML
+				var text = texteditor.text();
+				var html = texteditor.html();
+				if (text !== html) {
+					text = text.replace('<br[^>]*>/g', '\n');
+					// console.log('cleaning from', html);
+					// console.log('cleaning to', text);
+					texteditor.text(text).trigger('keyup');
+				}
+			}, 250);
+		});
+
+		// update target when editor edited
+		texteditor.on('blur keyup paste', function (e) {
+			// console.log('interaction with visual editor: ', e);
+			setTimeout(function() {
+				texteditor_target.val(texteditor.text());
+			}, 250);
+		});
+
+		texteditor_target.on('blur keyup input', function (e) {
+			// console.log('interaction with hidden field: ', e);
+			texteditor_target.val(texteditor_target.val().replace(/&nbsp;<br/g, '<br'));
+			texteditor_target.val(texteditor_target.val().replace(/&nbsp;\n/g, '\n'));
+			texteditor.text(texteditor_target.val());
 		});
 
 		// update editor when target edited
-		texteditor_target.on('blur keyup paste', function () {
-			texteditor.text(texteditor_target.val());
+		texteditor_target.on('blur keyup paste', function (e) {
+			// console.log('copy hidden field to visual: ', e);
+			texteditor.text(decodeEntities(texteditor_target.val()));
 		}).trigger('paste');
 
 		// text color
