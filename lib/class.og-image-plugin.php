@@ -287,6 +287,8 @@ class Plugin
 		add_action('admin_init', function () {
 			$this->setup_defaults();
 		});
+
+		add_filter('bsi_post_types', [static::class, 'post_types'], ~PHP_INT_MAX, 0);
 	}
 
 	public function setup_defaults()
@@ -325,6 +327,12 @@ class Plugin
 		}
 		$this->validate_text_options();
 		$this->validate_logo_options();
+	}
+
+	public static function post_types()
+	{
+		$list = get_post_types(['public' => true]);
+		return array_values($list);
 	}
 
 	public function validate_text_options()
