@@ -107,58 +107,59 @@ class Plugin
 
 			$id = get_the_ID();
 			if ($id) {
+				$allowed_meta = array_keys(self::field_list()['meta']);
 				$overrule_text_position = get_post_meta($id, self::OPTION_PREFIX . 'text_position', true);
-				if ($overrule_text_position) {
+				if (in_array('text_position', $allowed_meta) && $overrule_text_position) {
 					$this->text_options['position'] = $overrule_text_position;
 				}
 
 				$overrule_logo_enabled = get_post_meta($id, self::OPTION_PREFIX . 'logo_enabled', true);
-				if (!$overrule_logo_enabled || 'yes' === $overrule_logo_enabled) {
+				if (in_array('logo_enabled', $allowed_meta) && !$overrule_logo_enabled || 'yes' === $overrule_logo_enabled) {
 					$this->logo_options['enabled'] = $overrule_logo_enabled;
 				}
 
 				$overrule_logo_position = get_post_meta($id, self::OPTION_PREFIX . 'logo_position', true);
-				if ($overrule_logo_position) {
+				if (in_array('logo_position', $allowed_meta) && $overrule_logo_position) {
 					$this->logo_options['position'] = $overrule_logo_position;
 				}
 
 				$overrule_color = get_post_meta($id, self::OPTION_PREFIX . 'color', true);
-				if ($overrule_color) {
+				if (in_array('color', $allowed_meta) && $overrule_color) {
 					$this->text_options['color'] = $overrule_color;
 				}
 
 				$overrule_color = get_post_meta($id, self::OPTION_PREFIX . 'background_color', true);
-				if ($overrule_color) {
+				if (in_array('background_color', $allowed_meta) && $overrule_color) {
 					$this->text_options['background-color'] = $overrule_color;
 				}
 
 				$overrule_color = get_post_meta($id, self::OPTION_PREFIX . 'text_stroke_color', true);
-				if ($overrule_color) {
+				if (in_array('text_stroke_color', $allowed_meta) && $overrule_color) {
 					$this->text_options['text-stroke-color'] = $overrule_color;
 				}
 
 				$overrule = get_post_meta($id, self::OPTION_PREFIX . 'text_stroke', true);
-				if ($overrule !== '') {
+				if (in_array('text_stroke', $allowed_meta) && $overrule !== '') {
 					$this->text_options['text-stroke'] = intval($overrule);
 				}
 
 				$overrule_color = get_post_meta($id, self::OPTION_PREFIX . 'text_shadow_color', true);
-				if ($overrule_color) {
+				if (in_array('text_shadow_color', $allowed_meta) && $overrule_color) {
 					$this->text_options['text-shadow-color'] = $overrule_color;
 				}
 
 				$overrule_left = get_post_meta($id, self::OPTION_PREFIX . 'text_shadow_left', true);
-				if ($overrule_left !== '') {
+				if (in_array('text_shadow_left', $allowed_meta) && $overrule_left !== '') {
 					$this->text_options['text-shadow-left'] = $overrule_left;
 				}
 
 				$overrule_top = get_post_meta($id, self::OPTION_PREFIX . 'text_shadow_top', true);
-				if ($overrule_top !== '') {
+				if (in_array('text_shadow_top', $allowed_meta) && $overrule_top !== '') {
 					$this->text_options['text-shadow-top'] = $overrule_top;
 				}
 
 				$overrule_tsenabled = get_post_meta($id, self::OPTION_PREFIX . 'text_shadow_enabled', true);
-				if ($overrule_tsenabled === 'on') {
+				if (in_array('text_shadow_enabled', $allowed_meta) && $overrule_tsenabled === 'on') {
 					$this->text_options['text-shadow-color'] = '#555555DD';
 					$this->text_options['text-shadow-top'] = 2;
 					$this->text_options['text-shadow-left'] = -2;
