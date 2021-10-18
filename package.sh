@@ -36,8 +36,10 @@ cp -a "$GIT_DIRECTORY"/* "$GIT_DIRECTORY"/.git "$SVN_DIRECTORY"/
 
 # want these, but clean
 for i in bin; do
+	echo reverting bin to git state. this removes downloaded stuff.
 	rm -rf "$SVN_DIRECTORY"/$i
 	git checkout $i
+	echo done.
 done
 
 # don't want these

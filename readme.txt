@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -15,7 +15,7 @@ The simplest way to brand your social images. Provide all your social images (Op
 # Rich social images with just a few clicks.
 This plugin creates rich social images to match with your company’s style. Including a company logo and title.
 The images can either be auto-generated for the entire site or you have the option to overrule this per page/post.
-# Works with every post-type in WordPress!
+# Works with every (public) post-type in WordPress!
 For more information, visit our [website](https://clearsite.nl/branded-social-images/ "Our webpage about Branded Social Images")
 
 == Installation ==
@@ -32,7 +32,7 @@ Manual installation is almost as easy
 4. Activate the plugin.
 
 Please note:
-*This plugin requires the GD2 library to be installed*
+**This plugin requires the GD2 library to be installed**
 This is usually the case. If not, contact your hosting company or internet agency.
 
 == Frequently Asked Questions ==
@@ -91,6 +91,12 @@ You can use WordPress filters to influence the text- and image selection process
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.5 =
+* fixed: title detection does not always work.
+* fixed: custom post types now supported without implementing a filter
+* added: support for post-type-archives; fallback image and text are used. (For developers: implement filter bsi_text if you want something else)
+* rebuilt: visual text editor did not respond well to pasting text and "undo" did not work. editor has been rebuilt. please report issues using the support tab.
 
 = 1.0.4 =
 * added: protection against font-stealing; the BSI Storage directory is now protected from outside access.
