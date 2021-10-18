@@ -81,6 +81,8 @@ class Admin
 					sprintf(Plugin::EXTERNAL_INSPECTOR, urlencode(get_permalink(get_the_ID()))), Plugin::EXTERNAL_INSPECTOR_NAME); ?></p><?php
 			}
 		});
+
+		add_filter('bsi_post_types', [static::class, 'post_types'], ~PHP_INT_MAX, 0);
 	}
 
 	public static function admin_icon(): string
@@ -487,7 +489,7 @@ class Admin
 
 	public static function add_meta_boxes()
 	{
-		$post_types = apply_filters('bsi_post_types', ['post', 'page']);
+		$post_types = apply_filters('bsi_post_types', []);
 		foreach ($post_types as $post_type) {
 			add_meta_box(
 				Plugin::ADMIN_SLUG,
@@ -496,6 +498,12 @@ class Admin
 				$post_type
 			);
 		}
+	}
+
+	public static function post_types()
+	{
+		$list = get_post_types(['public' => true]);
+		return array_values($list);
 	}
 
 	public static function save_meta_data($post_id)
