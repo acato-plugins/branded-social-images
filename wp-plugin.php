@@ -4,7 +4,7 @@
  * Description: The simplest way to brand your social images. Provide all your social images (Open Graph Images) with your brand en text. In just a few clicks.
  * Plugin URI: https://clearsite.nl/branded-social-images
  * Author: Internetbureau Clearsite
- * Author URI: https://www.clearsite.nl
+ * Author URI: https://clearsite.nl/branded-social-images
  * Version: 1.0.4
  * License: GPL2
  */
