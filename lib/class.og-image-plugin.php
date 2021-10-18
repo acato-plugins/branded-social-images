@@ -171,6 +171,7 @@ class Plugin
 		});
 
 		add_action('init', function () {
+			// does not work in any possible way for Post-Type Archives
 			add_rewrite_endpoint(self::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, Plugin::QUERY_VAR);
 
 			if (get_option("bsi_needs_rewrite_rules")) {
@@ -209,13 +210,23 @@ class Plugin
 		// it changes the rewrite rules so the endpoint is value-less and more a tag, like 'feed' is for WordPress.
 		add_filter('rewrite_rules_array', function ($rules) {
 			$new_rules = [];
+			/**
+			 * make post-type archives work
+			 */
+			$pt_archives = [];
+			foreach ($rules as $source => $target) {
+				if (preg_match('/^index.php\?post_type=([^&%]+)$/', $target, $m)) {
+					$pt_archives[$m[1] .'/'. Plugin::BSI_IMAGE_NAME .'/?$'] = $target .'&'. Plugin::QUERY_VAR .'=1';
+				}
+			}
+			$rules = array_merge($pt_archives, $rules);
 			foreach ($rules as $source => $target) {
 				if (preg_match('/' . strtr(self::BSI_IMAGE_NAME, ['.' => '\\.', '-' => '\\-']) . '/', $source)) {
 					$source = explode(self::BSI_IMAGE_NAME, $source);
 					$source = $source[0] . self::BSI_IMAGE_NAME . '/?$';
 
-					$target = explode('clsogimg=', $target);
-					$target = $target[0] . 'clsogimg=1';
+					$target = explode(Plugin::QUERY_VAR . '=', $target);
+					$target = $target[0] . Plugin::QUERY_VAR . '=1';
 				}
 				$new_rules[$source] = $target;
 			}
@@ -238,7 +249,7 @@ class Plugin
 		// yes, a second hook on 'wp', but note; this runs absolute last using priority PHP_INT_MAX.
 		add_action('wp', function () {
 			$id = get_the_ID();
-			if (!is_admin() && $id || is_home()) {
+			if (!is_admin() && $id || is_home() || is_archive()) {
 				$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
 				$go = true;
 				if ('on' === $killswitch) {
@@ -1160,7 +1171,7 @@ EODOC;
 
 	public static function image_fallback_chain($with_post = false): array
 	{
-		if (!get_the_ID() && !is_home()) {
+		if (!get_the_ID() && !is_home() && !is_archive()) {
 			return [];
 		}
 

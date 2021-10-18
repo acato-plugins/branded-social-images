@@ -22,6 +22,10 @@ class Image {
 		if (is_home()) {
 			$this->post_id = 0;
 		}
+		elseif (is_archive()) {
+			$this->post_id = 'archive-'. get_post_type();
+		}
+
 		// hack for front-page
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		if ('/'. Plugin::BSI_IMAGE_NAME . '/' === $current_url) {
