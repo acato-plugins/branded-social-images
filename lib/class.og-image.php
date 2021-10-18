@@ -76,24 +76,23 @@ class Image {
 		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Plugin::BSI_IMAGE_NAME .'.lock';
 		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/'. Plugin::BSI_IMAGE_NAME;
 
-		// debugging
-		if (is_file($cache_file)) { unlink($cache_file); }
-		if (is_file($lock_file)) { unlink($lock_file); }
-
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
 			if (is_file($lock_file)) { unlink($lock_file); }
 			return false;
 		}
 
-		if (!$retry && !$this->use_cache) {
+		if (!$this->use_cache) {
+			header('X-OG-Cache-Enabled: false');
 			if (is_file($cache_file)) { unlink($cache_file); }
 			if (is_file($lock_file)) { unlink($lock_file); }
 		}
 
 		if (is_file($cache_file)) {
+			header('X-OG-Cache: hit');
 			return ['file' => $cache_file, 'url' => str_replace($base_dir, $base_url, $cache_file)];
 		}
+		header('X-OG-Cache: miss');
 		if (is_file($lock_file)) {
 			// we're already building this file.
 			if (filemtime($lock_file) > time() - 3600) {
