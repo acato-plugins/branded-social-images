@@ -92,7 +92,7 @@ You can use WordPress filters to influence the text- and image selection process
 
 == Changelog ==
 
-* 1.0.4 =
+= 1.0.4 =
 * added: protection against font-stealing; the BSI Storage directory is now protected from outside access.
 * fixed: missing text-background layer in post-meta interface
 * removed: cache-debugging removed. BSI image cache is cleared when a post is saved. (For developers: You can bypass caching with WP_DEBUG enabled)
