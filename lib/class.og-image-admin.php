@@ -353,6 +353,9 @@ class Admin
 		if ($logo) {
 			$editor_class[] = 'with-logo';
 		}
+		if ('on' === $text_settings['background-enabled']) {
+			$editor_class[] = 'with-text-background';
+		}
 
 		$editor_class = implode(' ', $editor_class);
 		?>
