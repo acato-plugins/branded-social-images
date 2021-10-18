@@ -219,13 +219,13 @@ class Admin
 		$fonts = glob(self::storage() . '/*.?tf'); // matches ttf and otf, and more, but this is checked better later on
 		$list = [];
 		foreach ($fonts as $font) {
-            $b = basename($font);
+			$b = basename($font);
 			$base = basename($font, '.ttf');
-            $t = 'ttf';
-            if ($base === $b) {
-			    $base = basename($font, '.otf');
-                $t = 'otf';
-            }
+			$t = 'ttf';
+			if ($base === $b) {
+				$base = basename($font, '.otf');
+				$t = 'otf';
+			}
 			$json = preg_replace('/\.[ot]tf$/', '.json', $font);
 			$meta = [];
 			if (is_file($json)) {
@@ -323,26 +323,26 @@ class Admin
 
 		?>
 		<style>
-		#branded-social-images-editor {
-			--padding: <?php print Plugin::PADDING; ?>px;
-			--text-width: <?php print ceil(Plugin::getInstance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']); ?>px;
-			--text-height: <?php print ceil(Plugin::getInstance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']); ?>px;
+			#branded-social-images-editor {
+				--padding: <?php print Plugin::PADDING; ?>px;
+				--text-width: <?php print ceil(Plugin::getInstance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']); ?>px;
+				--text-height: <?php print ceil(Plugin::getInstance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']); ?>px;
 
-			--text-background: <?php print Admin::hex_to_rgba($text_settings['background-color'], true); ?>;
-			--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
-			--text-font: <?php print $text_settings['font-file']; ?>;
-			--letter-spacing: 1px;
-			--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
-			--text-shadow-top: <?php print intval($text_settings['text-shadow-top']); ?>px;
-			--text-shadow-left: <?php print intval($text_settings['text-shadow-left']); ?>px;
-			--font-size: <?php print $text_settings['font-size']; ?>px;
-			--text-padding: <?php print $text_settings['padding']; ?>px;
-			--line-height: <?php print $text_settings['line-height']; ?>px;
+				--text-background: <?php print Admin::hex_to_rgba($text_settings['background-color'], true); ?>;
+				--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
+				--text-font: <?php print $text_settings['font-file']; ?>;
+				--letter-spacing: 1px;
+				--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
+				--text-shadow-top: <?php print intval($text_settings['text-shadow-top']); ?>px;
+				--text-shadow-left: <?php print intval($text_settings['text-shadow-left']); ?>px;
+				--font-size: <?php print $text_settings['font-size']; ?>px;
+				--text-padding: <?php print $text_settings['padding']; ?>px;
+				--line-height: <?php print $text_settings['line-height']; ?>px;
 
-			--logo-scale: <?php print $logo_settings['size']; ?>;
-			--logo-width: <?php print $logo ? $width : 410; /* example logo */ ?>;
-			--logo-height: <?php print $logo ? $height : 82; ?>;
-		}
+				--logo-scale: <?php print $logo_settings['size']; ?>;
+				--logo-width: <?php print $logo ? $width : 410; /* example logo */ ?>;
+				--logo-height: <?php print $logo ? $height : 82; ?>;
+			}
 
 		</style>
 		<?php self::render_options($fields, ['disabled']);
@@ -365,7 +365,7 @@ class Admin
 				<?php foreach (Plugin::image_fallback_chain() as $kind => $fallback_image) { ?>
 					<div class="area--background-alternate image-source-<?php print $kind; ?>">
 						<div class="background"
-							<?php if ($fallback_image) { ?>style="background-image:url('<?php print esc_attr($fallback_image); ?>')"<?php } ?>>
+							 <?php if ($fallback_image) { ?>style="background-image:url('<?php print esc_attr($fallback_image); ?>')"<?php } ?>>
 						</div>
 					</div>
 				<?php } ?>
@@ -736,11 +736,11 @@ EOCSS;
 			if (is_file($font)) {
 				$instance = Plugin::getInstance();
 				update_option(Plugin::DEFAULTS_PREFIX . 'text__ttf_upload', false);
-                $b = basename($font);
-                $base = basename($font, '.ttf');
-                if ($base === $b) {
-                    $base = basename($font, '.otf');
-                }
+				$b = basename($font);
+				$base = basename($font, '.ttf');
+				if ($base === $b) {
+					$base = basename($font, '.otf');
+				}
 				update_option(Plugin::DEFAULTS_PREFIX . 'text__font', $base);
 				rename($font, $instance->storage() . '/' . basename($font));
 				wp_delete_post($font_id);

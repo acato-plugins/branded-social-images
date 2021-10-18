@@ -367,10 +367,10 @@ class GD {
 			$textbox->setStrokeSize($stroke_width);
 		}
 		$textbox->setBox(
-		    $x,  // distance from left edge
-		    $y,  // distance from top edge
-		    $w, // textbox width
-		    $h  // textbox height
+			$x,  // distance from left edge
+			$y,  // distance from top edge
+			$w, // textbox width
+			$h  // textbox height
 		);
 
 		// text will be aligned inside textbox to right horizontally and to top vertically

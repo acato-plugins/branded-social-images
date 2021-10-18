@@ -82,13 +82,13 @@ class Image {
 
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
-            if (is_file($lock_file)) { unlink($lock_file); }
+			if (is_file($lock_file)) { unlink($lock_file); }
 			return false;
 		}
 
 		if (!$retry && !$this->use_cache) {
-            if (is_file($cache_file)) { unlink($cache_file); }
-            if (is_file($lock_file)) { unlink($lock_file); }
+			if (is_file($cache_file)) { unlink($cache_file); }
+			if (is_file($lock_file)) { unlink($lock_file); }
 		}
 
 		if (is_file($cache_file)) {
@@ -269,7 +269,7 @@ class Image {
 			$image_id = get_option(Plugin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
 		}
 
-        return apply_filters('bsi_image', $image_id, $post_id, $the_img);
+		return apply_filters('bsi_image', $image_id, $post_id, $the_img);
 	}
 
 	/**
