@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,7 +20,7 @@ For more information, visit our [website](https://clearsite.nl/branded-social-im
 
 == Installation ==
 
-Installation is as easy as 
+Installation is as easy as
 1. In the plugins panel of your website click the "Add New"
 2. Find the plugin in the list by typing "Branded Social Images"
 3. Click Install and follow up with Activate
@@ -91,6 +91,11 @@ You can use WordPress filters to influence the text- and image selection process
 3. Post-meta
 
 == Changelog ==
+
+* 1.0.4 =
+* added: protection against font-stealing; the BSI Storage directory is now protected from outside access.
+* fixed: missing text-background layer in post-meta interface
+* removed: cache-debugging removed. BSI image cache is cleared when a post is saved. (For developers: You can bypass caching with WP_DEBUG enabled)
 
 = 1.0.3 =
 * fixed: html entities in scraped title decoded

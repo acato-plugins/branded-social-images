@@ -5,7 +5,7 @@
  * Plugin URI: https://clearsite.nl/branded-social-images
  * Author: Internetbureau Clearsite
  * Author URI: https://www.clearsite.nl
- * Version: 1.0.3
+ * Version: 1.0.4
  * License: GPL2
  */
 
