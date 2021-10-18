@@ -197,6 +197,10 @@ class Image {
 
 	public function getTextForPost($post_id)
 	{
+		$default = $this->manager->text_options['text'];
+		if (Plugin::text_is_identical($default, Plugin::getInstance()->dummy_data('text'))) {
+			$default = '';
+		}
 		$enabled = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text_enabled', true);
 		if ('off' === $enabled) {
 			return '';
@@ -215,14 +219,15 @@ class Image {
 			$text = trim($meta);
 		}
 
-		if (!$text && $post_id) {
+		if (!$text && intval($post_id)) {
 			ob_start();
 			do_action('wp_head');
 			$head = ob_get_clean();
+
 			// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
 			// also; poor excuse for tag parsing. sorry.
 			if ($head && false !== strpos($head, 'og:title')) {
-				preg_match('/og:title.+content=(.)([^\n]+)/', $head, $m);
+				preg_match('/og:title.+content=(.)([^\n]+)/Um', $head, $m);
 				$title = html_entity_decode($m[2]);
 				$quote = $m[1];
 
@@ -230,16 +235,39 @@ class Image {
 				$type = 'scraped';
 			}
 			if ($head && !$text && false !== strpos($head, '<title')) {
-				preg_match('/<title[^>]*>(.+)<\/title>/U', $head, $m);
+				preg_match('/<title[^>]*>(.+)<\/title>/Um', $head, $m);
 				$title = html_entity_decode($m[1]);
 
 				$text = trim($title);
 				$type = 'scraped';
 			}
+
+			// nothing??? this should not be possible!
+			if (!$text) {
+				$head = wp_remote_retrieve_body(wp_remote_get(get_permalink(get_the_ID())));
+				$head = explode('<body', $head);
+				$head = reset($head);
+				$head = str_replace(["\n", "\t"], '', $head);
+				if ($head && false !== strpos($head, 'og:title')) {
+					preg_match('/og:title.+content=(.)([^\n]+)/Um', $head, $m);
+					$title = html_entity_decode($m[2]);
+					$quote = $m[1];
+
+					$text = trim($title, ' />' . $quote);
+					$type = 'scraped';
+				}
+				if ($head && !$text && false !== strpos($head, '<title')) {
+					preg_match('/<title[^>]*>(.+)<\/title>/Um', $head, $m);
+					$title = html_entity_decode($m[1]);
+
+					$text = trim($title);
+					$type = 'scraped';
+				}
+			}
 		}
 
 		if (!$text) {
-			$text = $this->manager->text_options['text'];
+			$text = $default;
 			$type = 'default';
 		}
 

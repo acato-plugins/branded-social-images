@@ -1137,9 +1137,13 @@ EODOC;
 			}
 
 			if (!$title) {
-				$title = '';
+				$title = $page = '';
 				try {
-					$page = wp_remote_retrieve_body(wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]));
+					$result = wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]);
+					$code = wp_remote_retrieve_response_code($result);
+					if ($code === '200') {
+						$page = wp_remote_retrieve_body($result);
+					}
 				} catch (\Exception $e) {
 					$page = '';
 				}
