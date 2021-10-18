@@ -1306,6 +1306,14 @@ EODOC;
 		return apply_filters('bsi_settings_' . $setting, false);
 	}
 
+	public static function protect_dir($dir)
+	{
+		if (!file_exists($dir .'/.htaccess')) {
+			// invalid HTACCESS code to prevent downloads the hard way
+			file_put_contents( $dir .'/.htaccess', 'You cannot be here');
+		}
+	}
+
 	public function hex_to_rgba($hex_color, $alpha_is_gd = false): array
 	{
 		if (substr($hex_color, 0, 1) !== '#') {

@@ -69,6 +69,8 @@ class Admin
 		add_filter('plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
 		add_filter('network_admin_plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
 
+		add_action('wp_ajax_'. Plugin::ADMIN_SLUG .'_get-font', [static::class, 'wp_ajax_bsi_get_font']);
+
 		add_action('bsi_footer', function () {
 			?><p><?php
 			print sprintf(__('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.', Plugin::TEXT_DOMAIN), Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO)
@@ -271,6 +273,7 @@ class Admin
 		if (!is_dir($dir)) {
 			self::setError('storage', __('Could not create the storage directory in the uploads folder.', Plugin::TEXT_DOMAIN) .' ' . __('In a WordPress site the uploads folder should always be writable.', Plugin::TEXT_DOMAIN) .' '. __('Please fix this.', Plugin::TEXT_DOMAIN) .' '. __('This error will disappear once the problem has been corrected.', Plugin::TEXT_DOMAIN));
 		}
+		Plugin::protect_dir($dir);
 
 		if ($as_url) {
 			return str_replace(trailingslashit(ABSPATH), '/', $dir);
@@ -543,11 +546,29 @@ class Admin
 		}
 	}
 
+	public static function wp_ajax_bsi_get_font()
+	{
+		// prevent path-traversal
+		$font = basename('fake-dir/'. $_GET['font']);
+		$file = self::storage() .'/'. $font;
+		if (is_file($file)) {
+			$mime = mime_content_type($file);
+			header('Content-Type: '. $mime);
+			header('Content-Disposition: inline; filename="'. $font .'"');
+			header('Content-Length: '. filesize($file));
+			readfile($file);
+			exit;
+		}
+		header('HTTP/1.1 404 Not Found', true, 404);
+		exit;
+	}
+
 	public static function add_fontface_definitions()
 	{
 		$fonts = self::valid_fonts();
 		$faces = [];
 		$storage = self::storage(true);
+		$protected = admin_url('admin-ajax.php?action='. Plugin::ADMIN_SLUG .'_get-font');
 
 		foreach ($fonts as $font_base => $font) {
 			if (!$font['valid']) {
@@ -560,7 +581,7 @@ class Admin
 				if (empty($font[$extention])) {
 					continue;
 				}
-				$sources[] = "url('$storage/$font_base.$extention') format('$format')";
+				$sources[] = "url('$protected&font=$font_base.$extention') format('$format')";
 			}
 			$sources = implode(',', $sources);
 			$faces[] = <<< EOCSS
