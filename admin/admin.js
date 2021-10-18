@@ -28,7 +28,7 @@ function hex_to_rgba(hex) {
 
 			// Restore the main ID when the add media button is pressed
 			jQuery('a.add_media').on('click', function () {
-				console.log('is this really needed?');
+				// console.log('is this really needed?');
 				wp.media.model.settings.post.id = wp_media_post_id;
 			});
 
@@ -57,7 +57,7 @@ function hex_to_rgba(hex) {
 					event.preventDefault();
 					// If the media frame already exists, reopen it.
 					if (!file_frame) {
-						console.log('new file_frame');
+						// console.log('new file_frame');
 						wp.media.model.settings.post.id = current_image_id;
 						// Create the media frame.
 						file_frame = wp.media.frames.file_frame = wp.media({
@@ -95,7 +95,7 @@ function hex_to_rgba(hex) {
 					// Set the post ID to what we want
 					// file_frame.uploader.options.uploader.params.post_id = current_image_id;
 					// Open frame
-					console.log('opening file_frame');
+					// console.log('opening file_frame');
 					file_frame.open();
 				});
 			});
@@ -105,7 +105,7 @@ function hex_to_rgba(hex) {
 
 			// Restore the main ID when the add media button is pressed
 			jQuery('a.add_media').on('click', function () {
-				console.log('is this really needed?');
+				// console.log('is this really needed?');
 				wp.media.model.settings.post.id = wp_media_post_id;
 			});
 
@@ -121,7 +121,7 @@ function hex_to_rgba(hex) {
 					event.preventDefault();
 					// If the media frame already exists, reopen it.
 					if (!file_frame) {
-						console.log('new file_frame');
+						// console.log('new file_frame');
 						wp.media.model.settings.post.id = current_image_id;
 						// Create the media frame.
 						file_frame = wp.media.frames.file_frame = wp.media({
@@ -134,14 +134,14 @@ function hex_to_rgba(hex) {
 							},
 							multiple: false // Set to true to allow multiple files to be selected
 						});
-						console.log(file_frame);
+						// console.log(file_frame);
 						// When an image is selected, run a callback.
 						file_frame.on('select', function () {
 							// We set multiple to false so only get one image from the uploader
 							attachment = file_frame.state().get('selection').first().toJSON();
 							// Do something with attachment.id and/or attachment.url here
 							input.trigger('file:select', [attachment]);
-							console.log(attachment);
+							// console.log(attachment);
 							input.val(attachment.id);
 							current_image_id = attachment.id;
 							// Restore the main post ID
@@ -156,7 +156,7 @@ function hex_to_rgba(hex) {
 					// Set the post ID to what we want
 					// file_frame.uploader.options.uploader.params.post_id = current_image_id;
 					// Open frame
-					console.log('opening file_frame');
+					// console.log('opening file_frame');
 					file_frame.open();
 				});
 			});
