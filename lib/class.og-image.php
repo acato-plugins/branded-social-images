@@ -227,7 +227,7 @@ class Image {
 			// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
 			// also; poor excuse for tag parsing. sorry.
 			if ($head && false !== strpos($head, 'og:title')) {
-				preg_match('/og:title.+content=(.)([^\n]+)/Um', $head, $m);
+				preg_match('/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $head, $m);
 				$title = html_entity_decode($m[2]);
 				$quote = $m[1];
 
@@ -249,7 +249,7 @@ class Image {
 				$head = reset($head);
 				$head = str_replace(["\n", "\t"], '', $head);
 				if ($head && false !== strpos($head, 'og:title')) {
-					preg_match('/og:title.+content=(.)([^\n]+)/Um', $head, $m);
+					preg_match('/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $head, $m);
 					$title = html_entity_decode($m[2]);
 					$quote = $m[1];
 
