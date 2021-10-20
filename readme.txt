@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -91,6 +91,10 @@ You can use WordPress filters to influence the text- and image selection process
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.8 =
+* removed: removed scraping title/og:title by using wp_head(). It often does not work or even reports wrong data. how? why? don't know.
+* fixed: scraping title/og:title was broken in meta panel, displaying wrong title
 
 = 1.0.7 =
 * fixed: scraping of og:title was broken
