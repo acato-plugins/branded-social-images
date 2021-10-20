@@ -220,12 +220,10 @@ class Image {
 		}
 
 		if (!$text && intval($post_id)) {
-			ob_start();
-			do_action('wp_head');
-			$head = ob_get_clean();
-
-			// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
-			// also; poor excuse for tag parsing. sorry.
+			$head = wp_remote_retrieve_body(wp_remote_get(get_permalink($post_id)));
+			$head = explode('<body', $head);
+			$head = reset($head);
+			$head = str_replace(["\n", "\t"], '', $head);
 			if ($head && false !== strpos($head, 'og:title')) {
 				preg_match('/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $head, $m);
 				$title = html_entity_decode($m[2]);
@@ -240,29 +238,6 @@ class Image {
 
 				$text = trim($title);
 				$type = 'scraped';
-			}
-
-			// nothing??? this should not be possible!
-			if (!$text) {
-				$head = wp_remote_retrieve_body(wp_remote_get(get_permalink(get_the_ID())));
-				$head = explode('<body', $head);
-				$head = reset($head);
-				$head = str_replace(["\n", "\t"], '', $head);
-				if ($head && false !== strpos($head, 'og:title')) {
-					preg_match('/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $head, $m);
-					$title = html_entity_decode($m[2]);
-					$quote = $m[1];
-
-					$text = trim($title, ' />' . $quote);
-					$type = 'scraped';
-				}
-				if ($head && !$text && false !== strpos($head, '<title')) {
-					preg_match('/<title[^>]*>(.+)<\/title>/Um', $head, $m);
-					$title = html_entity_decode($m[1]);
-
-					$text = trim($title);
-					$type = 'scraped';
-				}
 			}
 		}
 
