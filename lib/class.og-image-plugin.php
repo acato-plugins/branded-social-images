@@ -1149,7 +1149,7 @@ EODOC;
 				try {
 					$result = wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]);
 					$code = wp_remote_retrieve_response_code($result);
-					if ($code === '200') {
+					if (intval($code) === 200) {
 						$page = wp_remote_retrieve_body($result);
 					}
 				} catch (\Exception $e) {
@@ -1159,7 +1159,7 @@ EODOC;
 				// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
 				// also; poor excuse for tag parsing. sorry.
 				if ($page && (false !== strpos($page, 'og:title'))) {
-					if (preg_match('/og:title.+content=([\'"])(.+)([\'"])([ \/>])/mU', $page, $m)) {
+					if (preg_match('/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $page, $m)) {
 						$title = html_entity_decode($m[2]);
 						$quote = $m[1];
 						$layers['scraped'] = trim($title, ' />' . $quote);
