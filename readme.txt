@@ -92,6 +92,9 @@ You can use WordPress filters to influence the text- and image selection process
 
 == Changelog ==
 
+= 1.0.7 =
+* fixed: scraping of og:title was broken
+
 = 1.0.6 =
 * fixed: meta box not showing in classic editor
 
