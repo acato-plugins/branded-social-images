@@ -247,40 +247,7 @@ class Plugin
 		});
 
 		// yes, a second hook on 'wp', but note; this runs absolute last using priority PHP_INT_MAX.
-		add_action('wp', function () {
-			$id = get_the_ID();
-			if (!is_admin() && $id || is_home() || is_archive()) {
-				$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
-				$go = true;
-				if ('on' === $killswitch) {
-					$go = false;
-				}
-				if (!Plugin::getInstance()->og_image_available) {
-					$go = false;
-				}
-				if ($go) {
-					// overrule RankMath
-					add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-					add_filter('rank_math/opengraph/facebook/image_secure_url', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-					add_filter('rank_math/opengraph/twitter/twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-					add_filter('rank_math/opengraph/facebook/og_image_type', function () {
-						return 'image/png';
-					}, PHP_INT_MAX);
-
-					// overrule Yoast SEO
-					add_filter('wpseo_opengraph_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-					add_filter('wpseo_twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-
-					// overrule WordPress JetPack recently acquired SocialImageGenerator, because, hey, we were here first!
-					add_filter('sig_image_url', function ($url, $post_id) {
-						return static::get_og_image_url($post_id);
-					}, PHP_INT_MAX, 2);
-
-					// if an overrule did not take, we need to define our own.
-					add_action('wp_head', [static::class, 'late_head'], PHP_INT_MAX);
-				}
-			}
-		}, PHP_INT_MAX);
+		add_action('wp', [ $this, '_init' ], PHP_INT_MAX);
 
 		add_action('admin_bar_menu', [static::class, 'admin_bar'], 100);
 
@@ -289,6 +256,50 @@ class Plugin
 		});
 
 		add_filter('bsi_post_types', [static::class, 'post_types'], ~PHP_INT_MAX, 0);
+	}
+
+
+	public function _init() {
+		$id = get_the_ID();
+		if (!is_admin() && $id || is_home() || is_archive()) {
+			$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
+			$go = true;
+			if ('on' === $killswitch) {
+				$go = false;
+			}
+			if (!Plugin::getInstance()->og_image_available) {
+				$go = false;
+			}
+			if ($go) {
+				// overrule RankMath
+				add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/image_secure_url', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+				add_filter('rank_math/opengraph/twitter/twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/og_image_type', function () {
+					return 'image/png';
+				}, PHP_INT_MAX);
+
+				// overrule Yoast SEO
+				add_filter('wpseo_opengraph_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+				add_filter('wpseo_twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+
+				add_filter('wpseo_schema_main_image', function ($graph_piece) use ($id) {
+					$url = static::get_og_image_url($id);
+					$graph_piece['url'] = $graph_piece['contentUrl'] = $url;
+					$graph_piece['width'] = $this->width;
+					$graph_piece['height'] = $this->height;
+					return $graph_piece;
+				}, 11);
+
+				// overrule WordPress JetPack recently acquired SocialImageGenerator, because, hey, we were here first!
+				add_filter('sig_image_url', function ($url, $post_id) {
+					return static::get_og_image_url($post_id);
+				}, PHP_INT_MAX, 2);
+
+				// if an overrule did not take, we need to define our own.
+				add_action('wp_head', [static::class, 'late_head'], PHP_INT_MAX);
+			}
+		}
 	}
 
 	public function setup_defaults()
