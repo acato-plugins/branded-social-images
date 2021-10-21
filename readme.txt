@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -91,6 +91,11 @@ You can use WordPress filters to influence the text- and image selection process
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.9 =
+* added: oEmbed data is now also patched to use the correct OG:Image. This will please Facebook and LinkedIn
+* changed: set og:image url to a full URL instead of a relative one. Facebook made a big deal of this.
+* fixed: Selecting a featured image shows it in the Meta-box interface, but now also in the correct position.
 
 = 1.0.8 =
 * removed: removed scraping title/og:title by using wp_head(). It often does not work or even reports wrong data. how? why? don't know.
