@@ -256,6 +256,13 @@ class Plugin
 		});
 
 		add_filter('bsi_post_types', [static::class, 'post_types'], ~PHP_INT_MAX, 0);
+
+		// this patches Yoast REST API data. Do we need this??
+
+		// foreach (apply_filters('bsi_post_types', []) as $post_type) {
+		// 	add_filter('rest_prepare_'. $post_type, [static::class, 'patch_yoast_rest_api'], PHP_INT_MAX);
+		// }
+
 		add_filter('oembed_response_data', function($data, $post) {
 			$id = $post->ID;
 
@@ -274,6 +281,31 @@ class Plugin
 
 			return $data;
 		}, PHP_INT_MAX, 2);
+
+	}
+
+	public static function patch_yoast_rest_api($response) {
+		$id = $response->data['id'];
+
+		$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
+		$go = true;
+		if ('on' === $killswitch) {
+			$go = false;
+		}
+		if ($go) {
+			$url = static::get_og_image_url($id);
+
+			$response->data['yoast_head_json']['og_image'][0] = [ "width" => static::getInstance()->width, "height" => static::getInstance()->height, "url" => $url, "size" => Plugin::IMAGE_SIZE_NAME, "pixels" => static::getInstance()->width * static::getInstance()->height, "type" => "image/png" ];
+			foreach ($response->data['yoast_head_json']['schema']['@graph'] as &$item) {
+				if ($item['@type'] === 'ImageObject') {
+					$item['url'] = $item['contentUrl'] = $url;
+					$item['width'] = static::getInstance()->width;
+					$item['height'] = static::getInstance()->height;
+				}
+			}
+		}
+
+		return $response;
 	}
 
 
@@ -319,6 +351,7 @@ class Plugin
 			}
 		}
 	}
+
 
 	public function setup_defaults()
 	{
