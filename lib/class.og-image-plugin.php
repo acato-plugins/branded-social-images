@@ -256,6 +256,24 @@ class Plugin
 		});
 
 		add_filter('bsi_post_types', [static::class, 'post_types'], ~PHP_INT_MAX, 0);
+		add_filter('oembed_response_data', function($data, $post) {
+			$id = $post->ID;
+
+			$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
+			$go = true;
+			if ('on' === $killswitch) {
+				$go = false;
+			}
+			if ($go) {
+				$url = static::get_og_image_url($id);
+
+				$data['thumbnail_url'] = $url;
+				$data['thumbnail_width'] = static::getInstance()->width;
+				$data['thumbnail_height'] = static::getInstance()->height;
+			}
+
+			return $data;
+		}, PHP_INT_MAX, 2);
 	}
 
 
