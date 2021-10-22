@@ -4,3 +4,4 @@ bin/can-execute*
 bin/?webp*
 bin/macos
 bin/linux
+assets/.svn
