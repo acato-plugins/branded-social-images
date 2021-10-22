@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.10
+Stable tag: 1.0.11
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -91,6 +91,11 @@ You can use WordPress filters to influence the text- and image selection process
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.11 =
+* improved: Meta panel improved layout
+* improved: interface texts and elements made more clear
+* fixed: oembed still showed a social image even if none was available
 
 = 1.0.10 =
 * updated: translations updated.
