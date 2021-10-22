@@ -43,7 +43,7 @@ for i in bin; do
 done
 
 # don't want these
-for i in node_modules assets composer.json composer.lock package.sh tmp .git package.json package-lock.json gulpfile.js; do
+for i in node_modules assets composer.json composer.lock package.sh tmp .git package.json package-lock.json gulpfile.js languages/make-pot.sh; do
 	rm -rf "$SVN_DIRECTORY"/$i
 done
 find . -name '.DS_Store' -exec rm {} \;
