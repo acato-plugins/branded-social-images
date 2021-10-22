@@ -267,7 +267,7 @@ class Plugin
 			$id = $post->ID;
 
 			$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
-			$go = true;
+			$go = !!self::image_fallback_chain() || get_post_meta($id, self::OPTION_PREFIX . 'image', true);
 			if ('on' === $killswitch) {
 				$go = false;
 			}
@@ -1114,7 +1114,7 @@ EODOC;
 				'color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => __('Default Text color', Plugin::TEXT_DOMAIN), 'default' => '#FFFFFFFF'],
 				'text__font_size' => ['namespace' => self::OPTION_PREFIX, 'type' => 'slider', 'class' => 'single-slider', 'label' => __('Font-size (px)', Plugin::TEXT_DOMAIN), 'comment' => '', 'default' => Plugin::DEF_FONT_SIZE, 'min' => Plugin::MIN_FONT_SIZE, 'max' => Plugin::MAX_FONT_SIZE, 'step' => 1],
 				'background_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'color', 'attributes' => 'rgba', 'label' => __('Text background color', Plugin::TEXT_DOMAIN), 'default' => '#66666666'],
-				'background_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => __('Use a background', Plugin::TEXT_DOMAIN), 'value' => 'on', 'default' => 'on'],
+				'background_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => __('Use text background', Plugin::TEXT_DOMAIN), 'value' => 'on', 'default' => 'on'],
 
 				'text_stroke_color' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'color', 'attributes' => 'rgba', 'label' => __('Stroke color', Plugin::TEXT_DOMAIN), 'default' => '#00000000'],
 				'text_stroke' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => __('Default stroke width', Plugin::TEXT_DOMAIN), 'default' => 0],
@@ -1125,8 +1125,8 @@ EODOC;
 				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => __('Use a text shadow', Plugin::TEXT_DOMAIN), 'value' => 'on', 'default' => 'off'],
 			],
 			'meta' => [
-				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => sprintf(_x('Select if you don\'t want a Social Image with this %s', 'post-type', Plugin::TEXT_DOMAIN), get_post_type()) ],
-				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Use text on this image?', Plugin::TEXT_DOMAIN), 'default' => 'yes', 'value' => 'yes', 'comment' => __('Uncheck if you do not wish text on this image.', Plugin::TEXT_DOMAIN)],
+				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Select to disable the plugin Branded Social Images for this post.', Plugin::TEXT_DOMAIN), 'comment' => '<div class="disabled-notice">'. __('The plugin Branded Social Images is disabled for this post.', Plugin::TEXT_DOMAIN) .'</div>' ],
+				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Deselect if you do not wish text on this image.', Plugin::TEXT_DOMAIN), 'default' => 'yes', 'value' => 'yes' ],
 
 				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'label' => __('You can upload/select a specific Social Image here', Plugin::TEXT_DOMAIN), 'comment' => __('You can use JPEG and PNG.', Plugin::TEXT_DOMAIN) . ' ' . __('Recommended size: 1200x630 pixels.', Plugin::TEXT_DOMAIN), 'info-icon' => 'dashicons-info', 'info' => $image_comment],
 
@@ -1160,6 +1160,7 @@ EODOC;
 
 		if ('on' !== Plugin::FEATURE_META_LOGO_OPTIONS) {
 			unset($options['meta']['logo_position']);
+			unset($options['meta']['logo_enabled']);
 		}
 
 		if ('on' !== Plugin::FEATURE_META_TEXT_OPTIONS) {

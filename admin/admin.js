@@ -270,6 +270,9 @@ function hex_to_rgba(hex) {
 				editor.get(0).style.setProperty('--text-shadow-color', hex_to_rgba('#00000000'));
 			}
 		}).trigger('change');
+		editor.find('#disabled').on('change', function(){
+			editor.toggleClass('bsi-disabled', $(this).is(':checked'));
+		});
 
 		// positions
 		$('.wrap-position-grid input').on('change', function () {

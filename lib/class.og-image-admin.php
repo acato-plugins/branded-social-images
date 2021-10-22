@@ -303,7 +303,7 @@ class Admin
 		return $errors;
 	}
 
-	public static function show_editor($fields)
+	public static function show_editor($fields, $is_meta_panel=false)
 	{
 		$fields['text']['current_value'] = trim($fields['text']['current_value']) ? $fields['text']['current_value'] : self::array_first(Plugin::text_fallback_chain());
 
@@ -353,11 +353,14 @@ class Admin
 			}
 
 		</style>
-		<?php self::render_options($fields, ['disabled']);
+		<?php // self::render_options($fields, ['disabled']);
 
 		$editor_class = [];
 		$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
 		$editor_class[] = 'text_position-' . (!empty($fields['text_position']) ? $fields['text_position']['current_value'] : $text_settings['position']);
+		if (!empty($fields['disabled']) && $fields['disabled']['current_value'] == 'on') {
+			$editor_class[] = 'bsi-disabled';
+		}
 		if ($logo) {
 			$editor_class[] = 'with-logo';
 		}
@@ -371,6 +374,16 @@ class Admin
 			 class="<?php print $editor_class; ?>"
 			 data-font="<?php print $text_settings['font-file']; ?>"
 			 data-use-thumbnail="<?php print Plugin::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
+			<?php if ($is_meta_panel) { ?>
+				<div class="settings">
+					<div class="area--settings">
+						<h2><?php _e('Settings', Plugin::TEXT_DOMAIN); ?></h2>
+						<div class="inner">
+							<?php self::render_options($fields); ?>
+						</div>
+					</div>
+				</div>
+			<?php } ?>
 			<div class="grid">
 				<div class="area--background-canvas"><?php include __DIR__ .'/../img/example.svg'; ?></div>
 				<?php foreach (Plugin::image_fallback_chain() as $kind => $fallback_image) { ?>
@@ -400,9 +413,10 @@ class Admin
 					</div>
 				</div>
 			</div>
+			<?php if (!$is_meta_panel) { ?>
 			<div class="settings">
 				<div class="area--options">
-					<h2><?php _e('Image options', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+					<h2><?php _e('Image and Logo options', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
 					<div class="inner">
 						<?php self::render_options($fields, [
 							'image', 'image_use_thumbnail',
@@ -427,6 +441,7 @@ class Admin
 					</div>
 				</div>
 			</div>
+			<?php } ?>
 		</div>
 		<?php
 	}
@@ -546,7 +561,7 @@ class Admin
 	public static function meta_panel()
 	{
 		$fields = Plugin::field_list()['meta'];
-		self::show_editor($fields);
+		self::show_editor($fields, true);
 		do_action('bsi_footer');
 	}
 

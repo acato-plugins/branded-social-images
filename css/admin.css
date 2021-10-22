@@ -289,19 +289,18 @@
     width: 100%; }
 
 #branded-social-images-editor .area--options, #branded-social-images-editor .area--settings {
-  border-radius: 7px;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-direction: column;
       flex-direction: column; }
   #branded-social-images-editor .area--options h2, #branded-social-images-editor .area--settings h2 {
+    font-weight: 600;
+    font-size: 1.3em;
     background: #fcfcfc;
     border: 1px solid #ddd;
     display: block;
     margin: 0;
     padding: 1em 30px;
-    border-top-left-radius: 7px;
-    border-top-right-radius: 7px;
     position: relative; }
     #side-sortables #branded-social-images-editor .area--options h2, .is-side #branded-social-images-editor .area--options h2, #side-sortables #branded-social-images-editor .area--settings h2, .is-side #branded-social-images-editor .area--settings h2 {
       padding: 1em 15px; }
@@ -326,8 +325,6 @@
     -ms-transform: rotate(0);
         transform: rotate(0); }
   #branded-social-images-editor .area--options .inner, #branded-social-images-editor .area--settings .inner {
-    border-bottom-left-radius: 7px;
-    border-bottom-right-radius: 7px;
     padding: 20px;
     background: white;
     border: 1px solid #ddd;
@@ -351,7 +348,7 @@
       @media screen and (max-width: 1200px) {
         #branded-social-images-editor .area--options .inner > span, #branded-social-images-editor .area--settings .inner > span {
           width: 100%; } }
-      #branded-social-images-editor .area--options .inner > span.name-text_enabled, #branded-social-images-editor .area--options .inner > span.name-image, #branded-social-images-editor .area--options .inner > span.name-image_logo, #branded-social-images-editor .area--options .inner > span.name-image_use_thumbnail, #branded-social-images-editor .area--settings .inner > span.name-text_enabled, #branded-social-images-editor .area--settings .inner > span.name-image, #branded-social-images-editor .area--settings .inner > span.name-image_logo, #branded-social-images-editor .area--settings .inner > span.name-image_use_thumbnail {
+      #branded-social-images-editor .area--options .inner > span.name-text_enabled, #branded-social-images-editor .area--options .inner > span.name-image, #branded-social-images-editor .area--options .inner > span.name-image_logo, #branded-social-images-editor .area--options .inner > span.name-image_use_thumbnail, #branded-social-images-editor .area--options .inner > span.name-disabled, #branded-social-images-editor .area--settings .inner > span.name-text_enabled, #branded-social-images-editor .area--settings .inner > span.name-image, #branded-social-images-editor .area--settings .inner > span.name-image_logo, #branded-social-images-editor .area--settings .inner > span.name-image_use_thumbnail, #branded-social-images-editor .area--settings .inner > span.name-disabled {
         width: 100%; }
 
 #branded-social-images-editor .area--options {
@@ -475,3 +472,14 @@
 
 #branded-social-images-editor .filename:empty + .message {
   display: none; }
+
+#branded-social-images-editor .disabled-notice {
+  display: none;
+  border: 1px solid red;
+  background: rgba(255, 0, 0, 0.2);
+  padding: 10px 20px;
+  margin: 10px 0;
+  color: red; }
+
+#branded-social-images-editor.bsi-disabled .disabled-notice {
+  display: block; }

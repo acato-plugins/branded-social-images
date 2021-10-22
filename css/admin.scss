@@ -389,8 +389,9 @@
   }
 
   .area--options, .area--settings {
-    border-radius: 7px;
     h2 {
+      font-weight: 600;
+      font-size: 1.3em;
       background: #fcfcfc;
       border: 1px solid #ddd;
       display: block;
@@ -399,8 +400,6 @@
       #side-sortables &, .is-side & {
         padding: 1em 15px;
       }
-      border-top-left-radius: 7px;
-      border-top-right-radius: 7px;
       position: relative;
       .toggle {
         display: inline-block;
@@ -428,8 +427,6 @@
       }
     }
     .inner {
-      border-bottom-left-radius: 7px;
-      border-bottom-right-radius: 7px;
       padding: 20px;
       #side-sortables &, .is-side & {
         padding: 5px;
@@ -456,7 +453,7 @@
           @media screen and (max-width: 1200px) {
             width: 100%;
           }
-          &.name-text_enabled, &.name-image, &.name-image_logo, &.name-image_use_thumbnail {
+          &.name-text_enabled, &.name-image, &.name-image_logo, &.name-image_use_thumbnail, &.name-disabled {
             width: 100%;
           }
         }
@@ -641,5 +638,17 @@
 
   .filename:empty + .message {
     display: none;
+  }
+
+  .disabled-notice {
+    display: none;
+    border: 1px solid red;
+    background: rgba(255,0,0,0.2);
+    padding: 10px 20px;
+    margin: 10px 0;
+    color: red;
+  }
+  &.bsi-disabled .disabled-notice {
+    display: block;
   }
 }
