@@ -71,18 +71,32 @@ We aim for a simple, elegant solution that is completely self-contained.
 
 For image generation; NO. The plugin is self-contained in that manner.
 
-The plugin does use external services, namely the following, and only ONCE.
-1. Google Fonts - to download a set of sample fonts for you to use,
-2. Google APIs - to download image conversion software for converting WEBP to PNG so the images can be used by GD2.
+The plugin does use external services, namely the following, and only once after install or update.
+1. Google Fonts - to download a set of sample fonts for you to use (on install or loss of cache folder),
+2. Google APIs - to download image conversion software for converting WEBP to PNG so the images can be used by GD2 (on intall and on update).
 
 Number 2 might fail silently, resulting in not being able to use WEBP, but this will in no way affect the plugin itself when using PNG and JPEG.
 
 = I am using plugin XYZ for SEO and your plugin does not use the selected image or configured text, what can I do? =
 
-You can always set-up Branded Social Image on every post/page manually, but an automatic solution is always possible.
+You can set-up Branded Social Image on every post/page manually, but an automatic solution is always possible.
 You can use WordPress filters to influence the text- and image selection process;
 1. Filter `bsi_text` with parameters `$text`, `$post_id` and `$image_id`
-1. Filter `bsi_image` with parameters `$image_id` and `$post_id`
+2. Filter `bsi_image` with parameters `$image_id` and `$post_id`
+
+= I don't like the plugin to live in the main admin menu. =
+
+With WordPress filter `bsi_admin_menu_location` you can move the entry to the Settings menu. Just return any value other than 'main'.
+
+= I want to use a smaller, sidebar version of the post-meta =
+
+Use filter `bsi_meta_box_context` to change the meta-box position, return either `advanced`, `side` or `normal`. 
+Beware that the `side` option makes the meta-box very small and with that less usable.
+In a classic-editor environment, dragging the metabox to the sidebar (or back) is possible.
+
+= Can I assist with translating the plugin? =
+
+Absolutely! A .pot template can be found in the [GitHub repository](https://github.com/clearsite/branded-social-images "Branded Social Images on GitHub")
 
 == Screenshots ==
 
