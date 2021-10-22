@@ -108,6 +108,9 @@
   }
   .grid {
     zoom: 0.5; // enabling this line this disables the large view
+    #side-sortables &, .is-side & {
+      zoom: 0.21;
+    }
     display: grid;
     //grid-template-columns: 1200px 1fr;
     //grid-template-areas: "image ." "image .";
@@ -378,6 +381,9 @@
     gap: 20px;
     margin-top: 20px;
     width: 600px;
+    #side-sortables &, .is-side & {
+      width: 100%;
+    }
     grid-template-columns: 1fr;
     grid-template-areas: "settings" "options" ;
   }
@@ -390,6 +396,9 @@
       display: block;
       margin: 0;
       padding: 1em 30px;
+      #side-sortables &, .is-side & {
+        padding: 1em 15px;
+      }
       border-top-left-radius: 7px;
       border-top-right-radius: 7px;
       position: relative;
@@ -422,6 +431,9 @@
       border-bottom-left-radius: 7px;
       border-bottom-right-radius: 7px;
       padding: 20px;
+      #side-sortables &, .is-side & {
+        padding: 5px;
+      }
       background: white ;
       border: 1px solid #ddd;
       border-top: 0;

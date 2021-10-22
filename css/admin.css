@@ -88,6 +88,8 @@
       grid-template-columns: 1200px;
   grid-template-areas: "image" ".";
   z-index: 0; }
+  #side-sortables #branded-social-images-editor .grid, .is-side #branded-social-images-editor .grid {
+    zoom: 0.21; }
 
 #branded-social-images-editor .area--background, #branded-social-images-editor .area--background-alternate, #branded-social-images-editor .area--background-canvas {
   width: 1200px;
@@ -283,6 +285,8 @@
   -ms-grid-columns: 1fr;
       grid-template-columns: 1fr;
   grid-template-areas: "settings" "options"; }
+  #side-sortables #branded-social-images-editor .settings, .is-side #branded-social-images-editor .settings {
+    width: 100%; }
 
 #branded-social-images-editor .area--options, #branded-social-images-editor .area--settings {
   border-radius: 7px;
@@ -299,6 +303,8 @@
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
     position: relative; }
+    #side-sortables #branded-social-images-editor .area--options h2, .is-side #branded-social-images-editor .area--options h2, #side-sortables #branded-social-images-editor .area--settings h2, .is-side #branded-social-images-editor .area--settings h2 {
+      padding: 1em 15px; }
     #branded-social-images-editor .area--options h2 .toggle, #branded-social-images-editor .area--settings h2 .toggle {
       display: inline-block;
       width: 0;
@@ -326,6 +332,8 @@
     background: white;
     border: 1px solid #ddd;
     border-top: 0; }
+    #side-sortables #branded-social-images-editor .area--options .inner, .is-side #branded-social-images-editor .area--options .inner, #side-sortables #branded-social-images-editor .area--settings .inner, .is-side #branded-social-images-editor .area--settings .inner {
+      padding: 5px; }
   #branded-social-images-editor .area--options.closed .inner, #branded-social-images-editor .area--settings.closed .inner {
     overflow: hidden;
     height: 0;

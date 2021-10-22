@@ -494,11 +494,16 @@ class Admin
 	{
 		$post_types = apply_filters('bsi_post_types', []);
 		foreach ($post_types as $post_type) {
+			$context = apply_filters('bsi_meta_box_context', 'advanced', $post_type);
+			if (!in_array($context, ['advanced', 'normal', 'side'])) {
+				$context = 'advanced';
+			}
 			add_meta_box(
 				Plugin::ADMIN_SLUG,
 				'Branded Social Images',
 				[static::class, 'meta_panel'],
-				$post_type
+				$post_type,
+				$context
 			);
 		}
 	}

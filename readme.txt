@@ -93,10 +93,11 @@ You can use WordPress filters to influence the text- and image selection process
 == Changelog ==
 
 = 1.0.10 =
-* added: filter bsi_admin_menu_location to change the menu-position (main for main-menu, any other value moves Branded Social Images to the Settings menu)
+* added: filter bsi_admin_menu_location to change the menu-position (main for main-menu, any other value moves Branded Social Images to the Settings menu).
+* added: filter bsi_meta_box_context to change the meta-box position (either 'advanced', 'side' or 'normal'). Beware that the 'side' option makes the meta-box very small and with that less usable.
 
 = 1.0.9 =
-* added: oEmbed data is now also patched to use the correct OG:Image. This will please Facebook and LinkedIn
+* added: oEmbed data is now also patched to use the correct OG:Image. This will please Facebook and LinkedIn.
 * changed: set og:image url to a full URL instead of a relative one. Facebook made a big deal of this.
 * fixed: Selecting a featured image shows it in the Meta-box interface, but now also in the correct position.
 
