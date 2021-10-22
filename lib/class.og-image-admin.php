@@ -50,7 +50,12 @@ class Admin
 		});
 
 		add_action('admin_menu', function () {
-			add_menu_page('Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
+			if ('main' == apply_filters('bsi_admin_menu_location', 'main')) {
+				add_menu_page('Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
+			}
+			else {
+				add_submenu_page('options-general.php', 'Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel']);
+			}
 		});
 
 		add_action('admin_init', [static::class, 'sanitize_fonts']);
