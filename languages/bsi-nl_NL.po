@@ -290,7 +290,7 @@ msgstr "Tekst-schaduw kleur"
 
 #: lib/class.og-image-plugin.php:1123 lib/class.og-image-plugin.php:1143
 msgid "Shadow offset - vertical."
-msgstr "Schaduw positie - vertikaal"
+msgstr "Schaduw positie - vertikaal."
 
 #: lib/class.og-image-plugin.php:1123 lib/class.og-image-plugin.php:1143
 msgid "Negative numbers to top, Positive numbers to bottom."
@@ -298,7 +298,7 @@ msgstr "Negatieve nummer voor naar boven, positieve nummers voor naar beneden."
 
 #: lib/class.og-image-plugin.php:1124 lib/class.og-image-plugin.php:1144
 msgid "Shadow offset - horizontal."
-msgstr "Schaduw positie - horizontaal"
+msgstr "Schaduw positie - horizontaal."
 
 #: lib/class.og-image-plugin.php:1124 lib/class.og-image-plugin.php:1144
 msgid "Negative numbers to left, Positive numbers to right."
