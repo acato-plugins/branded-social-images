@@ -53,6 +53,9 @@ class GD {
 		$w = $this->manager->width * Plugin::AA;
 		$h = $this->manager->height * Plugin::AA;
 		$this->resource = imagecreatetruecolor($w, $h);
+
+		do_action_ref_array('bsi_image_gd', [&$this->resource, 'layer0']);
+
 		imagealphablending($this->resource, true);
 		imagesavealpha($this->resource, true);
 
@@ -78,6 +81,7 @@ class GD {
 		if ($this->source_is_temporary) {
 			@unlink($this->source);
 		}
+		do_action_ref_array('bsi_image_gd', [&$this->resource, 'layer1']);
 	}
 
 	public function text_overlay($textOptions, $text)
@@ -237,6 +241,7 @@ class GD {
 			'stroke_width' => $textOptions['text-stroke'],
 			'stroke_color' => $text_stroke_color,
 		]);
+		do_action_ref_array('bsi_image_gd', [&$this->resource, 'layer3']);
 	}
 
 	private function gradient_color($hex_rgba_start, $hex_rgba_end, $step, $steps = 100, $skip_alpha = false, $return_as_hex = true)
@@ -322,6 +327,7 @@ class GD {
 //		header("content-type: image/png");
 //		imagepng($this->resource);exit;
 		imagedestroy($logo);
+		do_action_ref_array('bsi_image_gd', [&$this->resource, 'layer2']);
 	}
 
 	public function save()
@@ -435,9 +441,9 @@ class GD {
 		// destroy img and serve the result
 		imagedestroy( $img );
 		return array( "left"   => $left - $rleft,
-			"top"    => $top  - $rtop,
-			"width"  => $rright - $rleft + 1,
-			"height" => $rbottom - $rtop + 1 );
+		              "top"    => $top  - $rtop,
+		              "width"  => $rright - $rleft + 1,
+		              "height" => $rbottom - $rtop + 1 );
 	}
 
 	// Returns wrapped format (with newlines) of a piece of text (meant to be rendered on an image)
