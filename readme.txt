@@ -106,6 +106,12 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 
 == Changelog ==
 
+= 1.0.12 =
+* added: interface now recognises RankMath image selection
+* added: action `bsi_image_gd` with 2 parameters; &$resource and $stage, in 4 stages of the image generation (`after_creating_canvas`, `after_adding_background`, `after_adding_text` and `after_adding_logo`)
+* fixed: replace image with BSI in RankMath LD+JSON
+* fixed: BSI image url not always used by RankMath
+
 = 1.0.11 =
 * improved: Meta panel improved layout
 * improved: interface texts and elements made more clear
