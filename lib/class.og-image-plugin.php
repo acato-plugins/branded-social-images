@@ -328,6 +328,12 @@ class Plugin
 				add_filter('rank_math/opengraph/facebook/og_image_type', function () {
 					return 'image/png';
 				}, PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/og_image_width', function () {
+					return static::getInstance()->width;
+				}, PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/og_image_height', function () {
+					return static::getInstance()->height;
+				}, PHP_INT_MAX);
 
 				// overrule Yoast SEO
 				add_filter('wpseo_opengraph_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
