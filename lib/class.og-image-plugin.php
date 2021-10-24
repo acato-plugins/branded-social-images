@@ -341,6 +341,8 @@ class Plugin
 				// overrule RankMath
 				add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
 				add_filter('rank_math/opengraph/facebook/image_secure_url', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/og_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/og_image_secure_url', [static::class, 'overrule_og_image'], PHP_INT_MAX);
 				add_filter('rank_math/opengraph/twitter/twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
 				add_filter('rank_math/opengraph/facebook/og_image_type', function () {
 					return 'image/png';
