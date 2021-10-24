@@ -54,7 +54,7 @@ class GD {
 		$h = $this->manager->height * Plugin::AA;
 		$this->resource = imagecreatetruecolor($w, $h);
 
-		do_action_ref_array('bsi_image_gd', [&$this->resource, 'layer0']);
+		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_creating_canvas']);
 
 		imagealphablending($this->resource, true);
 		imagesavealpha($this->resource, true);
@@ -81,7 +81,8 @@ class GD {
 		if ($this->source_is_temporary) {
 			@unlink($this->source);
 		}
-		do_action_ref_array('bsi_image_gd', [&$this->resource, 'layer1']);
+
+		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_adding_background']);
 	}
 
 	public function text_overlay($textOptions, $text)
@@ -241,7 +242,8 @@ class GD {
 			'stroke_width' => $textOptions['text-stroke'],
 			'stroke_color' => $text_stroke_color,
 		]);
-		do_action_ref_array('bsi_image_gd', [&$this->resource, 'layer3']);
+
+		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_adding_text']);
 	}
 
 	private function gradient_color($hex_rgba_start, $hex_rgba_end, $step, $steps = 100, $skip_alpha = false, $return_as_hex = true)
@@ -327,7 +329,8 @@ class GD {
 //		header("content-type: image/png");
 //		imagepng($this->resource);exit;
 		imagedestroy($logo);
-		do_action_ref_array('bsi_image_gd', [&$this->resource, 'layer2']);
+
+		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_adding_logo']);
 	}
 
 	public function save()
