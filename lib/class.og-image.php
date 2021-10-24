@@ -35,10 +35,13 @@ class Image {
 			}
 		}
 
-		// This plugin provides a meta box ...
 		$this->image_id = $this->getImageIdForPost( $this->post_id );
 
 		if (defined('WP_DEBUG') && WP_DEBUG) {
+			$this->use_cache = false;
+		}
+
+		if (!empty($_GET['rebuild'])) {
 			$this->use_cache = false;
 		}
 	}
