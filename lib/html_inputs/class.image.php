@@ -2,6 +2,8 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
+use Clearsite\Plugins\OGImage\Plugin;
+
 defined( 'ABSPATH' ) or die( 'You cannot be here.' );
 
 require_once __DIR__ . '/class.text.php'; // dependency
