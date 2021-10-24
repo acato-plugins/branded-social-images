@@ -394,7 +394,7 @@ function hex_to_rgba(hex) {
 
 		var getFeaturedImage = function(){};
 		// window.getFeaturedImage = getFeaturedImage;
-		var subscribe;
+		var subscribe, state = { yoast: false, rankmath: false, featured: false };
 
 		if (jQuery('body').is('.block-editor-page')) {
 
@@ -455,11 +455,28 @@ function hex_to_rgba(hex) {
 
 			return url;
 		};
-		var state = { yoast: getYoastFacebookImage(), featured: getFeaturedImage() };
 
-		window.i_state = state;
-		window.i_gyfi = getYoastFacebookImage;
-		window.i_gfi = getFeaturedImage;
+		// rankmath?? no events on the input, use polling
+		var getRankMathFacebookImage = function(){
+			var $preview = $('.rank-math-social-preview-facebook .rank-math-social-image-thumbnail');
+			if (!$preview.length) {
+				url = state.rankmath;
+			}
+			else if ($preview.attr('src').match(/wp-content\/plugins\/seo-by-rank-math\//)) {
+				url = false;
+			}
+			else {
+				url = $preview.attr('src');
+			}
+
+			return url;
+		};
+		state = { yoast: getYoastFacebookImage(), rankmath: getYoastFacebookImage(), featured: getFeaturedImage() };
+
+		// window.i_state = state;
+		// window.i_gyfi = getYoastFacebookImage;
+		// window.i_grmfi = getRankMathFacebookImage;
+		// window.i_gfi = getFeaturedImage;
 
 		var external_images_maybe_changed = function(){
 			setTimeout(function(){
@@ -473,6 +490,19 @@ function hex_to_rgba(hex) {
 							$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = 'url("' + url + '")';
 						} else {
 							$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = '';
+						}
+					}
+				}
+
+				// rankmath
+				if ($('.area--background-alternate.image-source-rankmath').length) {
+					url = getRankMathFacebookImage();
+					if (state.rankmath !== url) {
+						state.rankmath = url;
+						if (url) {
+							$(".area--background-alternate.image-source-rankmath .background").get(0).style.backgroundImage = 'url("' + url + '")';
+						} else {
+							$(".area--background-alternate.image-source-rankmath .background").get(0).style.backgroundImage = '';
 						}
 					}
 				}
