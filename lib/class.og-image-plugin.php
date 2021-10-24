@@ -266,12 +266,7 @@ class Plugin
 		add_filter('oembed_response_data', function($data, $post) {
 			$id = $post->ID;
 
-			$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
-			$go = !!self::image_fallback_chain() || get_post_meta($id, self::OPTION_PREFIX . 'image', true);
-			if ('on' === $killswitch) {
-				$go = false;
-			}
-			if ($go) {
+			if (self::go_for_id($id)) {
 				$url = static::get_og_image_url($id);
 
 				$data['thumbnail_url'] = $url;
@@ -282,6 +277,28 @@ class Plugin
 			return $data;
 		}, PHP_INT_MAX, 2);
 
+		add_filter('rank_math/json_ld', function($data, $RankMath_schema_jsonld) {
+			$id = $RankMath_schema_jsonld->post_id;
+
+			if ($id && self::go_for_id($id)) {
+				$url = static::get_og_image_url($id);
+
+				$data['primaryImage']['url'] = $url;
+				$data['primaryImage']['width'] =  static::getInstance()->width;
+				$data['primaryImage']['height'] = static::getInstance()->height;
+			}
+			return $data;
+			
+		}, PHP_INT_MAX, 2);
+	}
+
+	public static function go_for_id($post_id) {
+		$killswitch = get_post_meta($post_id, self::OPTION_PREFIX . 'disabled', true);
+		$go = !!self::image_fallback_chain() || get_post_meta($post_id, self::OPTION_PREFIX . 'image', true);
+		if ('on' === $killswitch) {
+			$go = false;
+		}
+		return $go;
 	}
 
 	public static function patch_yoast_rest_api($response) {
