@@ -138,6 +138,7 @@ class GD {
 		}
 		if ($debug) { exit; }
 		$font = $textOptions['font-file'];
+		Plugin::log("Text overlay: using font: $font");
 		$tweaks = Plugin::font_rendering_tweaks_for($font, 'gd');
 		if ($tweaks) {
 			if (!empty($tweaks['line-height'])) {
@@ -276,11 +277,15 @@ class GD {
 
 	public function logo_overlay($logoOptions)
 	{
+		Plugin::log('Overlay: logo');
 		if (!$logoOptions['file']) {
+			Plugin::log('Logo overlay: ( no logo )');
 			return;
 		}
 		$file = $logoOptions['file'];
+		Plugin::log('Logo overlay: logo file; '. $file);
 		if (!is_file($file)) {
+			Plugin::log('Logo overlay: logo file not found!');
 			return;
 		}
 
@@ -292,6 +297,8 @@ class GD {
 		// target
 		$image_width = imagesx($this->resource);
 		$image_height = imagesy($this->resource);
+
+		Plugin::log("Logo overlay: logo dimensions; W:$image_width, H:$image_height");
 
 		// logo overlay
 		$w = $logoOptions['w'] * Plugin::AA * 0.5;

@@ -18,31 +18,44 @@ class Image {
 		$this->manager = $manager;
 
 		$this->post_id = get_the_ID();
+		Plugin::log('Selected post_id: '. $this->post_id);
 		// hack for home (posts on front)
 		if (is_home()) {
 			$this->post_id = 0;
+			Plugin::log('Page is home (latest posts), post_id set to 0');
 		}
 		elseif (is_archive()) {
 			$this->post_id = 'archive-'. get_post_type();
+			Plugin::log('Page is archive, post_id set to '. $this->post_id);
 		}
 
 		// hack for front-page
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		if ('/'. Plugin::BSI_IMAGE_NAME . '/' === $current_url) {
+			Plugin::log('URI = Homepage BSI; ' . $current_url);
 			$front = get_option('page_on_front');
 			if ($front) {
 				$this->post_id = $front;
+				Plugin::log('Using post_id for front-page: '. $front);
 			}
 		}
 
 		$this->image_id = $this->getImageIdForPost( $this->post_id );
+		Plugin::log('Image selected: '. $this->image_id);
 
 		if (defined('WP_DEBUG') && WP_DEBUG) {
 			$this->use_cache = false;
+			Plugin::log('Caching disabled because of WP_DEBUG');
 		}
 
 		if (!empty($_GET['rebuild'])) {
 			$this->use_cache = false;
+			Plugin::log('Caching disabled because of rebuild flag');
+		}
+
+		if (!empty($_GET['debug']) && 'BSI' == $_GET['debug']) {
+			$this->use_cache = false;
+			Plugin::log('Caching disabled because of debug=BSI flag');
 		}
 	}
 
@@ -128,10 +141,16 @@ class Image {
 		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
 		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
 
+		Plugin::log('Base URL: '. $base_url);
+		Plugin::log('Base DIR: '. $base_dir);
+		Plugin::log('Lock File: '. $lock_file);
+		Plugin::log('Cache File: '. $cache_file);
+
 		$source = '';
 		for ($i = Plugin::AA; $i > 1; $i--) {
 			$tag = "@{$i}x";
 			$source = wp_get_attachment_image_src($image_id, Plugin::IMAGE_SIZE_NAME. $tag);
+			Plugin::log('Source: trying image size "'. Plugin::IMAGE_SIZE_NAME. $tag .'" for '. $image_id);
 			if ($source && !empty($source[1]) && $source[1] * $this->manager->width * $i) {
 				break;
 			}
@@ -139,17 +158,27 @@ class Image {
 
 		if (!$source) {
 			// use x1 source, no matter what dimensions
+			Plugin::log('Source: trying image size "'. Plugin::IMAGE_SIZE_NAME. '" for '. $image_id);
 			$source = wp_get_attachment_image_src($image_id, Plugin::IMAGE_SIZE_NAME);
+		}
+
+		if (!$source) {
+			Plugin::log('Source: failed. Could not get meta-data for image with id '. $image_id);
+			header('X-OG-Error-Source: Could not get meta-data for image with id '. $image_id);
+			return false;
 		}
 
 		if ($source) {
 			list($image, $width, $height) = $source;
+			Plugin::log('Source: found: ' . "W: $width, H: $height, U: $image");
 			if ($this->manager->height > $height || $this->manager->width > $width) {
 				header('X-OG-Error-Size: Image sizes do not match, web-master should rebuild thumbnails and use images of sufficient size.');
 			}
 			$image_file = str_replace($base_url, $base_dir, $image);
+			Plugin::log('Source: found: ' . "Filepath: $image_file");
 
 			if (!is_file($image_file)) {
+				Plugin::log('Source: not found: ' . "Filepath: $image_file does not exist");
 				header('X-OG-Error-File: Source image not found. This is a 404 on the source image.');
 				unlink($lock_file);
 				return false;
@@ -174,11 +203,24 @@ class Image {
 			}
 
 			if ($this->manager->logo_options['enabled']) {
+				Plugin::log("Logo overlay: enabled");
 				$image->logo_overlay($this->manager->logo_options);
+			}
+			else {
+				Plugin::log("Logo overlay: disabled");
 			}
 
 			if ($this->manager->text_options['enabled']) {
+				Plugin::log("Text overlay: enabled");
 				$image->text_overlay($this->manager->text_options, $this->getTextForPost($post_id));
+			}
+			else {
+				Plugin::log("Text overlay: disabled");
+			}
+
+			if (!empty($_GET['debug']) && $_GET['debug'] == 'BSI') {
+				Plugin::display_log();
+				exit;
 			}
 
 			if ($push_to_browser) {
@@ -204,8 +246,10 @@ class Image {
 		if (Plugin::text_is_identical($default, Plugin::getInstance()->dummy_data('text'))) {
 			$default = '';
 		}
+		Plugin::log('Text setting: default text; '. ($default ?: '( no text )'));
 		$enabled = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text_enabled', true);
 		if ('off' === $enabled) {
+			Plugin::log('Text setting: post-meta has "text on this image" set to No');
 			return '';
 		}
 		$text = '';
@@ -214,15 +258,18 @@ class Image {
 		if (Plugin::setting('use_bare_post_title')) {
 			$type = 'wordpress';
 			$text = apply_filters('the_title', get_the_title($post_id), $post_id);
+			Plugin::log('Text consideration: WordPress title (bare); '. $text);
 		}
 
 		$meta = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text', true);
 		if ($meta) {
 			$type = 'meta';
 			$text = trim($meta);
+			Plugin::log('Text consideration: Meta-box text; '. ($text ?: '( no text )'));
 		}
 
 		if (!$text && intval($post_id)) {
+			Plugin::log('Text: no text detected in meta-data, getting text from page;');
 			$head = wp_remote_retrieve_body(wp_remote_get(get_permalink($post_id)));
 			$head = explode('<body', $head);
 			$head = reset($head);
@@ -233,6 +280,7 @@ class Image {
 				$quote = $m[1];
 
 				$text = trim($title, ' />' . $quote);
+				Plugin::log('Text: og:title detected; '. $text);
 				$type = 'scraped';
 			}
 			if ($head && !$text && false !== strpos($head, '<title')) {
@@ -240,45 +288,59 @@ class Image {
 				$title = html_entity_decode($m[1]);
 
 				$text = trim($title);
+				Plugin::log('Text: HTML title detected; '. $text);
 				$type = 'scraped';
 			}
 		}
 
 		if (!$text) {
 			$text = $default;
+			Plugin::log('Text: No text found, using default; '. $text);
 			$type = 'default';
 		}
 
-		return apply_filters('bsi_text', $text, $post_id, $this->getImageIdForPost($post_id), $type);
+		Plugin::log('Text determination: text before filter  bsi_text; '. ($text ?: '( no text )'));
+		$text = apply_filters('bsi_text', $text, $post_id, $this->image_id, $type);
+		Plugin::log('Text determination: text after filter  bsi_text; '. ($text ?: '( no text )'));
+
+		return $text;
 	}
 
 	private function getImageIdForPost($post_id)
 	{
 		$the_img = 'meta';
 		$image_id = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'image', true);
-
+		Plugin::log('Image consideration: meta; '. ($image_id ?: 'no image found'));
 		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION') && !$image_id) {
 			$image_id = get_post_meta($post_id, '_yoast_wpseo_opengraph-image-id', true);
+			Plugin::log('Image consideration: Yoast SEO; '. ($image_id ?: 'no image found'));
 			$the_img = 'yoast';
 		}
 		// maybe RankMath?
 		if (class_exists(RankMath::class) && !$image_id) {
 			$image_id = get_post_meta($post_id, 'rank_math_facebook_image_id', true);
+			Plugin::log('Image consideration: SEO by RankMath; '. ($image_id ?: 'no image found'));
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
 		if (!$image_id && ('on' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($post_id);
+			Plugin::log('Image consideration: WordPress Featured Image; '. ($image_id ?: 'no image found'));
 		}
 		// global Image?
 		if (!$image_id) {
 			$the_img = 'global';
 			$image_id = get_option(Plugin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
+			Plugin::log('Image consideration: BSI Fallback Image; '. ($image_id ?: 'no image found'));
 		}
 
-		return apply_filters('bsi_image', $image_id, $post_id, $the_img);
+		Plugin::log('Image determination: ID before filter  bsi_image; '. ($image_id ?: 'no image found'));
+		$image_id = apply_filters('bsi_image', $image_id, $post_id, $the_img);
+		Plugin::log('Image determination: ID after filter  bsi_image; '. ($image_id ?: 'no image found'));
+
+		return $image_id;
 	}
 
 	/**

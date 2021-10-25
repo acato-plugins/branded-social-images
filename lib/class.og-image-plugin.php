@@ -288,7 +288,7 @@ class Plugin
 				$data['primaryImage']['height'] = static::getInstance()->height;
 			}
 			return $data;
-			
+
 		}, PHP_INT_MAX, 2);
 	}
 
@@ -323,6 +323,28 @@ class Plugin
 		}
 
 		return $response;
+	}
+
+	public static function log()
+	{
+		static $log = [];
+		if (count(func_get_args()) > 0) {
+			$item = func_get_arg(0);
+			// sanitize
+			$item = str_replace(trailingslashit(ABSPATH), 'ABSPATH/', $item);
+			$log[] = $item;
+		}
+		return $log;
+	}
+
+
+	public static function display_log()
+	{
+		header("Content-Type: text/plain");
+		echo "BSI Debug log for ". 'http'. (!empty($_SERVER['HTTPS'])?'s':'') .'://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug') ."\n";
+		echo date('r') ."\n";
+		echo implode("\n", self::log()) . "\n";
+		echo "- end log -";
 	}
 
 
