@@ -340,11 +340,14 @@ class Plugin
 
 	public static function display_log()
 	{
-		header("Content-Type: text/plain");
-		echo "BSI Debug log for ". 'http'. (!empty($_SERVER['HTTPS'])?'s':'') .'://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug') ."\n";
-		echo date('r') ."\n";
-		echo implode("\n", self::log()) . "\n";
-		echo "- end log -";
+		if (current_user_can( Plugin::get_management_permission() )) {
+			header("Content-Type: text/plain");
+			echo "BSI Debug log for " . 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug') . "\n";
+			echo date('r') . "\n";
+			echo implode("\n", self::log()) . "\n";
+			echo "- end log -";
+			exit;
+		}
 	}
 
 

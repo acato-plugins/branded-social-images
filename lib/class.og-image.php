@@ -220,7 +220,6 @@ class Image {
 
 			if (!empty($_GET['debug']) && $_GET['debug'] == 'BSI') {
 				Plugin::display_log();
-				exit;
 			}
 
 			if ($push_to_browser) {
