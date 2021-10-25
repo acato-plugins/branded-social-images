@@ -159,7 +159,7 @@ class Image {
 		$source = '';
 		for ($i = Plugin::AA; $i > 1; $i--) {
 			$tag = "@{$i}x";
-			$source = wp_get_attachment_image_src($image_id, Plugin::IMAGE_SIZE_NAME. $tag);
+			$source = Plugin::wp_get_attachment_image_data($image_id, Plugin::IMAGE_SIZE_NAME. $tag);
 			Plugin::log('Source: trying image size "'. Plugin::IMAGE_SIZE_NAME. $tag .'" for '. $image_id);
 			if ($source && !empty($source[1]) && $source[1] * $this->manager->width * $i) {
 				break;
@@ -169,7 +169,7 @@ class Image {
 		if (!$source) {
 			// use x1 source, no matter what dimensions
 			Plugin::log('Source: trying image size "'. Plugin::IMAGE_SIZE_NAME. '" for '. $image_id);
-			$source = wp_get_attachment_image_src($image_id, Plugin::IMAGE_SIZE_NAME);
+			$source = Plugin::wp_get_attachment_image_data($image_id, Plugin::IMAGE_SIZE_NAME);
 		}
 
 		if (!$source) {
@@ -179,12 +179,14 @@ class Image {
 		}
 
 		if ($source) {
-			list($image, $width, $height) = $source;
-			Plugin::log('Source: found: ' . "W: $width, H: $height, U: $image");
+			list($image, $width, $height, $_, $image_file) = $source;
+			Plugin::log('Source: found: ' . "W: $width, H: $height, U: $image, F: $image_file");
 			if ($this->manager->height > $height || $this->manager->width > $width) {
 				header('X-OG-Error-Size: Image sizes do not match, web-master should rebuild thumbnails and use images of sufficient size.');
 			}
-			$image_file = str_replace($base_url, $base_dir, $image);
+			if (!$image_file || !is_file($image_file)) {
+				$image_file = str_replace($base_url, $base_dir, $image);
+			}
 			Plugin::log('Source: found: ' . "Filepath: $image_file");
 
 			if (!is_file($image_file)) {
