@@ -452,7 +452,7 @@ class Admin
 				<div class="area--config closed">
 					<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
 					<div class="inner">
-						<?php self::render_options($fields); ?>
+						<?php self::render_options($fields, ['disabled']); ?>
 					</div>
 				</div>
 			</div>
