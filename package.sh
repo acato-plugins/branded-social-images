@@ -8,6 +8,7 @@ VERSION=$1
 
 GO=yes
 [ "$1" = "stage" ] && GO=no
+[ "$1" = "zip" ] && GO=no && VTAG="$2"
 
 if [ "yes" = "$GO" ]; then
 	[ 1 -gt $(git status | grep 'nothing to commit, working tree clean' | wc -l) ] && echo "GIT checkout not clean, aborting" && exit 1;
@@ -32,7 +33,7 @@ GIT_DIRECTORY="$(pwd -P)"
 cd ~/Desktop
 
 [ -d BSI_SVN_TRUNK ] && rm -rf ./BSI_SVN_TRUNK
-svn checkout $SVN_PROJECT$SVN_TRUNK BSI_SVN_TRUNK.$$ 
+svn checkout $SVN_PROJECT$SVN_TRUNK BSI_SVN_TRUNK.$$
 mkdir BSI_SVN_TRUNK
 mv BSI_SVN_TRUNK.$$/.svn BSI_SVN_TRUNK/
 rm -rf BSI_SVN_TRUNK.$$
@@ -65,6 +66,14 @@ svn status | grep '!' | awk '{print $2}' | xargs svn rm
 if [ "yes" = "$GO" ]; then
 	svn commit -m "Import changes from GitHub for version $VERSION"
 	svn cp $SVN_PROJECT$SVN_TRUNK $SVN_PROJECT$SVN_TAG -m "version $VERSION"
+elif [ "" != "$VTAG" ]; then
+	cd ..
+	mv BSI_SVN_TRUNK /tmp/branded-social-images
+	cd /tmp
+	rm -rf /tmp/branded-social-images/.svn
+	zip -r ~/Desktop/branded-social-images-$VTAG.zip branded-social-images
+	rm -rf /tmp/branded-social-images
+	echo "File created: ~/Desktop/branded-social-images-$VTAG.zip"
 else
 	echo "New SVN checkout is prepared at ~/Desktop/BSI_SVN_TRUNK"
 	svn status
