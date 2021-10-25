@@ -336,7 +336,7 @@ class Plugin
 		}
 		return $log;
 	}
-	
+
 	public static function display_log()
 	{
 		if (current_user_can( Plugin::get_management_permission() )) {
@@ -356,6 +356,14 @@ class Plugin
 		$upl = wp_upload_dir();
 		$upl = $upl['basedir'];
 		$data[4] = trailingslashit($upl) . $meta['file'];
+		if (!empty($meta['sizes'][ $size ][ 'path' ])) {
+			$data[4] = trailingslashit($upl) . $meta['sizes'][ $size ][ 'path' ];
+		} elseif (!empty($meta['sizes'][ $size ][ 'file' ])) {
+			$file = dirname($data[4])  .'/'. $meta['sizes'][ $size ][ 'file' ];
+			if (is_file($file)) {
+				$data[4] = $file;
+			}
+		}
 
 		return $data;
 	}
