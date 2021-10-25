@@ -69,7 +69,12 @@ class Image {
 		// well, we tried :(
 		if (!$this->image_id) {
 			header('HTTP/1.1 404 Not found');
-			echo __('Sorry, could not find an OG Image configured.', Plugin::TEXT_DOMAIN) .' '. __('This is probably a temporary error.', Plugin::TEXT_DOMAIN);
+			$error = __('Sorry, could not find an OG Image configured.', Plugin::TEXT_DOMAIN);
+			header('X-OG-Error: '. $error );
+			Plugin::log( $error );
+			Plugin::display_log();
+			// if we get here, display_log was unavailable
+			print $error;
 			exit;
 		}
 
@@ -83,7 +88,12 @@ class Image {
 			readfile($image_cache['file']);
 			exit;
 		}
-		echo __('Sorry, we could not create the image.', Plugin::TEXT_DOMAIN) .' '. __('This is probably a temporary error.', Plugin::TEXT_DOMAIN);
+		$error = __('Sorry, we could not create the image.', Plugin::TEXT_DOMAIN);
+		header('X-OG-Error: '. $error );
+		Plugin::log( $error );
+		Plugin::display_log();
+		// if we get here, display_log was unavailable
+		print $error;
 		exit;
 	}
 

@@ -83,7 +83,9 @@ class Admin
 				. ' ' . sprintf(__('<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN), Plugin::BSI_URL_CONTACT); ?></p><?php
 			if (get_the_ID()) {
 				?><p><?php print sprintf(__('Use <a href="%s" target="_blank">%s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN),
-					sprintf(Plugin::EXTERNAL_INSPECTOR, urlencode(get_permalink(get_the_ID()))), Plugin::EXTERNAL_INSPECTOR_NAME); ?></p><?php
+					sprintf(Plugin::EXTERNAL_INSPECTOR, urlencode(get_permalink(get_the_ID()))), Plugin::EXTERNAL_INSPECTOR_NAME); ?></p>
+				<p><?php print sprintf(__('<a href="%s" target="_blank">Show debug information</a> for the social-image of this post.', Plugin::TEXT_DOMAIN),
+					add_query_arg('debug', 'BSI', Plugin::get_og_image_url(get_the_ID()))); ?></p><?php
 			}
 		});
 	}
