@@ -336,8 +336,7 @@ class Plugin
 		}
 		return $log;
 	}
-
-
+	
 	public static function display_log()
 	{
 		if (current_user_can( Plugin::get_management_permission() )) {
@@ -350,6 +349,16 @@ class Plugin
 		}
 	}
 
+	public static function wp_get_attachment_image_data($image_id, string $size)
+	{
+		$data = wp_get_attachment_image_src($image_id, $size);
+		$meta = wp_get_attachment_metadata($image_id);
+		$upl = wp_upload_dir();
+		$upl = $upl['basedir'];
+		$data[4] = trailingslashit($upl) . $meta['file'];
+
+		return $data;
+	}
 
 	public function _init() {
 		$id = get_the_ID();
