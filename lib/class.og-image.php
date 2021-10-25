@@ -149,6 +149,7 @@ class Image {
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
 		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
+		$temp_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.tmp';
 		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE .'/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
 
 		Plugin::log('Base URL: '. $base_url);
@@ -187,6 +188,29 @@ class Image {
 			if (!$image_file || !is_file($image_file)) {
 				$image_file = str_replace($base_url, $base_dir, $image);
 			}
+
+			// situation: replacement failed. the url is not like the uploads url
+			if ($image_file === $image) {
+				$error = 'Image appears not to be in the regular path structure. Trying to get the path by checking for path fraction';
+				Plugin::log("Source error: $error");
+				Plugin::log("Source error: $image");
+				header('X-OG-Error: '. $error);
+				$base_url_path_only = parse_url($base_url, PHP_URL_PATH);
+				$image_file = explode($base_url_path_only, $image);
+				$image_file = $base_dir . end($image_file);
+				Plugin::log("Source error fixed?: $image_file; " . is_file($image_file) ? 'yes' : 'no');
+
+				if (!is_file($image_file)) {
+					// create temp file
+					$error = 'Attempt 2 at getting image path failed, fetching file from web.';
+					header('X-OG-Error: '. $error);
+					Plugin::log("Source error: $error");
+					$this->manager->file_put_contents($temp_file, wp_remote_retrieve_body(wp_remote_get($image)));
+					$image_file = $temp_file;
+					Plugin::log("Source error fixed?: $image_file; " . is_file($image_file) ? 'yes' : 'no');
+				}
+			}
+
 			Plugin::log('Source: found: ' . "Filepath: $image_file");
 
 			if (!is_file($image_file)) {
