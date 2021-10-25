@@ -90,7 +90,7 @@ With WordPress filter `bsi_admin_menu_location` you can move the entry to the Se
 
 = I want to use a smaller, sidebar version of the post-meta =
 
-Use filter `bsi_meta_box_context` to change the meta-box position, return either `advanced`, `side` or `normal`. 
+Use filter `bsi_meta_box_context` to change the meta-box position, return either `advanced`, `side` or `normal`.
 Beware that the `side` option makes the meta-box very small and with that less usable.
 In a classic-editor environment, dragging the metabox to the sidebar (or back) is possible.
 
@@ -111,6 +111,7 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 * added: action `bsi_image_gd` with 2 parameters; &$resource and $stage, in 4 stages of the image generation (`after_creating_canvas`, `after_adding_background`, `after_adding_text` and `after_adding_logo`)
 * fixed: replace image with BSI in RankMath LD+JSON
 * fixed: BSI image url not always used by RankMath
+* added: debug information for administrators on url.to/post/social-image.png/?debug=BSI
 
 = 1.0.11 =
 * improved: Meta panel improved layout
