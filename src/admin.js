@@ -1,157 +1,156 @@
 /*globals jQuery, wp, bsi_settings */
 import Picker from 'vanilla-picker';
 import hex_to_rgba from './helpers/hex_to_rgba';
-import {decodeEntities} from './helpers/decode_entities';
+import decodeEntities from './helpers/decode_entities';
 
 ;(function ($, s) {
-	var editor = $('#' + s);
+	let editor = $('#' + s);
 	if (editor.length < 1) {
 		return false;
 	}
 
-	var imageeditor = editor.find('.area--background .background');
-	var logoeditor = editor.find('.area--logo:not(.logo-alternate) .logo');
+	let $body = $('body'),
+		imageeditor = editor.find('.area--background .background'),
+		logoeditor = editor.find('.area--logo:not(.logo-alternate) .logo');
 
-	;(function ($) {
-		$.fn.attachMediaUpload = function () {
-			var wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
+	$.fn.attachMediaUpload = function () {
+		let wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
 
-			// Restore the main ID when the add media button is pressed
-			jQuery('a.add_media').on('click', function () {
-				// console.log('is this really needed?');
-				wp.media.model.settings.post.id = wp_media_post_id;
+		// Restore the main ID when the add media button is pressed
+		$('a.add_media').on('click', function () {
+			// console.log('is this really needed?');
+			wp.media.model.settings.post.id = wp_media_post_id;
+		});
+
+		return $(this).each(function () {
+			let file_frame,
+				wrap = $(this),
+				input = wrap.find('input').not('.button'),
+				preview = wrap.find('.image-preview-wrapper img'),
+				current_image_id = input.val(),
+				button = wrap.find('.button').not('.remove'),
+				remove = wrap.find('.button.remove');
+
+			remove.on('click', function () {
+				let attachment = {
+					id: '0',
+					url: 'data:image/png;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
+				};
+				preview.attr('src', attachment.url);
+				input.trigger('image:select', [attachment]);
+				input.val(attachment.id);
+				current_image_id = attachment.id;
 			});
 
-			return $(this).each(function () {
-				var file_frame;
-				var wrap = $(this),
-					input = wrap.find('input').not('.button'),
-					preview = wrap.find('.image-preview-wrapper img'),
-					current_image_id = input.val(),
-					button = wrap.find('.button').not('.remove'),
-					remove = wrap.find('.button.remove');
+			// Uploading files
+			button.on('click', function (event) {
+				event.preventDefault();
+				// If the media frame already exists, reopen it.
+				if (!file_frame) {
+					// console.log('new file_frame');
+					wp.media.model.settings.post.id = current_image_id;
+					// Create the media frame.
+					file_frame = wp.media.frames.file_frame = wp.media({
+						title: 'Select an image or upload one.',
+						button: {
+							text: 'Use this image',
+						},
+						library: {
+							type: wrap.data('types').split(',')
+						},
+						multiple: false // Set to true to allow multiple files to be selected
+					});
 
-				remove.on('click', function (event) {
-					var attachment = {
-						id: '0',
-						url: 'data:image/png;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
-					};
-					preview.attr('src', attachment.url);
-					input.trigger('image:select', [attachment]);
-					input.val(attachment.id);
-					current_image_id = attachment.id;
-				});
-
-				// Uploading files
-				button.on('click', function (event) {
-					event.preventDefault();
-					// If the media frame already exists, reopen it.
-					if (!file_frame) {
-						// console.log('new file_frame');
-						wp.media.model.settings.post.id = current_image_id;
-						// Create the media frame.
-						file_frame = wp.media.frames.file_frame = wp.media({
-							title: 'Select an image or upload one.',
-							button: {
-								text: 'Use this image',
-							},
-							library: {
-								type: wrap.data('types').split(',')
-							},
-							multiple: false // Set to true to allow multiple files to be selected
-						});
-
-						// When an image is selected, run a callback.
-						file_frame.on('select', function () {
-							// We set multiple to false so only get one image from the uploader
-							var attachment = file_frame.state().get('selection').first().toJSON();
-							if ('sizes' in attachment && 'og-image' in attachment.sizes) {
-								attachment.url = attachment.sizes['og-image'].url;
-							}
-							// Do something with attachment.id and/or attachment.url here
-							preview.attr('src', attachment.url);
-							input.trigger('image:select', [attachment]);
-							input.val(attachment.id);
-							current_image_id = attachment.id;
-							// Restore the main post ID
-							wp.media.model.settings.post.id = wp_media_post_id;
-						}).on('open', function () {
-							var selection = file_frame.state().get('selection');
-							if (current_image_id) {
-								selection.add(wp.media.attachment(current_image_id));
-							}
-						});
-					}
-					// Set the post ID to what we want
-					// file_frame.uploader.options.uploader.params.post_id = current_image_id;
-					// Open frame
-					// console.log('opening file_frame');
-					file_frame.open();
-				});
+					// When an image is selected, run a callback.
+					file_frame.on('select', function () {
+						// We set multiple to false so only get one image from the uploader
+						let attachment = file_frame.state().get('selection').first().toJSON();
+						if ('sizes' in attachment && 'og-image' in attachment.sizes) {
+							attachment.url = attachment.sizes['og-image'].url;
+						}
+						// Do something with attachment.id and/or attachment.url here
+						preview.attr('src', attachment.url);
+						input.trigger('image:select', [attachment]);
+						input.val(attachment.id);
+						current_image_id = attachment.id;
+						// Restore the main post ID
+						wp.media.model.settings.post.id = wp_media_post_id;
+					}).on('open', function () {
+						let selection = file_frame.state().get('selection');
+						if (current_image_id) {
+							selection.add(wp.media.attachment(current_image_id));
+						}
+					});
+				}
+				// Set the post ID to what we want
+				// file_frame.uploader.options.uploader.params.post_id = current_image_id;
+				// Open frame
+				// console.log('opening file_frame');
+				file_frame.open();
 			});
-		};
-		$.fn.attachFileUpload = function () {
-			var wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
+		});
+	};
+	$.fn.attachFileUpload = function () {
+		let wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
 
-			// Restore the main ID when the add media button is pressed
-			jQuery('a.add_media').on('click', function () {
-				// console.log('is this really needed?');
-				wp.media.model.settings.post.id = wp_media_post_id;
+		// Restore the main ID when the add media button is pressed
+		$('a.add_media').on('click', function () {
+			// console.log('is this really needed?');
+			wp.media.model.settings.post.id = wp_media_post_id;
+		});
+
+		return $(this).each(function () {
+			let file_frame,
+				wrap = $(this),
+				input = wrap.find('input').not('.button'),
+				current_image_id = input.val(),
+				button = wrap.find('.button').not('.remove');
+
+			// Uploading files
+			button.on('click', function (event) {
+				event.preventDefault();
+				// If the media frame already exists, reopen it.
+				if (!file_frame) {
+					// console.log('new file_frame');
+					wp.media.model.settings.post.id = current_image_id;
+					// Create the media frame.
+					file_frame = wp.media.frames.file_frame = wp.media({
+						title: 'Select a file or upload one',
+						button: {
+							text: 'Use this file',
+						},
+						library: {
+							type: wrap.data('types').split(',')
+						},
+						multiple: false // Set to true to allow multiple files to be selected
+					});
+					// console.log(file_frame);
+					// When an image is selected, run a callback.
+					file_frame.on('select', function () {
+						// We set multiple to false so only get one image from the uploader
+						let attachment = file_frame.state().get('selection').first().toJSON();
+						// Do something with attachment.id and/or attachment.url here
+						input.trigger('file:select', [attachment]);
+						// console.log(attachment);
+						input.val(attachment.id);
+						current_image_id = attachment.id;
+						// Restore the main post ID
+						wp.media.model.settings.post.id = wp_media_post_id;
+					}).on('open', function () {
+						let selection = file_frame.state().get('selection');
+						if (current_image_id) {
+							selection.add(wp.media.attachment(current_image_id));
+						}
+					});
+				}
+				// Set the post ID to what we want
+				// file_frame.uploader.options.uploader.params.post_id = current_image_id;
+				// Open frame
+				// console.log('opening file_frame');
+				file_frame.open();
 			});
-
-			return $(this).each(function () {
-				var file_frame;
-				var wrap = $(this),
-					input = wrap.find('input').not('.button'),
-					current_image_id = input.val(),
-					button = wrap.find('.button').not('.remove');
-
-				// Uploading files
-				button.on('click', function (event) {
-					event.preventDefault();
-					// If the media frame already exists, reopen it.
-					if (!file_frame) {
-						// console.log('new file_frame');
-						wp.media.model.settings.post.id = current_image_id;
-						// Create the media frame.
-						file_frame = wp.media.frames.file_frame = wp.media({
-							title: 'Select a file or upload one',
-							button: {
-								text: 'Use this file',
-							},
-							library: {
-								type: wrap.data('types').split(',')
-							},
-							multiple: false // Set to true to allow multiple files to be selected
-						});
-						// console.log(file_frame);
-						// When an image is selected, run a callback.
-						file_frame.on('select', function () {
-							// We set multiple to false so only get one image from the uploader
-							var attachment = file_frame.state().get('selection').first().toJSON();
-							// Do something with attachment.id and/or attachment.url here
-							input.trigger('file:select', [attachment]);
-							// console.log(attachment);
-							input.val(attachment.id);
-							current_image_id = attachment.id;
-							// Restore the main post ID
-							wp.media.model.settings.post.id = wp_media_post_id;
-						}).on('open', function () {
-							var selection = file_frame.state().get('selection');
-							if (current_image_id) {
-								selection.add(wp.media.attachment(current_image_id));
-							}
-						});
-					}
-					// Set the post ID to what we want
-					// file_frame.uploader.options.uploader.params.post_id = current_image_id;
-					// Open frame
-					// console.log('opening file_frame');
-					file_frame.open();
-				});
-			});
-		};
-	})(jQuery);
+		});
+	};
 
 	$(document).ready(function () {
 		// $('.editable[contenteditable]').keydown(function (e) {
@@ -164,8 +163,8 @@ import {decodeEntities} from './helpers/decode_entities';
 		// 	}
 		// });
 
-		var texteditor = editor.find('.editable');
-		var texteditor_target = editor.find('textarea.editable-target');
+		let texteditor = editor.find('.editable');
+		let texteditor_target = editor.find('textarea.editable-target');
 
 		editor.find('h2 .toggle').on('click touchend', function() {
 			$(this).closest('[class^="area"]').toggleClass('closed');
@@ -177,12 +176,12 @@ import {decodeEntities} from './helpers/decode_entities';
 		});
 
 		// native JS solution for paste-fix
-		texteditor.get(0).addEventListener('paste', function(e) {
+		texteditor.get(0).addEventListener('paste', function() {
 			// console.log('PASTE with visual editor');
 			setTimeout(function() {
 				// strip all HTML
-				var text = texteditor.text();
-				var html = texteditor.html();
+				let text = texteditor.text();
+				let html = texteditor.html();
 				if (text !== html) {
 					text = text.replace('<br[^>]*>/g', '\n');
 					// console.log('cleaning from', html);
@@ -193,14 +192,14 @@ import {decodeEntities} from './helpers/decode_entities';
 		});
 
 		// update target when editor edited
-		texteditor.on('blur keyup paste', function (e) {
+		texteditor.on('blur keyup paste', function () {
 			// console.log('interaction with visual editor: ', e);
 			setTimeout(function() {
 				texteditor_target.val(texteditor.text());
 			}, 250);
 		});
 
-		texteditor_target.on('blur keyup input', function (e) {
+		texteditor_target.on('blur keyup input', function () {
 			// console.log('interaction with hidden field: ', e);
 			texteditor_target.val(texteditor_target.val().replace(/&nbsp;<br/g, '<br'));
 			texteditor_target.val(texteditor_target.val().replace(/&nbsp;\n/g, '\n'));
@@ -208,7 +207,7 @@ import {decodeEntities} from './helpers/decode_entities';
 		});
 
 		// update editor when target edited
-		texteditor_target.on('blur keyup paste', function (e) {
+		texteditor_target.on('blur keyup paste', function () {
 			// console.log('copy hidden field to visual: ', e);
 			texteditor.text(decodeEntities(texteditor_target.val()));
 		}).trigger('paste');
@@ -219,7 +218,7 @@ import {decodeEntities} from './helpers/decode_entities';
 		});
 		// text background color
 		editor.find('#background_enabled,#background_color').on('keyup blur paste input change', function () {
-			var use_background = editor.find('#background_enabled').is(':checked');
+			let use_background = editor.find('#background_enabled').is(':checked');
 			editor.toggleClass('with-text-background', use_background);
 			editor.get(0).style.setProperty('--text-background', hex_to_rgba(editor.find('#background_color').val()));
 		}).trigger('blur');
@@ -246,8 +245,8 @@ import {decodeEntities} from './helpers/decode_entities';
 
 		// positions
 		$('.wrap-position-grid input').on('change', function () {
-			var c = $(this).closest(".wrap-position-grid");
-			var n = c.data('name');
+			let c = $(this).closest('.wrap-position-grid');
+			let n = c.data('name');
 			editor.removeClass(function (index, className) {
 				return (className.match(new RegExp('(^|\\s)' + n + '-\\S+', 'g')) || []).join(' ');
 			}).addClass(n + '-' + c.find('input:checked').attr('value'));
@@ -255,9 +254,9 @@ import {decodeEntities} from './helpers/decode_entities';
 
 		// logo size
 		$('#image_logo_size').on('keyup blur paste input', function () {
-			var v = parseInt("0" + $(this).val(), 10);
-			var logo_min = parseInt( $(this).attr('min'), 10 );
-			var logo_max = parseInt( $(this).attr('max'), 10 );
+			let v = parseInt('0' + $(this).val(), 10);
+			let logo_min = parseInt( $(this).attr('min'), 10 );
+			let logo_max = parseInt( $(this).attr('max'), 10 );
 			if (v < logo_min) {
 				v = logo_min;
 			}
@@ -270,25 +269,25 @@ import {decodeEntities} from './helpers/decode_entities';
 
 		// font size
 		$('#text__font_size').on('keyup blur paste input', function () {
-			var v = parseInt("0" + $(this).val(), 10);
-			var fs_min = parseInt( $(this).attr('min'), 10 );
-			var fs_max = parseInt( $(this).attr('max'), 10 );
+			let v = parseInt('0' + $(this).val(), 10);
+			let fs_min = parseInt( $(this).attr('min'), 10 );
+			let fs_max = parseInt( $(this).attr('max'), 10 );
 			if (v < fs_min) {
 				v = fs_min;
 			}
 			if (v > fs_max) {
 				v = fs_max;
 			}
-			editor.get(0).style.setProperty('--font-size', v + "px");
-			editor.get(0).style.setProperty('--line-height', (v*1.25) + "px");
+			editor.get(0).style.setProperty('--font-size', v + 'px');
+			editor.get(0).style.setProperty('--line-height', (v*1.25) + 'px');
 
 		}).trigger('blur');
 
 		// sliders
 		$('.add-slider').each(function () {
-			var $input = $(this).find('input');
+			let $input = $(this).find('input');
 			$input.attr('size', 4).on('blur change', function () {
-				$(this).next('.a-slider').slider("value", parseInt($(this).val(), 10));
+				$(this).next('.a-slider').slider('value', parseInt($(this).val(), 10));
 				$(this).trigger('input');
 			}).after('<div class="a-slider"></div>');
 
@@ -306,12 +305,12 @@ import {decodeEntities} from './helpers/decode_entities';
 			});
 		});
 
-		editor.find("#image").on('image:select', function (event, attachment) {
+		editor.find('#image').on('image:select', function (event, attachment) {
 			imageeditor.get(0).style.backgroundImage = 'url("' + attachment.url + '")';
 		});
 
-		editor.find("#image_logo").on('image:select', function (event, attachment) {
-			if ('id' in attachment && parseInt(""+attachment.id, 10) > 0) {
+		editor.find('#image_logo').on('image:select', function (event, attachment) {
+			if ('id' in attachment && parseInt(''+attachment.id, 10) > 0) {
 				editor.get(0).style.setProperty('--logo-width', attachment.width);
 				editor.get(0).style.setProperty('--logo-height', attachment.height);
 				logoeditor.get(0).style.backgroundImage = 'url("' + attachment.url + '")';
@@ -325,11 +324,11 @@ import {decodeEntities} from './helpers/decode_entities';
 			}
 		});
 
-		editor.find("#text__ttf_upload").on('file:select', function (event, attachment) {
+		editor.find('#text__ttf_upload').on('file:select', function (event, attachment) {
 			$(this).parent().find('.filename').html(attachment.filename);
 		});
 
-		editor.find("i.toggle-comment,i.toggle-info").on('click touchend', function(){
+		editor.find('i.toggle-comment,i.toggle-info').on('click touchend', function(){
 			$(this).toggleClass('active');
 		});
 
@@ -343,7 +342,7 @@ import {decodeEntities} from './helpers/decode_entities';
 		}).trigger('change'); // font face is defined in *admin.php
 
 		$('.input-color', editor).each(function () {
-			var $input = $(this).find('input');
+			let $input = $(this).find('input');
 			new Picker({
 				parent: this,
 				popup: 'top',
@@ -358,35 +357,35 @@ import {decodeEntities} from './helpers/decode_entities';
 			});
 		});
 
-		var getFeaturedImage = function(){};
+		let getFeaturedImage = function(){};
 		// window.getFeaturedImage = getFeaturedImage;
-		var subscribe, state = { yoast: false, rankmath: false, featured: false };
+		let subscribe, state = { yoast: false, rankmath: false, featured: false };
 
-		if (jQuery('body').is('.block-editor-page')) {
+		if ($body.is('.block-editor-page')) {
 
-			var select = wp.data.select;
+			let select = wp.data.select;
 			subscribe = wp.data.subscribe;
 
-			var _coreDataSelect, _coreEditorSelect;
+			let _coreDataSelect, _coreEditorSelect;
 
-			var getMediaById = function(mediaId) {
+			let getMediaById = function(mediaId) {
 				if (!_coreDataSelect) {
-					_coreDataSelect = select("core");
+					_coreDataSelect = select('core');
 				}
 
 				return _coreDataSelect.getMedia(mediaId);
 			};
 
-			var getPostAttribute = function(attribute) {
+			let getPostAttribute = function(attribute) {
 				if (!_coreEditorSelect) {
-					_coreEditorSelect = select("core/editor");
+					_coreEditorSelect = select('core/editor');
 				}
 
 				return _coreEditorSelect.getEditedPostAttribute(attribute);
 			};
 
 			getFeaturedImage = function () {
-				const featuredImage = getPostAttribute("featured_media");
+				const featuredImage = getPostAttribute('featured_media');
 				if (featuredImage) {
 					const mediaObj = getMediaById(featuredImage);
 
@@ -408,10 +407,10 @@ import {decodeEntities} from './helpers/decode_entities';
 		}
 
 		// yoast?? no events on the input, use polling
-		var getYoastFacebookImage = function() {
-			var url;
-			var $field = $('#facebook-url-input-metabox');
-			var $preview = $('#wpseo-section-social > div:nth(0) .yoast-image-select__preview--image');
+		let getYoastFacebookImage = function() {
+			let url;
+			let $field = $('#facebook-url-input-metabox');
+			let $preview = $('#wpseo-section-social > div:nth(0) .yoast-image-select__preview--image');
 			if (!$field.length && !$preview.length) {
 				return false;
 			}
@@ -424,9 +423,9 @@ import {decodeEntities} from './helpers/decode_entities';
 		};
 
 		// rankmath?? no events on the input, use polling
-		var getRankMathFacebookImage = function(){
-			var url;
-			var $preview = $('.rank-math-social-preview-facebook .rank-math-social-image-thumbnail');
+		let getRankMathFacebookImage = function(){
+			let url;
+			let $preview = $('.rank-math-social-preview-facebook .rank-math-social-image-thumbnail');
 			if (!$preview.length) {
 				url = state.rankmath;
 			}
@@ -446,18 +445,18 @@ import {decodeEntities} from './helpers/decode_entities';
 		// window.i_grmfi = getRankMathFacebookImage;
 		// window.i_gfi = getFeaturedImage;
 
-		var external_images_maybe_changed = function(){
+		let external_images_maybe_changed = function(){
 			setTimeout(function(){
-				var url;
+				let url;
 				// yoast
 				if ($('.area--background-alternate.image-source-yoast').length) {
 					url = getYoastFacebookImage();
 					if (state.yoast !== url) {
 						state.yoast = url;
 						if (url) {
-							$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = 'url("' + url + '")';
+							$('.area--background-alternate.image-source-yoast .background').get(0).style.backgroundImage = 'url("' + url + '")';
 						} else {
-							$(".area--background-alternate.image-source-yoast .background").get(0).style.backgroundImage = '';
+							$('.area--background-alternate.image-source-yoast .background').get(0).style.backgroundImage = '';
 						}
 					}
 				}
@@ -468,9 +467,9 @@ import {decodeEntities} from './helpers/decode_entities';
 					if (state.rankmath !== url) {
 						state.rankmath = url;
 						if (url) {
-							$(".area--background-alternate.image-source-rankmath .background").get(0).style.backgroundImage = 'url("' + url + '")';
+							$('.area--background-alternate.image-source-rankmath .background').get(0).style.backgroundImage = 'url("' + url + '")';
 						} else {
-							$(".area--background-alternate.image-source-rankmath .background").get(0).style.backgroundImage = '';
+							$('.area--background-alternate.image-source-rankmath .background').get(0).style.backgroundImage = '';
 						}
 					}
 				}
@@ -481,17 +480,17 @@ import {decodeEntities} from './helpers/decode_entities';
 					if (state.featured !== url) {
 						state.featured = url;
 						if (url) {
-							$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = 'url("' + url + '")';
+							$('.area--background-alternate.image-source-thumbnail .background').get(0).style.backgroundImage = 'url("' + url + '")';
 						} else {
-							$(".area--background-alternate.image-source-thumbnail .background").get(0).style.backgroundImage = '';
+							$('.area--background-alternate.image-source-thumbnail .background').get(0).style.backgroundImage = '';
 						}
 					}
 				}
 			}, 500);
 		};
 
-		if (jQuery('body').is('.block-editor-page')) {
-			var debounce;
+		if ($body.is('.block-editor-page')) {
+			let debounce;
 			subscribe(function() {
 				if (debounce) { clearTimeout(debounce); }
 				debounce = setTimeout(function() { external_images_maybe_changed(); }, 1000);

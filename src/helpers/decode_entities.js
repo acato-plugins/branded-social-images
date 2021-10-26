@@ -1,4 +1,4 @@
-export var decodeEntities = (function() {
+export default (function() {
 	// this prevents any overhead from creating the object each time
 	var element = document.createElement('div');
 
