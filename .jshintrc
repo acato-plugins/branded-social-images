@@ -1,0 +1,12 @@
+{
+	"esversion": 6,
+	"browser": true,
+	"globals": {
+		"jquery": "jQuery"
+	},
+	"curly": true,
+	"eqeqeq": true,
+	"quotmark": "single",
+	"undef": true,
+	"unused": true
+}

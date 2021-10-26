@@ -1,16 +1,7 @@
+/*globals jQuery, wp, bsi_settings */
 import Picker from 'vanilla-picker';
-
-function hex_to_rgba(hex) {
-	var c;
-	// #ABC or #ABCD
-	if (/^#([A-Fa-f0-9]{3,4})$/.test(hex)) {
-		c = (hex + 'F').substring(1).split('');
-		return hex_to_rgba(c[0], c[0], c[1], c[1], c[2], c[2], c[3], c[3]);
-	}
-
-	c = '0x' + (hex.substring(1) + 'FF').substring(0, 8);
-	return 'rgba(' + [(c >> 24) & 255, (c >> 16) & 255, (c >> 8) & 255, Math.round((c & 255) / 25.5) / 10].join(',') + ')';
-}
+import hex_to_rgba from './helpers/hex_to_rgba';
+import {decodeEntities} from './helpers/decode_entities';
 
 ;(function ($, s) {
 	var editor = $('#' + s);
@@ -73,7 +64,7 @@ function hex_to_rgba(hex) {
 						// When an image is selected, run a callback.
 						file_frame.on('select', function () {
 							// We set multiple to false so only get one image from the uploader
-							attachment = file_frame.state().get('selection').first().toJSON();
+							var attachment = file_frame.state().get('selection').first().toJSON();
 							if ('sizes' in attachment && 'og-image' in attachment.sizes) {
 								attachment.url = attachment.sizes['og-image'].url;
 							}
@@ -137,7 +128,7 @@ function hex_to_rgba(hex) {
 						// When an image is selected, run a callback.
 						file_frame.on('select', function () {
 							// We set multiple to false so only get one image from the uploader
-							attachment = file_frame.state().get('selection').first().toJSON();
+							var attachment = file_frame.state().get('selection').first().toJSON();
 							// Do something with attachment.id and/or attachment.url here
 							input.trigger('file:select', [attachment]);
 							// console.log(attachment);
@@ -175,26 +166,6 @@ function hex_to_rgba(hex) {
 
 		var texteditor = editor.find('.editable');
 		var texteditor_target = editor.find('textarea.editable-target');
-
-		var decodeEntities = (function() {
-			// this prevents any overhead from creating the object each time
-			var element = document.createElement('div');
-
-			function decodeHTMLEntities (str) {
-				if(str && typeof str === 'string') {
-					// strip script/html tags
-					str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
-					str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
-					element.innerHTML = str;
-					str = element.textContent;
-					element.textContent = '';
-				}
-
-				return str;
-			}
-
-			return decodeHTMLEntities;
-		})();
 
 		editor.find('h2 .toggle').on('click touchend', function() {
 			$(this).closest('[class^="area"]').toggleClass('closed');

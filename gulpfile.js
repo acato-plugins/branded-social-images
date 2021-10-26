@@ -4,17 +4,17 @@
 var $ = require('gulp-load-plugins')({
     rename: {'gulp': 'g'},
     pattern: ['gulp', 'gulp-*', 'gulp.*', '@*/gulp{-,.}*']
-});
-var webpack = require('webpack');
-var webpackStream = require('webpack-stream');
-var webpackConfig = require('./webpack.config.js');
+}),
+	webpack = require('webpack'),
+	webpackStream = require('webpack-stream'),
+	webpackConfig = require('./webpack.config.js');
 
 // Browsers to target when prefixing CSS.
 var BROWSERS = ['last 2 versions', 'ie >= 9'];
 
 $.g.task('styles', function () {
     var s = [
-        {source: 'src/*.scss', targetDir: 'admin', title: 'Style'}
+        {source: ['src/*.scss', '!src/_*.scss'], targetDir: 'admin', title: 'Style'}
     ];
     for (var i in s) {
         $.g.src(
@@ -35,7 +35,9 @@ $.g.task('scripts', function () {
 	for (var i in s) {
 		$.g.src(
 			s[i].source)
-			.pipe(webpackStream(webpackConfig), webpack).on('error', $.sass.logError)
+			.pipe($.jshint())
+			.pipe($.jshint.reporter('jshint-stylish'))
+			.pipe(webpackStream(webpackConfig), webpack).on('error', console.log)
 			.pipe($.g.dest(s[i].targetDir + '/'))
 			.pipe($.livereload())
 			.pipe($.notify(s[i].title + ' compiled'));
