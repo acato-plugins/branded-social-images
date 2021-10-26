@@ -5,3 +5,4 @@ bin/?webp*
 bin/macos
 bin/linux
 assets/.svn
+package-lock.json

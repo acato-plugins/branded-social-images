@@ -369,7 +369,7 @@
       grid-template-columns: 22px 22px 22px;
   -ms-grid-rows: 22px 22px 22px;
       grid-template-rows: 22px 22px 22px;
-  border: 1px solid black;
+  border: 1px solid #8c8f94;
   padding: 0 !important;
   box-sizing: content-box; }
 
@@ -387,7 +387,7 @@
     position: absolute;
     left: 0;
     top: 0;
-    border: 1px solid black;
+    border: 1px solid #8c8f94;
     border-top: 0;
     border-left: 0; }
   #branded-social-images-editor .wrap-position-grid .option-wrap:nth-child(n+7) label {
@@ -395,7 +395,7 @@
   #branded-social-images-editor .wrap-position-grid .option-wrap:nth-child(3n) label {
     border-right: 0; }
   #branded-social-images-editor .wrap-position-grid .option-wrap input:checked + label {
-    background: black; }
+    background: #4c4f48; }
 
 #branded-social-images-editor .wrap-position-grid input {
   width: 20px;
