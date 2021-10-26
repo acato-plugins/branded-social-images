@@ -385,10 +385,10 @@
       width: 100%;
     }
     grid-template-columns: 1fr;
-    grid-template-areas: "settings" "options" ;
+    grid-template-areas: "settings" "options" "config";
   }
 
-  .area--options, .area--settings {
+  .area--options, .area--settings, .area--config {
     h2 {
       font-weight: 600;
       font-size: 1.3em;
@@ -471,6 +471,10 @@
 
   .area--settings {
     grid-area: settings;
+  }
+
+  .area--config {
+    grid-area: config;
   }
 
   .hidden, .wrap-hidden {

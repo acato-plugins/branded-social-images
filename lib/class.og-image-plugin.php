@@ -293,7 +293,7 @@ class Plugin
 	}
 
 	public static function go_for_id($post_id) {
-		$killswitch = get_post_meta($post_id, self::OPTION_PREFIX . 'disabled', true);
+		$killswitch = get_post_meta($post_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
 		$go = !!self::image_fallback_chain() || get_post_meta($post_id, self::OPTION_PREFIX . 'image', true);
 		if ('on' === $killswitch) {
 			$go = false;
@@ -304,7 +304,7 @@ class Plugin
 	public static function patch_yoast_rest_api($response) {
 		$id = $response->data['id'];
 
-		$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
+		$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
 		$go = true;
 		if ('on' === $killswitch) {
 			$go = false;
@@ -371,7 +371,7 @@ class Plugin
 	public function _init() {
 		$id = get_the_ID();
 		if (!is_admin() && $id || is_home() || is_archive()) {
-			$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true);
+			$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
 			$go = true;
 			if ('on' === $killswitch) {
 				$go = false;
@@ -1165,6 +1165,10 @@ EODOC;
 
 		$options = [
 			'admin' => [
+				'disabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => __('Select to disable the plugin Branded Social Images by default.', Plugin::TEXT_DOMAIN), 'default' => 'off' ],
+				'menu_location' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => __('Where does Branded Social Images live in the menu?', Plugin::TEXT_DOMAIN), 'default' => 'main', 'options' => ['main' => __('At the main level', Plugin::TEXT_DOMAIN), 'options' => __('In the Settings sub-menu', Plugin::TEXT_DOMAIN), 'media' => __('In the Media sub-menu', Plugin::TEXT_DOMAIN)] ],
+				'meta_location' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'select', 'label' => __('Branded Social Images meta-box location', Plugin::TEXT_DOMAIN), 'default' => 'advanced', 'options' => ['advanced' => __('Below the content editor', Plugin::TEXT_DOMAIN), 'side' => __('In the sidebar', Plugin::TEXT_DOMAIN)] ],
+
 				'image' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'class' => '-no-remove', 'label' => __('Fallback OG:Image.', Plugin::TEXT_DOMAIN), 'comment' => __('Used for any page/post that has no OG image selected.', Plugin::TEXT_DOMAIN) . ' ' . __('You can use JPEG and PNG.', Plugin::TEXT_DOMAIN) . ' ' . __('Recommended size: 1200x630 pixels.', Plugin::TEXT_DOMAIN)],
 				'image_use_thumbnail' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Use the WordPress Featured image.', Plugin::TEXT_DOMAIN), 'default' => 'on', 'info-icon' => 'dashicons-info', 'info' => $image_comment],
 
@@ -1192,7 +1196,7 @@ EODOC;
 				'text_shadow_enabled' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'checkbox', 'label' => __('Use a text shadow', Plugin::TEXT_DOMAIN), 'value' => 'on', 'default' => 'off'],
 			],
 			'meta' => [
-				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Select to disable the plugin Branded Social Images for this post.', Plugin::TEXT_DOMAIN), 'comment' => '<div class="disabled-notice">'. __('The plugin Branded Social Images is disabled for this post.', Plugin::TEXT_DOMAIN) .'</div>' ],
+				'disabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Select to disable the plugin Branded Social Images for this post.', Plugin::TEXT_DOMAIN), 'default' => get_option(self::DEFAULTS_PREFIX . 'disabled', 'off'), 'comment' => '<div class="disabled-notice">'. __('The plugin Branded Social Images is disabled for this post.', Plugin::TEXT_DOMAIN) .'</div>' ],
 				'text_enabled' => ['namespace' => self::OPTION_PREFIX, 'type' => 'checkbox', 'label' => __('Deselect if you do not wish text on this image.', Plugin::TEXT_DOMAIN), 'default' => 'yes', 'value' => 'yes' ],
 
 				'image' => ['namespace' => self::OPTION_PREFIX, 'type' => 'image', 'types' => 'image/png,image/jpeg,image/webp', 'label' => __('You can upload/select a specific Social Image here', Plugin::TEXT_DOMAIN), 'comment' => __('You can use JPEG and PNG.', Plugin::TEXT_DOMAIN) . ' ' . __('Recommended size: 1200x630 pixels.', Plugin::TEXT_DOMAIN), 'info-icon' => 'dashicons-info', 'info' => $image_comment],

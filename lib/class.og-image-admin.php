@@ -49,11 +49,17 @@ class Admin
 		});
 
 		add_action('admin_menu', function () {
-			if ('main' == apply_filters('bsi_admin_menu_location', 'main')) {
+			$location_setting = get_option( Plugin::DEFAULTS_PREFIX .'menu_location', 'main');
+		    $location = apply_filters('bsi_admin_menu_location', $location_setting);
+			if ('main' == $location) {
 				add_menu_page('Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
 			}
 			else {
-				add_submenu_page('options-general.php', 'Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel']);
+			    $parent = 'options-general.php';
+			    if ('media' === $location_setting) {
+			        $parent = 'upload.php';
+                }
+				add_submenu_page($parent, 'Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel']);
 			}
 		});
 
@@ -359,7 +365,8 @@ class Admin
 		$editor_class = [];
 		$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
 		$editor_class[] = 'text_position-' . (!empty($fields['text_position']) ? $fields['text_position']['current_value'] : $text_settings['position']);
-		if (!empty($fields['disabled']) && $fields['disabled']['current_value'] == 'on') {
+
+		if ((empty($fields['disabled']) && 'on' === get_option(Plugin::DEFAULTS_PREFIX . 'disabled', 'off')) || $fields['disabled']['current_value'] == 'on') {
 			$editor_class[] = 'bsi-disabled';
 		}
 		if ($logo) {
@@ -441,6 +448,12 @@ class Admin
 						]); ?>
 					</div>
 				</div>
+				<div class="area--config closed">
+					<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+					<div class="inner">
+						<?php self::render_options($fields, ['disabled']); ?>
+					</div>
+				</div>
 			</div>
 			<?php } ?>
 		</div>
@@ -509,11 +522,12 @@ class Admin
 	public static function add_meta_boxes()
 	{
 		$post_types = apply_filters('bsi_post_types', []);
+		$meta_location = get_option(Plugin::DEFAULTS_PREFIX .'meta_location', 'advanced');
 		foreach ($post_types as $post_type) {
-			$context = apply_filters('bsi_meta_box_context', 'advanced', $post_type);
-			if (!in_array($context, ['advanced', 'normal', 'side'])) {
-				$context = 'advanced';
-			}
+            $context = apply_filters('bsi_meta_box_context', $meta_location, $post_type);
+            if (!in_array($context, ['advanced', 'normal', 'side'])) {
+                $context = $meta_location;
+            }
 			add_meta_box(
 				Plugin::ADMIN_SLUG,
 				'Branded Social Images',
