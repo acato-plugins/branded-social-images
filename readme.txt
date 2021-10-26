@@ -112,6 +112,7 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 * fixed: replace image with BSI in RankMath LD+JSON
 * fixed: BSI image url not always used by RankMath
 * added: debug information for administrators on url.to/post/social-image.png/?debug=BSI
+* added: admin option to purge BSI cache
 
 = 1.0.11 =
 * improved: Meta panel improved layout

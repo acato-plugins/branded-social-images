@@ -180,7 +180,8 @@ class Admin
 
 	public static function admin_panel()
 	{
-		$fields = Plugin::field_list()['admin'];
+		$action = !empty($_REQUEST['bsi-action']) ? $_REQUEST['bsi-action'] : 'show-config';
+
 		?>
 		<div class="wrap">
 			<h2>Branded Social Images</h2>
@@ -190,17 +191,50 @@ class Admin
 				?>
 				<div class="updated error"><p><?php print $error; ?></p></div><?php
 			}
-			?>
-			<div>
-				<form method="POST" action="<?php print esc_attr(add_query_arg('bsi-defaults', '1')); ?>">
-					<?php self::show_editor($fields); ?>
-					<br/>
-					<br/>
-					<button class="action button-primary"><?php _e('Save settings', Plugin::TEXT_DOMAIN); ?></button>
-				</form>
-			</div>
+			?><div><?php
+			switch ($action) {
+				case 'purge-cache':
+					$purgable = Plugin::get_purgable_cache('images');
+					$purgable_dirs = Plugin::get_purgable_cache('directories');
+					if (!$purgable && !$purgable_dirs) {
+						_e('The cache is empty', Plugin::TEXT_DOMAIN);
+						?><a class="action button-primary"
+							 href="<?php print esc_attr(remove_query_arg('bsi-action')); ?>"><?php _e('Ok', Plugin::TEXT_DOMAIN); ?></a><?php
+					}
+					else {
+						print sprintf(__('This will clear the cache, %d image(s) and %d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN), count($purgable), count($purgable_dirs));
+					}
+					?>
+					<form method="POST"
+						  action="<?php print esc_attr(add_query_arg('bsi-action', 'purge-cache-confirm')); ?>">
+						<input type="hidden" name="bsi-action" value="purge-cache-confirm" />
+						<button
+							class="action button-primary"><?php _e('Confirm', Plugin::TEXT_DOMAIN); ?></button>
+						<a class="action button cancel"
+						   href="<?php print esc_attr(remove_query_arg('bsi-action')); ?>"><?php _e('Cancel', Plugin::TEXT_DOMAIN); ?></a>
+					</form>
+					<?php
+					break;
+				case 'show-config':
+					$fields = Plugin::field_list()['admin'];
+					?>
+					<form method="POST"
+						  action="<?php print esc_attr(add_query_arg('bsi-action', 'save-settings')); ?>">
+						<?php self::show_editor($fields); ?>
+						<br/>
+						<br/>
+						<button
+							class="action button-primary"><?php _e('Save settings', Plugin::TEXT_DOMAIN); ?></button>
+						<a class="action button-secondary" target="_blank"
+						   href="<?php print esc_attr(add_query_arg('bsi-action', 'purge-cache')); ?>"><?php _e('Purge cache', Plugin::TEXT_DOMAIN); ?></a>
+					</form>
 
-			<?php do_action('bsi_footer'); ?>
+					<?php
+					do_action('bsi_footer');
+
+					break;
+			}
+			?></div>
 		</div>
 		<?php
 	}
@@ -819,23 +853,59 @@ EOCSS;
 	public static function process_post()
 	{
 		if (is_admin() && !empty($_GET['page']) && $_GET['page'] === Plugin::ADMIN_SLUG && !empty($_POST)) {
-			$valid_post_keys = Plugin::get_valid_POST_keys('admin');
+			$action = !empty($_REQUEST['bsi-action']) ? $_REQUEST['bsi-action'] : 'nop';
+			switch ($action) {
+				case 'save-settings':
+					$valid_post_keys = Plugin::get_valid_POST_keys('admin');
 
-			foreach ($_POST['branded_social_images'] as $namespace => $values) {
-				if (is_array($values)) {
-					foreach ($values as $key => $value) {
-						if (!in_array($key, $valid_post_keys[ $namespace ])) {
+					foreach ($_POST['branded_social_images'] as $namespace => $values) {
+						if (is_array($values)) {
+							foreach ($values as $key => $value) {
+								if (!in_array($key, $valid_post_keys[$namespace])) {
+									continue;
+								}
+								if ($key === 'text' && !empty($value)) {
+									$value = strip_tags($value, '<br>');
+								}
+								update_option("$namespace$key", $value);
+							}
+						}
+					}
+					wp_redirect(remove_query_arg('bsi-action', add_query_arg('updated', 1)));
+					exit;
+				case 'purge-cache-confirm':
+					$purgable = Plugin::get_purgable_cache();
+					// protection!
+					$base = trailingslashit(Plugin::getInstance()->storage());
+					foreach ($purgable as $item) {
+						if (false === strpos($item, $base)) {
 							continue;
 						}
-						if ($key === 'text' && !empty($value)) {
-							$value = strip_tags($value, '<br>');
+
+						try {
+							if (is_file($item)) {
+								unlink($item);
+							}
+							if (is_dir($item)) {
+								rmdir($item);
+								rmdir(dirname($item));
+							}
 						}
-						update_option("$namespace$key", $value);
+						catch(\Exception $e) {
+
+						}
 					}
-				}
+
+					$purgable = Plugin::get_purgable_cache();
+					if ($purgable) {
+						self::setError('generic', sprintf(__('Not all cache items could be removed. Please try again, or check the cache folder yourself. Location: %s', Plugin::TEXT_DOMAIN), $base));
+						wp_redirect(remove_query_arg('bsi-action', add_query_arg('purged', 'error')));
+					}
+					else {
+						wp_redirect(remove_query_arg('bsi-action', add_query_arg('purged', 1)));
+					}
+					exit;
 			}
-			wp_redirect(remove_query_arg('bsi-defaults', add_query_arg('updated', 1)));
-			exit;
 		}
 	}
 

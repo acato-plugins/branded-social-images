@@ -368,6 +368,36 @@ class Plugin
 		return $data;
 	}
 
+	public static function get_purgable_cache($type='all')
+	{
+		$filter = 'is_file';
+		switch($type) {
+			case 'directories':
+				$ext = '';
+				$filter = 'is_dir';
+				break;
+			case 'files':
+				$ext = '/*';
+				break;
+			case 'images':
+				$ext = '/*.png';
+				break;
+			case 'locks':
+				$ext = '/*.lock';
+				break;
+			case 'tmp':
+				$ext = '/*.tmp';
+				break;
+			case 'all':
+			default:
+				return array_merge(self::get_purgable_cache('files'), self::get_purgable_cache('directories'));
+		}
+		$cache = glob(self::getInstance()->storage() .'/*/*'. $ext);
+		$cache = array_filter($cache, $filter);
+
+		return $cache;
+	}
+
 	public function _init() {
 		$id = get_the_ID();
 		if (!is_admin() && $id || is_home() || is_archive()) {
