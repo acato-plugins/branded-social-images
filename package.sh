@@ -41,7 +41,7 @@ cd BSI_SVN_TRUNK
 
 SVN_DIRECTORY="$(pwd -P)"
 
-cp -a "$GIT_DIRECTORY"/* "$GIT_DIRECTORY"/.git "$SVN_DIRECTORY"/
+cp -a "$GIT_DIRECTORY"/* "$GIT_DIRECTORY"/.??* "$SVN_DIRECTORY"/
 
 # want these, but clean
 for i in bin; do
@@ -52,7 +52,7 @@ for i in bin; do
 done
 
 # don't want these
-for i in node_modules assets composer.json composer.lock package.sh tmp .git package.json package-lock.json gulpfile.js languages/make-pot.sh; do
+for i in .git .gitignore .github .jshintrc .babelrc src webpack.config.js node_modules assets composer.json composer.lock package.sh tmp package.json package-lock.json gulpfile.js languages/make-pot.sh; do
 	rm -rf "$SVN_DIRECTORY"/$i
 done
 find . -name '.DS_Store' -exec rm {} \;
