@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -106,12 +106,16 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 
 == Changelog ==
 
+= 1.0.13 =
+* fixed: showing debug information leaves image cache in locked state, preventing (re-)generation of image.
+
 = 1.0.12 =
 * added: interface now recognises RankMath image selection
 * added: action `bsi_image_gd` with 2 parameters; &$resource and $stage, in 4 stages of the image generation (`after_creating_canvas`, `after_adding_background`, `after_adding_text` and `after_adding_logo`)
 * fixed: replace image with BSI in RankMath LD+JSON
 * fixed: BSI image url not always used by RankMath
 * added: debug information for administrators on url.to/post/social-image.png/?debug=BSI
+* added: admin option to purge BSI cache
 
 = 1.0.11 =
 * improved: Meta panel improved layout

@@ -254,6 +254,16 @@ class Image {
 				Plugin::log("Text overlay: disabled");
 			}
 
+			add_action('shutdown', function () use ($lock_file, $temp_file) {
+				@unlink($lock_file);
+				@unlink($temp_file);
+			});
+			if (!$this->use_cache) {
+				add_action('shutdown', function () use ($cache_file) {
+					@unlink($cache_file);
+				});
+			}
+
 			if (!empty($_GET['debug']) && $_GET['debug'] == 'BSI') {
 				Plugin::display_log();
 			}
@@ -265,13 +275,9 @@ class Image {
 				$image->save();
 			}
 
-			unlink($lock_file);
-			if (!$this->use_cache) {
-				add_action('shutdown', function () use ($cache_file) { @unlink($cache_file); });
-			}
 			return is_file($cache_file) ? $cache_file : false;
 		}
-		unlink($lock_file);
+
 		return false;
 	}
 
