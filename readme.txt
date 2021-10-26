@@ -106,6 +106,9 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 
 == Changelog ==
 
+= 1.0.13 =
+* fixed: showing debug information leaves image cache in locked state, preventing (re-)generation of image.
+
 = 1.0.12 =
 * added: interface now recognises RankMath image selection
 * added: action `bsi_image_gd` with 2 parameters; &$resource and $stage, in 4 stages of the image generation (`after_creating_canvas`, `after_adding_background`, `after_adding_text` and `after_adding_logo`)
