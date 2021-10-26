@@ -39,13 +39,15 @@ class Admin
 		add_action('admin_head', [static::class, 'add_fontface_definitions']);
 		add_action('admin_init', [static::class, 'process_post'], 11);
 		add_action('admin_enqueue_scripts', function () {
-			wp_enqueue_script(Plugin::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.js', __DIR__), ['jquery', 'jquery-ui-slider'], filemtime(dirname(__DIR__) . '/admin/admin.js'), true);
+			$script = (!defined('BSI_UNMINIFIED') ? 'admin/admin.min.js' : 'admin/admin.js');
+			$style = (!defined('BSI_UNMINIFIED') ? 'admin/admin.css' : 'admin/admin.min.css');
+			wp_enqueue_script(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($script, __DIR__), ['jquery', 'jquery-ui-slider'], filemtime(dirname(__DIR__) . '/'. $script), true);
 			wp_localize_script(Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', [
 				'preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME,
 				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
 			]);
 
-			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url('admin/admin.css', __DIR__), '', filemtime(dirname(__DIR__) . '/admin/admin.css'), 'all');
+			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($style, __DIR__), '', filemtime(dirname(__DIR__) . '/' .$style), 'all');
 		});
 
 		add_action('admin_menu', function () {

@@ -22,6 +22,8 @@ $.g.task('styles', function () {
             .pipe($.sass()).on('error', $.sass.logError)
             .pipe($.autoprefixer({browsers: BROWSERS}))
             .pipe($.g.dest(s[i].targetDir + '/'))
+			.pipe($.cssnano()).pipe($.rename({suffix: '.min'}))
+			.pipe($.g.dest(s[i].targetDir + '/'))
             .pipe($.livereload())
             .pipe($.notify(s[i].title + ' compiled'));
     }
@@ -38,6 +40,8 @@ $.g.task('scripts', function () {
 			.pipe($.jshint())
 			.pipe($.jshint.reporter('jshint-stylish'))
 			.pipe(webpackStream(webpackConfig), webpack).on('error', console.log)
+			.pipe($.g.dest(s[i].targetDir + '/'))
+			.pipe($.uglify()).pipe($.rename({suffix: '.min'}))
 			.pipe($.g.dest(s[i].targetDir + '/'))
 			.pipe($.livereload())
 			.pipe($.notify(s[i].title + ' compiled'));

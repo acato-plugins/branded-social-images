@@ -8,6 +8,9 @@ const config = {
 		path: path.resolve(__dirname, 'admin'),
 		filename: 'admin.js'
 	},
+	optimization: {
+		minimize: false
+	},
 	externals: {
 		// require("jquery") is external and available
 		//  on the global var jQuery
