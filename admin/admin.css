@@ -1193,7 +1193,7 @@
   #branded-social-images-editor label {
     vertical-align: unset; }
   #branded-social-images-editor .grid {
-    zoom: 0.5;
+    zoom: var(--editor-scale, 0.5);
     display: -ms-grid;
     display: grid;
     -ms-grid-columns: 1200px;
@@ -1373,7 +1373,7 @@
     display: grid;
     gap: 20px;
     margin-top: 20px;
-    width: 600px;
+    max-width: 600px;
     -ms-grid-columns: 1fr;
         grid-template-columns: 1fr;
     grid-template-areas: "settings" "options" "config"; }

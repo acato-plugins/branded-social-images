@@ -1545,7 +1545,22 @@ function hex_to_rgba(hex) {
       });
     }
 
-    setInterval(external_images_maybe_changed, 5000);
+    setInterval(external_images_maybe_changed, 5000); // monitor available space for editor 
+    // you might be wondering, why?
+    // we use zoom to scale the entire interface because otherwise we would have to size all images and the text based on viewport width... which is even more crap
+
+    var monitor_space = function monitor_space() {
+      var w = $("#branded-social-images").outerWidth();
+
+      if (w < 600) {
+        editor.get(0).style.setProperty('--editor-scale', (w - 26) / 600 * .5);
+      } else {
+        editor.get(0).style.setProperty('--editor-scale', .5);
+      }
+    };
+
+    $(window).on('resize', monitor_space);
+    setTimeout(monitor_space, 1000);
   });
 })(jQuery, 'branded-social-images-editor');
 /******/ })()
