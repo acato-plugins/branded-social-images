@@ -25,10 +25,12 @@ class HTML_Inputs {
 	/**
 	 * @param $option_name
 	 * @param array $option_atts
+	 * @param string $option_label
 	 * @param bool $echo
+	 *
 	 * @return string|null
 	 */
-	public static function render($option_name, array $option_atts = [], string $option_label = '', bool $echo = true): ?string
+	public static function render($option_name, array $option_atts = [], string $option_label = '', bool $echo = true)
 	{
 		$type = $option_atts['type'] ?? 'text';
 		$class = Input::getClass($type);

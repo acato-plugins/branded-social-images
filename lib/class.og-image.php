@@ -382,7 +382,7 @@ class Image {
 	 * @return string
 	 */
 	public static function replaceFirstOccurence(string $haystack, string $needle, string $replace): string {
-		// reference: https://stackoverflow.com/a/1252710/3679900
+		$new_string = $haystack;
 		$pos = strpos($haystack, $needle);
 		if ($pos !== false) {
 			$new_string = substr_replace($haystack, $replace, $pos, strlen($needle));

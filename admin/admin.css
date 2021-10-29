@@ -1188,7 +1188,6 @@
     width: 60px !important; }
   #branded-social-images-editor .add-slider .a-slider {
     display: inline-block;
-    width: 350px;
     width: calc(100% - 66px); }
   #branded-social-images-editor label {
     vertical-align: unset; }
