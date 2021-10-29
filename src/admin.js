@@ -197,6 +197,9 @@ import decodeEntities from './helpers/decode_entities';
 			setTimeout(function() {
 				texteditor_target.val(texteditor.text());
 			}, 250);
+
+			// once we edit, remove the automatic update
+			editor.removeClass('auto-title');
 		});
 
 		texteditor_target.on('blur keyup input', function () {
@@ -204,6 +207,9 @@ import decodeEntities from './helpers/decode_entities';
 			texteditor_target.val(texteditor_target.val().replace(/&nbsp;<br/g, '<br'));
 			texteditor_target.val(texteditor_target.val().replace(/&nbsp;\n/g, '\n'));
 			texteditor.text(texteditor_target.val());
+
+			// once we edit, remove the automatic update
+			editor.removeClass('auto-title');
 		});
 
 		// update editor when target edited
@@ -512,6 +518,24 @@ import decodeEntities from './helpers/decode_entities';
 		};
 		$(window).on('resize', monitor_space);
 		setTimeout(monitor_space, 1000);
+
+		// monitor title
+		let title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php').find('#post #title,.block-editor #post-title-0').get(0);
+		let update_auto_title = () => {
+			// sure?
+			if (editor.is('.auto-title')) {
+				let new_title = bsi_settings.title_format.replace('{title}', $(title_field).val());
+				texteditor_target.val(new_title);
+				texteditor.text(new_title);
+			}
+			else {
+				$(title_field).off(update_auto_title);
+			}
+		};
+
+		if (title_field) {
+			$(title_field).on('keyup change blur', update_auto_title).trigger('keyup');
+		}
 
 	});
 })(jQuery, 'branded-social-images-editor');
