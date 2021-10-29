@@ -39,7 +39,8 @@ This is usually the case. If not, contact your hosting company or internet agenc
 
 = Does this plugin work with third party plugins like Yoast etc.? =
 
-This plugin will take the title from the page as it is created by ANY SEO-plugin, and if you want, you can change it. And if you have used Yoast-SEO to choose an OG:Image, this plugin will use it as well.
+For existing pages/posts, this plugin will take the title from the page as it is created by ANY SEO-plugin, and if you want, you can change it.
+And if you have used Yoast-SEO to choose an OG:Image, this plugin will use it as well.
 
 = How do I configure the plugin? =
 
@@ -108,6 +109,10 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 
 = 1.0.13 =
 * fixed: showing debug information leaves image cache in locked state, preventing (re-)generation of image.
+* improved: interface will now scale on small displays.
+* changed: for new posts, title is automatically filled based on '{title} - {blogname}'.
+* changed: overhaul of javascript and style.
+* added: @developers; For debugging, set BSI_UNMINIFIED to true. Script and style will be more readable.
 
 = 1.0.12 =
 * added: interface now recognises RankMath image selection
