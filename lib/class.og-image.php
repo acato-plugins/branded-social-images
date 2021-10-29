@@ -311,26 +311,15 @@ class Image {
 
 		if (!$text && intval($post_id)) {
 			Plugin::log('Text: no text detected in meta-data, getting text from page;');
-			$head = wp_remote_retrieve_body(wp_remote_get(get_permalink($post_id)));
-			$head = explode('<body', $head);
-			$head = reset($head);
-			$head = str_replace(["\n", "\t"], '', $head);
-			if ($head && false !== strpos($head, 'og:title')) {
-				preg_match('/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $head, $m);
-				$title = html_entity_decode($m[2]);
-				$quote = $m[1];
-
-				$text = trim($title, ' />' . $quote);
-				Plugin::log('Text: og:title detected; '. $text);
+			$scraped = Plugin::scrape_title($post_id);
+			if ($scraped) {
 				$type = 'scraped';
+				$text = $scraped;
 			}
-			if ($head && !$text && false !== strpos($head, '<title')) {
-				preg_match('/<title[^>]*>(.+)<\/title>/Um', $head, $m);
-				$title = html_entity_decode($m[1]);
 
-				$text = trim($title);
-				Plugin::log('Text: HTML title detected; '. $text);
-				$type = 'scraped';
+			if (!$text) { // no text from scraping, build it
+				$text = Plugin::title_format($post_id);
+				$type = 'by-format';
 			}
 		}
 

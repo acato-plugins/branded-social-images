@@ -44,6 +44,7 @@ class Admin
 			wp_localize_script(Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', [
 				'preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME,
 				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
+				'title_format' => Plugin::title_format(1, true)
 			]);
 
 			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url('css/admin.css', __DIR__), '', filemtime(dirname(__DIR__) . '/css/admin.css'), 'all');
@@ -411,6 +412,15 @@ class Admin
 			$editor_class[] = 'with-text-background';
 		}
 
+		$text_fallback_chain = Plugin::text_fallback_chain();
+		// in case of no 'scraped' title which resulted of a non-normal-page-code, build the title on-the-fly
+		if (get_the_ID() && empty($text_fallback_chain['meta'])) { // post but no title configured
+			$scraped = Plugin::scrape_title_data(get_the_ID());
+			if ($scraped[0] >= 300) { // non-normal state
+				$editor_class[] = 'auto-title';
+			}
+		}
+
 		$editor_class = implode(' ', $editor_class);
 		?>
 		<div id="branded-social-images-editor"
@@ -449,7 +459,7 @@ class Admin
 					<div class="editable-container">
 						<pre contenteditable="true"
 							 class="editable"><?php print $fields['text']['current_value']; ?></pre>
-						<?php foreach (Plugin::text_fallback_chain() as $type => $text) {
+						<?php foreach ($text_fallback_chain as $type => $text) {
 							?>
 							<div class="text-alternate type-<?php print $type; ?>"><?php print $text; ?></div><?php
 						} ?>

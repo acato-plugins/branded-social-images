@@ -398,6 +398,65 @@ class Plugin
 		return $cache;
 	}
 
+    public static function scrape_title($post_id)
+    {
+		return self::scrape_title_data($post_id)[1];
+    }
+
+    public static function scrape_code($post_id)
+    {
+		return self::scrape_title_data($post_id)[0];
+    }
+
+    public static function scrape_title_data($post_id)
+    {
+		static $previous = [];
+		if (!empty($previous[ $post_id ])) {
+			return $previous[ $post_id ];
+		}
+
+		$title = $page = '';
+		$code = 0;
+		try {
+			$result = wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]);
+			$code = wp_remote_retrieve_response_code($result);
+			if (intval($code) === 200) {
+				$page = wp_remote_retrieve_body($result);
+				// limit size of string to work with
+				list($page) = explode('</head>', $page);
+				// remove line endings for better scraping
+				$page = str_replace(["\n", "\r"], '', $page);
+			}
+		} catch (\Exception $e) {
+			$page = '';
+		}
+
+		if ($page && (false !== strpos($page, 'og:title'))) {
+			if (preg_match('/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $page, $m)) {
+				$title = trim($m[2], ' />' . $m[1]);
+			}
+
+		}
+		if ($page && !$title && (false !== strpos($page, '<title'))) {
+			if (preg_match('/<title[^>]*>(.+)<\/title>/mU', $page, $m)) {
+				$title = trim($m[1]);
+			}
+		}
+
+		return $previous[ $post_id ] = [ $code, html_entity_decode($title) ];
+    }
+
+	public static function title_format( $post_id = null, $no_title = false )
+	{
+		// to return, in case of no post
+		$format = get_option( Plugin::OPTION_PREFIX . 'title_format', '{title} - {blogname}');
+		if ($post_id) { // post asked, build the full title
+			$tokens = apply_filters('bsi_title_tokens', [ '{title}' => $no_title ? '{title}' : get_the_title($post_id), '{blogname}' => get_bloginfo('name') ]);
+			return strtr($format, $tokens);
+		}
+		return $format;
+	}
+
 	public function _init() {
 		$id = get_the_ID();
 		if (!is_admin() && $id || is_home() || is_archive()) {
@@ -1299,50 +1358,40 @@ EODOC;
 
 	public static function text_fallback_chain(): array
 	{
+		static $chain; // prevent double work
+		if ($chain) return $chain;
+
 		$post_id = get_the_ID();
+		$new_post = 'auto-draft' == get_post_status($post_id);
+
 		$layers = [];
 
 		$title = '';
 		if ($post_id) {
 			if (Plugin::setting('use_bare_post_title')) {
-				$layers['wordpress'] = $title = apply_filters('the_title', get_the_title($post_id), $post_id);
+				$title = apply_filters('the_title', get_the_title($post_id), $post_id);
+				if ($title) {
+					$layers['wordpress'] = $title;
+				}
 			}
 
 			if (!$title) {
-				$title = $page = '';
-				try {
-					$result = wp_remote_get(get_permalink($post_id), ['httpversion' => '1.1', 'user-agent' => $_SERVER["HTTP_USER_AGENT"], 'referer' => remove_query_arg('asd')]);
-					$code = wp_remote_retrieve_response_code($result);
-					if (intval($code) === 200) {
-						$page = wp_remote_retrieve_body($result);
-					}
-				} catch (\Exception $e) {
-					$page = '';
+				$title = Plugin::scrape_title($post_id);
+				if ($title) {
+					$layers['scraped'] = $title;
 				}
-				$page = str_replace(["\n", "\r"], '', $page);
-				// this is a lousy way of getting a processed og:title, but unfortunately, no easy options exist.
-				// also; poor excuse for tag parsing. sorry.
-				if ($page && (false !== strpos($page, 'og:title'))) {
-					if (preg_match('/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $page, $m)) {
-						$title = html_entity_decode($m[2]);
-						$quote = $m[1];
-						$layers['scraped'] = trim($title, ' />' . $quote);
-					}
-
-				}
-				if ($page && !$title && (false !== strpos($page, '<title'))) {
-					if (preg_match('/<title[^>]*>(.+)<\/title>/mU', $page, $m)) {
-						$title = html_entity_decode($m[1]);
-						$layers['scraped'] = trim($title);
-					}
+			}
+			if (!$title) { // no text from scraping, build it
+				$title = Plugin::title_format($post_id, $new_post);
+				if ($title) {
+					$layers['by-format'] = $title;
 				}
 			}
 
 			$layers['default'] = get_option(self::DEFAULTS_PREFIX . 'text', esc_attr(Plugin::getInstance()->dummy_data('text')));
 		}
 
-
-		return $layers;
+		return $chain = array_filter($layers);
 	}
 
 	public static function image_fallback_chain($with_post = false): array
