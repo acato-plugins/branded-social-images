@@ -1057,9 +1057,9 @@ function hex_to_rgba(hex) {
       // console.log('is this really needed?');
       wp.media.model.settings.post.id = wp_media_post_id;
     });
-    return $(this).each(function () {
+    return $(this).each(function (i, element) {
       var file_frame,
-          wrap = $(this),
+          wrap = $(element),
           input = wrap.find('input').not('.button'),
           preview = wrap.find('.image-preview-wrapper img'),
           current_image_id = input.val(),
@@ -1084,9 +1084,9 @@ function hex_to_rgba(hex) {
           wp.media.model.settings.post.id = current_image_id; // Create the media frame.
 
           file_frame = wp.media.frames.file_frame = wp.media({
-            title: 'Select an image or upload one.',
+            title: bsi_settings.text.image_upload_title,
             button: {
-              text: 'Use this image'
+              text: bsi_settings.text.image_upload_button
             },
             library: {
               type: wrap.data('types').split(',')
@@ -1151,9 +1151,9 @@ function hex_to_rgba(hex) {
           wp.media.model.settings.post.id = current_image_id; // Create the media frame.
 
           file_frame = wp.media.frames.file_frame = wp.media({
-            title: 'Select a file or upload one',
+            title: bsi_settings.text.file_upload_title,
             button: {
-              text: 'Use this file'
+              text: bsi_settings.text.file_upload_button
             },
             library: {
               type: wrap.data('types').split(',')
@@ -1192,19 +1192,10 @@ function hex_to_rgba(hex) {
   };
 
   $(document).ready(function () {
-    // $('.editable[contenteditable]').keydown(function (e) {
-    // 	// trap the return key being pressed
-    // 	if (e.keyCode === 13) {
-    // 		// insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
-    // 		document.execCommand('insertHTML', false, '\n');
-    // 		// prevent the default behaviour of return key pressed
-    // 		return false;
-    // 	}
-    // });
     var texteditor = editor.find('.editable');
     var texteditor_target = editor.find('textarea.editable-target');
-    editor.find('h2 .toggle').on('click touchend', function () {
-      $(this).closest('[class^="area"]').toggleClass('closed');
+    editor.find('h2 .toggle').on('click touchend', function (e) {
+      $(e.target).closest('[class^="area"]').toggleClass('closed');
     }); // bugfix: compose.js is preventing things like undo.
 
     editor.on('keypress keyup keydown', function (e) {
@@ -1446,7 +1437,7 @@ function hex_to_rgba(hex) {
     var getYoastFacebookImage = function getYoastFacebookImage() {
       var url;
       var $field = $('#facebook-url-input-metabox');
-      var $preview = $('#wpseo-section-social > div:nth(0) .yoast-image-select__preview--image');
+      var $preview = $('#wpseo-section-social > div:n' + 'th(0) .yoast-image-select__preview--image');
 
       if (!$field.length && !$preview.length) {
         return false;
@@ -1554,12 +1545,12 @@ function hex_to_rgba(hex) {
     // we use zoom to scale the entire interface because otherwise we would have to size all images and the text based on viewport width... which is even more crap
 
     var monitor_space = function monitor_space() {
-      var w = $("#branded-social-images").outerWidth();
+      var w = $('#branded-social-images').outerWidth();
 
       if (w < 600) {
-        editor.get(0).style.setProperty('--editor-scale', (w - 26) / 600 * .5);
+        editor.get(0).style.setProperty('--editor-scale', (w - 26) / 600 * 0.5);
       } else {
-        editor.get(0).style.setProperty('--editor-scale', .5);
+        editor.get(0).style.setProperty('--editor-scale', 0.5);
       }
     };
 

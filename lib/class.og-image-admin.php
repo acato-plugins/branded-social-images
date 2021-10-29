@@ -45,7 +45,14 @@ class Admin
 			wp_localize_script(Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', [
 				'preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME,
 				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
-				'title_format' => Plugin::title_format(1, true)
+				'title_format' => Plugin::title_format(1, true),
+                'text' => [
+                    'image_upload_title' => __('Select an image or upload one.', Plugin::TEXT_DOMAIN),
+                    'image_upload_button' => __('Use this image', Plugin::TEXT_DOMAIN),
+                    'file_upload_title' => __('Select an file or upload one.', Plugin::TEXT_DOMAIN),
+                    'file_upload_button' => __('Use this file', Plugin::TEXT_DOMAIN),
+
+                ]
 			]);
 
 			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($style, __DIR__), '', filemtime(dirname(__DIR__) . '/' .$style), 'all');

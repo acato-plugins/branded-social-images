@@ -3,7 +3,7 @@ import Picker from 'vanilla-picker';
 import hex_to_rgba from './helpers/hex_to_rgba';
 import decodeEntities from './helpers/decode_entities';
 
-;(function ($, s) {
+;(($, s) => {
 	let editor = $('#' + s);
 	if (editor.length < 1) {
 		return false;
@@ -17,14 +17,14 @@ import decodeEntities from './helpers/decode_entities';
 		let wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
 
 		// Restore the main ID when the add media button is pressed
-		$('a.add_media').on('click', function () {
+		$('a.add_media').on('click', () => {
 			// console.log('is this really needed?');
 			wp.media.model.settings.post.id = wp_media_post_id;
 		});
 
-		return $(this).each(function () {
+		return $(this).each((i, element) => {
 			let file_frame,
-				wrap = $(this),
+				wrap = $(element),
 				input = wrap.find('input').not('.button'),
 				preview = wrap.find('.image-preview-wrapper img'),
 				current_image_id = input.val(),
@@ -43,7 +43,7 @@ import decodeEntities from './helpers/decode_entities';
 			});
 
 			// Uploading files
-			button.on('click', function (event) {
+			button.on('click', (event) => {
 				event.preventDefault();
 				// If the media frame already exists, reopen it.
 				if (!file_frame) {
@@ -51,9 +51,9 @@ import decodeEntities from './helpers/decode_entities';
 					wp.media.model.settings.post.id = current_image_id;
 					// Create the media frame.
 					file_frame = wp.media.frames.file_frame = wp.media({
-						title: 'Select an image or upload one.',
+						title: bsi_settings.text.image_upload_title,
 						button: {
-							text: 'Use this image',
+							text: bsi_settings.text.image_upload_button,
 						},
 						library: {
 							type: wrap.data('types').split(',')
@@ -62,7 +62,7 @@ import decodeEntities from './helpers/decode_entities';
 					});
 
 					// When an image is selected, run a callback.
-					file_frame.on('select', function () {
+					file_frame.on('select', () => {
 						// We set multiple to false so only get one image from the uploader
 						let attachment = file_frame.state().get('selection').first().toJSON();
 						if ('sizes' in attachment && 'og-image' in attachment.sizes) {
@@ -75,7 +75,7 @@ import decodeEntities from './helpers/decode_entities';
 						current_image_id = attachment.id;
 						// Restore the main post ID
 						wp.media.model.settings.post.id = wp_media_post_id;
-					}).on('open', function () {
+					}).on('open', () => {
 						let selection = file_frame.state().get('selection');
 						if (current_image_id) {
 							selection.add(wp.media.attachment(current_image_id));
@@ -94,7 +94,7 @@ import decodeEntities from './helpers/decode_entities';
 		let wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
 
 		// Restore the main ID when the add media button is pressed
-		$('a.add_media').on('click', function () {
+		$('a.add_media').on('click', () => {
 			// console.log('is this really needed?');
 			wp.media.model.settings.post.id = wp_media_post_id;
 		});
@@ -107,7 +107,7 @@ import decodeEntities from './helpers/decode_entities';
 				button = wrap.find('.button').not('.remove');
 
 			// Uploading files
-			button.on('click', function (event) {
+			button.on('click', (event) => {
 				event.preventDefault();
 				// If the media frame already exists, reopen it.
 				if (!file_frame) {
@@ -115,9 +115,9 @@ import decodeEntities from './helpers/decode_entities';
 					wp.media.model.settings.post.id = current_image_id;
 					// Create the media frame.
 					file_frame = wp.media.frames.file_frame = wp.media({
-						title: 'Select a file or upload one',
+						title: bsi_settings.text.file_upload_title,
 						button: {
-							text: 'Use this file',
+							text: bsi_settings.text.file_upload_button,
 						},
 						library: {
 							type: wrap.data('types').split(',')
@@ -126,7 +126,7 @@ import decodeEntities from './helpers/decode_entities';
 					});
 					// console.log(file_frame);
 					// When an image is selected, run a callback.
-					file_frame.on('select', function () {
+					file_frame.on('select', () => {
 						// We set multiple to false so only get one image from the uploader
 						let attachment = file_frame.state().get('selection').first().toJSON();
 						// Do something with attachment.id and/or attachment.url here
@@ -136,7 +136,7 @@ import decodeEntities from './helpers/decode_entities';
 						current_image_id = attachment.id;
 						// Restore the main post ID
 						wp.media.model.settings.post.id = wp_media_post_id;
-					}).on('open', function () {
+					}).on('open', () => {
 						let selection = file_frame.state().get('selection');
 						if (current_image_id) {
 							selection.add(wp.media.attachment(current_image_id));
@@ -153,32 +153,22 @@ import decodeEntities from './helpers/decode_entities';
 	};
 
 	$(document).ready(function () {
-		// $('.editable[contenteditable]').keydown(function (e) {
-		// 	// trap the return key being pressed
-		// 	if (e.keyCode === 13) {
-		// 		// insert 2 br tags (if only one br tag is inserted the cursor won't go to the next line)
-		// 		document.execCommand('insertHTML', false, '\n');
-		// 		// prevent the default behaviour of return key pressed
-		// 		return false;
-		// 	}
-		// });
-
 		let texteditor = editor.find('.editable');
 		let texteditor_target = editor.find('textarea.editable-target');
 
-		editor.find('h2 .toggle').on('click touchend', function() {
-			$(this).closest('[class^="area"]').toggleClass('closed');
+		editor.find('h2 .toggle').on('click touchend', (e) => {
+			$(e.target).closest('[class^="area"]').toggleClass('closed');
 		});
 
 		// bugfix: compose.js is preventing things like undo.
-		editor.on('keypress keyup keydown', function (e) {
+		editor.on('keypress keyup keydown', (e) => {
 			e.stopPropagation();
 		});
 
 		// native JS solution for paste-fix
-		texteditor.get(0).addEventListener('paste', function() {
+		texteditor.get(0).addEventListener('paste', () => {
 			// console.log('PASTE with visual editor');
-			setTimeout(function() {
+			setTimeout(() => {
 				// strip all HTML
 				let text = texteditor.text();
 				let html = texteditor.html();
@@ -192,7 +182,7 @@ import decodeEntities from './helpers/decode_entities';
 		});
 
 		// update target when editor edited
-		texteditor.on('blur keyup paste', function () {
+		texteditor.on('blur keyup paste', () => {
 			// console.log('interaction with visual editor: ', e);
 			setTimeout(function() {
 				texteditor_target.val(texteditor.text());
@@ -202,7 +192,7 @@ import decodeEntities from './helpers/decode_entities';
 			editor.removeClass('auto-title');
 		});
 
-		texteditor_target.on('blur keyup input', function () {
+		texteditor_target.on('blur keyup input', () => {
 			// console.log('interaction with hidden field: ', e);
 			texteditor_target.val(texteditor_target.val().replace(/&nbsp;<br/g, '<br'));
 			texteditor_target.val(texteditor_target.val().replace(/&nbsp;\n/g, '\n'));
@@ -213,7 +203,7 @@ import decodeEntities from './helpers/decode_entities';
 		});
 
 		// update editor when target edited
-		texteditor_target.on('blur keyup paste', function () {
+		texteditor_target.on('blur keyup paste', () => {
 			// console.log('copy hidden field to visual: ', e);
 			texteditor.text(decodeEntities(texteditor_target.val()));
 		}).trigger('paste');
@@ -223,7 +213,7 @@ import decodeEntities from './helpers/decode_entities';
 			editor.get(0).style.setProperty('--text-color', hex_to_rgba($(this).val()));
 		});
 		// text background color
-		editor.find('#background_enabled,#background_color').on('keyup blur paste input change', function () {
+		editor.find('#background_enabled,#background_color').on('keyup blur paste input change', () => {
 			let use_background = editor.find('#background_enabled').is(':checked');
 			editor.toggleClass('with-text-background', use_background);
 			editor.get(0).style.setProperty('--text-background', hex_to_rgba(editor.find('#background_color').val()));
@@ -311,11 +301,11 @@ import decodeEntities from './helpers/decode_entities';
 			});
 		});
 
-		editor.find('#image').on('image:select', function (event, attachment) {
+		editor.find('#image').on('image:select', (event, attachment) => {
 			imageeditor.get(0).style.backgroundImage = 'url("' + attachment.url + '")';
 		});
 
-		editor.find('#image_logo').on('image:select', function (event, attachment) {
+		editor.find('#image_logo').on('image:select', (event, attachment) => {
 			if ('id' in attachment && parseInt(''+attachment.id, 10) > 0) {
 				editor.get(0).style.setProperty('--logo-width', attachment.width);
 				editor.get(0).style.setProperty('--logo-height', attachment.height);
@@ -374,7 +364,7 @@ import decodeEntities from './helpers/decode_entities';
 
 			let _coreDataSelect, _coreEditorSelect;
 
-			let getMediaById = function(mediaId) {
+			let getMediaById = (mediaId) => {
 				if (!_coreDataSelect) {
 					_coreDataSelect = select('core');
 				}
@@ -382,7 +372,7 @@ import decodeEntities from './helpers/decode_entities';
 				return _coreDataSelect.getMedia(mediaId);
 			};
 
-			let getPostAttribute = function(attribute) {
+			let getPostAttribute = (attribute) => {
 				if (!_coreEditorSelect) {
 					_coreEditorSelect = select('core/editor');
 				}
@@ -390,7 +380,7 @@ import decodeEntities from './helpers/decode_entities';
 				return _coreEditorSelect.getEditedPostAttribute(attribute);
 			};
 
-			getFeaturedImage = function () {
+			getFeaturedImage = () => {
 				const featuredImage = getPostAttribute('featured_media');
 				if (featuredImage) {
 					const mediaObj = getMediaById(featuredImage);
@@ -407,16 +397,16 @@ import decodeEntities from './helpers/decode_entities';
 			};
 		}
 		else {
-			getFeaturedImage = function () {
+			getFeaturedImage = () => {
 				return $('#set-post-thumbnail img').attr('src') || '';
 			};
 		}
 
 		// yoast?? no events on the input, use polling
-		let getYoastFacebookImage = function() {
+		let getYoastFacebookImage = () => {
 			let url;
 			let $field = $('#facebook-url-input-metabox');
-			let $preview = $('#wpseo-section-social > div:nth(0) .yoast-image-select__preview--image');
+			let $preview = $('#wpseo-section-social > div:n'+'th(0) .yoast-image-select__preview--image');
 			if (!$field.length && !$preview.length) {
 				return false;
 			}
@@ -429,7 +419,7 @@ import decodeEntities from './helpers/decode_entities';
 		};
 
 		// rankmath?? no events on the input, use polling
-		let getRankMathFacebookImage = function(){
+		let getRankMathFacebookImage = () => {
 			let url;
 			let $preview = $('.rank-math-social-preview-facebook .rank-math-social-image-thumbnail');
 			if (!$preview.length) {
@@ -451,8 +441,8 @@ import decodeEntities from './helpers/decode_entities';
 		// window.i_grmfi = getRankMathFacebookImage;
 		// window.i_gfi = getFeaturedImage;
 
-		let external_images_maybe_changed = function(){
-			setTimeout(function(){
+		let external_images_maybe_changed = () => {
+			setTimeout(() => {
 				let url;
 				// yoast
 				if ($('.area--background-alternate.image-source-yoast').length) {
@@ -497,9 +487,9 @@ import decodeEntities from './helpers/decode_entities';
 
 		if ($body.is('.block-editor-page')) {
 			let debounce;
-			subscribe(function() {
+			subscribe(() => {
 				if (debounce) { clearTimeout(debounce); }
-				debounce = setTimeout(function() { external_images_maybe_changed(); }, 1000);
+				debounce = setTimeout(() => { external_images_maybe_changed(); }, 1000);
 			});
 		}
 		setInterval(external_images_maybe_changed, 5000);
@@ -508,12 +498,12 @@ import decodeEntities from './helpers/decode_entities';
 		// you might be wondering, why?
 		// we use zoom to scale the entire interface because otherwise we would have to size all images and the text based on viewport width... which is even more crap
 		let monitor_space = () => {
-			let w = $("#branded-social-images").outerWidth();
+			let w = $('#branded-social-images').outerWidth();
 			if (w < 600) {
-				editor.get(0).style.setProperty('--editor-scale', (w-26)/600 * .5);
+				editor.get(0).style.setProperty('--editor-scale', (w-26)/600 * 0.5);
 			}
 			else {
-				editor.get(0).style.setProperty('--editor-scale', .5);
+				editor.get(0).style.setProperty('--editor-scale', 0.5);
 			}
 		};
 		$(window).on('resize', monitor_space);
