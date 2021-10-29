@@ -1128,7 +1128,7 @@ function hex_to_rgba(hex) {
     });
   };
 
-  $.fn.attachFileUpload = function () {
+  $.fn.BSIattachFileUpload = function () {
     var wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
     // Restore the main ID when the add media button is pressed
 

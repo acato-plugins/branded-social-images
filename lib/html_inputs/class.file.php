@@ -52,7 +52,7 @@ class file extends text
 			<script>
 				;(function ($) {
 					$(document).ready(function(){
-						$('.add-file-select').attachFileUpload();
+						$('.add-file-select').BSIattachFileUpload();
 					});
 				})(jQuery);
 			</script><?php

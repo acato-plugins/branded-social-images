@@ -90,7 +90,7 @@ import decodeEntities from './helpers/decode_entities';
 			});
 		});
 	};
-	$.fn.attachFileUpload = function () {
+	$.fn.BSIattachFileUpload = function () {
 		let wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
 
 		// Restore the main ID when the add media button is pressed
@@ -152,7 +152,7 @@ import decodeEntities from './helpers/decode_entities';
 		});
 	};
 
-	$(document).ready(function () {
+	$(document).ready(() => {
 		let texteditor = editor.find('.editable');
 		let texteditor_target = editor.find('textarea.editable-target');
 
@@ -184,7 +184,7 @@ import decodeEntities from './helpers/decode_entities';
 		// update target when editor edited
 		texteditor.on('blur keyup paste', () => {
 			// console.log('interaction with visual editor: ', e);
-			setTimeout(function() {
+			setTimeout(() => {
 				texteditor_target.val(texteditor.text());
 			}, 250);
 
@@ -243,7 +243,7 @@ import decodeEntities from './helpers/decode_entities';
 		$('.wrap-position-grid input').on('change', function () {
 			let c = $(this).closest('.wrap-position-grid');
 			let n = c.data('name');
-			editor.removeClass(function (index, className) {
+			editor.removeClass((index, className) => {
 				return (className.match(new RegExp('(^|\\s)' + n + '-\\S+', 'g')) || []).join(' ');
 			}).addClass(n + '-' + c.find('input:checked').attr('value'));
 		}).trigger('change');
@@ -343,7 +343,7 @@ import decodeEntities from './helpers/decode_entities';
 				parent: this,
 				popup: 'top',
 				color: $input.val(),
-				onChange: function (color) {
+				onChange: (color) => {
 					$input.val(color.hex.toUpperCase()).parent().get(0).style.setProperty('--the-color', hex_to_rgba(color.hex));
 					$input.trigger('blur');
 				},
