@@ -177,6 +177,7 @@ class Admin
 					</form>
 					<?php
 					break;
+				default:
 				case 'show-config':
 					$fields = Plugin::field_list()['admin'];
 					?>
@@ -309,7 +310,18 @@ class Admin
 
 	public static function show_editor($fields, $is_meta_panel=false)
 	{
-		$fields['text']['current_value'] = trim($fields['text']['current_value']) ? $fields['text']['current_value'] : self::array_first(Plugin::text_fallback_chain());
+		$text_fallback_chain = Plugin::text_fallback_chain();
+		if (!empty($text_fallback_chain['default'])) {
+			$default = $text_fallback_chain['default'];
+			$current = trim($fields['text']['current_value']);
+			if ($current === $default) {
+				$current = '';
+			}
+			if (!$current) {
+				$current = self::array_first($text_fallback_chain);
+			}
+			$fields['text']['current_value'] = $current;
+		}
 
 		$text_settings = Plugin::getInstance()->text_options;
 		$logo_settings = Plugin::getInstance()->logo_options;

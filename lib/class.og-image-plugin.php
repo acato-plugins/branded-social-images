@@ -376,29 +376,78 @@ class Plugin
 
 	public function setup_defaults($post_id = null)
 	{
+		$this->logo_options = [
+			'enabled' => Plugin::get_setting('logo_enabled'),
+			'position' => Plugin::get_setting('logo_position'),
+			'logo_image_size' => Plugin::get_setting('image_logo_size'),
+			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
+		];
+
+		// text options
+		$this->text_options = [ // colors are RGBA in hex format
+			'enabled' => Plugin::get_setting('text_enabled'),
+			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
+			'position' => Plugin::get_setting('text_position'),
+			'font-size' => Plugin::get_setting('text__font_size'),
+			'line-height' => Plugin::get_setting('text__font_size') * 1.25,
+			'color' => Plugin::get_setting('color'),
+			'font-file' => Plugin::get_setting('text__font'),
+			'font-family' => Plugin::get_setting('text__font'),
+			'font-weight' => Plugin::get_setting('text__font_weight'),
+			'font-style' => Plugin::get_setting('text__font_style'),
+			'padding' => '20', // background padding
+			'background-color' => Plugin::get_setting('background_color'),
+			'background-enabled' => Plugin::get_setting('background_enabled'),
+
+			// optionals
+			'text-stroke-color' => '#00000000',
+			'text-stroke' => 0,
+			'text-shadow-color' => '#00000000',
+			'text-shadow-left' => 0,
+			'text-shadow-top' => 0,
+		];
+
+		if ('on' === Plugin::FEATURE_STROKE) {
+			$this->text_options['text-stroke-color'] = Plugin::get_setting('text_stroke_color');
+			$this->text_options['text-stroke'] = Plugin::get_setting('text_stroke');
+		}
+
+		if ('on' === Plugin::FEATURE_SHADOW) {
+			$this->text_options['text-shadow-color'] = Plugin::get_setting('text_shadow_color');
+			$this->text_options['text-shadow-left'] = Plugin::get_setting('text_shadow_left');
+			$this->text_options['text-shadow-top'] = Plugin::get_setting('text_shadow_top');
+		}
+		elseif ('simple' === Plugin::FEATURE_SHADOW) {
+			$enabled = Plugin::get_setting('text_shadow_enabled');
+			$enabled = 'off' === $enabled ? false : $enabled;
+			$this->text_options['text-shadow-color'] = $enabled ? Plugin::get_setting('text_shadow_color') : '#00000000';
+			$this->text_options['text-shadow-left'] = Plugin::get_setting('text_shadow_left');
+			$this->text_options['text-shadow-top'] = Plugin::get_setting('text_shadow_top');
+		}
+
 		if (null !== $post_id && is_numeric($post_id)) {
 			$this->logo_options = [
-				'enabled' => Plugin::get_post_setting($post_id, 'logo_enabled'),
-				'position' => Plugin::get_post_setting($post_id, 'logo_position'),
-				'logo_image_size' => Plugin::get_post_setting($post_id, 'image_logo_size'),
+				'enabled' => Plugin::get_post_setting($post_id, 'logo_enabled', $this->logo_options['enabled']),
+				'position' => Plugin::get_post_setting($post_id, 'logo_position', $this->logo_options['position']),
+				'logo_image_size' => Plugin::get_post_setting($post_id, 'image_logo_size', $this->logo_options['logo_image_size']),
 				'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
 			];
 
 			// text options
 			$this->text_options = [ // colors are RGBA in hex format
-				'enabled' => Plugin::get_post_setting($post_id, 'text_enabled'),
+				'enabled' => Plugin::get_post_setting($post_id, 'text_enabled', $this->text_options['enabled']),
 				'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-				'position' => Plugin::get_post_setting($post_id, 'text_position'),
-				'font-size' => Plugin::get_post_setting($post_id, 'text__font_size'),
-				'line-height' => Plugin::get_post_setting($post_id, 'text__font_size') * 1.25,
-				'color' => Plugin::get_post_setting($post_id, 'color'),
-				'font-file' => Plugin::get_post_setting($post_id, 'text__font'),
-				'font-family' => Plugin::get_post_setting($post_id, 'text__font'),
-				'font-weight' => Plugin::get_post_setting($post_id, 'text__font_weight'),
-				'font-style' => Plugin::get_post_setting($post_id, 'text__font_style'),
+				'position' => Plugin::get_post_setting($post_id, 'text_position', $this->text_options['position']),
+				'font-size' => Plugin::get_post_setting($post_id, 'text__font_size', $this->text_options['font-size']),
+				'line-height' => Plugin::get_post_setting($post_id, 'text__font_size', $this->text_options['font-size']) * 1.25,
+				'color' => Plugin::get_post_setting($post_id, 'color', $this->text_options['color']),
+				'font-file' => Plugin::get_post_setting($post_id, 'text__font', $this->text_options['font-file']),
+				'font-family' => Plugin::get_post_setting($post_id, 'text__font', $this->text_options['font-family']),
+				'font-weight' => Plugin::get_post_setting($post_id, 'text__font_weight', $this->text_options['font-weight']),
+				'font-style' => Plugin::get_post_setting($post_id, 'text__font_style', $this->text_options['font-style']),
 				'padding' => '20', // background padding
-				'background-color' => Plugin::get_post_setting($post_id, 'background_color'),
-				'background-enabled' => Plugin::get_post_setting($post_id, 'background_enabled'),
+				'background-color' => Plugin::get_post_setting($post_id, 'background_color', $this->text_options['background-color']),
+				'background-enabled' => Plugin::get_post_setting($post_id, 'background_enabled', $this->text_options['background-enabled']),
 
 				// optionals
 				'text-stroke-color' => '#00000000',
@@ -409,73 +458,24 @@ class Plugin
 			];
 
 			if ('on' === Plugin::FEATURE_STROKE) {
-				$this->text_options['text-stroke-color'] = Plugin::get_post_setting($post_id,'text_stroke_color');
-				$this->text_options['text-stroke'] = Plugin::get_post_setting($post_id,'text_stroke');
+				$this->text_options['text-stroke-color'] = Plugin::get_post_setting($post_id,'text_stroke_color', $this->text_options['text-stroke-color']);
+				$this->text_options['text-stroke'] = Plugin::get_post_setting($post_id,'text_stroke', $this->text_options['text-stroke']);
 			}
 
 			if ('on' === Plugin::FEATURE_SHADOW) {
-				$this->text_options['text-shadow-color'] = Plugin::get_post_setting($post_id,'text_shadow_color');
-				$this->text_options['text-shadow-left'] = Plugin::get_post_setting($post_id,'text_shadow_left');
-				$this->text_options['text-shadow-top'] = Plugin::get_post_setting($post_id,'text_shadow_top');
+				$this->text_options['text-shadow-color'] = Plugin::get_post_setting($post_id,'text_shadow_color', $this->text_options['text-shadow-color']);
+				$this->text_options['text-shadow-left'] = Plugin::get_post_setting($post_id,'text_shadow_left', $this->text_options['text-shadow-left']);
+				$this->text_options['text-shadow-top'] = Plugin::get_post_setting($post_id,'text_shadow_top', $this->text_options['text-shadow-top']);
 			}
 			elseif ('simple' === Plugin::FEATURE_SHADOW) {
-				$enabled = Plugin::get_post_setting($post_id,'text_shadow_enabled');
+				$enabled = Plugin::get_post_setting($post_id,'text_shadow_enabled', Plugin::get_setting('text_shadow_enabled'));
 				$enabled = 'off' === $enabled ? false : $enabled;
-				$this->text_options['text-shadow-color'] = $enabled ? '#555555DD' : '#00000000';
-				$this->text_options['text-shadow-left'] = -2;
-				$this->text_options['text-shadow-top'] = 2;
-			}
-		}
-		else {
-			$this->logo_options = [
-				'enabled' => Plugin::get_setting('logo_enabled'),
-				'position' => Plugin::get_setting('logo_position'),
-				'logo_image_size' => Plugin::get_setting('image_logo_size'),
-				'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			];
-
-			// text options
-			$this->text_options = [ // colors are RGBA in hex format
-				'enabled' => Plugin::get_setting('text_enabled'),
-				'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-				'position' => Plugin::get_setting('text_position'),
-				'font-size' => Plugin::get_setting('text__font_size'),
-				'line-height' => Plugin::get_setting('text__font_size') * 1.25,
-				'color' => Plugin::get_setting('color'),
-				'font-file' => Plugin::get_setting('text__font'),
-				'font-family' => Plugin::get_setting('text__font'),
-				'font-weight' => Plugin::get_setting('text__font_weight'),
-				'font-style' => Plugin::get_setting('text__font_style'),
-				'padding' => '20', // background padding
-				'background-color' => Plugin::get_setting('background_color'),
-				'background-enabled' => Plugin::get_setting('background_enabled'),
-
-				// optionals
-				'text-stroke-color' => '#00000000',
-				'text-stroke' => 0,
-				'text-shadow-color' => '#00000000',
-				'text-shadow-left' => 0,
-				'text-shadow-top' => 0,
-			];
-
-			if ('on' === Plugin::FEATURE_STROKE) {
-				$this->text_options['text-stroke-color'] = Plugin::get_setting('text_stroke_color');
-				$this->text_options['text-stroke'] = Plugin::get_setting('text_stroke');
-			}
-
-			if ('on' === Plugin::FEATURE_SHADOW) {
-				$this->text_options['text-shadow-color'] = Plugin::get_setting('text_shadow_color');
+				$this->text_options['text-shadow-color'] = $enabled ? Plugin::get_setting('text_shadow_color') : '#00000000';
 				$this->text_options['text-shadow-left'] = Plugin::get_setting('text_shadow_left');
 				$this->text_options['text-shadow-top'] = Plugin::get_setting('text_shadow_top');
 			}
-			elseif ('simple' === Plugin::FEATURE_SHADOW) {
-				$enabled = Plugin::get_setting('text_shadow_enabled');
-				$enabled = 'off' === $enabled ? false : $enabled;
-				$this->text_options['text-shadow-color'] = $enabled ? '#555555DD' : '#00000000';
-				$this->text_options['text-shadow-left'] = -2;
-				$this->text_options['text-shadow-top'] = 2;
-			}
 		}
+
 		$this->text_options['enabled'] = $this->text_options['enabled'] === 'yes' || $this->text_options['enabled'] === 'on';
 		$this->logo_options['enabled'] = $this->logo_options['enabled'] === 'yes' || $this->logo_options['enabled'] === 'on';
 
@@ -1448,11 +1448,17 @@ EODOC;
 
 		if ($get_values) {
 			foreach ($options['admin'] as $field => $_) {
+				if (empty($_['namespace'])) {
+					$options['admin'][$field]['namespace'] = Plugin::DEFAULTS_PREFIX;
+				}
 				$options['admin'][$field]['current_value'] = Plugin::get_setting($field);
 			}
 
 			if (get_the_ID()) {
 				foreach ($options['meta'] as $field => $_) {
+					if (empty($_['namespace'])) {
+						$options['admin'][$field]['namespace'] = Plugin::OPTION_PREFIX;
+					}
 					if (!array_key_exists('default', $_)) {
 						$_['default'] = Plugin::get_setting($field);
 					}
@@ -1507,7 +1513,6 @@ EODOC;
 
 			$layers['default'] = Plugin::get_setting('text');
 		}
-
 
 		return $layers;
 	}
@@ -1756,7 +1761,7 @@ EODOC;
 			'meta_location' => 'advanced',
 		];
 
-		return $defaults[$setting];
+		return array_key_exists($setting, $defaults) ? $defaults[$setting] : false;
 	}
 
 	public static function protect_dir($dir)
