@@ -337,8 +337,8 @@ class Admin
 		$width = $height = 0;
 		if ($logo && is_numeric($logo)) {
 			$logo = Plugin::wp_get_attachment_image_data($logo, 'full');
-			$width = $logo[1] . 'px';
-			$height = $logo[2] . 'px';
+			$width = $logo[1];
+			$height = $logo[2];
 			$logo = $logo[0];
 		}
 

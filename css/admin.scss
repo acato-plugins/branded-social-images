@@ -181,16 +181,16 @@
       grid-area: logo;
       background: transparent no-repeat center/contain;
       // x0.005 for 0.001 = 1%, x 0.5 for interface scale
-      width: calc(var(--logo-scale) * var(--logo-width) / 200);
-      height: calc(var(--logo-scale) * var(--logo-height) / 200);
+      width: calc(var(--logo-scale) * var(--logo-width) / 200 * 1px );
+      height: calc(var(--logo-scale) * var(--logo-height) / 200 * 1px );
     }
     &.logo-alternate {
       .postbox & {
         display: none;
       }
       .logo {
-        width: calc(var(--logo-scale) * var(--logo-width) / 100);
-        height: calc(var(--logo-scale) * var(--logo-height) / 100);
+        width: calc(var(--logo-scale) * var(--logo-width) / 100 * 1px );
+        height: calc(var(--logo-scale) * var(--logo-height) / 100 * 1px );
       }
     }
   }
