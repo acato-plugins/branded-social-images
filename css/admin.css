@@ -135,13 +135,13 @@
   #branded-social-images-editor .area--logo .logo {
     grid-area: logo;
     background: transparent no-repeat center/contain;
-    width: calc(var(--logo-scale) * .005px * var(--logo-width));
-    height: calc(var(--logo-scale) * .005px * var(--logo-height)); }
+    width: calc(var(--logo-scale) * var(--logo-width) / 200);
+    height: calc(var(--logo-scale) * var(--logo-height) / 200); }
   .postbox #branded-social-images-editor .area--logo.logo-alternate {
     display: none; }
   #branded-social-images-editor .area--logo.logo-alternate .logo {
-    width: calc(var(--logo-scale) * .01px * var(--logo-width));
-    height: calc(var(--logo-scale) * .01px * var(--logo-height)); }
+    width: calc(var(--logo-scale) * var(--logo-width) / 100);
+    height: calc(var(--logo-scale) * var(--logo-height) / 100); }
 
 #branded-social-images-editor.with-logo .area--logo.logo-alternate {
   display: none; }

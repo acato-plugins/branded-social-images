@@ -288,7 +288,7 @@ class Image {
 			$default = '';
 		}
 		Plugin::log('Text setting: default text; '. ($default ?: '( no text )'));
-		$enabled = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text_enabled', true);
+		$enabled = Plugin::get_post_setting($post_id, 'text_enabled');
 		if ('off' === $enabled) {
 			Plugin::log('Text setting: post-meta has "text on this image" set to No');
 			return '';
@@ -302,7 +302,7 @@ class Image {
 			Plugin::log('Text consideration: WordPress title (bare); '. $text);
 		}
 
-		$meta = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text', true);
+		$meta = Plugin::get_post_setting($post_id, 'text');
 		if ($meta) {
 			$type = 'meta';
 			$text = trim($meta);
@@ -350,7 +350,7 @@ class Image {
 	private function getImageIdForPost($post_id)
 	{
 		$the_img = 'meta';
-		$image_id = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'image', true);
+		$image_id = Plugin::get_post_setting($post_id, 'image');
 		Plugin::log('Image consideration: meta; '. ($image_id ?: 'no image found'));
 		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION') && !$image_id) {
@@ -365,7 +365,7 @@ class Image {
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if (!$image_id && ('on' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if (!$image_id && ('on' === Plugin::get_setting('image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($post_id);
 			Plugin::log('Image consideration: WordPress Featured Image; '. ($image_id ?: 'no image found'));
@@ -373,7 +373,7 @@ class Image {
 		// global Image?
 		if (!$image_id) {
 			$the_img = 'global';
-			$image_id = get_option(Plugin::DEFAULTS_PREFIX . 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
+			$image_id = Plugin::get_setting( 'image'); // this is a Carbon Fields field, defined in class.og-image-admin.php
 			Plugin::log('Image consideration: BSI Fallback Image; '. ($image_id ?: 'no image found'));
 		}
 

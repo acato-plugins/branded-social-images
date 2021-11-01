@@ -50,7 +50,7 @@ class Admin
 		});
 
 		add_action('admin_menu', function () {
-			$location_setting = get_option( Plugin::DEFAULTS_PREFIX .'menu_location', 'main');
+			$location_setting = Plugin::get_setting('menu_location');
 		    $location = apply_filters('bsi_admin_menu_location', $location_setting);
 			if ('main' == $location) {
 				add_menu_page('Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
@@ -128,44 +128,6 @@ class Admin
 //			return plugins_url('/img/' . basename('/' . Plugin::ICON), __DIR__);
 //		}
 		return Plugin::ICON;
-	}
-
-	/**
-	 * todo: This does not change the defaults, nor is it used in this fashion anymore
-	 * todo: This needs to be refactored!
-	 */
-	public static function base_settings(): array
-	{
-		$defaults = [];
-		$defaults['text_options'] = [ // colors are RGBA in hex format
-			'enabled' => 'on',
-			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'position' => 'bottom-left',
-			'font-size' => Plugin::DEF_FONT_SIZE,
-			'color' => '#ffffffff', 'line-height' => Plugin::DEF_FONT_SIZE * 1.25,
-			'font-file' => '',
-			'font-family' => 'Roboto-Bold',
-			'font-weight' => 700,
-			'font-style' => 'normal',
-			'display' => 'inline', // determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
-			'padding' => '20', // background padding
-			'background-color' => '#66666666',
-			'background-enabled' => 'on',
-			'text-shadow-color' => '',
-			'text-shadow-left' => '2',
-			'text-shadow-top' => '-2',
-			'text-shadow-enabled' => 'off',
-			'text-stroke-color' => '',
-			'text-stroke' => '2',
-		];
-		$defaults['logo_options'] = [
-			'enabled' => 'on',
-			'position' => 'top-left',
-			'left' => null, 'bottom' => null, 'top' => null, 'right' => null,
-			'size' => get_option(Plugin::OPTION_PREFIX . 'image_logo_size', '100'),
-		];
-
-		return $defaults;
 	}
 
 	public static function getInstance()
@@ -340,8 +302,8 @@ class Admin
 
 	public static function getErrors()
 	{
-		$errors = get_option(Plugin::DEFAULTS_PREFIX . '_admin_errors', []);
-		update_option(Plugin::DEFAULTS_PREFIX . '_admin_errors', []);
+		$errors = get_option('_bsi_admin_errors', []);
+		update_option('_bsi_admin_errors', []);
 		return $errors;
 	}
 
@@ -362,13 +324,10 @@ class Admin
 		$logo = $fields['image_logo']['current_value'];
 		$width = $height = 0;
 		if ($logo && is_numeric($logo)) {
-			$logo = wp_get_attachment_image($logo, 'full');
-			preg_match('/width="(.+)"/U', $logo, $width);
-			$width = $width[1];
-			preg_match('/height="(.+)"/U', $logo, $height);
-			$height = $height[1];
-			preg_match('/src="(.+)"/U', $logo, $m);
-			$logo = $m[1];
+			$logo = Plugin::wp_get_attachment_image_data($logo, 'full');
+			$width = $logo[1] . 'px';
+			$height = $logo[2] . 'px';
+			$logo = $logo[0];
 		}
 
 		?>
@@ -390,8 +349,8 @@ class Admin
 				--line-height: <?php print $text_settings['line-height']; ?>px;
 
 				--logo-scale: <?php print $logo_settings['size']; ?>;
-				--logo-width: <?php print $logo ? $width : 410; /* example logo */ ?>;
-				--logo-height: <?php print $logo ? $height : 82; ?>;
+				--logo-width: <?php print ($logo ? $width : 410); /* example logo */ ?>;
+				--logo-height: <?php print ($logo ? $height : 82); ?>;
 			}
 
 		</style>
@@ -401,7 +360,7 @@ class Admin
 		$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
 		$editor_class[] = 'text_position-' . (!empty($fields['text_position']) ? $fields['text_position']['current_value'] : $text_settings['position']);
 
-		if ((empty($fields['disabled']) && 'on' === get_option(Plugin::DEFAULTS_PREFIX . 'disabled', 'off')) || $fields['disabled']['current_value'] == 'on') {
+		if ((empty($fields['disabled']) && 'on' === Plugin::get_setting( 'disabled')) || $fields['disabled']['current_value'] == 'on') {
 			$editor_class[] = 'bsi-disabled';
 		}
 		if ($logo) {
@@ -557,7 +516,7 @@ class Admin
 	public static function add_meta_boxes()
 	{
 		$post_types = apply_filters('bsi_post_types', []);
-		$meta_location = get_option(Plugin::DEFAULTS_PREFIX .'meta_location', 'advanced');
+		$meta_location = Plugin::get_setting('meta_location');
 		foreach ($post_types as $post_type) {
             $context = apply_filters('bsi_meta_box_context', $meta_location, $post_type);
             if (!in_array($context, ['advanced', 'normal', 'side'])) {
@@ -595,7 +554,7 @@ class Admin
 						if ($key === 'text' && Plugin::text_is_identical($value, Plugin::getInstance()->dummy_data('text'))) {
 							$value = '';
 						}
-						update_post_meta($post_id, "$namespace$key", $value);
+						Plugin::update_post_setting($post_id, $key, $value);
 					}
 				}
 			}
@@ -799,17 +758,17 @@ EOCSS;
 	public static function setError($tag, $text)
 	{
 		if ('generic' == $tag) {
-			$errors = get_option(Plugin::DEFAULTS_PREFIX . '_admin_errors', []);
+			$errors = get_option('_bsi_admin_errors', []);
 			$errors[] = $text;
 			$errors = array_filter($errors);
 			$errors = array_unique($errors);
-			update_option(Plugin::DEFAULTS_PREFIX . '_admin_errors', $errors);
+			update_option('_bsi_admin_errors', $errors);
 		}
 		else {
-			$errors = get_option(Plugin::DEFAULTS_PREFIX . '_errors', []);
+			$errors = get_option('_bsi_errors', []);
 			$errors[$tag] = $text;
 			$errors = array_filter($errors);
-			update_option(Plugin::DEFAULTS_PREFIX . '_errors', $errors);
+			update_option('_bsi_errors', $errors);
 		}
 	}
 
@@ -833,17 +792,17 @@ EOCSS;
 
 	public static function maybe_move_font()
 	{
-		if (is_admin() && ($font_id = get_option(Plugin::DEFAULTS_PREFIX . 'text__ttf_upload'))) {
+		if (is_admin() && ($font_id = Plugin::get_setting('text__ttf_upload'))) {
 			$font = get_attached_file($font_id);
 			if (is_file($font)) {
 				$instance = Plugin::getInstance();
-				update_option(Plugin::DEFAULTS_PREFIX . 'text__ttf_upload', false);
+				Plugin::update_setting('text__ttf_upload', false);
 				$b = basename($font);
 				$base = basename($font, '.ttf');
 				if ($base === $b) {
 					$base = basename($font, '.otf');
 				}
-				update_option(Plugin::DEFAULTS_PREFIX . 'text__font', $base);
+				Plugin::update_setting('text__font', $base);
 				rename($font, $instance->storage() . '/' . basename($font));
 				wp_delete_post($font_id);
 			}
@@ -867,7 +826,7 @@ EOCSS;
 								if ($key === 'text' && !empty($value)) {
 									$value = strip_tags($value, '<br>');
 								}
-								update_option("$namespace$key", $value);
+								Plugin::update_setting($key, $value);
 							}
 						}
 					}
@@ -930,7 +889,7 @@ EOCSS;
 
 	public static function getError($tag = null)
 	{
-		$errors = get_option(Plugin::DEFAULTS_PREFIX . '_errors', []);
+		$errors = get_option('_bsi_errors', []);
 
 		if ($tag) {
 			$return = $errors[$tag];
@@ -942,7 +901,7 @@ EOCSS;
 			$errors = [];
 		}
 
-		update_option(Plugin::DEFAULTS_PREFIX . '_errors', $errors);
+		update_option('_bsi_errors', $errors);
 
 		return $return;
 	}
