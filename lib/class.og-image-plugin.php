@@ -1446,19 +1446,25 @@ EODOC;
 			unset($options['admin']['text_shadow_enabled']);
 		}
 
+		foreach ($options['admin'] as $field => $_) {
+			if (empty($_['namespace'])) {
+				$options['admin'][$field]['namespace'] = Plugin::DEFAULTS_PREFIX;
+			}
+		}
+
+		foreach ($options['meta'] as $field => $_) {
+			if (empty($_['namespace'])) {
+				$options['meta'][$field]['namespace'] = Plugin::OPTION_PREFIX;
+			}
+		}
+
 		if ($get_values) {
 			foreach ($options['admin'] as $field => $_) {
-				if (empty($_['namespace'])) {
-					$options['admin'][$field]['namespace'] = Plugin::DEFAULTS_PREFIX;
-				}
 				$options['admin'][$field]['current_value'] = Plugin::get_setting($field);
 			}
 
 			if (get_the_ID()) {
 				foreach ($options['meta'] as $field => $_) {
-					if (empty($_['namespace'])) {
-						$options['admin'][$field]['namespace'] = Plugin::OPTION_PREFIX;
-					}
 					if (!array_key_exists('default', $_)) {
 						$_['default'] = Plugin::get_setting($field);
 					}
