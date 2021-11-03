@@ -439,12 +439,15 @@ class Admin
 				<div class="area--logo logo-alternate">
 					<div class="logo" style="background-image:url('<?php print plugins_url('img/example-logo.svg', __DIR__) ?>')"></div>
 				</div>
+                <?php do_action('bsi_image_editor', 'after_creating_canvas'); ?>
 				<div class="area--background">
 					<div class="background" style="background-image:url('<?php print esc_attr($image); ?>')"></div>
 				</div>
+                <?php do_action('bsi_image_editor', 'after_adding_background'); ?>
 				<div class="area--logo">
 					<div class="logo" style="background-image:url('<?php print esc_attr($logo); ?>')"></div>
 				</div>
+                <?php do_action('bsi_image_editor', 'after_adding_logo'); ?>
 				<div class="area--text">
 					<div class="editable-container">
 						<pre contenteditable="true"
@@ -455,6 +458,7 @@ class Admin
 						} ?>
 					</div>
 				</div>
+                <?php do_action('bsi_image_editor', 'after_adding_text'); ?>
 			</div>
 			<?php if (!$is_meta_panel) { ?>
 			<div class="settings">

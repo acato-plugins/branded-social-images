@@ -91,7 +91,7 @@
   #side-sortables #branded-social-images-editor .grid, .is-side #branded-social-images-editor .grid {
     zoom: 0.21; }
 
-#branded-social-images-editor .area--background, #branded-social-images-editor .area--background-alternate, #branded-social-images-editor .area--background-canvas {
+#branded-social-images-editor .area--background, #branded-social-images-editor .area--background-alternate, #branded-social-images-editor .area--background-canvas, #branded-social-images-editor .area--extra-layer {
   width: 1200px;
   height: 0;
   padding-bottom: 52.5%;
