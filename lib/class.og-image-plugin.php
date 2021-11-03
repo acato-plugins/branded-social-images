@@ -929,7 +929,16 @@ class Plugin
 		if (current_action() !== 'wpseo_twitter_image' && current_action() !== 'rank_math/opengraph/twitter/twitter_image') {
 			self::getInstance()->page_already_has_og_image = true;
 		}
-		return trailingslashit(untrailingslashit( get_bloginfo('url') ) . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::BSI_IMAGE_NAME . '/'; // yes, slash, WP will add it with a redirect anyway
+
+		// this consturction is to please WPML;
+		// *_query_arg return domain-less root-based urls (/language/page/path/)
+		// get_bloginfo('url') returns https://somesite.com/language/
+		// we could use site_url, but this will be problematic with multi-site installations...
+		$base_url = get_bloginfo('url');
+		// from https://somesite.com/language/, keep only the base url, as the rest is included in the result from 'remove_query_arg'
+		$base_url = parse_url($base_url, PHP_URL_SCHEME) .'://' . parse_url($base_url, PHP_URL_HOST); // no trailing slash
+		
+		return trailingslashit( $base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::BSI_IMAGE_NAME . '/'; // yes, slash, WP will add it with a redirect anyway
 	}
 
 	public static function get_og_image_url($post_id)
