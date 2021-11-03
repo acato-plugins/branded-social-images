@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social images, OG-image, open-graph, featured image
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.12
+Stable tag: 1.0.14
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -107,12 +107,18 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 
 == Changelog ==
 
-= 1.0.13 =
+= 1.0.14 =
 * fixed: showing debug information leaves image cache in locked state, preventing (re-)generation of image.
 * improved: interface will now scale on small displays.
 * changed: for new posts, title is automatically filled based on '{title} - {blogname}'.
 * changed: overhaul of javascript and style.
 * added: @developers; For debugging, set BSI_UNMINIFIED to true. Script and style will be more readable.
+
+= 1.0.13 =
+* fixed: in WPML folder-per-language installation, the language folder is duplicated in the social-image-url
+* fixed: some themes make all links relative, this breaks the admin-bar link to OpenGraph.xyz
+* changed: action `bsi_image_gd` now includes two extra parameters: $post_id and $image_id
+* added: action `bsi_image_editor` with 1 parameter; $stage, in 4 stages of displaying the editor (`after_creating_canvas`, `after_adding_background`, `after_adding_text` and `after_adding_logo`) for future expansion of the editor
 
 = 1.0.12 =
 * added: interface now recognises RankMath image selection

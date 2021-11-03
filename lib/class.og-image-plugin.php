@@ -985,7 +985,15 @@ class Plugin {
 			self::getInstance()->page_already_has_og_image = true;
 		}
 
-		return trailingslashit( untrailingslashit( get_bloginfo( 'url' ) ) . remove_query_arg( array_keys( ! empty( $_GET ) ? $_GET : [ 'asd' => 1 ] ) ) ) . self::BSI_IMAGE_NAME . '/'; // yes, slash, WP will add it with a redirect anyway
+		// this consturction is to please WPML;
+		// *_query_arg return domain-less root-based urls (/language/page/path/)
+		// get_bloginfo('url') returns https://somesite.com/language/
+		// we could use site_url, but this will be problematic with multi-site installations...
+		$base_url = get_bloginfo('url');
+		// from https://somesite.com/language/, keep only the base url, as the rest is included in the result from 'remove_query_arg'
+		$base_url = parse_url($base_url, PHP_URL_SCHEME) .'://' . parse_url($base_url, PHP_URL_HOST); // no trailing slash
+		
+		return trailingslashit( $base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::BSI_IMAGE_NAME . '/'; // yes, slash, WP will add it with a redirect anyway
 	}
 
 	public static function get_og_image_url( $post_id )
@@ -1725,15 +1733,21 @@ EODOC;
 		global $pagenow;
 		if ( ! is_admin() || $pagenow == 'post.php' || $pagenow == 'post-new.php' ) {
 
+            $permalink = get_permalink(get_the_ID());
+            if (!parse_url($permalink, PHP_URL_HOST)) {
+                // somebody messed with the permalinks!
+                $permalink = trailingslashit( get_home_url() ) . ltrim( parse_url($permalink, PHP_URL_PATH), '/');
+            }
+
 			if (
 				defined( 'BSI_SHOW_ADMIN_BAR_IMAGE_LINK' ) &&
 				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter( Plugin::image_fallback_chain( true ) )
 			) {
 				$args = array(
-					'id'    => self::ADMIN_SLUG . '-view',
-					'title' => __( 'View Social Image', Plugin::TEXT_DOMAIN ),
-					'href'  => get_permalink( get_the_ID() ) . Plugin::BSI_IMAGE_NAME . '/',
-					'meta'  => [
+					'id' => self::ADMIN_SLUG . '-view',
+					'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
+					'href' => $permalink . Plugin::BSI_IMAGE_NAME . '/',
+					'meta' => [
 						'target' => '_blank',
 						'class'  => self::ADMIN_SLUG . '-view'
 					]
@@ -1751,8 +1765,8 @@ EODOC;
 				]
 			);
 
-			$args['href'] = sprintf( $args['href'], urlencode( get_permalink( get_the_ID() ) ) );
-			$admin_bar->add_node( $args );
+			$args['href'] = sprintf($args['href'], urlencode($permalink));
+			$admin_bar->add_node($args);
 
 			add_action( 'wp_footer', [ static::class, 'admin_bar_icon_style' ], PHP_INT_MAX );
 			add_action( 'admin_footer', [ static::class, 'admin_bar_icon_style' ], PHP_INT_MAX );
