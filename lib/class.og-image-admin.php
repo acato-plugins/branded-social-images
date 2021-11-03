@@ -2,7 +2,7 @@
 
 namespace Clearsite\Plugins\OGImage;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined('ABSPATH') or die('You cannot be here.');
 
 use Clearsite\Tools\HTML_Inputs;
 use RankMath;
@@ -41,34 +41,34 @@ class Admin
 		add_action('admin_enqueue_scripts', function () {
 			$script = (!defined('BSI_UNMINIFIED') ? 'admin/admin.min.js' : 'admin/admin.js');
 			$style = (!defined('BSI_UNMINIFIED') ? 'admin/admin.css' : 'admin/admin.min.css');
-			wp_enqueue_script(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($script, __DIR__), ['jquery', 'jquery-ui-slider'], filemtime(dirname(__DIR__) . '/'. $script), true);
+			wp_enqueue_script(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($script, __DIR__), ['jquery', 'jquery-ui-slider'], filemtime(dirname(__DIR__) . '/' . $script), true);
 			wp_localize_script(Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', [
 				'preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME,
 				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
 				'title_format' => Plugin::title_format(1, true),
-                'text' => [
-                    'image_upload_title' => __('Select an image or upload one.', Plugin::TEXT_DOMAIN),
-                    'image_upload_button' => __('Use this image', Plugin::TEXT_DOMAIN),
-                    'file_upload_title' => __('Select an file or upload one.', Plugin::TEXT_DOMAIN),
-                    'file_upload_button' => __('Use this file', Plugin::TEXT_DOMAIN),
+				'text' => [
+					'image_upload_title' => __('Select an image or upload one.', Plugin::TEXT_DOMAIN),
+					'image_upload_button' => __('Use this image', Plugin::TEXT_DOMAIN),
+					'file_upload_title' => __('Select an file or upload one.', Plugin::TEXT_DOMAIN),
+					'file_upload_button' => __('Use this file', Plugin::TEXT_DOMAIN),
 
-                ]
+				]
 			]);
 
-			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($style, __DIR__), '', filemtime(dirname(__DIR__) . '/' .$style), 'all');
+			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($style, __DIR__), '', filemtime(dirname(__DIR__) . '/' . $style), 'all');
 		});
 
 		add_action('admin_menu', function () {
-			$location_setting = get_option( Plugin::DEFAULTS_PREFIX .'menu_location', 'main');
-		    $location = apply_filters('bsi_admin_menu_location', $location_setting);
+			$location_setting = get_option(Plugin::DEFAULTS_PREFIX . 'menu_location', 'main');
+			$location = apply_filters('bsi_admin_menu_location', $location_setting);
 			if ('main' == $location) {
 				add_menu_page('Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel'], self::admin_icon());
 			}
 			else {
-			    $parent = 'options-general.php';
-			    if ('media' === $location_setting) {
-			        $parent = 'upload.php';
-                }
+				$parent = 'options-general.php';
+				if ('media' === $location_setting) {
+					$parent = 'upload.php';
+				}
 				add_submenu_page($parent, 'Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [self::class, 'admin_panel']);
 			}
 		});
@@ -89,7 +89,7 @@ class Admin
 		add_filter('plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
 		add_filter('network_admin_plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
 
-		add_action('wp_ajax_'. Plugin::ADMIN_SLUG .'_get-font', [static::class, 'wp_ajax_bsi_get_font']);
+		add_action('wp_ajax_' . Plugin::ADMIN_SLUG . '_get-font', [static::class, 'wp_ajax_bsi_get_font']);
 
 		add_action('bsi_footer', function () {
 			?><p><?php
@@ -97,7 +97,8 @@ class Admin
 				. ' ' . __('Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN)
 				. ' ' . sprintf(__('<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN), Plugin::BSI_URL_CONTACT); ?></p><?php
 			if (get_the_ID()) {
-				?><p><?php print sprintf(__('Use <a href="%s" target="_blank">%s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN),
+				?>
+				<p><?php print sprintf(__('Use <a href="%s" target="_blank">%s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN),
 					sprintf(Plugin::EXTERNAL_INSPECTOR, urlencode(get_permalink(get_the_ID()))), Plugin::EXTERNAL_INSPECTOR_NAME); ?></p>
 				<p><?php print sprintf(__('<a href="%s" target="_blank">Show debug information</a> for the social-image of this post.', Plugin::TEXT_DOMAIN),
 					add_query_arg('debug', 'BSI', Plugin::get_og_image_url(get_the_ID()))); ?></p><?php
@@ -193,57 +194,59 @@ class Admin
 
 		?>
 		<div class="wrap">
-			<h2>Branded Social Images <span style="opacity: 0.2"><?php print Plugin::get_version(); ?></span></span></h2>
+			<h2>Branded Social Images <span style="opacity: 0.2"><?php print Plugin::get_version(); ?></span></span>
+			</h2>
 			<?php
 			$errors = self::getErrors();
 			foreach ($errors as $error) {
 				?>
 				<div class="updated error"><p><?php print $error; ?></p></div><?php
 			}
-			?><div><?php
-			switch ($action) {
-				case 'purge-cache':
-					$purgable = Plugin::get_purgable_cache('images');
-					$purgable_dirs = Plugin::get_purgable_cache('directories');
-					if (!$purgable && !$purgable_dirs) {
-						_e('The cache is empty', Plugin::TEXT_DOMAIN);
-						?><a class="action button-primary"
-							 href="<?php print esc_attr(remove_query_arg('bsi-action')); ?>"><?php _e('Ok', Plugin::TEXT_DOMAIN); ?></a><?php
-					}
-					else {
-						print sprintf(__('This will clear the cache, %d image(s) and %d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN), count($purgable), count($purgable_dirs));
-					}
-					?>
-					<form method="POST"
-						  action="<?php print esc_attr(add_query_arg('bsi-action', 'purge-cache-confirm')); ?>">
-						<input type="hidden" name="bsi-action" value="purge-cache-confirm" />
-						<button
-							class="action button-primary"><?php _e('Confirm', Plugin::TEXT_DOMAIN); ?></button>
-						<a class="action button cancel"
-						   href="<?php print esc_attr(remove_query_arg('bsi-action')); ?>"><?php _e('Cancel', Plugin::TEXT_DOMAIN); ?></a>
-					</form>
-					<?php
-					break;
-				case 'show-config':
-					$fields = Plugin::field_list()['admin'];
-					?>
-					<form method="POST"
-						  action="<?php print esc_attr(add_query_arg('bsi-action', 'save-settings')); ?>">
-						<?php self::show_editor($fields); ?>
-						<br/>
-						<br/>
-						<button
-							class="action button-primary"><?php _e('Save settings', Plugin::TEXT_DOMAIN); ?></button>
-						<a class="action button-secondary" target="_blank"
-						   href="<?php print esc_attr(add_query_arg('bsi-action', 'purge-cache')); ?>"><?php _e('Purge cache', Plugin::TEXT_DOMAIN); ?></a>
-					</form>
+			?>
+			<div><?php
+				switch ($action) {
+					case 'purge-cache':
+						$purgable = Plugin::get_purgable_cache('images');
+						$purgable_dirs = Plugin::get_purgable_cache('directories');
+						if (!$purgable && !$purgable_dirs) {
+							_e('The cache is empty', Plugin::TEXT_DOMAIN);
+							?><a class="action button-primary"
+								 href="<?php print esc_attr(remove_query_arg('bsi-action')); ?>"><?php _e('Ok', Plugin::TEXT_DOMAIN); ?></a><?php
+						}
+						else {
+							print sprintf(__('This will clear the cache, %d image(s) and %d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN), count($purgable), count($purgable_dirs));
+						}
+						?>
+						<form method="POST"
+							  action="<?php print esc_attr(add_query_arg('bsi-action', 'purge-cache-confirm')); ?>">
+							<input type="hidden" name="bsi-action" value="purge-cache-confirm"/>
+							<button
+								class="action button-primary"><?php _e('Confirm', Plugin::TEXT_DOMAIN); ?></button>
+							<a class="action button cancel"
+							   href="<?php print esc_attr(remove_query_arg('bsi-action')); ?>"><?php _e('Cancel', Plugin::TEXT_DOMAIN); ?></a>
+						</form>
+						<?php
+						break;
+					case 'show-config':
+						$fields = Plugin::field_list()['admin'];
+						?>
+						<form method="POST"
+							  action="<?php print esc_attr(add_query_arg('bsi-action', 'save-settings')); ?>">
+							<?php self::show_editor($fields); ?>
+							<br/>
+							<br/>
+							<button
+								class="action button-primary"><?php _e('Save settings', Plugin::TEXT_DOMAIN); ?></button>
+							<a class="action button-secondary" target="_blank"
+							   href="<?php print esc_attr(add_query_arg('bsi-action', 'purge-cache')); ?>"><?php _e('Purge cache', Plugin::TEXT_DOMAIN); ?></a>
+						</form>
 
-					<?php
-					do_action('bsi_footer');
+						<?php
+						do_action('bsi_footer');
 
-					break;
-			}
-			?></div>
+						break;
+				}
+				?></div>
 		</div>
 		<?php
 	}
@@ -327,7 +330,7 @@ class Admin
 			mkdir($dir);
 		}
 		if (!is_dir($dir)) {
-			self::setError('storage', __('Could not create the storage directory in the uploads folder.', Plugin::TEXT_DOMAIN) .' ' . __('In a WordPress site the uploads folder should always be writable.', Plugin::TEXT_DOMAIN) .' '. __('Please fix this.', Plugin::TEXT_DOMAIN) .' '. __('This error will disappear once the problem has been corrected.', Plugin::TEXT_DOMAIN));
+			self::setError('storage', __('Could not create the storage directory in the uploads folder.', Plugin::TEXT_DOMAIN) . ' ' . __('In a WordPress site the uploads folder should always be writable.', Plugin::TEXT_DOMAIN) . ' ' . __('Please fix this.', Plugin::TEXT_DOMAIN) . ' ' . __('This error will disappear once the problem has been corrected.', Plugin::TEXT_DOMAIN));
 		}
 		Plugin::protect_dir($dir);
 
@@ -354,7 +357,7 @@ class Admin
 		return $errors;
 	}
 
-	public static function show_editor($fields, $is_meta_panel=false)
+	public static function show_editor($fields, $is_meta_panel = false)
 	{
 		$fields['text']['current_value'] = trim($fields['text']['current_value']) ? $fields['text']['current_value'] : self::array_first(Plugin::text_fallback_chain());
 
@@ -446,7 +449,7 @@ class Admin
 				</div>
 			<?php } ?>
 			<div class="grid">
-				<div class="area--background-canvas"><?php include __DIR__ .'/../img/example.svg'; ?></div>
+				<div class="area--background-canvas"><?php include __DIR__ . '/../img/example.svg'; ?></div>
 				<?php foreach (Plugin::image_fallback_chain() as $kind => $fallback_image) { ?>
 					<div class="area--background-alternate image-source-<?php print $kind; ?>">
 						<div class="background"
@@ -455,17 +458,18 @@ class Admin
 					</div>
 				<?php } ?>
 				<div class="area--logo logo-alternate">
-					<div class="logo" style="background-image:url('<?php print plugins_url('img/example-logo.svg', __DIR__) ?>')"></div>
+					<div class="logo"
+						 style="background-image:url('<?php print plugins_url('img/example-logo.svg', __DIR__) ?>')"></div>
 				</div>
-                <?php do_action('bsi_image_editor', 'after_creating_canvas'); ?>
+				<?php do_action('bsi_image_editor', 'after_creating_canvas'); ?>
 				<div class="area--background">
 					<div class="background" style="background-image:url('<?php print esc_attr($image); ?>')"></div>
 				</div>
-                <?php do_action('bsi_image_editor', 'after_adding_background'); ?>
+				<?php do_action('bsi_image_editor', 'after_adding_background'); ?>
 				<div class="area--logo">
 					<div class="logo" style="background-image:url('<?php print esc_attr($logo); ?>')"></div>
 				</div>
-                <?php do_action('bsi_image_editor', 'after_adding_logo'); ?>
+				<?php do_action('bsi_image_editor', 'after_adding_logo'); ?>
 				<div class="area--text">
 					<div class="editable-container">
 						<pre contenteditable="true"
@@ -476,42 +480,42 @@ class Admin
 						} ?>
 					</div>
 				</div>
-                <?php do_action('bsi_image_editor', 'after_adding_text'); ?>
+				<?php do_action('bsi_image_editor', 'after_adding_text'); ?>
 			</div>
 			<?php if (!$is_meta_panel) { ?>
-			<div class="settings">
-				<div class="area--options">
-					<h2><?php _e('Image and Logo options', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
-					<div class="inner">
-						<?php self::render_options($fields, [
-							'image', 'image_use_thumbnail',
-							'image_logo', 'logo_position', 'image_logo_size',
-						]); ?>
+				<div class="settings">
+					<div class="area--options">
+						<h2><?php _e('Image and Logo options', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+						<div class="inner">
+							<?php self::render_options($fields, [
+								'image', 'image_use_thumbnail',
+								'image_logo', 'logo_position', 'image_logo_size',
+							]); ?>
+						</div>
+					</div>
+					<div class="area--settings">
+						<h2><?php _e('Text settings', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+						<div class="inner">
+							<?php self::render_options($fields, [
+								'text', 'text_enabled',
+								'color',
+								'text_shadow_enabled',
+								'text__font', 'text__ttf_upload', 'text_position',
+								'text__font_size',
+								'background_enabled', 'background_color',
+								'text_shadow_color', 'text_shadow_top', 'text_shadow_left',
+								'text_stroke_color', 'text_stroke',
+								'text__google_download',
+							]); ?>
+						</div>
+					</div>
+					<div class="area--config closed">
+						<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+						<div class="inner">
+							<?php self::render_options($fields, ['disabled']); ?>
+						</div>
 					</div>
 				</div>
-				<div class="area--settings">
-					<h2><?php _e('Text settings', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
-					<div class="inner">
-						<?php self::render_options($fields, [
-							'text', 'text_enabled',
-							'color',
-							'text_shadow_enabled',
-							'text__font', 'text__ttf_upload', 'text_position',
-							'text__font_size',
-							'background_enabled', 'background_color',
-							'text_shadow_color', 'text_shadow_top', 'text_shadow_left',
-							'text_stroke_color', 'text_stroke',
-							'text__google_download',
-						]); ?>
-					</div>
-				</div>
-				<div class="area--config closed">
-					<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
-					<div class="inner">
-						<?php self::render_options($fields, ['disabled']); ?>
-					</div>
-				</div>
-			</div>
 			<?php } ?>
 		</div>
 		<?php
@@ -579,12 +583,12 @@ class Admin
 	public static function add_meta_boxes()
 	{
 		$post_types = apply_filters('bsi_post_types', []);
-		$meta_location = get_option(Plugin::DEFAULTS_PREFIX .'meta_location', 'advanced');
+		$meta_location = get_option(Plugin::DEFAULTS_PREFIX . 'meta_location', 'advanced');
 		foreach ($post_types as $post_type) {
-            $context = apply_filters('bsi_meta_box_context', $meta_location, $post_type);
-            if (!in_array($context, ['advanced', 'normal', 'side'])) {
-                $context = $meta_location;
-            }
+			$context = apply_filters('bsi_meta_box_context', $meta_location, $post_type);
+			if (!in_array($context, ['advanced', 'normal', 'side'])) {
+				$context = $meta_location;
+			}
 			add_meta_box(
 				Plugin::ADMIN_SLUG,
 				'Branded Social Images',
@@ -605,7 +609,7 @@ class Admin
 			foreach ($_POST['branded_social_images'] as $namespace => $values) {
 				if (is_array($values)) {
 					foreach ($values as $key => $value) {
-						if (!in_array($key, $valid_post_keys[ $namespace ])) {
+						if (!in_array($key, $valid_post_keys[$namespace])) {
 							continue;
 						}
 						if ($key === 'text' && !empty($value)) {
@@ -649,13 +653,13 @@ class Admin
 	public static function wp_ajax_bsi_get_font()
 	{
 		// prevent path-traversal
-		$font = basename('fake-dir/'. $_GET['font']);
-		$file = self::storage() .'/'. $font;
+		$font = basename('fake-dir/' . $_GET['font']);
+		$file = self::storage() . '/' . $font;
 		if (is_file($file)) {
 			$mime = mime_content_type($file);
-			header('Content-Type: '. $mime);
-			header('Content-Disposition: inline; filename="'. $font .'"');
-			header('Content-Length: '. filesize($file));
+			header('Content-Type: ' . $mime);
+			header('Content-Disposition: inline; filename="' . $font . '"');
+			header('Content-Length: ' . filesize($file));
 			readfile($file);
 			exit;
 		}
@@ -668,7 +672,7 @@ class Admin
 		$fonts = self::valid_fonts();
 		$faces = [];
 		$storage = self::storage(true);
-		$protected = admin_url('admin-ajax.php?action='. Plugin::ADMIN_SLUG .'_get-font');
+		$protected = admin_url('admin-ajax.php?action=' . Plugin::ADMIN_SLUG . '_get-font');
 
 		foreach ($fonts as $font_base => $font) {
 			if (!$font['valid']) {
@@ -795,7 +799,7 @@ EOCSS;
 				exit;
 			}
 			if (!$font_css) {
-				self::setError('font-family', __('Could not download font from Google Fonts.', Plugin::TEXT_DOMAIN) .' '. __('Please download yourself and upload here.', Plugin::TEXT_DOMAIN));
+				self::setError('font-family', __('Could not download font from Google Fonts.', Plugin::TEXT_DOMAIN) . ' ' . __('Please download yourself and upload here.', Plugin::TEXT_DOMAIN));
 			}
 			else {
 				$font_css_parts = explode('@font-face', $font_css);
@@ -912,8 +916,7 @@ EOCSS;
 								rmdir($item);
 								rmdir(dirname($item));
 							}
-						}
-						catch(\Exception $e) {
+						} catch (\Exception $e) {
 
 						}
 					}

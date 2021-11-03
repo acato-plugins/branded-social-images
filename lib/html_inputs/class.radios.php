@@ -2,12 +2,14 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined('ABSPATH') or die('You cannot be here.');
 
-require_once __DIR__ .'/class.radio.php'; // dependency
+require_once __DIR__ . '/class.radio.php'; // dependency
 
-class radios extends radio {
+class radios extends radio
+{
 	private $namespace;
+
 	public function __construct($attribute_name, $atts)
 	{
 		parent::__construct($attribute_name, $atts);
@@ -18,7 +20,7 @@ class radios extends radio {
 	{
 		$label = '';
 		if ($this->label) {
-			$label = '<label class="radios-label">'. $this->label .'</label>';
+			$label = '<label class="radios-label">' . $this->label . '</label>';
 		}
 
 		$options = '';

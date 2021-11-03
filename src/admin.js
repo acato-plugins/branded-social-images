@@ -235,7 +235,7 @@ import decodeEntities from './helpers/decode_entities';
 				editor.get(0).style.setProperty('--text-shadow-color', hex_to_rgba('#00000000'));
 			}
 		}).trigger('change');
-		editor.find('#disabled').on('change', function(){
+		editor.find('#disabled').on('change', function () {
 			editor.toggleClass('bsi-disabled', $(this).is(':checked'));
 		});
 
@@ -251,8 +251,8 @@ import decodeEntities from './helpers/decode_entities';
 		// logo size
 		$('#image_logo_size').on('keyup blur paste input', function () {
 			let v = parseInt('0' + $(this).val(), 10);
-			let logo_min = parseInt( $(this).attr('min'), 10 );
-			let logo_max = parseInt( $(this).attr('max'), 10 );
+			let logo_min = parseInt($(this).attr('min'), 10);
+			let logo_max = parseInt($(this).attr('max'), 10);
 			if (v < logo_min) {
 				v = logo_min;
 			}
@@ -266,8 +266,8 @@ import decodeEntities from './helpers/decode_entities';
 		// font size
 		$('#text__font_size').on('keyup blur paste input', function () {
 			let v = parseInt('0' + $(this).val(), 10);
-			let fs_min = parseInt( $(this).attr('min'), 10 );
-			let fs_max = parseInt( $(this).attr('max'), 10 );
+			let fs_min = parseInt($(this).attr('min'), 10);
+			let fs_max = parseInt($(this).attr('max'), 10);
 			if (v < fs_min) {
 				v = fs_min;
 			}
@@ -275,7 +275,7 @@ import decodeEntities from './helpers/decode_entities';
 				v = fs_max;
 			}
 			editor.get(0).style.setProperty('--font-size', v + 'px');
-			editor.get(0).style.setProperty('--line-height', (v*1.25) + 'px');
+			editor.get(0).style.setProperty('--line-height', (v * 1.25) + 'px');
 
 		}).trigger('blur');
 
@@ -306,13 +306,12 @@ import decodeEntities from './helpers/decode_entities';
 		});
 
 		editor.find('#image_logo').on('image:select', (event, attachment) => {
-			if ('id' in attachment && parseInt(''+attachment.id, 10) > 0) {
+			if ('id' in attachment && parseInt('' + attachment.id, 10) > 0) {
 				editor.get(0).style.setProperty('--logo-width', attachment.width);
 				editor.get(0).style.setProperty('--logo-height', attachment.height);
 				logoeditor.get(0).style.backgroundImage = 'url("' + attachment.url + '")';
 				editor.addClass('with-logo');
-			}
-			else {
+			} else {
 				editor.get(0).style.setProperty('--logo-width', 410); // this is the example logo
 				editor.get(0).style.setProperty('--logo-height', 82);
 				logoeditor.get(0).style.backgroundImage = '';
@@ -324,7 +323,7 @@ import decodeEntities from './helpers/decode_entities';
 			$(this).parent().find('.filename').html(attachment.filename);
 		});
 
-		editor.find('i.toggle-comment,i.toggle-info').on('click touchend', function(){
+		editor.find('i.toggle-comment,i.toggle-info').on('click touchend', function () {
 			$(this).toggleClass('active');
 		});
 
@@ -353,9 +352,10 @@ import decodeEntities from './helpers/decode_entities';
 			});
 		});
 
-		let getFeaturedImage = function(){};
+		let getFeaturedImage = function () {
+		};
 		// window.getFeaturedImage = getFeaturedImage;
-		let subscribe, state = { yoast: false, rankmath: false, featured: false };
+		let subscribe, state = {yoast: false, rankmath: false, featured: false};
 
 		if ($body.is('.block-editor-page')) {
 
@@ -395,8 +395,7 @@ import decodeEntities from './helpers/decode_entities';
 
 				return null;
 			};
-		}
-		else {
+		} else {
 			getFeaturedImage = () => {
 				return $('#set-post-thumbnail img').attr('src') || '';
 			};
@@ -406,7 +405,7 @@ import decodeEntities from './helpers/decode_entities';
 		let getYoastFacebookImage = () => {
 			let url;
 			let $field = $('#facebook-url-input-metabox');
-			let $preview = $('#wpseo-section-social > div:n'+'th(0) .yoast-image-select__preview--image');
+			let $preview = $('#wpseo-section-social > div:n' + 'th(0) .yoast-image-select__preview--image');
 			if (!$field.length && !$preview.length) {
 				return false;
 			}
@@ -424,17 +423,15 @@ import decodeEntities from './helpers/decode_entities';
 			let $preview = $('.rank-math-social-preview-facebook .rank-math-social-image-thumbnail');
 			if (!$preview.length) {
 				url = state.rankmath;
-			}
-			else if ($preview.attr('src').match(/wp-content\/plugins\/seo-by-rank-math\//)) {
+			} else if ($preview.attr('src').match(/wp-content\/plugins\/seo-by-rank-math\//)) {
 				url = false;
-			}
-			else {
+			} else {
 				url = $preview.attr('src');
 			}
 
 			return url;
 		};
-		state = { yoast: getYoastFacebookImage(), rankmath: getYoastFacebookImage(), featured: getFeaturedImage() };
+		state = {yoast: getYoastFacebookImage(), rankmath: getYoastFacebookImage(), featured: getFeaturedImage()};
 
 		// window.i_state = state;
 		// window.i_gyfi = getYoastFacebookImage;
@@ -488,8 +485,12 @@ import decodeEntities from './helpers/decode_entities';
 		if ($body.is('.block-editor-page')) {
 			let debounce;
 			subscribe(() => {
-				if (debounce) { clearTimeout(debounce); }
-				debounce = setTimeout(() => { external_images_maybe_changed(); }, 1000);
+				if (debounce) {
+					clearTimeout(debounce);
+				}
+				debounce = setTimeout(() => {
+					external_images_maybe_changed();
+				}, 1000);
 			});
 		}
 		setInterval(external_images_maybe_changed, 5000);
@@ -500,9 +501,8 @@ import decodeEntities from './helpers/decode_entities';
 		let monitor_space = () => {
 			let w = $('#branded-social-images').outerWidth();
 			if (w < 600) {
-				editor.get(0).style.setProperty('--editor-scale', (w-26)/600 * 0.5);
-			}
-			else {
+				editor.get(0).style.setProperty('--editor-scale', (w - 26) / 600 * 0.5);
+			} else {
 				editor.get(0).style.setProperty('--editor-scale', 0.5);
 			}
 		};
@@ -517,8 +517,7 @@ import decodeEntities from './helpers/decode_entities';
 				let new_title = bsi_settings.title_format.replace('{title}', $(title_field).val());
 				texteditor_target.val(new_title);
 				texteditor.text(new_title);
-			}
-			else {
+			} else {
 				$(title_field).off(update_auto_title);
 			}
 		};

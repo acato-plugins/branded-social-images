@@ -2,7 +2,7 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined('ABSPATH') or die('You cannot be here.');
 
 require_once __DIR__ . '/class.text.php'; // dependency
 
@@ -31,7 +31,7 @@ class file extends text
 		$atts = $this->attributes(); // builds HTML attributes
 
 
-		return $label . '<span class="add-file-select" data-types="'. $types .'">
+		return $label . '<span class="add-file-select" data-types="' . $types . '">
 			<input type="' . $this->type . '" ' . $atts . '/>
 			<input type="button" class="button" value="' . esc_attr($button) . '"/>
 			<span class="filename"></span>
@@ -51,7 +51,7 @@ class file extends text
 			?>
 			<script>
 				;(function ($) {
-					$(document).ready(function(){
+					$(document).ready(function () {
 						$('.add-file-select').BSIattachFileUpload();
 					});
 				})(jQuery);

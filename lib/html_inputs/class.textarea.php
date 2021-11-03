@@ -2,9 +2,10 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined('ABSPATH') or die('You cannot be here.');
 
-class textarea extends Input {
+class textarea extends Input
+{
 	public function __construct($attribute_name, $atts)
 	{
 		parent::__construct($attribute_name, $atts);
@@ -19,6 +20,6 @@ class textarea extends Input {
 
 	public function generate_html(): string
 	{
-		return '<'. $this->type . ' '. $this->attributes() .'>' . ($this->empty ? '' : esc_textarea($this->current_value) . '</'. $this->type .'>');
+		return '<' . $this->type . ' ' . $this->attributes() . '>' . ($this->empty ? '' : esc_textarea($this->current_value) . '</' . $this->type . '>');
 	}
 }

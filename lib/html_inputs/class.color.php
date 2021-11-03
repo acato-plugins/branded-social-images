@@ -2,9 +2,10 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined('ABSPATH') or die('You cannot be here.');
 
-class color extends Input {
+class color extends Input
+{
 	public function __construct($attribute_name, $atts)
 	{
 		if (empty($atts['class'])) {
@@ -25,7 +26,7 @@ class color extends Input {
 	{
 		$label = '';
 		if ($this->label) {
-			$label = '<label for="'. $this->id .'">'. $this->label .'</label>';
+			$label = '<label for="' . $this->id . '">' . $this->label . '</label>';
 			$this->atts['id'] = $this->id;
 		}
 
@@ -33,6 +34,6 @@ class color extends Input {
 		$atts = $this->attributes();
 
 
-		return $label  .'<span class="field-wrap"><input type="'. $this->type .'" '. $atts .'/><span class="swatch"></span></span>';
+		return $label . '<span class="field-wrap"><input type="' . $this->type . '" ' . $atts . '/><span class="swatch"></span></span>';
 	}
 }

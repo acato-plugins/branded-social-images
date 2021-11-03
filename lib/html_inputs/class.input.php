@@ -2,9 +2,10 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined('ABSPATH') or die('You cannot be here.');
 
-class Input {
+class Input
+{
 
 	protected $type = 'text';
 	protected $empty = true;
@@ -56,7 +57,7 @@ class Input {
 		}
 	}
 
-	public function set_label($text, $id_sufix=false)
+	public function set_label($text, $id_sufix = false)
 	{
 		$this->label = $text;
 		if (!$this->id) {
@@ -93,7 +94,8 @@ class Input {
 		$this->atts = $atts;
 	}
 
-	public function set_attribute_name() {
+	public function set_attribute_name()
+	{
 		// default is "just set"
 		$this->atts['name'] = '[' . $this->name . ']';
 		if (!empty($this->atts['namespace'])) {
@@ -108,10 +110,10 @@ class Input {
 
 	public static function getClass($type)
 	{
-		if (file_exists( __DIR__ .'/class.'. $type .'.php')) {
+		if (file_exists(__DIR__ . '/class.' . $type . '.php')) {
 			$class = __NAMESPACE__ . '\\' . ucfirst($type);
 			if (!class_exists($class)) {
-				require_once __DIR__ .'/class.'. $type .'.php';
+				require_once __DIR__ . '/class.' . $type . '.php';
 			}
 			return $class;
 		}
@@ -149,7 +151,7 @@ class Input {
 	{
 		$label = '';
 		if ($this->label) {
-			$label = '<label for="'. $this->id .'">'. $this->label .'</label>';
+			$label = '<label for="' . $this->id . '">' . $this->label . '</label>';
 			$this->atts['id'] = $this->id;
 		}
 
@@ -157,7 +159,7 @@ class Input {
 		$atts = $this->attributes();
 
 
-		return $label .'<input type="'. $this->type .'" '. $atts .'>' . ($this->empty ? '' : $this->content . '</'. $this->type .'>');
+		return $label . '<input type="' . $this->type . '" ' . $atts . '>' . ($this->empty ? '' : $this->content . '</' . $this->type . '>');
 	}
 
 	private function generate_id($id_suffix = ''): string
@@ -187,8 +189,8 @@ class Input {
 	{
 		$comment = '';
 		if ($this->comment) {
-			$comment = '<span class="comment">'. $this->comment;
-			if ($this->the_info()){
+			$comment = '<span class="comment">' . $this->comment;
+			if ($this->the_info()) {
 				$comment .= $this->the_info();
 				$this->info = false;
 				$this->info_icon = false;
@@ -196,7 +198,7 @@ class Input {
 			$comment .= '</span>';
 		}
 		if (!empty($this->comment_icon)) {
-			$comment = '<i class="toggle-comment dashicons-before '. $this->comment_icon .'"></i>' . $comment;
+			$comment = '<i class="toggle-comment dashicons-before ' . $this->comment_icon . '"></i>' . $comment;
 		}
 
 		return $comment;
@@ -206,16 +208,17 @@ class Input {
 	{
 		$info = '';
 		if ($this->info) {
-			$info = '<span class="info">'. $this->info .'</span>';
+			$info = '<span class="info">' . $this->info . '</span>';
 		}
 		if (!empty($this->info_icon)) {
-			$info = '<i class="toggle-info dashicons-before '. $this->info_icon .'"></i>' . $info;
+			$info = '<i class="toggle-info dashicons-before ' . $this->info_icon . '"></i>' . $info;
 		}
 
 		return $info;
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		return $this->generate_html() . $this->the_comment() . $this->the_info();
 	}
 }

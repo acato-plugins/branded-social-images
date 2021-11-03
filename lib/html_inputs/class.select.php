@@ -2,11 +2,12 @@
 
 namespace Clearsite\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined('ABSPATH') or die('You cannot be here.');
 
-require_once __DIR__ .'/class.option.php'; // dependency
+require_once __DIR__ . '/class.option.php'; // dependency
 
-class select extends Input {
+class select extends Input
+{
 	public function __construct($attribute_name, $atts)
 	{
 		parent::__construct($attribute_name, $atts);
@@ -16,7 +17,7 @@ class select extends Input {
 	{
 		$label = '';
 		if ($this->label) {
-			$label = '<label for="'. $this->id .'">'. $this->label .'</label>';
+			$label = '<label for="' . $this->id . '">' . $this->label . '</label>';
 			$this->atts['id'] = $this->id;
 		}
 

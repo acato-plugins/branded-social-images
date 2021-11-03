@@ -4,7 +4,7 @@ namespace Clearsite\Tools\HTML_Inputs;
 
 use Clearsite\Plugins\OGImage\Plugin;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined('ABSPATH') or die('You cannot be here.');
 
 require_once __DIR__ . '/class.text.php'; // dependency
 
@@ -31,10 +31,10 @@ class image extends text
 		$atts = $this->attributes(); // builds HTML attributes
 
 
-		return $label . '<span class="add-image-select" data-types="'. $types .'">
+		return $label . '<span class="add-image-select" data-types="' . $types . '">
 			<input type="' . $this->type . '" ' . $atts . '/>
 			<div class="image-preview-wrapper">
-				<img src="'. esc_attr(wp_get_attachment_url($this->get_current_value())) .'" width="200">
+				<img src="' . esc_attr(wp_get_attachment_url($this->get_current_value())) . '" width="200">
 			</div>
 			<input type="button" class="button" value="' . esc_attr(__("Choose image", Plugin::TEXT_DOMAIN)) . '"/>
 			<input type="button" class="button remove" value="' . esc_attr(__("Remove image", Plugin::TEXT_DOMAIN)) . '"/>
@@ -53,7 +53,7 @@ class image extends text
 			?>
 			<script>
 				;(function ($) {
-					$(document).ready(function(){
+					$(document).ready(function () {
 						$('.add-image-select').attachMediaUpload();
 					});
 				})(jQuery);
