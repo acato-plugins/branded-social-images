@@ -327,6 +327,12 @@ class Plugin {
 		}
 	}
 
+	public static function get_version()
+	{
+		$data = get_plugin_data( dirname(__DIR__) .'/wp-plugin.php' );
+		return $data['Version'];
+	}
+
 	public static function wp_get_attachment_image_data( $image_id, string $size )
 	{
 		$data    = wp_get_attachment_image_src( $image_id, $size );
@@ -992,7 +998,7 @@ class Plugin {
 		$base_url = get_bloginfo('url');
 		// from https://somesite.com/language/, keep only the base url, as the rest is included in the result from 'remove_query_arg'
 		$base_url = parse_url($base_url, PHP_URL_SCHEME) .'://' . parse_url($base_url, PHP_URL_HOST); // no trailing slash
-		
+
 		return trailingslashit( $base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::BSI_IMAGE_NAME . '/'; // yes, slash, WP will add it with a redirect anyway
 	}
 

@@ -193,7 +193,7 @@ class Admin
 
 		?>
 		<div class="wrap">
-			<h2>Branded Social Images</h2>
+			<h2>Branded Social Images <span style="opacity: 0.2"><?php print Plugin::get_version(); ?></span></span></h2>
 			<?php
 			$errors = self::getErrors();
 			foreach ($errors as $error) {
