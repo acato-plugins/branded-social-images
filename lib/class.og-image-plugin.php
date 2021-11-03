@@ -1407,6 +1407,12 @@ EODOC;
 		global $pagenow;
 		if (!is_admin() || $pagenow == 'post.php' || $pagenow == 'post-new.php') {
 
+            $permalink = get_permalink(get_the_ID());
+            if (!parse_url($permalink, PHP_URL_HOST)) {
+                // somebody messed with the permalinks!
+                $permalink = trailingslashit( get_home_url() ) . ltrim( parse_url($permalink, PHP_URL_PATH), '/');
+            }
+
 			if (
 				defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
 				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
@@ -1414,7 +1420,7 @@ EODOC;
 				$args = array(
 					'id' => self::ADMIN_SLUG . '-view',
 					'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
-					'href' => get_permalink(get_the_ID()) . Plugin::BSI_IMAGE_NAME . '/',
+					'href' => $permalink . Plugin::BSI_IMAGE_NAME . '/',
 					'meta' => [
 						'target' => '_blank',
 						'class' => self::ADMIN_SLUG . '-view'
@@ -1433,7 +1439,7 @@ EODOC;
 				]
 			);
 
-			$args['href'] = sprintf($args['href'], urlencode(get_permalink(get_the_ID())));
+			$args['href'] = sprintf($args['href'], urlencode($permalink));
 			$admin_bar->add_node($args);
 
 			add_action('wp_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
