@@ -994,7 +994,7 @@ class Plugin {
 			self::getInstance()->page_already_has_og_image = true;
 		}
 
-		// this consturction is to please WPML;
+		// this construction is to please WPML;
 		// *_query_arg return domain-less root-based urls (/language/page/path/)
 		// get_bloginfo('url') returns https://somesite.com/language/
 		// we could use site_url, but this will be problematic with multi-site installations...
@@ -1009,7 +1009,7 @@ class Plugin {
 	{
 		return get_permalink( $post_id ) ? get_permalink( $post_id ) . self::BSI_IMAGE_NAME . '/' : false;
 	}
-	
+
 	public static function patch_wpseo_head() {
 		static $step;
 		if (!$step) $step = 0;
