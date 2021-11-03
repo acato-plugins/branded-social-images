@@ -494,6 +494,9 @@ class Plugin {
 				add_filter( 'wpseo_opengraph_image', [ static::class, 'overrule_og_image' ], PHP_INT_MAX );
 				add_filter( 'wpseo_twitter_image', [ static::class, 'overrule_og_image' ], PHP_INT_MAX );
 
+				add_action('wpseo_head', [static::class, 'patch_wpseo_head'], ~PHP_INT_MAX);
+				add_action('wpseo_head', [static::class, 'patch_wpseo_head'], PHP_INT_MAX);
+
 				add_filter( 'wpseo_schema_main_image', function ( $graph_piece ) use ( $id ) {
 					$url                   = static::get_og_image_url( $id );
 					$graph_piece['url']    = $graph_piece['contentUrl'] = $url;
@@ -1005,6 +1008,25 @@ class Plugin {
 	public static function get_og_image_url( $post_id )
 	{
 		return get_permalink( $post_id ) ? get_permalink( $post_id ) . self::BSI_IMAGE_NAME . '/' : false;
+	}
+	
+	public static function patch_wpseo_head() {
+		static $step;
+		if (!$step) $step = 0;
+		$step ++;
+
+		switch ($step) {
+			case 1:
+				ob_start();
+				break;
+			case 2:
+				$wpseo_head = ob_get_clean();
+				if (preg_match('@/'. Plugin::BSI_IMAGE_NAME .'/@', $wpseo_head)) {
+					$wpseo_head = preg_replace('/og:image:width" content="([0-9]+)"/', 'og:image:width" content="'. Plugin::getInstance()->width .'"', $wpseo_head);
+					$wpseo_head = preg_replace('/og:image:height" content="([0-9]+)"/', 'og:image:height" content="'. Plugin::getInstance()->height .'"', $wpseo_head);
+				}
+				print $wpseo_head;
+		}
 	}
 
 	public static function init()
