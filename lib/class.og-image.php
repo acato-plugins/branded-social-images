@@ -12,7 +12,7 @@ class Image
 	public $image_id;
 	public $post_id;
 
-	private $use_cache = true; // for skipping caching, set to false
+	private $use_existing_cached_image = true;
 
 	public function __construct(Plugin $manager)
 	{
@@ -45,18 +45,18 @@ class Image
 		Plugin::log('Image selected: ' . $this->image_id);
 
 		if (defined('WP_DEBUG') && WP_DEBUG) {
-			$this->use_cache = false;
-			Plugin::log('Caching disabled because of WP_DEBUG');
+			$this->use_existing_cached_image = false;
+			Plugin::log('Cache ignored because of WP_DEBUG');
 		}
 
 		if (!empty($_GET['rebuild'])) {
-			$this->use_cache = false;
-			Plugin::log('Caching disabled because of rebuild flag');
+			$this->use_existing_cached_image = false;
+			Plugin::log('Cache ignored because of rebuild flag');
 		}
 
 		if (!empty($_GET['debug']) && 'BSI' == $_GET['debug']) {
-			$this->use_cache = false;
-			Plugin::log('Caching disabled because of debug=BSI flag');
+			$this->use_existing_cached_image = false;
+			Plugin::log('Cache ignored because of debug=BSI flag');
 		}
 	}
 
@@ -132,21 +132,14 @@ class Image
 			return false;
 		}
 
-		if (!$this->use_cache) {
-			header('X-OG-Cache-Enabled: false');
-			if (is_file($cache_file)) {
-				unlink($cache_file);
-			}
-			if (is_file($lock_file)) {
-				unlink($lock_file);
-			}
+		header('X-OG-Cache: miss');
+		if (!$this->use_existing_cached_image) {
+			header('X-OG-Cache: ignored', true);
 		}
-
-		if (is_file($cache_file)) {
-			header('X-OG-Cache: hit');
+		else if (is_file($cache_file)) {
+			header('X-OG-Cache: hit', true);
 			return ['file' => $cache_file, 'url' => str_replace($base_dir, $base_url, $cache_file)];
 		}
-		header('X-OG-Cache: miss');
 		if (is_file($lock_file)) {
 			// we're already building this file.
 			if (filemtime($lock_file) > time() - 3600) {
@@ -284,11 +277,6 @@ class Image
 				@unlink($lock_file);
 				@unlink($temp_file);
 			});
-			if (!$this->use_cache) {
-				add_action('shutdown', function () use ($cache_file) {
-					@unlink($cache_file);
-				});
-			}
 
 			if (!empty($_GET['debug']) && $_GET['debug'] == 'BSI') {
 				Plugin::display_log();
