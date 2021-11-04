@@ -1,6 +1,6 @@
-=== Branded Social Images ===
+=== Branded Social Images - Open Graph Images with logo and extra text layer ===
 Contributors: clearsite
-Tags: social images, OG-image, open-graph, featured image
+Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
 Tested up to: 5.8.1
 Stable tag: 1.0.14
@@ -12,10 +12,11 @@ The simplest way to brand your social images. Provide all your social images (Op
 
 == Description ==
 
-# Rich social images with just a few clicks.
-This plugin creates rich social images to match with your company’s style. Including a company logo and title.
-The images can either be auto-generated for the entire site or you have the option to overrule this per page/post.
+# Branded social images (open graph images) in just a few clicks.
+This plugin creates branded social images to match with your company’s style. Including a company logo and title.
+These open graph images can either be auto-generated for the entire site or you have the option to overrule this per page/post.
 # Works with every (public) post-type in WordPress!
+
 For more information, visit our [website](https://clearsite.nl/branded-social-images/ "Our webpage about Branded Social Images")
 
 == Installation ==
