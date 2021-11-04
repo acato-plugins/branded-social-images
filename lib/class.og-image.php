@@ -79,6 +79,23 @@ class Image
 			exit;
 		}
 
+		// destroy any kind of caching by external plugins.
+		$problem_handlers=[];
+		// verified to work with 'breeze', a caching plugin by Cloudways, troublesome handlers:
+		$problem_handlers[] = 'breeze_ob_start_callback';
+		$problem_handlers[] = 'breeze_cache';
+		$problem_handlers = apply_filters('bsi_image_serve_ob_start_problem_handlers', $problem_handlers);
+		if (!$problem_handlers) { // don't have a list of prblem handlers? then just destroy ANY output buffer.
+			while(ob_get_level()) {
+				ob_end_flush();
+			}
+		}
+		else {
+			while(array_intersect($problem_handlers, ob_list_handlers())) {
+				ob_end_flush();
+			}
+		}
+
 		$image_cache = $this->cache($this->image_id, $this->post_id);
 		if ($image_cache) {
 			// we have cache, or have created cache. In any way, we have an image :)
@@ -144,6 +161,7 @@ class Image
 		$this->manager->file_put_contents($lock_file, date('r'));
 		$cache_file = $this->build($image_id, $post_id);
 		if (is_file($cache_file)) {
+			do_action('bsi_image_cache_built', $cache_file);
 			return ['file' => $cache_file, 'url' => str_replace($base_dir, $base_url, $cache_file)];
 		}
 		elseif ($retry < 2) {
