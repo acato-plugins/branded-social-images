@@ -901,26 +901,7 @@ EOCSS;
 					wp_redirect(remove_query_arg('bsi-action', add_query_arg('updated', 1)));
 					exit;
 				case 'purge-cache-confirm':
-					$purgable = Plugin::get_purgable_cache();
-					// protection!
-					$base = trailingslashit(Plugin::getInstance()->storage());
-					foreach ($purgable as $item) {
-						if (false === strpos($item, $base)) {
-							continue;
-						}
-
-						try {
-							if (is_file($item)) {
-								self::unlink($item);
-							}
-							if (is_dir($item)) {
-								self::rmdir($item);
-								self::rmdir(dirname($item));
-							}
-						} catch (\Exception $e) {
-
-						}
-					}
+					Plugin::purge_cache();
 
 					$purgable = Plugin::get_purgable_cache();
 					if ($purgable) {
@@ -933,19 +914,6 @@ EOCSS;
 					exit;
 			}
 		}
-	}
-
-	private static function unlink($path)
-	{
-		return unlink($path);
-	}
-
-	private static function rmdir($path)
-	{
-		if (is_file("$path/.DS_Store")) {
-			@unlink("$path/.DS_Store");
-		}
-		return rmdir($path);
 	}
 
 	public static function font_weights(): array

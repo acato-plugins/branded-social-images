@@ -182,6 +182,7 @@ class Plugin
 				update_option("rewrite_rules", false);
 				$wp_rewrite->flush_rules(true);
 				update_option('_bsi_rewrite_rules_based_on', Plugin::output_filename());
+				Plugin::purge_cache();
 			}
 			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
 			if (Plugin::AA > 1) {
@@ -473,6 +474,43 @@ class Plugin
 		}
 
 		return self::BSI_IMAGE_NAME . '.'. $output_format;
+	}
+
+	private static function rmdir($path)
+	{
+		if (is_file("$path/.DS_Store")) {
+			@unlink("$path/.DS_Store");
+		}
+		return rmdir($path);
+	}
+
+	private static function unlink($path)
+	{
+		return unlink($path);
+	}
+
+	public static function purge_cache()
+	{
+		$purgable = Plugin::get_purgable_cache();
+		// protection!
+		$base = trailingslashit(Plugin::getInstance()->storage());
+		foreach ($purgable as $item) {
+			if (false === strpos($item, $base)) {
+				continue;
+			}
+
+			try {
+				if (is_file($item)) {
+					self::unlink($item);
+				}
+				if (is_dir($item)) {
+					self::rmdir($item);
+					self::rmdir(dirname($item));
+				}
+			} catch (\Exception $e) {
+
+			}
+		}
 	}
 
 	public function _init()

@@ -342,25 +342,6 @@ class GD
 		}
 	}
 
-	public function push_to_browser($filename)
-	{
-		header('Content-Type: image/png');
-		header('Content-Disposition: inline; filename=' . $filename);
-		imagepng($this->resource);
-	}
-//
-//	private function imagettftextbox_stroke(&$image, $size, $x, $y, $w, $h, $strokecolor, $fontfile, $text, $px, $align='left') {
-//		for($c1 = ($x-$px); $c1 <= ($x+$px); $c1++) {
-//			$a +=2;
-//			$c2 = $y + round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
-////			imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
-//			$this->imagettftextbox($image, $size, $c1, $c2, $w, $h, $strokecolor, $fontfile, $text, ['align' => $align ]);
-//			$c3 = $y - round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
-////			imagettftext($image, $size, $angle, $c1, $c3, $strokecolor, $fontfile, $text);
-//			$this->imagettftextbox($image, $size, $c1, $c3, $w, $h, $strokecolor, $fontfile, $text, ['align' => $align ]);
-//		}
-//	}
-
 	private function imagettftextbox($image, $size, $x, $y, $w, $h, Color $color, $fontfile, $text, $options = [])
 	{
 		/** @var $align string left, center or right */
