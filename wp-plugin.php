@@ -58,25 +58,9 @@ add_action('check_ajax_referer', function ($action) {
 	}
 });
 
-/**
- * On plugin activation, register a flag to rewrite permalinks.
- * THe plugin will do so after adding the post-endpoint.
- */
-register_activation_hook(__FILE__, 'bsi_plugin_activation');
-function bsi_plugin_activation($network_wide)
-{
-	global $wpdb;
-	update_option("bsi_needs_rewrite_rules", true);
-	if ($network_wide && function_exists('is_multisite') && is_multisite()) {
-		$blog_ids = $wpdb->get_col("SELECT blog_id FROM {$wpdb->base_prefix}blogs");
-		foreach ($blog_ids as $blog_id) {
-			switch_to_blog($blog_id);
-			update_option("bsi_needs_rewrite_rules", true);
-			restore_current_blog();
-		}
-	}
-}
-
+register_activation_hook(__FILE__, [Plugin::class, 'on_activation']);
+register_deactivation_hook(__FILE__, [Plugin::class, 'on_deactivation']);
+register_uninstall_hook(__FILE__, [Plugin::class, 'on_uninstall']);
 /**
  * Reference list
  * @see https://www.cssscript.com/color-picker-alpha-selection/

@@ -1933,4 +1933,46 @@ EODOC;
 					__('Change logo and image below', Plugin::TEXT_DOMAIN);
 		}
 	}
+
+
+	/**
+	 * On plugin activation, register a flag to rewrite permalinks.
+	 * The plugin will do so after adding the post-endpoint.
+	 */
+	public static function on_activation($network_wide)
+	{
+		global $wpdb;
+		update_option("bsi_needs_rewrite_rules", true);
+		if ($network_wide && function_exists('is_multisite') && is_multisite()) {
+			$blog_ids = $wpdb->get_col("SELECT blog_id FROM {$wpdb->base_prefix}blogs");
+			foreach ($blog_ids as $blog_id) {
+				switch_to_blog($blog_id);
+				update_option("bsi_needs_rewrite_rules", true);
+				restore_current_blog();
+			}
+		}
+
+		self::track('activate', $network_wide);
+	}
+
+	public static function on_deactivation($network_wide)
+	{
+		self::track('deactivate', $network_wide);
+	}
+
+	public static function on_uninstall($network_wide)
+	{
+		self::track('uninstall', $network_wide);
+	}
+
+	private static function track($action, $network_wide=false)
+	{
+		// we like to see where our plugin is used so we can provide support more easily
+		// note that the only data we collect are plugin name, version and your website URL.
+		// also note that we do not care about the response. (blocking:false)
+		wp_remote_get('https://wp.clearsite.nl/tracking/'. ($network_wide ? 'network-' : '') . $action .'/'.
+			basename(dirname(__DIR__)) . '/'. Plugin::get_version() .'/'. get_bloginfo('url'),
+			['blocking' => false]
+		);
+	}
 }
