@@ -283,6 +283,7 @@ class Image
 			Plugin::log('Using output format: '. $format);
 			switch($format) {
 				case 'jpg':
+				default:
 					$quality = Plugin::setting('jpg_quality_level', 75);
 					$quality = min(max(0, intval($quality)), 100);
 					Plugin::log('Using JPEG quality: '. $quality .' ( 0 - 100 )');
@@ -293,7 +294,6 @@ class Image
 					Plugin::log('Using WEBP quality: '. $quality .' ( 0 - 100 )');
 					break;
 				case 'png':
-				default:
 					$quality = Plugin::setting('png_compression_level', 2);
 					$quality = min(max(0, intval($quality)), 9);
 					Plugin::log('Using PNG quality: '. $quality .' ( 9 - 0 )');

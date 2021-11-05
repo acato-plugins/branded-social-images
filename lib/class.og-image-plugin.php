@@ -457,14 +457,14 @@ class Plugin
 
 	public static function output_filename()
 	{
-		$output_format = Plugin::setting('output_format', 'png');
-		$fallback_format = 'png';
+		$fallback_format = 'jpg';
+		$output_format = Plugin::setting('output_format', $fallback_format);
 		if (is_array($output_format)) {
 			$fallback_format = $output_format[1];
 			$output_format = $output_format[0];
 		}
 		if (!in_array($fallback_format, ['png','jpg','webp'])) {
-			$fallback_format = 'png';
+			$fallback_format = 'jpg';
 		}
 		if ('webp' === $output_format && !function_exists('imagewebp')) {
 			$output_format = $fallback_format;
