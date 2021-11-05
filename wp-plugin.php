@@ -45,6 +45,11 @@ define('BSI_PLUGIN_FILE', __FILE__);
 
 require_once __DIR__ . '/lib/class.og-image-plugin.php';
 require_once __DIR__ . '/lib/class.og-image-admin.php';
+require_once __DIR__ . '/lib/class.licensing.php';
+// premium features
+if (is_file(__DIR__ . '/lib/inc.premium.php')) {
+	require_once __DIR__ . '/lib/inc.premium.php';
+}
 
 add_action('plugins_loaded', [Plugin::class, 'init']);
 
