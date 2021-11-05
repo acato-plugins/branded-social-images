@@ -210,8 +210,9 @@ class Admin
 						$purgable_dirs = Plugin::get_purgable_cache('directories');
 						if (!$purgable && !$purgable_dirs) {
 							_e('The cache is empty', Plugin::TEXT_DOMAIN);
-							?><a class="action button-primary"
-								 href="<?php print esc_attr(remove_query_arg('bsi-action')); ?>"><?php _e('Ok', Plugin::TEXT_DOMAIN); ?></a><?php
+							?><br /><a class="action button-primary"
+									   href="<?php print esc_attr(remove_query_arg('bsi-action')); ?>"><?php _e('Ok', Plugin::TEXT_DOMAIN); ?></a><?php
+							break;
 						}
 						else {
 							print sprintf(__('This will clear the cache, %d image(s) and %d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN), count($purgable), count($purgable_dirs));
@@ -910,11 +911,11 @@ EOCSS;
 
 						try {
 							if (is_file($item)) {
-								unlink($item);
+								self::unlink($item);
 							}
 							if (is_dir($item)) {
-								rmdir($item);
-								rmdir(dirname($item));
+								self::rmdir($item);
+								self::rmdir(dirname($item));
 							}
 						} catch (\Exception $e) {
 
@@ -932,6 +933,19 @@ EOCSS;
 					exit;
 			}
 		}
+	}
+
+	private static function unlink($path)
+	{
+		return unlink($path);
+	}
+
+	private static function rmdir($path)
+	{
+		if (is_file("$path/.DS_Store")) {
+			@unlink("$path/.DS_Store");
+		}
+		return rmdir($path);
 	}
 
 	public static function font_weights(): array
