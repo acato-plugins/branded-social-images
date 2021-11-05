@@ -43,7 +43,7 @@ class Admin
 			$style = (!defined('BSI_UNMINIFIED') ? 'admin/admin.css' : 'admin/admin.min.css');
 			wp_enqueue_script(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($script, __DIR__), ['jquery', 'jquery-ui-slider'], filemtime(dirname(__DIR__) . '/' . $script), true);
 			wp_localize_script(Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', [
-				'preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME,
+				'preview_url' => get_permalink() . Plugin::output_filename(),
 				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
 				'title_format' => Plugin::title_format(1, true),
 				'text' => [
@@ -628,8 +628,8 @@ class Admin
 
 			// clean the cache
 			$cache_file = wp_upload_dir();
-			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
-			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
+			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::output_filename() . '.lock';
+			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::output_filename();
 			array_map('unlink', array_merge(glob($lock_files), glob($cache_files)));
 		}
 	}

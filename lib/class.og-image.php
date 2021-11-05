@@ -32,7 +32,7 @@ class Image
 
 		// hack for front-page
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-		if ('/' . Plugin::BSI_IMAGE_NAME . '/' === $current_url) {
+		if ('/' . Plugin::output_filename() . '/' === $current_url) {
 			Plugin::log('URI = Homepage BSI; ' . $current_url);
 			$front = get_option('page_on_front');
 			if ($front) {
@@ -100,8 +100,8 @@ class Image
 		if ($image_cache) {
 			// we have cache, or have created cache. In any way, we have an image :)
 			// serve-type = redirect?
-			header('Content-Type: image/png');
-			header('Content-Disposition: inline; filename=' . Plugin::BSI_IMAGE_NAME);
+			header('Content-Type: '. mime_content_type($image_cache['file']));
+			header('Content-Disposition: inline; filename=' . Plugin::output_filename());
 			header('Content-Length: ' . filesize($image_cache['file']));
 			readfile($image_cache['file']);
 			exit;
@@ -121,8 +121,8 @@ class Image
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
-		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
+		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename() . '.lock';
+		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename();
 
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
@@ -162,14 +162,14 @@ class Image
 		}
 	}
 
-	public function build($image_id, $post_id, $push_to_browser = false)
+	public function build($image_id, $post_id)
 	{
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
-		$temp_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.tmp';
-		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
+		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename() . '.lock';
+		$temp_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename() . '.tmp';
+		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename();
 
 		Plugin::log('Base URL: ' . $base_url);
 		Plugin::log('Base DIR: ' . $base_dir);
@@ -278,16 +278,33 @@ class Image
 				@unlink($temp_file);
 			});
 
+			$filename = Plugin::output_filename();
+			$format = explode('.', $filename); $format = end($format);
+			Plugin::log('Using output format: '. $format);
+			switch($format) {
+				case 'jpg':
+					$quality = Plugin::setting('jpg_quality_level', 75);
+					$quality = min(max(0, intval($quality)), 100);
+					Plugin::log('Using JPEG quality: '. $quality .' ( 0 - 100 )');
+					break;
+				case 'webp':
+					$quality = Plugin::setting('webp_quality_level', 75);
+					$quality = min(max(0, intval($quality)), 100);
+					Plugin::log('Using WEBP quality: '. $quality .' ( 0 - 100 )');
+					break;
+				case 'png':
+				default:
+					$quality = Plugin::setting('png_compression_level', 2);
+					$quality = min(max(0, intval($quality)), 9);
+					Plugin::log('Using PNG quality: '. $quality .' ( 9 - 0 )');
+					break;
+			}
+
 			if (!empty($_GET['debug']) && $_GET['debug'] == 'BSI') {
 				Plugin::display_log();
 			}
 
-			if ($push_to_browser) {
-				$image->push_to_browser(microtime(true) . '.png');
-			}
-			else {
-				$image->save();
-			}
+			$image->save($format, $quality);
 
 			return is_file($cache_file) ? $cache_file : false;
 		}
