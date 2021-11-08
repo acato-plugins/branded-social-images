@@ -114,6 +114,7 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 * changed: for new posts, title is automatically filled based on '{title} - {blogname}'.
 * changed: overhaul of javascript and style.
 * added: @developers; For debugging, set BSI_UNMINIFIED to true. Script and style will be more readable.
+* added: Last generated debug log (with ?debug=BSI on image url) will be shown in the admin panel. If you have problems with an image, please include this information in your support ticket.
 
 = 1.0.13 =
 * fixed: in WPML folder-per-language installation, the language folder is duplicated in the social-image-url

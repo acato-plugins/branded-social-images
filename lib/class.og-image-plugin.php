@@ -1971,6 +1971,9 @@ EODOC;
 
 	private static function track($action, $network_wide=false)
 	{
+		// tracking disabled for now, we need to find out if this is allowed.
+		return false;
+
 		// we like to see where our plugin is used so we can provide support more easily
 		// note that the only data we collect are plugin name, version and your website URL.
 		// also note that we do not care about the response. (blocking:false)
