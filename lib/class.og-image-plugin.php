@@ -1754,7 +1754,7 @@ EODOC;
 		foreach ($layers as &$layer) {
 			if ($layer) {
 				$image = wp_get_attachment_image_src($layer, Plugin::IMAGE_SIZE_NAME);
-				$layer = $image[0];
+				$layer = is_array($image) && !empty($image[0]) ? $image[0] : false;
 			}
 		}
 
