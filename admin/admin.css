@@ -668,7 +668,7 @@
   #branded-social-images-editor body .ui-tooltip {
     border-width: 2px; }
   #branded-social-images-editor .ui-widget {
-    font-family: Verdana, Arial, sans-serif;
+    font-family: Verdana,Arial,sans-serif;
     font-size: 1.1em; }
   #branded-social-images-editor .ui-widget .ui-widget {
     font-size: 1em; }
@@ -676,7 +676,7 @@
   #branded-social-images-editor .ui-widget select,
   #branded-social-images-editor .ui-widget textarea,
   #branded-social-images-editor .ui-widget button {
-    font-family: Verdana, Arial, sans-serif;
+    font-family: Verdana,Arial,sans-serif;
     font-size: 1em; }
   #branded-social-images-editor .ui-widget-content {
     border: 1px solid #aaaaaa;
