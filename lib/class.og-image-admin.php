@@ -5,9 +5,7 @@ namespace Clearsite\Plugins\OGImage;
 defined('ABSPATH') or die('You cannot be here.');
 
 use Clearsite\Tools\HTML_Inputs;
-use RankMath;
-
-// supported but not required. question is, do we need it? RankMath uses the Featured Image... todo: investigate
+use Exception;
 
 class Admin
 {
@@ -15,7 +13,7 @@ class Admin
 
 	public function __construct()
 	{
-		add_filter('wp_check_filetype_and_ext', function ($result, $file, $filename, $mimes, $realmime) {
+		add_filter('wp_check_filetype_and_ext', function ($result, $file, $filename) {
 			if (substr(strtolower($filename), -4, 4) == '.ttf') {
 				$result['ext'] = 'ttf';
 				$result['type'] = 'font/ttf';
@@ -27,7 +25,7 @@ class Admin
 				$result['proper_filename'] = $filename;
 			}
 			return $result;
-		}, 11, 5);
+		}, 11, 3);
 
 		add_filter('upload_mimes', function ($existing_mimes) {
 			$existing_mimes['ttf'] = 'font/ttf';
@@ -55,7 +53,7 @@ class Admin
 				]
 			]);
 
-			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($style, __DIR__), '', filemtime(dirname(__DIR__) . '/' . $style), 'all');
+			wp_enqueue_style(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($style, __DIR__), '', filemtime(dirname(__DIR__) . '/' . $style));
 		});
 
 		add_action('admin_menu', function () {
@@ -178,7 +176,7 @@ class Admin
 		return $defaults;
 	}
 
-	public static function getInstance()
+	public static function getInstance(): Admin
 	{
 		static $instance;
 		if (!$instance) {
@@ -194,8 +192,7 @@ class Admin
 
 		?>
 		<div class="wrap">
-			<h2>Branded Social Images <span style="opacity: 0.2"><?php print Plugin::get_version(); ?></span></span>
-			</h2>
+			<h2>Branded Social Images <span style="opacity: 0.2"><?php print Plugin::get_version(); ?></span></h2>
 			<?php
 			$errors = self::getErrors();
 			foreach ($errors as $error) {
@@ -255,8 +252,9 @@ class Admin
 
 	/**
 	 * Add a link to the settings on the Plugins screen.
+	 * @return array list of links to show in the plugins table
 	 */
-	public static function add_settings_link($links, $file)
+	public static function add_settings_link($links, $file): array
 	{
 		if ($file === Plugin::get_plugin_file() && current_user_can(Plugin::get_management_permission())) {
 			// add setting link for anyone that is allowed to alter the settings.
@@ -302,7 +300,7 @@ class Admin
 				$t => self::storage() . '/' . $base . '.' . $t,
 			];
 			$weights = implode('|', self::font_name_weights());
-			if (preg_match("/-({$weights})?(Italic)?$/", $base, $m) && !empty($m[1])) {
+			if (preg_match("/-($weights)?(Italic)?$/", $base, $m) && !empty($m[1])) {
 				$weight = array_search($m[1], self::font_name_weights());
 				if ($weight) {
 					$entry['weight'] = $weight;
@@ -323,7 +321,7 @@ class Admin
 		return $list;
 	}
 
-	private static function storage($as_url = false)
+	private static function storage(): string
 	{
 		$dir = wp_upload_dir();
 		$dir = $dir['basedir'] . '/' . Plugin::STORAGE;
@@ -335,20 +333,15 @@ class Admin
 		}
 		Plugin::protect_dir($dir);
 
-		if ($as_url) {
-			return str_replace(trailingslashit(ABSPATH), '/', $dir);
-		}
-
 		return $dir;
 	}
 
 	public static function nice_font_name($font)
 	{
 		// w400 to normal, w700 to bold etc
-		list($name, $_) = explode('-w', $font . '-w400', 2);
+		list($name) = explode('-w', $font . '-w400', 2);
 		$weights = implode('|', self::font_name_weights());
-		$name = preg_replace("/-({$weights})?(Italic)?$/", '', $name);
-		return $name;
+		return preg_replace("/-($weights)?(Italic)?$/", '', $name);
 	}
 
 	public static function getErrors()
@@ -403,8 +396,8 @@ class Admin
 				--line-height: <?php print $text_settings['line-height']; ?>px;
 
 				--logo-scale: <?php print $logo_settings['size']; ?>;
-				--logo-width: <?php print $logo ? $width : 410; /* example logo */ ?>;
-				--logo-height: <?php print $logo ? $height : 82; ?>;
+				--logo-width: <?php print ($logo ? $width : 410); /* example logo */ ?>;
+				--logo-height: <?php print ($logo ? $height : 82); ?>;
 			}
 
 		</style>
@@ -578,17 +571,9 @@ class Admin
 		$hex = substr($hex . 'FF', 0, 8);
 
 		$int = hexdec($hex);
-		$red = ($int >> 24) & 255;
-		$green = ($int >> 16) & 255;
-		$blue = ($int >> 8) & 255;
-		$alpha = floatval($int & 255) / 255;
+		$rgba = [ ($int >> 24) & 255, ($int >> 16) & 255, ($int >> 8) & 255, floatval($int & 255) / 255 ];
 
-		return $asRGBA ? sprintf('rgba(%d, %d, %d, %0.1f)', $red, $green, $blue, $alpha) : array(
-			'red' => $red,
-			'green' => $green,
-			'blue' => $blue,
-			'alpha' => $alpha,
-		);
+		return $asRGBA ? vsprintf('rgba(%d, %d, %d, %0.1f)', $rgba) : array_combine(['red', 'green', 'blue', 'alpha'], $rgba);
 	}
 
 	public static function add_meta_boxes()
@@ -682,7 +667,6 @@ class Admin
 	{
 		$fonts = self::valid_fonts();
 		$faces = [];
-		$storage = self::storage(true);
 		$protected = admin_url('admin-ajax.php?action=' . Plugin::ADMIN_SLUG . '_get-font');
 
 		foreach ($fonts as $font_base => $font) {
@@ -881,6 +865,7 @@ EOCSS;
 					$purgable = Plugin::get_purgable_cache();
 					// protection!
 					$base = trailingslashit(Plugin::getInstance()->storage());
+					$success = true;
 					foreach ($purgable as $item) {
 						if (false === strpos($item, $base)) {
 							continue;
@@ -888,19 +873,19 @@ EOCSS;
 
 						try {
 							if (is_file($item)) {
-								self::unlink($item);
+								if (!self::unlink($item)) $success = false;
 							}
 							if (is_dir($item)) {
-								self::rmdir($item);
-								self::rmdir(dirname($item));
+								if (!self::rmdir($item)) $success = false;
+								if (!self::rmdir(dirname($item))) $success = false;
 							}
-						} catch (\Exception $e) {
+						} catch (Exception $e) {
 
 						}
 					}
 
 					$purgable = Plugin::get_purgable_cache();
-					if ($purgable) {
+					if ($purgable || !$success) {
 						self::setError('generic', sprintf(__('Not all cache items could be removed. Please try again, or check the cache folder yourself. Location: %s', Plugin::TEXT_DOMAIN), $base));
 						wp_redirect(remove_query_arg('bsi-action', add_query_arg('purged', 'error')));
 					}
@@ -912,12 +897,12 @@ EOCSS;
 		}
 	}
 
-	private static function unlink($path)
+	private static function unlink($path): bool
 	{
 		return unlink($path);
 	}
 
-	private static function rmdir($path)
+	private static function rmdir($path): bool
 	{
 		if (is_file("$path/.DS_Store")) {
 			@unlink("$path/.DS_Store");
@@ -925,7 +910,7 @@ EOCSS;
 		return rmdir($path);
 	}
 
-	private static function weight_to_suffix($weight, $is_italic)
+	private static function weight_to_suffix($weight, $is_italic): string
 	{
 		$weight = intval(round($weight / 100) * 100);
 		$weights = self::font_name_weights();
@@ -950,7 +935,7 @@ EOCSS;
 	 * Please do not try to refactor this ;)
 	 */
 
-	private static function font_name_weights()
+	private static function font_name_weights(): array
 	{
 		return [
 			100 => 'Thin',
@@ -1001,16 +986,6 @@ EOCSS;
 		update_option(Plugin::DEFAULTS_PREFIX . '_errors', $errors);
 
 		return $return;
-	}
-
-	private static function hex_to_hex_opacity($hex_color): array
-	{
-		if (substr($hex_color, 0, 1) !== '#') {
-			$hex_color = '#ffffffff';
-		}
-		$hex_values = str_split(substr($hex_color . 'FF', 1, 8), 6);
-
-		return [$hex_values[0], intval((hexdec($hex_values[1]) + 1) / 256 * 100)];
 	}
 
 	private static function array_first(array $array)

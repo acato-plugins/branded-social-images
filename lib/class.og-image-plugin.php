@@ -681,37 +681,7 @@ class Plugin
 		}
 
 		// text positioning
-		$top = &$this->text_options['top'];
-		$right = &$this->text_options['right'];
-		$bottom = &$this->text_options['bottom'];
-		$left = &$this->text_options['left'];
-
-		$top = empty($top) || 'null' === $top ? null : $top;
-		$right = empty($right) || 'null' === $right ? null : $right;
-		$bottom = empty($bottom) || 'null' === $bottom ? null : $bottom;
-		$left = empty($left) || 'null' === $left ? null : $left;
-
-		$this->evaluate_vertical($top, $bottom);
-		$this->evaluate_horizontal($left, $right);
-
-		if (null !== $top && null !== $bottom) {
-			$valign = 'center';
-		}
-		elseif (null !== $top) {
-			$valign = 'top';
-		}
-		else {
-			$valign = 'bottom';
-		}
-		if (null !== $left && null !== $right) {
-			$halign = 'center';
-		}
-		elseif (null !== $left) {
-			$halign = 'left';
-		}
-		else {
-			$halign = 'right';
-		}
+		list($valign, $halign) = $this->evaluate_positions($this->text_options['top'], $this->text_options['right'], $this->text_options['bottom'], $this->text_options['left']);
 		$this->text_options['valign'] = $valign;
 		$this->text_options['halign'] = $halign;
 
@@ -915,10 +885,7 @@ class Plugin
 		if (is_numeric($this->logo_options['file'])) {
 			$this->logo_options['file'] = get_attached_file($this->logo_options['file']);
 		}
-		list($sw, $sh) = is_file($this->logo_options['file']) ? getimagesize($this->logo_options['file']) : [
-			0,
-			0
-		];
+		list($sw, $sh) = is_file($this->logo_options['file']) ? getimagesize($this->logo_options['file']) : [0, 0];
 		if ($sw && $sh) {
 			$sa = $sw / $sh;
 			$this->logo_options['source_width'] = $sw;
@@ -935,11 +902,28 @@ class Plugin
 		}
 
 		// logo positioning
-		$top = &$this->logo_options['top'];
-		$right = &$this->logo_options['right'];
-		$bottom = &$this->logo_options['bottom'];
-		$left = &$this->logo_options['left'];
+		list($valign, $halign) = $this->evaluate_positions($this->logo_options['top'], $this->logo_options['right'], $this->logo_options['bottom'], $this->logo_options['left']);
 
+		$this->logo_options['valign'] = $valign;
+		$this->logo_options['halign'] = $halign;
+
+		// size w and h are bounding box!
+		$this->logo_options['size'] = intval($this->logo_options['size']);
+		$this->logo_options['size'] = min(Plugin::MAX_LOGO_SCALE, $this->logo_options['size']);
+		$this->logo_options['size'] = max(Plugin::MIN_LOGO_SCALE, $this->logo_options['size']);
+		$this->logo_options['w'] = $this->logo_options['size'] / 100 * $sw;
+		$this->logo_options['h'] = $this->logo_options['size'] / 100 * $sh;
+		$this->logo_options['size'] .= '%';
+
+		// resolve aspect issues
+		// -> this makes bounding box actual image size
+		$scale = min($this->logo_options['w'] / $sw, $this->logo_options['h'] / $sh);
+		$this->logo_options['w'] = $sw * $scale;
+		$this->logo_options['h'] = $sh * $scale;
+	}
+
+	public function evaluate_positions(&$top, &$right, &$bottom, &$left)
+	{
 		$top = empty($top) || 'null' === $top ? null : $top;
 		$right = empty($right) || 'null' === $right ? null : $right;
 		$bottom = empty($bottom) || 'null' === $bottom ? null : $bottom;
@@ -966,22 +950,8 @@ class Plugin
 		else {
 			$halign = 'right';
 		}
-		$this->logo_options['valign'] = $valign;
-		$this->logo_options['halign'] = $halign;
 
-		// size w and h are bounding box!
-		$this->logo_options['size'] = intval($this->logo_options['size']);
-		$this->logo_options['size'] = min(Plugin::MAX_LOGO_SCALE, $this->logo_options['size']);
-		$this->logo_options['size'] = max(Plugin::MIN_LOGO_SCALE, $this->logo_options['size']);
-		$this->logo_options['w'] = $this->logo_options['size'] / 100 * $sw;
-		$this->logo_options['h'] = $this->logo_options['size'] / 100 * $sh;
-		$this->logo_options['size'] .= '%';
-
-		// resolve aspect issues
-		// -> this makes bounding box actual image size
-		$scale = min($this->logo_options['w'] / $sw, $this->logo_options['h'] / $sh);
-		$this->logo_options['w'] = $sw * $scale;
-		$this->logo_options['h'] = $sh * $scale;
+		return [ $valign, $halign ];
 	}
 
 	public static function late_head()
@@ -1972,14 +1942,14 @@ EODOC;
 	private static function track($action, $network_wide=false)
 	{
 		// tracking disabled for now, we need to find out if this is allowed.
-		return false;
-
-		// we like to see where our plugin is used so we can provide support more easily
-		// note that the only data we collect are plugin name, version and your website URL.
-		// also note that we do not care about the response. (blocking:false)
-		wp_remote_get('https://wp.clearsite.nl/tracking/'. ($network_wide ? 'network-' : '') . $action .'/'.
-			basename(dirname(__DIR__)) . '/'. Plugin::get_version() .'/'. get_bloginfo('url'),
-			['blocking' => false]
-		);
+		if (defined('BSI_TRACKING_ENABLED')) {
+			// we like to see where our plugin is used so we can provide support more easily
+			// note that the only data we collect are plugin name, version and your website URL.
+			// also note that we do not care about the response. (blocking:false)
+			wp_remote_get('https://wp.clearsite.nl/tracking/' . ($network_wide ? 'network-' : '') . $action . '/' .
+				basename(dirname(__DIR__)) . '/' . Plugin::get_version() . '/' . get_bloginfo('url'),
+				['blocking' => false]
+			);
+		}
 	}
 }
