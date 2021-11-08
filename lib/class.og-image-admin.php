@@ -752,39 +752,6 @@ EOCSS;
 		return $font_filename;
 	}
 
-	private static function weight_to_suffix($weight, $is_italic)
-	{
-		$weight = intval(round($weight / 100) * 100);
-		$weights = self::font_name_weights();
-
-		if (!array_key_exists($weight, $weights) || (/* Special case; RegularItalic is just called Italic */ 400 == $weight && $is_italic)) {
-			$suffix = '';
-		}
-		else {
-			$suffix = $weights[$weight];
-		}
-		if ($is_italic) {
-			$suffix .= 'Italic';
-		}
-
-		return $suffix;
-	}
-
-	private static function font_name_weights()
-	{
-		return [
-			100 => 'Thin',
-			200 => 'ExtraLight',
-			300 => 'Light',
-			400 => 'Regular',
-			500 => 'Medium',
-			600 => 'SemiBold',
-			700 => 'Bold',
-			800 => 'ExtraBold',
-			900 => 'Black',
-		];
-	}
-
 	public static function download_google_font($font_family, $font_weight, $font_style)
 	{
 		$font_filename = self::google_font_filename($font_family, $font_weight, $font_style);
@@ -956,6 +923,46 @@ EOCSS;
 			@unlink("$path/.DS_Store");
 		}
 		return rmdir($path);
+	}
+
+	private static function weight_to_suffix($weight, $is_italic)
+	{
+		$weight = intval(round($weight / 100) * 100);
+		$weights = self::font_name_weights();
+
+		if (!array_key_exists($weight, $weights) || (/* Special case; RegularItalic is just called Italic */ 400 == $weight && $is_italic)) {
+			$suffix = '';
+		}
+		else {
+			$suffix = $weights[$weight];
+		}
+		if ($is_italic) {
+			$suffix .= 'Italic';
+		}
+
+		return $suffix;
+	}
+
+	/**
+	 * @method font_name_weights
+	 * @method font_weights
+	 * These might seem duplicate, but they serve a very different function.
+	 * Please do not try to refactor this ;)
+	 */
+
+	private static function font_name_weights()
+	{
+		return [
+			100 => 'Thin',
+			200 => 'ExtraLight',
+			300 => 'Light',
+			400 => 'Regular',
+			500 => 'Medium',
+			600 => 'SemiBold',
+			700 => 'Bold',
+			800 => 'ExtraBold',
+			900 => 'Black',
+		];
 	}
 
 	public static function font_weights(): array
