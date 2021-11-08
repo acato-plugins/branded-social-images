@@ -200,7 +200,7 @@ class Image
 
 		if ($source) {
 			list($image, $width, $height, $_, $image_file) = $source;
-			Plugin::log('Source: found: ' . "W: $width, H: $height, U: $image, F: $image_file");
+			Plugin::log('Source: found: ' . "W: $width, H: $height,\n URL: $image,\n Filepath: $image_file");
 			if ($this->manager->height > $height || $this->manager->width > $width) {
 				header('X-OG-Error-Size: Image sizes do not match, web-master should rebuild thumbnails and use images of sufficient size.');
 			}
@@ -229,8 +229,6 @@ class Image
 					Plugin::log("Source error fixed?: $image_file; " . is_file($image_file) ? 'yes' : 'no');
 				}
 			}
-
-			Plugin::log('Source: found: ' . "Filepath: $image_file");
 
 			if (!is_file($image_file)) {
 				Plugin::log('Source: not found: ' . "Filepath: $image_file does not exist");

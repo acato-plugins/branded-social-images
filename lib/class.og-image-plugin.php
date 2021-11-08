@@ -322,10 +322,14 @@ class Plugin
 	{
 		if (current_user_can(Plugin::get_management_permission())) {
 			header("Content-Type: text/plain");
-			echo "BSI Debug log for " . 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug') . "\n";
-			echo date('r') . "\n";
-			echo implode("\n", self::log()) . "\n";
-			echo "- end log -";
+			$log = [];
+			$log[] = "BSI Debug log for " . 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug');
+			$log[] = date('r');
+			$log = array_merge($log, self::log());
+			$log[] = "- end log -";
+			$log = implode("\n", $log);
+			set_transient(Plugin::OPTION_PREFIX . '_debug_log', $log, 7*86400); // keep log for 1 week.
+			print $log;
 			exit;
 		}
 	}

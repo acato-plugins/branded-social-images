@@ -300,7 +300,9 @@
 		display: grid;
 		gap: 20px;
 		margin-top: 20px;
-		max-width: 600px;
+		&, & > [class*=area--] {
+			max-width: 600px;
+		}
 
 		#side-sortables &, .is-side & {
 			width: 100%;
@@ -310,7 +312,7 @@
 		grid-template-areas: "settings" "options" "config";
 	}
 
-	.area--options, .area--settings, .area--config {
+	.collapsible {
 		h2 {
 			font-weight: 600;
 			font-size: 1.3em;
@@ -410,6 +412,12 @@
 
 	.area--config {
 		grid-area: config;
+	}
+
+	.area--debug {
+		pre {
+			overflow: auto;
+		}
 	}
 
 	.hidden, .wrap-hidden {

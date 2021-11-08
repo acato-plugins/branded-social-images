@@ -485,7 +485,7 @@ class Admin
 			</div>
 			<?php if (!$is_meta_panel) { ?>
 				<div class="settings">
-					<div class="area--options">
+					<div class="area--options collapsible">
 						<h2><?php _e('Image and Logo options', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
 						<div class="inner">
 							<?php self::render_options($fields, [
@@ -494,7 +494,7 @@ class Admin
 							]); ?>
 						</div>
 					</div>
-					<div class="area--settings">
+					<div class="area--settings collapsible">
 						<h2><?php _e('Text settings', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
 						<div class="inner">
 							<?php self::render_options($fields, [
@@ -510,12 +510,22 @@ class Admin
 							]); ?>
 						</div>
 					</div>
-					<div class="area--config closed">
+					<div class="area--config closed collapsible">
 						<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
 						<div class="inner">
 							<?php self::render_options($fields, ['disabled']); ?>
 						</div>
 					</div>
+					<?php if ($log = get_transient(Plugin::OPTION_PREFIX .'_debug_log')) { ?>
+						<div class="area--debug closed collapsible">
+							<h2><?php _e('Debug log', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+							<div class="inner">
+								<pre><?php print $log; ?></pre>
+								<em><?php $date = date('d-m-Y H:i:s', get_option('_transient_timeout_'. Plugin::OPTION_PREFIX .'_debug_log'));
+									print sprintf(__('This log will be available until %s', Plugin::TEXT_DOMAIN), $date); ?></em>
+							</div>
+						</div>
+					<?php } ?>
 				</div>
 			<?php } ?>
 		</div>

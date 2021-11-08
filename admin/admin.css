@@ -1372,18 +1372,19 @@
     display: grid;
     gap: 20px;
     margin-top: 20px;
-    max-width: 600px;
     -ms-grid-columns: 1fr;
         grid-template-columns: 1fr;
     grid-template-areas: "settings" "options" "config"; }
+    #branded-social-images-editor .settings, #branded-social-images-editor .settings > [class*=area--] {
+      max-width: 600px; }
     #side-sortables #branded-social-images-editor .settings, .is-side #branded-social-images-editor .settings {
       width: 100%; }
-  #branded-social-images-editor .area--options, #branded-social-images-editor .area--settings, #branded-social-images-editor .area--config {
+  #branded-social-images-editor .collapsible {
     display: -ms-flexbox;
     display: flex;
     -ms-flex-direction: column;
         flex-direction: column; }
-    #branded-social-images-editor .area--options h2, #branded-social-images-editor .area--settings h2, #branded-social-images-editor .area--config h2 {
+    #branded-social-images-editor .collapsible h2 {
       font-weight: 600;
       font-size: 1.3em;
       background: #fcfcfc;
@@ -1392,9 +1393,9 @@
       margin: 0;
       padding: 1em 30px;
       position: relative; }
-      #side-sortables #branded-social-images-editor .area--options h2, .is-side #branded-social-images-editor .area--options h2, #side-sortables #branded-social-images-editor .area--settings h2, .is-side #branded-social-images-editor .area--settings h2, #side-sortables #branded-social-images-editor .area--config h2, .is-side #branded-social-images-editor .area--config h2 {
+      #side-sortables #branded-social-images-editor .collapsible h2, .is-side #branded-social-images-editor .collapsible h2 {
         padding: 1em 15px; }
-      #branded-social-images-editor .area--options h2 .toggle, #branded-social-images-editor .area--settings h2 .toggle, #branded-social-images-editor .area--config h2 .toggle {
+      #branded-social-images-editor .collapsible h2 .toggle {
         display: inline-block;
         width: 0;
         height: 0;
@@ -1407,38 +1408,38 @@
             transform: rotate(180deg);
         top: 0.5em;
         right: 30px; }
-        #branded-social-images-editor .area--options h2 .toggle:hover, #branded-social-images-editor .area--settings h2 .toggle:hover, #branded-social-images-editor .area--config h2 .toggle:hover {
+        #branded-social-images-editor .collapsible h2 .toggle:hover {
           border-top-color: #888;
           cursor: pointer; }
-    #branded-social-images-editor .area--options.closed h2 .toggle, #branded-social-images-editor .area--settings.closed h2 .toggle, #branded-social-images-editor .area--config.closed h2 .toggle {
+    #branded-social-images-editor .collapsible.closed h2 .toggle {
       top: 1em;
       -ms-transform: rotate(0);
           transform: rotate(0); }
-    #branded-social-images-editor .area--options .inner, #branded-social-images-editor .area--settings .inner, #branded-social-images-editor .area--config .inner {
+    #branded-social-images-editor .collapsible .inner {
       padding: 20px;
       background: white;
       border: 1px solid #ddd;
       border-top: 0; }
-      #side-sortables #branded-social-images-editor .area--options .inner, .is-side #branded-social-images-editor .area--options .inner, #side-sortables #branded-social-images-editor .area--settings .inner, .is-side #branded-social-images-editor .area--settings .inner, #side-sortables #branded-social-images-editor .area--config .inner, .is-side #branded-social-images-editor .area--config .inner {
+      #side-sortables #branded-social-images-editor .collapsible .inner, .is-side #branded-social-images-editor .collapsible .inner {
         padding: 5px; }
-    #branded-social-images-editor .area--options.closed .inner, #branded-social-images-editor .area--settings.closed .inner, #branded-social-images-editor .area--config.closed .inner {
+    #branded-social-images-editor .collapsible.closed .inner {
       overflow: hidden;
       height: 0;
       padding-top: 0;
       padding-bottom: 0; }
-    #branded-social-images-editor .area--options .inner, #branded-social-images-editor .area--settings .inner, #branded-social-images-editor .area--config .inner {
+    #branded-social-images-editor .collapsible .inner {
       display: -ms-flexbox;
       display: flex;
       -ms-flex-direction: row;
           flex-direction: row;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap; }
-      #branded-social-images-editor .area--options .inner > span, #branded-social-images-editor .area--settings .inner > span, #branded-social-images-editor .area--config .inner > span {
+      #branded-social-images-editor .collapsible .inner > span {
         width: 50%; }
         @media screen and (max-width: 1200px) {
-          #branded-social-images-editor .area--options .inner > span, #branded-social-images-editor .area--settings .inner > span, #branded-social-images-editor .area--config .inner > span {
+          #branded-social-images-editor .collapsible .inner > span {
             width: 100%; } }
-        #branded-social-images-editor .area--options .inner > span.name-text_enabled, #branded-social-images-editor .area--options .inner > span.name-image, #branded-social-images-editor .area--options .inner > span.name-image_logo, #branded-social-images-editor .area--options .inner > span.name-image_use_thumbnail, #branded-social-images-editor .area--options .inner > span.name-disabled, #branded-social-images-editor .area--settings .inner > span.name-text_enabled, #branded-social-images-editor .area--settings .inner > span.name-image, #branded-social-images-editor .area--settings .inner > span.name-image_logo, #branded-social-images-editor .area--settings .inner > span.name-image_use_thumbnail, #branded-social-images-editor .area--settings .inner > span.name-disabled, #branded-social-images-editor .area--config .inner > span.name-text_enabled, #branded-social-images-editor .area--config .inner > span.name-image, #branded-social-images-editor .area--config .inner > span.name-image_logo, #branded-social-images-editor .area--config .inner > span.name-image_use_thumbnail, #branded-social-images-editor .area--config .inner > span.name-disabled {
+        #branded-social-images-editor .collapsible .inner > span.name-text_enabled, #branded-social-images-editor .collapsible .inner > span.name-image, #branded-social-images-editor .collapsible .inner > span.name-image_logo, #branded-social-images-editor .collapsible .inner > span.name-image_use_thumbnail, #branded-social-images-editor .collapsible .inner > span.name-disabled {
           width: 100%; }
   #branded-social-images-editor .area--options {
     position: relative;
@@ -1447,6 +1448,8 @@
     grid-area: settings; }
   #branded-social-images-editor .area--config {
     grid-area: config; }
+  #branded-social-images-editor .area--debug pre {
+    overflow: auto; }
   #branded-social-images-editor .hidden, #branded-social-images-editor .wrap-hidden {
     display: none !important; }
   #branded-social-images-editor .wrap-position-grid .options-wrap {
