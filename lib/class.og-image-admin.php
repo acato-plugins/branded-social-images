@@ -41,7 +41,7 @@ class Admin
 			$style = (!defined('BSI_UNMINIFIED') ? 'admin/admin.css' : 'admin/admin.min.css');
 			wp_enqueue_script(Plugin::SCRIPT_STYLE_HANDLE, plugins_url($script, __DIR__), ['jquery', 'jquery-ui-slider'], filemtime(dirname(__DIR__) . '/' . $script), true);
 			wp_localize_script(Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', [
-				'preview_url' => get_permalink() . Plugin::BSI_IMAGE_NAME,
+				'preview_url' => get_permalink() . Plugin::output_filename(),
 				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
 				'title_format' => Plugin::title_format(1, true),
 				'text' => [
@@ -624,8 +624,8 @@ class Admin
 
 			// clean the cache
 			$cache_file = wp_upload_dir();
-			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME . '.lock';
-			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::BSI_IMAGE_NAME;
+			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::output_filename() . '.lock';
+			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::output_filename();
 			array_map('unlink', array_merge(glob($lock_files), glob($cache_files)));
 		}
 	}
@@ -862,27 +862,7 @@ EOCSS;
 					wp_redirect(remove_query_arg('bsi-action', add_query_arg('updated', 1)));
 					exit;
 				case 'purge-cache-confirm':
-					$purgable = Plugin::get_purgable_cache();
-					// protection!
-					$base = trailingslashit(Plugin::getInstance()->storage());
-					$success = true;
-					foreach ($purgable as $item) {
-						if (false === strpos($item, $base)) {
-							continue;
-						}
-
-						try {
-							if (is_file($item)) {
-								if (!self::unlink($item)) $success = false;
-							}
-							if (is_dir($item)) {
-								if (!self::rmdir($item)) $success = false;
-								if (!self::rmdir(dirname($item))) $success = false;
-							}
-						} catch (Exception $e) {
-
-						}
-					}
+					Plugin::purge_cache();
 
 					$purgable = Plugin::get_purgable_cache();
 					if ($purgable || !$success) {
@@ -895,19 +875,6 @@ EOCSS;
 					exit;
 			}
 		}
-	}
-
-	private static function unlink($path): bool
-	{
-		return unlink($path);
-	}
-
-	private static function rmdir($path): bool
-	{
-		if (is_file("$path/.DS_Store")) {
-			@unlink("$path/.DS_Store");
-		}
-		return rmdir($path);
 	}
 
 	private static function weight_to_suffix($weight, $is_italic): string

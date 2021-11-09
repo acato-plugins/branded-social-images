@@ -320,38 +320,27 @@ class GD
 		}
 
 		imagecopyresampled($this->resource, $logo, $logo_posX, $logo_posY, 0, 0, $w, $h, $logo_width, $logo_height);
-//		var_dump($logoOptions);exit;
-//		header("content-type: image/png");
-//		imagepng($this->resource);exit;
 		imagedestroy($logo);
 
 		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_adding_logo', $this->handler->post_id, $this->handler->image_id]);
 	}
 
-	public function save()
+	public function save($format, $quality)
 	{
 		$this->manager->file_put_contents($this->target, ''); // prime the file, creating all directories
-		imagepng(imagescale($this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED), $this->target, 2);
+		switch($format) {
+			case 'jpg':
+				imagejpeg(imagescale($this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED), $this->target, $quality);
+			break;
+			case 'webp':
+				imagewebp(imagescale($this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED), $this->target, $quality);
+			break;
+			case 'png':
+			default:
+				imagepng(imagescale($this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED), $this->target, $quality);
+			break;
+		}
 	}
-
-	public function push_to_browser($filename)
-	{
-		header('Content-Type: image/png');
-		header('Content-Disposition: inline; filename=' . $filename);
-		imagepng($this->resource);
-	}
-//
-//	private function imagettftextbox_stroke(&$image, $size, $x, $y, $w, $h, $strokecolor, $fontfile, $text, $px, $align='left') {
-//		for($c1 = ($x-$px); $c1 <= ($x+$px); $c1++) {
-//			$a +=2;
-//			$c2 = $y + round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
-////			imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
-//			$this->imagettftextbox($image, $size, $c1, $c2, $w, $h, $strokecolor, $fontfile, $text, ['align' => $align ]);
-//			$c3 = $y - round(sqrt($px*$px - ($x-$c1)*($x-$c1)));
-////			imagettftext($image, $size, $angle, $c1, $c3, $strokecolor, $fontfile, $text);
-//			$this->imagettftextbox($image, $size, $c1, $c3, $w, $h, $strokecolor, $fontfile, $text, ['align' => $align ]);
-//		}
-//	}
 
 	private function imagettftextbox($image, $size, $x, $y, $w, $h, Color $color, $fontfile, $text, $options = [])
 	{

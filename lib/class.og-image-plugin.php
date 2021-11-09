@@ -10,7 +10,7 @@ defined('ABSPATH') or die('You cannot be here.');
 class Plugin
 {
 	/** @var string Defines the URL-endpoint. After changing, re-save permalinks to take effect */
-	const BSI_IMAGE_NAME = 'social-image.png';
+	const BSI_IMAGE_NAME = 'social-image';
 	/** @var string Experimental feature text-stroke. (off|on) */
 	const FEATURE_STROKE = 'off';
 	/** @var string Reduced functionality for clarity. (off|simple|on) */
@@ -174,13 +174,15 @@ class Plugin
 
 		add_action('init', function () {
 			// does not work in any possible way for Post-Type Archives
-			add_rewrite_endpoint(self::BSI_IMAGE_NAME, EP_PERMALINK | EP_ROOT | EP_PAGES, Plugin::QUERY_VAR);
+			add_rewrite_endpoint(self::output_filename(), EP_PERMALINK | EP_ROOT | EP_PAGES, Plugin::QUERY_VAR);
 
-			if (get_option("bsi_needs_rewrite_rules")) {
+			if (get_option("bsi_needs_rewrite_rules") || Plugin::output_filename() !== get_option('_bsi_rewrite_rules_based_on')) {
 				delete_option("bsi_needs_rewrite_rules");
 				global $wp_rewrite;
 				update_option("rewrite_rules", false);
 				$wp_rewrite->flush_rules(true);
+				update_option('_bsi_rewrite_rules_based_on', Plugin::output_filename());
+				Plugin::purge_cache();
 			}
 			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
 			if (Plugin::AA > 1) {
@@ -218,19 +220,19 @@ class Plugin
 			$pt_archives = [];
 			foreach ($rules as $target) {
 				if (preg_match('/^index.php\?post_type=([^&%]+)$/', $target, $m)) {
-					$pt_archives[$m[1] . '/' . Plugin::BSI_IMAGE_NAME . '/?$'] = $target . '&' . Plugin::QUERY_VAR . '=1';
+					$pt_archives[$m[1] . '/' . Plugin::output_filename() . '/?$'] = $target . '&' . Plugin::QUERY_VAR . '=1';
 				}
 			}
 			$rules = array_merge($pt_archives, $rules);
 			foreach ($rules as $source => $target) {
 				if (
-					preg_match('/' . strtr(self::BSI_IMAGE_NAME, [
+					preg_match('/' . strtr(self::output_filename(), [
 							'.' => '\\.',
 							'-' => '\\-'
 						]) . '/', $source)
 				) {
-					$source = explode(self::BSI_IMAGE_NAME, $source);
-					$source = $source[0] . self::BSI_IMAGE_NAME . '/?$';
+					$source = explode(self::output_filename(), $source);
+					$source = $source[0] . self::output_filename() . '/?$';
 
 					$target = explode(Plugin::QUERY_VAR . '=', $target);
 					$target = $target[0] . Plugin::QUERY_VAR . '=1';
@@ -372,7 +374,7 @@ class Plugin
 				$ext = '/*';
 				break;
 			case 'images':
-				$ext = '/*.png';
+				$ext = '/*.{png,jpg,webp}';
 				break;
 			case 'locks':
 				$ext = '/*.lock';
@@ -384,7 +386,7 @@ class Plugin
 			default:
 				return array_merge(self::get_purgable_cache('files'), self::get_purgable_cache('directories'));
 		}
-		$cache = glob(self::getInstance()->storage() . '/*/*' . $ext);
+		$cache = glob(self::getInstance()->storage() . '/*/*' . $ext, GLOB_BRACE);
 
 		return array_filter($cache, $filter);
 	}
@@ -457,6 +459,64 @@ class Plugin
 		return $format;
 	}
 
+	public static function output_filename()
+	{
+		$fallback_format = 'jpg';
+		$output_format = Plugin::setting('output_format', $fallback_format);
+		if (is_array($output_format)) {
+			$fallback_format = $output_format[1];
+			$output_format = $output_format[0];
+		}
+		if (!in_array($fallback_format, ['png','jpg','webp'])) {
+			$fallback_format = 'jpg';
+		}
+		if ('webp' === $output_format && !function_exists('imagewebp')) {
+			$output_format = $fallback_format;
+		}
+		if (!in_array($output_format, ['png','jpg','webp'])) {
+			$output_format = $fallback_format;
+		}
+
+		return self::BSI_IMAGE_NAME . '.'. $output_format;
+	}
+
+	private static function unlink($path): bool
+	{
+		return unlink($path);
+	}
+
+	private static function rmdir($path): bool
+	{
+		if (is_file("$path/.DS_Store")) {
+			@unlink("$path/.DS_Store");
+		}
+		return rmdir($path);
+	}
+
+	public static function purge_cache()
+	{
+		$purgable = Plugin::get_purgable_cache();
+		// protection!
+		$base = trailingslashit(Plugin::getInstance()->storage());
+		foreach ($purgable as $item) {
+			if (false === strpos($item, $base)) {
+				continue;
+			}
+
+			try {
+				if (is_file($item)) {
+					self::unlink($item);
+				}
+				if (is_dir($item)) {
+					self::rmdir($item);
+					self::rmdir(dirname($item));
+				}
+			} catch (\Exception $e) {
+
+			}
+		}
+	}
+
 	public function _init()
 	{
 		$id = get_the_ID();
@@ -488,9 +548,10 @@ class Plugin
 					static::class,
 					'overrule_og_image'
 				], PHP_INT_MAX);
-				add_filter('rank_math/opengraph/facebook/og_image_type', function () {
-					return 'image/png';
-				}, PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/og_image_type', [
+					static::class,
+					'overrule_og_type'
+				], PHP_INT_MAX);
 				add_filter('rank_math/opengraph/facebook/og_image_width', function () {
 					return static::getInstance()->width;
 				}, PHP_INT_MAX);
@@ -990,12 +1051,20 @@ class Plugin
 		// from https://somesite.com/language/, keep only the base url, as the rest is included in the result from 'remove_query_arg'
 		$base_url = parse_url($base_url, PHP_URL_SCHEME) . '://' . parse_url($base_url, PHP_URL_HOST); // no trailing slash
 
-		return trailingslashit($base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::BSI_IMAGE_NAME . '/'; // yes, slash, WP will add it with a redirect anyway
+		return trailingslashit($base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::output_filename() . '/'; // yes, slash, WP will add it with a redirect anyway
+	}
+
+	public static function overrule_og_type(): string
+	{
+		$ext = explode('.', self::output_filename());
+		$ext = end($ext);
+
+		return 'image/'. $ext;
 	}
 
 	public static function get_og_image_url($post_id)
 	{
-		return get_permalink($post_id) ? get_permalink($post_id) . self::BSI_IMAGE_NAME . '/' : false;
+		return get_permalink($post_id) ? get_permalink($post_id) . self::output_filename() . '/' : false;
 	}
 
 	public static function patch_wpseo_head()
@@ -1012,7 +1081,7 @@ class Plugin
 				break;
 			case 2:
 				$wpseo_head = ob_get_clean();
-				if (preg_match('@/' . Plugin::BSI_IMAGE_NAME . '/@', $wpseo_head)) {
+				if (preg_match('@/' . Plugin::output_filename() . '/@', $wpseo_head)) {
 					$wpseo_head = preg_replace('/og:image:width" content="([0-9]+)"/', 'og:image:width" content="' . Plugin::getInstance()->width . '"', $wpseo_head);
 					$wpseo_head = preg_replace('/og:image:height" content="([0-9]+)"/', 'og:image:height" content="' . Plugin::getInstance()->height . '"', $wpseo_head);
 				}
@@ -1751,8 +1820,12 @@ EODOC;
 	{
 		global $pagenow;
 		if (!is_admin() || $pagenow == 'post.php' || $pagenow == 'post-new.php') {
-
-			$permalink = get_permalink(get_the_ID());
+			if (!is_admin()) {
+				$permalink = is_single() ? get_permalink(get_the_ID()) : remove_query_arg('');
+			}
+			else {
+				$permalink = get_permalink(get_the_ID());
+			}
 			if (!parse_url($permalink, PHP_URL_HOST)) {
 				// somebody messed with the permalinks!
 				$permalink = trailingslashit(get_home_url()) . ltrim(parse_url($permalink, PHP_URL_PATH), '/');
@@ -1765,7 +1838,7 @@ EODOC;
 				$args = array(
 					'id' => self::ADMIN_SLUG . '-view',
 					'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
-					'href' => $permalink . Plugin::BSI_IMAGE_NAME . '/',
+					'href' => $permalink . Plugin::output_filename() . '/',
 					'meta' => [
 						'target' => '_blank',
 						'class' => self::ADMIN_SLUG . '-view'
@@ -1837,12 +1910,16 @@ EODOC;
 	 *                                 with true, the WordPress title is used as default
 	 *                                 with false, the default title is scraped from the HTML and will therefore be
 	 *                                             influenced by plugins like Yoast SEO. This is standard behavior.
+	 * $setting = png_compression_level, filter = bsi_settings_png_compression_level, expects number 0 - 9,
+	 *                                 0 = no compression, 9 = highest compression, default = 2
+	 *         WARNING                 If you change the format, you must flush all page-caches, flush the BSI Image
+	 *                                 cache and re-save permalinks!  THIS IS YOUR OWN RESPONSIBILITY.
 	 *
 	 * @return mixed|void
 	 */
-	public static function setting(string $setting)
+	public static function setting($setting, $default = null)
 	{
-		return apply_filters('bsi_settings_' . $setting, false);
+		return apply_filters('bsi_settings_' . $setting, $default);
 	}
 
 	public static function protect_dir($dir)
