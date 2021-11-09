@@ -96,6 +96,22 @@ Use filter `bsi_meta_box_context` to change the meta-box position, return either
 Beware that the `side` option makes the meta-box very small and with that less usable.
 In a classic-editor environment, dragging the metabox to the sidebar (or back) is possible.
 
+= In version 1.0.14, the output format changed from PNG to JPG, now my images don't work anymore. =
+
+While the plugin has code to migrate, obviously in your case it failed. Sorry about that. To remedy the situation, perform 2 steps;
+1. Go to your permalinks settings and click the save button. No need to change anything, just go there and hit save.
+2. Purge the BSI cache using the purge cache button on the bottom of the BSI settings panel.
+
+= In version 1.0.14, the output format changed from PNG to JPG. I don't want that, can I switch back to PNG? =
+
+Yes you can. use filter `bsi_settings_output_format` to change it; `add_filter('bsi_settings_output_format', function() { return 'png'; });`
+
+= The quality of the output image is not high enough, the output image size is too large. What can I do? =
+
+By changing the quality-level of the output image, you can reduce the filesize, or increase the sharpness of the image.
+Use filter `bsi_settings_jpg_quality_level` and return a number between 0 and 100, 100 being best quality, 75 being the default.
+If you set the output to PNG, use filter `bsi_settings_png_compression_level` and return a number from 0 to 9, 2 being the default.
+
 = Can I assist with translating the plugin? =
 
 Absolutely! A .pot template can be found in the [GitHub repository](https://github.com/clearsite/branded-social-images "Branded Social Images on GitHub")
@@ -109,6 +125,7 @@ Absolutely! A .pot template can be found in the [GitHub repository](https://gith
 == Changelog ==
 
 = 1.0.14 =
+* important change: Switch from PNG output to JPG output. The reason is disk-space usage; the JPG takes only a fraction of the disk space and has practically the same quality. See the FAQ for more information.
 * fixed: showing debug information leaves image cache in locked state, preventing (re-)generation of image.
 * improved: interface will now scale on small displays.
 * changed: for new posts, title is automatically filled based on '{title} - {blogname}'.

@@ -515,7 +515,7 @@ class Admin
 							<div class="inner">
 								<pre><?php print $log; ?></pre>
 								<em><?php $date = date('d-m-Y H:i:s', get_option('_transient_timeout_'. Plugin::OPTION_PREFIX .'_debug_log'));
-									print sprintf(__('This log will be available until %s', Plugin::TEXT_DOMAIN), $date); ?></em>
+									print sprintf(__('This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN), $date); ?></em>
 							</div>
 						</div>
 					<?php } ?>
