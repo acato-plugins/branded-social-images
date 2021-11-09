@@ -309,7 +309,12 @@ class Plugin
 
 	public static function log(): array
 	{
-		static $log = [];
+		static $log;
+		if (!$log) {
+			$log = [];
+			$log[] = 'BSI version: '. Plugin::get_version();
+			$log[] = 'BSI revision date: '. date('Y-m-d H:i:s', filemtime(BSI_PLUGIN_FILE));
+		}
 		if (count(func_get_args()) > 0) {
 			$item = func_get_arg(0);
 			// sanitize
@@ -338,8 +343,13 @@ class Plugin
 
 	public static function get_version()
 	{
-		$data = get_plugin_data(dirname(__DIR__) . '/wp-plugin.php');
-		return $data['Version'];
+		static $version;
+		if (!$version) {
+			// yes, we are mimicking get_plugin_data here because get_plugin_data is not always available while get_file_data is.
+			$data = get_file_data(BSI_PLUGIN_FILE, ['Version' => 'Version'], 'plugin');
+			$version = $data['Version'];
+		}
+		return $version;
 	}
 
 	public static function wp_get_attachment_image_data($image_id, string $size)
