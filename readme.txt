@@ -62,7 +62,7 @@ Although this might be a feature for a future version; there currently is no way
 
 = Is the plugin WPML compatible? =
 
-Yes, as long as your font supports the languages. The supplied fonts are "Western" only. If you need character sets for languages like Korean or Japanese, you need to upload an approriate font.
+Yes, as long as your font supports the languages. The supplied fonts are "Western" only. If you need character sets for languages like Korean or Japanese, you need to upload an appropriate font.
 
 = Your plugin is not the first I've seen, why bother creating this plugin? =
 
@@ -75,7 +75,7 @@ For image generation; NO. The plugin is self-contained in that manner.
 
 The plugin does use external services, namely the following, and only once after install or update.
 1. Google Fonts - to download a set of sample fonts for you to use (on install or loss of cache folder),
-2. Google APIs - to download image conversion software for converting WEBP to PNG so the images can be used by GD2 (on intall and on update).
+2. Google APIs - to download image conversion software for converting WEBP to PNG so the images can be used by GD2 (on install and on update).
 
 Number 2 might fail silently, resulting in not being able to use WEBP, but this will in no way affect the plugin itself when using PNG and JPEG.
 
