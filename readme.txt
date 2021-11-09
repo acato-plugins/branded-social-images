@@ -116,6 +116,15 @@ If you set the output to PNG, use filter `bsi_settings_png_compression_level` an
 
 Absolutely! A .pot template can be found in the [GitHub repository](https://github.com/clearsite/branded-social-images "Branded Social Images on GitHub")
 
+= Something isn't working properly. Can you help? =
+
+Sure! Go to the support forum and create a new request.
+Please include as much information as you feel comfortable with, just make sure you do not reveal information that could lead to unauthorized access to your website.
+Do NOT send us your logins, password etc.
+If you have problems with a specific image, please generate a log and include it in your support ticket (take the url to the social-image, add ?debug=BSI to it). If you do not see the log on-screen, you can find it in the BSI settings panel.
+If you don't want to share this information publicly, send us an e-mail referencing the support ticket.
+When in doubt, contact us before sharing.
+
 == Screenshots ==
 
 1. Enrich your social images, automatically.
