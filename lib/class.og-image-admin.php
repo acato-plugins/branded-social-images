@@ -865,7 +865,7 @@ EOCSS;
 					Plugin::purge_cache();
 
 					$purgable = Plugin::get_purgable_cache();
-					if ($purgable || !$success) {
+					if ($purgable) {
 						self::setError('generic', sprintf(__('Not all cache items could be removed. Please try again, or check the cache folder yourself. Location: %s', Plugin::TEXT_DOMAIN), $base));
 						wp_redirect(remove_query_arg('bsi-action', add_query_arg('purged', 'error')));
 					}

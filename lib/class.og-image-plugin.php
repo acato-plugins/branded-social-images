@@ -384,7 +384,19 @@ class Plugin
 				break;
 			case 'all':
 			default:
-				return array_merge(self::get_purgable_cache('files'), self::get_purgable_cache('directories'));
+				$list = array_merge(self::get_purgable_cache('files'), self::get_purgable_cache('directories'), array_map('dirname', self::get_purgable_cache('directories')));
+				// sort files first, then directory depth
+				uasort($list, function($item1, $item2) {
+					if (is_file($item1)) { return -1; }
+					if (is_dir($item1)) { return strnatcmp(count(explode('/', $item1)), count(explode('/', $item2))); }
+					return 0;
+				});
+				// now the items are sorted, but the order in the array is wrong ?!?!
+				$sorted = [];
+				for ($i = 0; $i < count($list); $i++) {
+					$sorted[] = $list[$i];
+				}
+				return array_values(array_unique($sorted));
 		}
 		$cache = glob(self::getInstance()->storage() . '/*/*' . $ext, GLOB_BRACE);
 
@@ -482,22 +494,36 @@ class Plugin
 
 	private static function unlink($path): bool
 	{
-		return unlink($path);
+		try {
+			$result = unlink($path);
+		} catch(Exception $e) {
+			$result = false;
+		}
+
+		return $result;
 	}
 
 	private static function rmdir($path): bool
 	{
 		if (is_file("$path/.DS_Store")) {
-			@unlink("$path/.DS_Store");
+			self::unlink("$path/.DS_Store");
 		}
-		return rmdir($path);
+		try {
+			$result = rmdir($path);
+		}
+		catch(Exception $e) {
+			$result = false;
+		}
+
+		return $result;
 	}
 
-	public static function purge_cache()
+	public static function purge_cache(): bool
 	{
 		$purgable = Plugin::get_purgable_cache();
 		// protection!
 		$base = trailingslashit(Plugin::getInstance()->storage());
+		$result = true;
 		foreach ($purgable as $item) {
 			if (false === strpos($item, $base)) {
 				continue;
@@ -505,16 +531,21 @@ class Plugin
 
 			try {
 				if (is_file($item)) {
-					self::unlink($item);
+					if (!self::unlink($item)) {
+						$result = false;
+					}
 				}
 				if (is_dir($item)) {
-					self::rmdir($item);
-					self::rmdir(dirname($item));
+					if (!self::rmdir($item)) {
+						$result = false;
+					}
 				}
 			} catch (\Exception $e) {
 
 			}
 		}
+
+		return $result;
 	}
 
 	public function _init()
