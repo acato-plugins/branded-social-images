@@ -316,20 +316,24 @@ class Plugin
 			$static[] = '-- active plugins --';
 			$plugins = get_option('active_plugins', []);
 			foreach ($plugins as $key => $value) {
-				$static[] = ($key+1) . ": $value";
+				$static[] = ($key + 1) . ": $value";
+			}
+			$static[] = '-- php/wp functions --';
+			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype'] as $function) {
+				$static[] = "$function: " . (function_exists($function) ? 'exists' : 'does not exist');
 			}
 			$static[] = '-- php settings --';
 			foreach (['memory_limit', 'max_execution_time'] as $setting) {
-				$static[] = "$setting: ". ini_get($setting);
+				$static[] = "$setting: " . ini_get($setting);
 			}
 			$static[] = '-- end of log --';
 		}
 		if (!$log) {
 			$log = [];
-			$log[] = 'Log start: '. date('r');
-			$log[] = 'BSI version: '. Plugin::get_version();
-			$log[] = 'BSI revision date: '. date('r', filemtime(BSI_PLUGIN_FILE));
-			$log[] = "Start memory usage: ". ceil(memory_get_peak_usage()/(1024*1024)) . "M";
+			$log[] = 'Log start: ' . date('r');
+			$log[] = 'BSI version: ' . Plugin::get_version();
+			$log[] = 'BSI revision date: ' . date('r', filemtime(BSI_PLUGIN_FILE));
+			$log[] = "Start memory usage: " . ceil(memory_get_peak_usage() / (1024 * 1024)) . "M";
 			$log[] = '-- image generation --';
 			$log[] = "BSI Debug log for " . 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug');
 		}
@@ -340,7 +344,7 @@ class Plugin
 			$log[] = $item;
 		}
 
-		return array_merge($log, ['Peak memory usage: '. ceil(memory_get_peak_usage()/(1024*1024)) . 'M'], $static);
+		return array_merge($log, ['Peak memory usage: ' . ceil(memory_get_peak_usage() / (1024 * 1024)) . 'M'], $static);
 	}
 
 	public static function display_log()
@@ -348,7 +352,7 @@ class Plugin
 		if (current_user_can(Plugin::get_management_permission())) {
 			header("Content-Type: text/plain");
 			$log = implode("\n", self::log());
-			set_transient(Plugin::OPTION_PREFIX . '_debug_log', $log, 7*86400); // keep log for 1 week.
+			set_transient(Plugin::OPTION_PREFIX . '_debug_log', $log, 7 * 86400); // keep log for 1 week.
 			print $log;
 			exit;
 		}
@@ -409,9 +413,13 @@ class Plugin
 			default:
 				$list = array_merge(self::get_purgable_cache('files'), self::get_purgable_cache('directories'), array_map('dirname', self::get_purgable_cache('directories')));
 				// sort files first, then directory depth
-				uasort($list, function($item1, $item2) {
-					if (is_file($item1)) { return -1; }
-					if (is_dir($item1)) { return strnatcmp(count(explode('/', $item1)), count(explode('/', $item2))); }
+				uasort($list, function ($item1, $item2) {
+					if (is_file($item1)) {
+						return -1;
+					}
+					if (is_dir($item1)) {
+						return strnatcmp(count(explode('/', $item1)), count(explode('/', $item2)));
+					}
 					return 0;
 				});
 				// now the items are sorted, but the order in the array is wrong ?!?!
@@ -502,24 +510,24 @@ class Plugin
 			$fallback_format = $output_format[1];
 			$output_format = $output_format[0];
 		}
-		if (!in_array($fallback_format, ['png','jpg','webp'])) {
+		if (!in_array($fallback_format, ['png', 'jpg', 'webp'])) {
 			$fallback_format = 'jpg';
 		}
 		if ('webp' === $output_format && !function_exists('imagewebp')) {
 			$output_format = $fallback_format;
 		}
-		if (!in_array($output_format, ['png','jpg','webp'])) {
+		if (!in_array($output_format, ['png', 'jpg', 'webp'])) {
 			$output_format = $fallback_format;
 		}
 
-		return self::BSI_IMAGE_NAME . '.'. $output_format;
+		return self::BSI_IMAGE_NAME . '.' . $output_format;
 	}
 
 	private static function unlink($path): bool
 	{
 		try {
 			$result = unlink($path);
-		} catch(Exception $e) {
+		} catch (Exception $e) {
 			$result = false;
 		}
 
@@ -533,8 +541,7 @@ class Plugin
 		}
 		try {
 			$result = rmdir($path);
-		}
-		catch(Exception $e) {
+		} catch (Exception $e) {
 			$result = false;
 		}
 
@@ -581,7 +588,7 @@ class Plugin
 			while (ob_get_level()) {
 				$destroy_buffer ? ob_end_clean() : ob_end_flush();
 			}
-			Plugin::log('All buffers are '. ($destroy_buffer ? 'cleaned' : 'flushed'));
+			Plugin::log('All buffers are ' . ($destroy_buffer ? 'cleaned' : 'flushed'));
 		}
 	}
 
@@ -1080,7 +1087,7 @@ class Plugin
 			$halign = 'right';
 		}
 
-		return [ $valign, $halign ];
+		return [$valign, $halign];
 	}
 
 	public static function late_head()
@@ -1127,7 +1134,7 @@ class Plugin
 		$ext = explode('.', self::output_filename());
 		$ext = end($ext);
 
-		return 'image/'. $ext;
+		return 'image/' . $ext;
 	}
 
 	public static function get_og_image_url($post_id)
@@ -2084,7 +2091,7 @@ EODOC;
 		self::track('uninstall', $network_wide);
 	}
 
-	private static function track($action, $network_wide=false)
+	private static function track($action, $network_wide = false)
 	{
 		// tracking disabled for now, we need to find out if this is allowed.
 		if (defined('BSI_TRACKING_ENABLED')) {

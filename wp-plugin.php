@@ -5,7 +5,7 @@
  * Plugin URI: https://clearsite.nl/branded-social-images
  * Author: Internetbureau Clearsite
  * Author URI: https://clearsite.nl/branded-social-images
- * Version: 1.0.14
+ * Version: 1.0.15
  * License: GPL2
  */
 
@@ -43,6 +43,7 @@ use Clearsite\Plugins\OGImage\Plugin;
 
 define('BSI_PLUGIN_FILE', __FILE__);
 
+require_once __DIR__ . '/lib/inc.functions.php';
 require_once __DIR__ . '/lib/class.og-image-plugin.php';
 require_once __DIR__ . '/lib/class.og-image-admin.php';
 

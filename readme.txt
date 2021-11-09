@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.14
+Stable tag: 1.0.15
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -132,6 +132,9 @@ When in doubt, contact us before sharing.
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.15 =
+* fixed: some users report "function mime_content_type does not exist". This function should exist and indicates a broken/misconfigured server. To accommodate, fallback functions are in place.
 
 = 1.0.14 =
 * important change: Switch from PNG output to JPG output. The reason is disk-space usage; the JPG takes only a fraction of the disk space and has practically the same quality. See the FAQ for more information.
