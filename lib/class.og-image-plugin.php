@@ -309,11 +309,29 @@ class Plugin
 
 	public static function log(): array
 	{
-		static $log;
+		static $log, $static;
+
+		if (!$static) {
+			$static = [];
+			$static[] = '-- active plugins --';
+			$plugins = get_option('active_plugins', []);
+			foreach ($plugins as $key => $value) {
+				$static[] = ($key+1) . ": $value";
+			}
+			$static[] = '-- php settings --';
+			foreach (['memory_limit', 'max_execution_time'] as $setting) {
+				$static[] = "$setting: ". ini_get($setting);
+			}
+			$static[] = '-- end of log --';
+		}
 		if (!$log) {
 			$log = [];
+			$log[] = 'Log start: '. date('r');
 			$log[] = 'BSI version: '. Plugin::get_version();
-			$log[] = 'BSI revision date: '. date('Y-m-d H:i:s', filemtime(BSI_PLUGIN_FILE));
+			$log[] = 'BSI revision date: '. date('r', filemtime(BSI_PLUGIN_FILE));
+			$log[] = "Start memory usage: ". ceil(memory_get_peak_usage()/(1024*1024)) . "M";
+			$log[] = '-- image generation --';
+			$log[] = "BSI Debug log for " . 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug');
 		}
 		if (count(func_get_args()) > 0) {
 			$item = func_get_arg(0);
@@ -322,19 +340,14 @@ class Plugin
 			$log[] = $item;
 		}
 
-		return $log;
+		return array_merge($log, ['Peak memory usage: '. ceil(memory_get_peak_usage()/(1024*1024)) . 'M'], $static);
 	}
 
 	public static function display_log()
 	{
 		if (current_user_can(Plugin::get_management_permission())) {
 			header("Content-Type: text/plain");
-			$log = [];
-			$log[] = "BSI Debug log for " . 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug');
-			$log[] = date('r');
-			$log = array_merge($log, self::log());
-			$log[] = "- end log -";
-			$log = implode("\n", $log);
+			$log = implode("\n", self::log());
 			set_transient(Plugin::OPTION_PREFIX . '_debug_log', $log, 7*86400); // keep log for 1 week.
 			print $log;
 			exit;
@@ -556,6 +569,20 @@ class Plugin
 		}
 
 		return $result;
+	}
+
+	public static function no_output_buffers($destroy_buffer = false)
+	{
+		if (ob_get_level()) {
+			$list = ob_list_handlers();
+			foreach ($list as $item) {
+				Plugin::log('Output buffer detected: ' . (is_string($item) ? $item : serialize($item)));
+			}
+			while (ob_get_level()) {
+				$destroy_buffer ? ob_end_clean() : ob_end_flush();
+			}
+			Plugin::log('All buffers are '. ($destroy_buffer ? 'cleaned' : 'flushed'));
+		}
 	}
 
 	public function _init()

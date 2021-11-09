@@ -79,22 +79,7 @@ class Image
 			exit;
 		}
 
-		// destroy any kind of caching by external plugins.
-		$problem_handlers=[];
-		// verified to work with 'breeze', a caching plugin by Cloudways, troublesome handlers:
-		$problem_handlers[] = 'breeze_ob_start_callback';
-		$problem_handlers[] = 'breeze_cache';
-		$problem_handlers = apply_filters('bsi_image_serve_ob_start_problem_handlers', $problem_handlers);
-		if (!$problem_handlers) { // don't have a list of prblem handlers? then just destroy ANY output buffer.
-			while(ob_get_level()) {
-				ob_end_flush();
-			}
-		}
-		else {
-			while(array_intersect($problem_handlers, ob_list_handlers())) {
-				ob_end_flush();
-			}
-		}
+		Plugin::no_output_buffers(true);
 
 		$image_cache = $this->cache($this->image_id, $this->post_id);
 		if ($image_cache) {
