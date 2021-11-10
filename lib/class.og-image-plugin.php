@@ -527,6 +527,12 @@ class Plugin
 		return self::scrape_title_data($post_id)[0];
 	}
 
+	/**
+	 * Scrape the title from a rendered page.
+	 * This really is an eye-sore and we will replace it with a title-builder in the future.
+	 * @param $post_id
+	 * @return array|mixed
+	 */
 	public static function scrape_title_data($post_id)
 	{
 		static $previous = [];
@@ -606,6 +612,13 @@ class Plugin
 		return self::BSI_IMAGE_NAME . '.' . $output_format;
 	}
 
+	/**
+	 * wrapper for unlink function for proper error handling or at least error-prevention
+	 * @see unlink
+	 *
+	 * @param $path
+	 * @return bool
+	 */
 	private static function unlink($path): bool
 	{
 		try {
@@ -617,6 +630,14 @@ class Plugin
 		return $result;
 	}
 
+	/**
+	 * wrapper for rmdir function for proper error handling or at least error-prevention
+	 * also clears .DS_Store items (macOS sucks sometimes) before attempting rmdir.
+	 * @see rmdir
+	 *
+	 * @param $path
+	 * @return bool
+	 */
 	private static function rmdir($path): bool
 	{
 		if (is_file("$path/.DS_Store")) {
@@ -631,6 +652,10 @@ class Plugin
 		return $result;
 	}
 
+	/**
+	 * Clear the BSI cache.
+	 * @return bool
+	 */
 	public static function purge_cache(): bool
 	{
 		$purgable = Plugin::get_purgable_cache();
@@ -661,6 +686,9 @@ class Plugin
 		return $result;
 	}
 
+	/**
+	 * @param false $destroy_buffer if false; do a nice flush. if true; previous output is destroyed.
+	 */
 	public static function no_output_buffers($destroy_buffer = false)
 	{
 		if (ob_get_level()) {
@@ -721,6 +749,10 @@ class Plugin
 				add_filter('wpseo_opengraph_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
 				add_filter('wpseo_twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
 
+				// this is a very intrusive way, but Yoast does not allow overruling the
+				// image dimensions.
+				// @todo: investigate the option of always doing it this way. I wanted to prevent it, bus since we cannot
+				// @todo: perhaps we should always just kill all og:image data from the head and add it ourselves.
 				add_action('wpseo_head', [static::class, 'patch_wpseo_head'], ~PHP_INT_MAX);
 				add_action('wpseo_head', [static::class, 'patch_wpseo_head'], PHP_INT_MAX);
 
