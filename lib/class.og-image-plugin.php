@@ -408,16 +408,34 @@ class Plugin
 	{
 		$data = wp_get_attachment_image_src($image_id, $size);
 		$meta = wp_get_attachment_metadata($image_id);
-		$upl = wp_upload_dir();
-		$upl = $upl['basedir'];
-		$data[4] = trailingslashit($upl) . $meta['file'];
-		if (!empty($meta['sizes'][$size]['path'])) {
-			$data[4] = trailingslashit($upl) . $meta['sizes'][$size]['path'];
-		}
-		elseif (!empty($meta['sizes'][$size]['file'])) {
-			$file = dirname($data[4]) . '/' . $meta['sizes'][$size]['file'];
+		if (is_array($data) && is_array($meta)) {
+			$upl = wp_upload_dir();
+			$upl = $upl['basedir'];
+			// path to the base image
+			$file = $base = trailingslashit($upl) . $meta['file'];
+			Plugin::log(sprintf(' Base image for #%d: %s', $image_id, $base));
+			if (!empty($meta['sizes'][$size]['path'])) {
+				// path to the resized image, if it exists
+				$file = trailingslashit($upl) . $meta['sizes'][$size]['path'];
+				Plugin::log(sprintf(' Using \'path\' entry: %s with size-name %s', $file, $size));
+			}
+			elseif (!empty($meta['sizes'][$size]['file'])) {
+				// only a new filename is listed, use directory of base.
+				$file = dirname($base) . '/' . $meta['sizes'][$size]['file'];
+				Plugin::log(sprintf(' Using \'file\' entry: %s with size-name %s', $file, $size));
+			}
+			// check existence of file.
 			if (is_file($file)) {
 				$data[4] = $file;
+			}
+			else {
+				Plugin::log(' Selected size-specific file does not exist. Please run a thumbnail rebuild.');
+				if (is_file($base)) {
+					$data[4] = $base;
+				}
+				else {
+					Plugin::log(' Base image also does not exist. THIS IS A PROBLEM!');
+				}
 			}
 		}
 
