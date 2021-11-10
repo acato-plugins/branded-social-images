@@ -137,6 +137,7 @@ When in doubt, contact us before sharing.
 * fixed: some users report "function mime_content_type does not exist". This function should exist and indicates a broken/misconfigured server. To accommodate, fallback functions are in place.
 
 = 1.0.14 =
+* warning: Only install this version if your host has the "magic mime" extension properly configured (function mime_content_type exists)
 * important change: Switch from PNG output to JPG output. The reason is disk-space usage; the JPG takes only a fraction of the disk space and has practically the same quality. See the FAQ for more information.
 * fixed: showing debug information leaves image cache in locked state, preventing (re-)generation of image.
 * improved: interface will now scale on small displays.
