@@ -223,23 +223,24 @@ class Plugin
 			}
 		});
 
-		add_action('admin_init', function () {
-			$font_file = get_option(self::DEFAULTS_PREFIX . 'text__font');
-
-			// legacy code follows, todo: investigate removal.
-			if (preg_match('/google:(.+)/', $font_file, $m)) {
-				$defaults = Admin::base_settings();
-				$this->text_options = $defaults['text_options'];
-				$this->text_options['font-file'] = $font_file;
-				$this->text_options['font-family'] = $font_file;
-				$this->expand_text_options();
-				if ($this->text_options['font-file'] && is_file($this->text_options['font-file']) && $this->text_options['font-file'] !== $font_file) { // PROCESSED!
-					update_option(self::DEFAULTS_PREFIX . 'text__font', basename($this->text_options['font-file']));
-					wp_redirect(remove_query_arg(''));
-					exit;
-				}
-			}
-		});
+		// todo: remove in 1.0.20 release
+//		add_action('admin_init', function () {
+//			$font_file = get_option(self::DEFAULTS_PREFIX . 'text__font');
+//
+//			// legacy code follows, todo: investigate removal.
+//			if (preg_match('/google:(.+)/', $font_file, $m)) {
+//				$defaults = Admin::base_settings();
+//				$this->text_options = $defaults['text_options'];
+//				$this->text_options['font-file'] = $font_file;
+//				$this->text_options['font-family'] = $font_file;
+//				$this->expand_text_options();
+//				if ($this->text_options['font-file'] && is_file($this->text_options['font-file']) && $this->text_options['font-file'] !== $font_file) { // PROCESSED!
+//					update_option(self::DEFAULTS_PREFIX . 'text__font', basename($this->text_options['font-file']));
+//					wp_redirect(remove_query_arg(''));
+//					exit;
+//				}
+//			}
+//		});
 
 		// this filter is used when a re-save permalink occurs
 		add_filter('rewrite_rules_array', function ($rules) {
