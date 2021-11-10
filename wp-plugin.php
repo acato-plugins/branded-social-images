@@ -59,6 +59,9 @@ add_action('check_ajax_referer', function ($action) {
 	}
 });
 
+/**
+ * plugin activation/deactivation/uninstall hooks
+ */
 register_activation_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_activation']);
 register_deactivation_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_deactivation']);
 register_uninstall_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_uninstall']);

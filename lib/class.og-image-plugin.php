@@ -301,6 +301,9 @@ class Plugin
 
 		add_filter('bsi_post_types', [static::class, 'post_types'], ~PHP_INT_MAX, 0);
 
+		/**
+		 * Patch the response to WordPress oembed request
+		 */
 		add_filter('oembed_response_data', function ($data, $post) {
 			$id = $post->ID;
 
@@ -315,6 +318,9 @@ class Plugin
 			return $data;
 		}, PHP_INT_MAX, 2);
 
+		/**
+		 * Patch SEO by RankMath JD+JSON data
+		 */
 		add_filter('rank_math/json_ld', function ($data, $RankMath_schema_jsonld) {
 			$id = $RankMath_schema_jsonld->post_id;
 
@@ -331,6 +337,12 @@ class Plugin
 		}, PHP_INT_MAX, 2);
 	}
 
+	/**
+	 * Test if we want a BSI for this post.
+	 * @todo: future version will have to detect archives and categories as well
+	 * @param $post_id
+	 * @return bool
+	 */
 	public static function go_for_id($post_id): bool
 	{
 		$killswitch = get_post_meta($post_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
@@ -342,6 +354,13 @@ class Plugin
 		return $go;
 	}
 
+	/**
+	 * Logging function used for debugging.
+	 * When called with ?debug=BSI, an image url produces debug output
+	 * Because some hosts mess with output buffers and/or reverse proxies, this data is not always visible
+	 * so it is stored for viewing in the config panel as well.
+	 * @return array
+	 */
 	public static function log(): array
 	{
 		static $log, $static;
@@ -393,17 +412,28 @@ class Plugin
 		}
 	}
 
+	/**
+	 * yes, we are mimicking get_plugin_data here because get_plugin_data is not always available while get_file_data is.
+	 * we could have statically set the version number, but we could forget to update it.
+	 * @return string the version number of the plugin.
+	 */
 	public static function get_version()
 	{
 		static $version;
 		if (!$version) {
-			// yes, we are mimicking get_plugin_data here because get_plugin_data is not always available while get_file_data is.
 			$data = get_file_data(BSI_PLUGIN_FILE, ['Version' => 'Version'], 'plugin');
 			$version = $data['Version'];
 		}
 		return $version;
 	}
 
+	/**
+	 * Retrieves Media-library-item data with a certain size
+	 * A mashup of wp_get_attachment_image_src and wp_get_attachment_metadata
+	 * @param $image_id
+	 * @param string $size
+	 * @return array|false
+	 */
 	public static function wp_get_attachment_image_data($image_id, string $size)
 	{
 		$data = wp_get_attachment_image_src($image_id, $size);
