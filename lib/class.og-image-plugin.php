@@ -593,7 +593,7 @@ class Plugin
 			$fallback_format = $output_format[1];
 			$output_format = $output_format[0];
 		}
-		if (!in_array($fallback_format, ['png', 'jpg', 'webp'])) {
+		if (!in_array($fallback_format, ['png', 'jpg', /* 'webp' */])) {
 			$fallback_format = 'jpg';
 		}
 		if ('webp' === $output_format && !function_exists('imagewebp')) {
