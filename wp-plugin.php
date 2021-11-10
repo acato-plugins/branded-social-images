@@ -59,9 +59,10 @@ add_action('check_ajax_referer', function ($action) {
 	}
 });
 
-register_activation_hook(__FILE__, [Plugin::class, 'on_activation']);
-register_deactivation_hook(__FILE__, [Plugin::class, 'on_deactivation']);
-register_uninstall_hook(__FILE__, [Plugin::class, 'on_uninstall']);
+register_activation_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_activation']);
+register_deactivation_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_deactivation']);
+register_uninstall_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_uninstall']);
+
 /**
  * Reference list
  * @see https://www.cssscript.com/color-picker-alpha-selection/
