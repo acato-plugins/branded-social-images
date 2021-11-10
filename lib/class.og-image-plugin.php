@@ -2077,31 +2077,25 @@ EODOC;
 				restore_current_blog();
 			}
 		}
-
-		self::track('activate', $network_wide);
 	}
 
 	public static function on_deactivation($network_wide)
 	{
-		self::track('deactivate', $network_wide);
+		global $wpdb;
+		Plugin::purge_cache();
+		if ($network_wide && function_exists('is_multisite') && is_multisite()) {
+			$blog_ids = $wpdb->get_col("SELECT blog_id FROM {$wpdb->base_prefix}blogs");
+			foreach ($blog_ids as $blog_id) {
+				switch_to_blog($blog_id);
+				Plugin::purge_cache();
+				restore_current_blog();
+			}
+		}
 	}
 
 	public static function on_uninstall($network_wide)
 	{
-		self::track('uninstall', $network_wide);
-	}
-
-	private static function track($action, $network_wide = false)
-	{
-		// tracking disabled for now, we need to find out if this is allowed.
-		if (defined('BSI_TRACKING_ENABLED')) {
-			// we like to see where our plugin is used so we can provide support more easily
-			// note that the only data we collect are plugin name, version and your website URL.
-			// also note that we do not care about the response. (blocking:false)
-			wp_remote_get('https://wp.clearsite.nl/tracking/' . ($network_wide ? 'network-' : '') . $action . '/' .
-				basename(dirname(__DIR__)) . '/' . Plugin::get_version() . '/' . get_bloginfo('url'),
-				['blocking' => false]
-			);
-		}
+		// cannot uninstall without deactivation, so we may expect WordPress to call the dectivation hook.
+		// no need to do it ourselves.
 	}
 }
