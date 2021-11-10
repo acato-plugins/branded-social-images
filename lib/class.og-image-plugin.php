@@ -172,6 +172,37 @@ class Plugin
 			$this->expand_logo_options();
 		});
 
+		/**
+		 * url endpoint, the WordPress way
+		 *
+		 * pros: 
+		 * 1. it works on non-standard hosts, 
+		 * 2. works on nginx hosts
+		 * cons: 
+		 * 1. does not work for custom post-type archives
+		 * 2. because it is in essence a page-modifier, WP considers this a page, therefore
+		 * - adds a trailing slash
+		 * - confusing caching plugins into thinking the content-type should be text/html
+		 * 3. the WP construction assumes an /endpoint/value/ set-up, requiring cleanup, see fileter rewrite_rules_array implementation below
+		 * 
+		 * Why this way?
+		 * 
+		 * Because an .htaccess RewriteRule, although improving performance 20-fold, would be web-server-software specific, blog-set-up specific and multi-site aware
+		 * which makes it quite impossible to do universally. Unfortunately.
+		 * 
+		 * If you feel adventurous, you can always add it yourself! It should look something like this:
+		 * 
+		 * RewriteRule (.+)/social-image.(jpg|png)/?$ $1/?bsi_img=1 [QSA,L,NC]
+		 * 
+		 * If only for a certain domain, you can add a condition;
+		 * 
+		 * RewriteCond %{HTTP_HOST} yourdomain.com
+		 * RewriteRule (.+)/social-image.(jpg|png)/?$ $1/?bsi_img=1 [QSA,L,NC]
+		 * 
+		 * For more information on apache rewrite rules, see
+		 * @see https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html
+		 */
+
 		add_action('init', function () {
 			// does not work in any possible way for Post-Type Archives
 			add_rewrite_endpoint(self::output_filename(), EP_PERMALINK | EP_ROOT | EP_PAGES, Plugin::QUERY_VAR);
@@ -211,7 +242,6 @@ class Plugin
 		});
 
 		// this filter is used when a re-save permalink occurs
-		// it changes the rewrite rules so the endpoint is value-less and more a tag, like 'feed' is for WordPress.
 		add_filter('rewrite_rules_array', function ($rules) {
 			$new_rules = [];
 			/**
@@ -224,6 +254,10 @@ class Plugin
 				}
 			}
 			$rules = array_merge($pt_archives, $rules);
+			
+			/**
+			 * changes the rewrite rules so the endpoint is value-less and more a tag, like 'feed' is for WordPress.
+			 */
 			foreach ($rules as $source => $target) {
 				if (
 					preg_match('/' . strtr(self::output_filename(), [
