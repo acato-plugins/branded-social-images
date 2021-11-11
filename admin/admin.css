@@ -1374,7 +1374,7 @@
     margin-top: 20px;
     -ms-grid-columns: 1fr;
         grid-template-columns: 1fr;
-    grid-template-areas: "settings" "options" "config"; }
+    grid-template-areas: "settings" "options"; }
     #branded-social-images-editor .settings, #branded-social-images-editor .settings > [class*=area--] {
       max-width: 600px; }
     #side-sortables #branded-social-images-editor .settings, .is-side #branded-social-images-editor .settings {
@@ -1446,8 +1446,6 @@
     grid-area: options; }
   #branded-social-images-editor .area--settings {
     grid-area: settings; }
-  #branded-social-images-editor .area--config {
-    grid-area: config; }
   #branded-social-images-editor .area--debug pre {
     overflow: auto; }
   #branded-social-images-editor .hidden, #branded-social-images-editor .wrap-hidden {

@@ -309,7 +309,7 @@
 		}
 
 		grid-template-columns: 1fr;
-		grid-template-areas: "settings" "options" "config";
+		grid-template-areas: "settings" "options";
 	}
 
 	.collapsible {
@@ -410,10 +410,6 @@
 		grid-area: settings;
 	}
 
-	.area--config {
-		grid-area: config;
-	}
-	
 	.area--debug {
 		pre {
 			overflow: auto;

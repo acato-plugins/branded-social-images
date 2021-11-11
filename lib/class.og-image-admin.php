@@ -102,6 +102,9 @@ class Admin
 					add_query_arg('debug', 'BSI', Plugin::get_og_image_url(get_the_ID()))); ?></p><?php
 			}
 		});
+
+		add_action('bsi_settings_panels', [ static::class, 'config_panel']);
+		add_action('bsi_settings_panels', [ static::class, 'log_panel']);
 	}
 
 	public static function admin_icon(): string
@@ -503,22 +506,7 @@ class Admin
 							]); ?>
 						</div>
 					</div>
-					<div class="area--config closed collapsible">
-						<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
-						<div class="inner">
-							<?php self::render_options($fields, ['disabled']); ?>
-						</div>
-					</div>
-					<?php if ($log = get_transient(Plugin::OPTION_PREFIX .'_debug_log')) { ?>
-						<div class="area--debug closed collapsible">
-							<h2><?php _e('Debug log', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
-							<div class="inner">
-								<pre><?php print $log; ?></pre>
-								<em><?php $date = date('d-m-Y H:i:s', get_option('_transient_timeout_'. Plugin::OPTION_PREFIX .'_debug_log'));
-									print sprintf(__('This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN), $date); ?></em>
-							</div>
-						</div>
-					<?php } ?>
+					<?php do_action('bsi_settings_panels', $fields); ?>
 				</div>
 			<?php } ?>
 		</div>
@@ -556,6 +544,32 @@ class Admin
 		}
 		HTML_Inputs::render($option_name, $option_atts, $label);
 		print '</span>';
+	}
+
+	public static function log_panel()
+	{
+		if ($log = get_transient(Plugin::OPTION_PREFIX .'_debug_log')) { ?>
+		<div class="area--debug closed collapsible">
+			<h2><?php _e('Debug log', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+			<div class="inner">
+				<pre><?php print $log; ?></pre>
+				<em><?php $date = date('d-m-Y H:i:s', get_option('_transient_timeout_'. Plugin::OPTION_PREFIX .'_debug_log'));
+					print sprintf(__('This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN), $date); ?></em>
+			</div>
+		</div>
+	<?php }
+	}
+
+	public static function config_panel($fields)
+	{
+		?>
+		<div class="area--config closed collapsible">
+			<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+			<div class="inner">
+				<?php self::render_options($fields, ['disabled']); ?>
+			</div>
+		</div>
+		<?php
 	}
 
 	public static function hex_to_rgba($hex, $asRGBA = false)
