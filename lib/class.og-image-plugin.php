@@ -374,7 +374,7 @@ class Plugin
 			}
 			$static[] = '-- php/wp functions --';
 			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype'] as $function) {
-				$static[] = "$function: " . (function_exists($function) ? 'exists' : 'does not exist');
+				$static[] = "$function: " . (constant(strtoupper($function) .'_EXISTED_BEFORE_PATCH') ? 'exists' : 'does not exist');
 			}
 			$static[] = '-- php settings --';
 			foreach (['memory_limit', 'max_execution_time'] as $setting) {
