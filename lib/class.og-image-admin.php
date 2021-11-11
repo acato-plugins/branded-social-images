@@ -573,7 +573,7 @@ class Admin
 		$int = hexdec($hex);
 		$rgba = [ ($int >> 24) & 255, ($int >> 16) & 255, ($int >> 8) & 255, floatval($int & 255) / 255 ];
 
-		return $asRGBA ? vsprintf('rgba(%d, %d, %d, %0.1f)', $rgba) : array_combine(['red', 'green', 'blue', 'alpha'], $rgba);
+		return $asRGBA ? vsprintf('rgba(%d, %d, %d, %0.1F)', $rgba) : array_combine(['red', 'green', 'blue', 'alpha'], $rgba);
 	}
 
 	public static function add_meta_boxes()

@@ -133,6 +133,9 @@ When in doubt, contact us before sharing.
 
 == Changelog ==
 
+= 1.0.17 =
+* fixed: editor issues with colors fixed; sprintf for formatting floats was set to locale aware. oops.
+
 = 1.0.16 =
 * fixed: in some cases, the {title} placeholder gets stored in the post-meta and appears in the generated image. This should not happen as the {title} placeholder is replaced while editing.
 * cleanup: lot of code cleaned up, comments added
