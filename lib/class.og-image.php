@@ -310,9 +310,11 @@ class Image
 		$text = '';
 		$type = 'none';
 
+		$title = apply_filters('the_title', get_the_title($post_id), $post_id);
+
 		if (Plugin::setting('use_bare_post_title')) {
 			$type = 'wordpress';
-			$text = apply_filters('the_title', get_the_title($post_id), $post_id);
+			$text = $title;
 			Plugin::log('Text consideration: WordPress title (bare); ' . $text);
 		}
 
@@ -341,6 +343,11 @@ class Image
 			$text = $default;
 			Plugin::log('Text: No text found, using default; ' . $text);
 			$type = 'default';
+		}
+		if (false !== strpos($text, '{title}')) {
+			Plugin::log('{title} placeholder stored in database. Replacing with actual title.');
+			Plugin::log(' This is a failsafe, should not happen. Please check the editor javascript console.');
+			$text = str_replace('{title}', $title, $text);
 		}
 
 		Plugin::log('Text determination: text before filter  bsi_text; ' . ($text ?: '( no text )'));
