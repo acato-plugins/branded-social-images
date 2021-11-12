@@ -94,6 +94,9 @@ class Plugin
 			return $vars;
 		});
 
+		add_action('wp', [static::class, 'evaluate_queried_object'], PHP_INT_MIN);
+		add_action('admin_init', [static::class, 'evaluate_queried_object'], PHP_INT_MIN);
+
 		add_action('wp', function () {
 			// oh, my, this is a mess.
 			// ...
@@ -107,8 +110,8 @@ class Plugin
 			$this->text_options['position'] = get_option(self::DEFAULTS_PREFIX . 'text_position', 'top-left');
 			$this->logo_options['position'] = get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right');
 
-			$id = get_the_ID();
-			if ($id) {
+			list($id, $type, $base_type) = Plugin::get_queried_object();
+			if ($id && 'post' === $base_type) {
 				$allowed_meta = array_keys(self::field_list()['meta']);
 				$overrule_text_position = get_post_meta($id, self::OPTION_PREFIX . 'text_position', true);
 				if (in_array('text_position', $allowed_meta) && $overrule_text_position) {
@@ -175,30 +178,30 @@ class Plugin
 		/**
 		 * url endpoint, the WordPress way
 		 *
-		 * pros: 
-		 * 1. it works on non-standard hosts, 
+		 * pros:
+		 * 1. it works on non-standard hosts,
 		 * 2. works on nginx hosts
-		 * cons: 
+		 * cons:
 		 * 1. does not work for custom post-type archives
 		 * 2. because it is in essence a page-modifier, WP considers this a page, therefore
 		 * - adds a trailing slash
 		 * - confusing caching plugins into thinking the content-type should be text/html
 		 * 3. the WP construction assumes an /endpoint/value/ set-up, requiring cleanup, see fileter rewrite_rules_array implementation below
-		 * 
+		 *
 		 * Why this way?
-		 * 
+		 *
 		 * Because an .htaccess RewriteRule, although improving performance 20-fold, would be web-server-software specific, blog-set-up specific and multi-site aware
 		 * which makes it quite impossible to do universally. Unfortunately.
-		 * 
+		 *
 		 * If you feel adventurous, you can always add it yourself! It should look something like this:
-		 * 
+		 *
 		 * RewriteRule (.+)/social-image.(jpg|png)/?$ $1/?bsi_img=1 [QSA,L,NC]
-		 * 
+		 *
 		 * If only for a certain domain, you can add a condition;
-		 * 
+		 *
 		 * RewriteCond %{HTTP_HOST} yourdomain.com
 		 * RewriteRule (.+)/social-image.(jpg|png)/?$ $1/?bsi_img=1 [QSA,L,NC]
-		 * 
+		 *
 		 * For more information on apache rewrite rules, see
 		 * @see https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html
 		 */
@@ -255,7 +258,7 @@ class Plugin
 				}
 			}
 			$rules = array_merge($pt_archives, $rules);
-			
+
 			/**
 			 * changes the rewrite rules so the endpoint is value-less and more a tag, like 'feed' is for WordPress.
 			 */
@@ -307,8 +310,8 @@ class Plugin
 		add_filter('oembed_response_data', function ($data, $post) {
 			$id = $post->ID;
 
-			if (self::go_for_id($id)) {
-				$url = static::get_og_image_url($id);
+			if (self::go_for_id($id, 'pots', 'post')) {
+				$url = static::get_og_image_url($id, 'pots', 'post');
 
 				$data['thumbnail_url'] = $url;
 				$data['thumbnail_width'] = static::getInstance()->width;
@@ -324,8 +327,8 @@ class Plugin
 		add_filter('rank_math/json_ld', function ($data, $RankMath_schema_jsonld) {
 			$id = $RankMath_schema_jsonld->post_id;
 
-			if ($id && self::go_for_id($id)) {
-				$url = static::get_og_image_url($id);
+			if ($id && self::go_for_id($id, 'post', 'post')) {
+				$url = static::get_og_image_url($id, 'post', 'post');
 
 				$data['primaryImage']['url'] = $url;
 				$data['primaryImage']['width'] = static::getInstance()->width;
@@ -339,14 +342,25 @@ class Plugin
 
 	/**
 	 * Test if we want a BSI for this post.
-	 * @todo: future version will have to detect archives and categories as well
-	 * @param $post_id
+	 * @param $object_id
 	 * @return bool
+	 * @todo: future version will have to detect archives and categories as well
 	 */
-	public static function go_for_id($post_id): bool
+	public static function go_for_id($object_id, $post_type, $base_type): bool
 	{
-		$killswitch = get_post_meta($post_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
-		$go = !!self::image_fallback_chain() || get_post_meta($post_id, self::OPTION_PREFIX . 'image', true);
+		// default to NO GO
+		$go = $image = false;
+		$killswitch = 'on';
+
+		if ('post' === $base_type) {
+			$killswitch = get_post_meta($object_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
+			$image = get_post_meta($object_id, self::OPTION_PREFIX . 'image', true);
+		}
+//		if ('tax' === $base_type) {
+//			$killswitch = get_term_meta($object_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
+//			$image = get_term_meta($object_id, self::OPTION_PREFIX . 'image', true);
+//		}
+		$go = !!self::image_fallback_chain() || $image;
 		if ('on' === $killswitch) {
 			$go = false;
 		}
@@ -374,7 +388,7 @@ class Plugin
 			}
 			$static[] = '-- php/wp functions --';
 			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype'] as $function) {
-				$static[] = "$function: " . (constant(strtoupper($function) .'_EXISTED_BEFORE_PATCH') ? 'exists' : 'does not exist');
+				$static[] = "$function: " . (constant(strtoupper($function) . '_EXISTED_BEFORE_PATCH') ? 'exists' : 'does not exist');
 			}
 			$static[] = '-- php settings --';
 			foreach (['memory_limit', 'max_execution_time'] as $setting) {
@@ -390,6 +404,7 @@ class Plugin
 			$log[] = "Start memory usage: " . ceil(memory_get_peak_usage() / (1024 * 1024)) . "M";
 			$log[] = '-- image generation --';
 			$log[] = "BSI Debug log for " . 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug');
+			$log = array_merge($log, Plugin::array_key_prefix(array_combine(['- object_id', '- object_type', '- base_type', '- permalink', '- og:image', '- go'], Plugin::get_queried_object())));
 		}
 		if (count(func_get_args()) > 0) {
 			$item = func_get_arg(0);
@@ -614,10 +629,10 @@ class Plugin
 
 	/**
 	 * wrapper for unlink function for proper error handling or at least error-prevention
-	 * @see unlink
-	 *
 	 * @param $path
 	 * @return bool
+	 * @see unlink
+	 *
 	 */
 	private static function unlink($path): bool
 	{
@@ -633,10 +648,10 @@ class Plugin
 	/**
 	 * wrapper for rmdir function for proper error handling or at least error-prevention
 	 * also clears .DS_Store items (macOS sucks sometimes) before attempting rmdir.
-	 * @see rmdir
-	 *
 	 * @param $path
 	 * @return bool
+	 * @see rmdir
+	 *
 	 */
 	private static function rmdir($path): bool
 	{
@@ -703,15 +718,133 @@ class Plugin
 		}
 	}
 
+	public static function set_queried_object($object_array=null)
+	{
+		static $object;
+		if ($object_array) {
+			$object = $object_array;
+		}
+		return $object;
+	}
+
+	public static function get_queried_object()
+	{
+		return self::set_queried_object();
+	}
+
+	public static function evaluate_queried_object() {
+		static $result;
+		global $wp_query, $pagenow;
+		if (!$result) {
+			$link = null;
+			$id = get_queried_object_id();
+			$qo = get_queried_object();
+			switch (true) {
+				// post edit
+				case is_admin() && in_array($pagenow, ['post.php', 'post-new.php']):
+					$id = !empty($_GET['post']) ? intval($_GET['post']) : 'new';
+					$type = !empty($_GET['post_type']) ? $_GET['post_type'] : get_post_type($id);
+					$base_type = 'post';
+					$link = get_permalink($id);
+					break;
+
+				// post
+				case is_single():
+				case is_page():
+				case is_front_page():
+				case is_privacy_policy():
+				case is_singular():
+					$type = get_post_type();
+					$base_type = 'post';
+					$link = get_permalink($id);
+					break;
+
+				// post archive
+				case is_post_type_archive():
+				case is_archive() && !is_category() && !is_tag():
+				case is_home():
+					$id = 'archive';
+					$type = get_post_type();
+					$base_type = 'post';
+					$link = get_post_type_archive_link($type);
+					break;
+
+				// category edit
+				case is_admin() && in_array($pagenow, ['term.php', 'edit-tags.php']):
+					$id = !empty($_GET['tag_ID']) ? intval($_GET['tag_ID']) : 'new';
+					$type = !empty($_GET['taxonomy']) ? $_GET['taxonomy'] : get_post_type($id);
+					$base_type = 'tax';
+					$link = get_term_link($id, $type);
+					if (is_wp_error($link)) $link = null;
+					break;
+
+
+				// category archive
+				case is_category():
+				case is_tag():
+				case is_tax():
+					$type = $qo->taxonomy;
+					$base_type = 'tax';
+					$link = get_term_link($id, $type);
+					break;
+
+//				case is_archive():
+//					$id = 'archive';
+//					$base_type = 'tax';
+//					$type = 'the-taxonomy-here';
+//					var_dumP($wp_query);
+//					break;
+
+				// unsupported
+				case is_404():
+					$type = '404';
+					$base_type = 'unsupported';
+					break;
+				case is_robots():
+				case is_favicon():
+				case is_embed():
+				case is_paged():
+				case is_admin():
+				case is_attachment():
+				case is_preview():
+				case is_author():
+				case is_date():
+				case is_year():
+				case is_month():
+				case is_day():
+				case is_time():
+				case is_search():
+				case is_feed():
+				case is_comment_feed():
+				case is_trackback():
+				default:
+					$id = null;
+					$type = 'unsupported';
+					$base_type = 'unsupported';
+					break;
+
+			}
+			$result = [$id, $type, $base_type, $link, $link ? trailingslashit(trailingslashit($link) . self::output_filename()) : null ];
+			$result[] = self::go_for_id($id, $type, $base_type);
+
+			self::set_queried_object($result);
+		}
+		return $result;
+	}
+
+	public static function array_key_prefix($array_combine)
+	{
+		foreach ($array_combine as $key => &$value) {
+			if (!is_scalar($value) || is_bool($value)) { $value = json_encode($value); }
+			$value = "$key: $value";
+		}
+		return array_values($array_combine);
+	}
+
 	public function _init()
 	{
-		$id = get_the_ID();
-		if (!is_admin() && $id || is_home() || is_archive()) {
-			$killswitch = get_post_meta($id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
-			$go = true;
-			if ('on' === $killswitch) {
-				$go = false;
-			}
+		list($id, $type, $base_type, $link, $ogimage, $go) = self::get_queried_object();
+		if ($go) {
 			if (!Plugin::getInstance()->og_image_available) {
 				$go = false;
 			}
@@ -756,9 +889,8 @@ class Plugin
 				add_action('wpseo_head', [static::class, 'patch_wpseo_head'], ~PHP_INT_MAX);
 				add_action('wpseo_head', [static::class, 'patch_wpseo_head'], PHP_INT_MAX);
 
-				add_filter('wpseo_schema_main_image', function ($graph_piece) use ($id) {
-					$url = static::get_og_image_url($id);
-					$graph_piece['url'] = $graph_piece['contentUrl'] = $url;
+				add_filter('wpseo_schema_main_image', function ($graph_piece) use ($ogimage) {
+					$graph_piece['url'] = $graph_piece['contentUrl'] = $ogimage;
 					$graph_piece['width'] = $this->width;
 					$graph_piece['height'] = $this->height;
 
@@ -766,8 +898,8 @@ class Plugin
 				}, 11);
 
 				// overrule WordPress JetPack recently acquired SocialImageGenerator, because, hey, we were here first!
-				add_filter('sig_image_url', function ($url, $post_id) {
-					return static::get_og_image_url($post_id);
+				add_filter('sig_image_url', function ($url, $post_id) use ($ogimage) {
+					return $ogimage;
 				}, PHP_INT_MAX, 2);
 
 				// if an overrule did not take, we need to define our own.
@@ -1252,9 +1384,26 @@ class Plugin
 		return 'image/' . $ext;
 	}
 
-	public static function get_og_image_url($post_id)
+	public static function get_og_image_url($object_id, $object_type, $base_type)
 	{
-		return get_permalink($post_id) ? get_permalink($post_id) . self::output_filename() . '/' : false;
+		if ('post' === $base_type) {
+			if ('archive' === $object_id) {
+				return get_post_type_archive_link($object_type) ? get_post_type_archive_link($object_type) . self::output_filename() . '/' : false;
+			}
+			else {
+				return get_permalink($object_id) ? get_permalink($object_id) . self::output_filename() . '/' : false;
+			}
+		}
+		if ('tax' === $base_type) {
+			if ('archive' === $object_id) {
+				return get_category_link($object_type) ? get_category_link($object_type) . self::output_filename() . '/' : false;
+			}
+			else {
+				return get_term_link($object_id, $object_type) ? get_term_link($object_id, $object_type) . self::output_filename() . '/' : false;
+			}
+		}
+
+		return false;
 	}
 
 	public static function patch_wpseo_head()
@@ -1916,28 +2065,29 @@ EODOC;
 			return $chain;
 		}
 
-		$post_id = get_the_ID();
-		$new_post = 'auto-draft' == get_post_status($post_id);
+		list($object_id, $object_type, $base_type) = Plugin::get_queried_object();
 
 		$layers = [];
 
 		$title = '';
-		if ($post_id) {
+		if ('post' === $base_type && $object_id) {
+			$new_post = 'auto-draft' == get_post_status($object_id);
+
 			if (Plugin::setting('use_bare_post_title')) {
-				$title = apply_filters('the_title', get_the_title($post_id), $post_id);
+				$title = apply_filters('the_title', get_the_title($object_id), $object_id);
 				if ($title) {
 					$layers['wordpress'] = $title;
 				}
 			}
 
 			if (!$title) {
-				$title = Plugin::scrape_title($post_id);
+				$title = Plugin::scrape_title($object_id);
 				if ($title) {
 					$layers['scraped'] = $title;
 				}
 			}
 			if (!$title) { // no text from scraping, build it
-				$title = Plugin::title_format($post_id, $new_post);
+				$title = Plugin::title_format($object_id, $new_post);
 				if ($title) {
 					$layers['by-format'] = $title;
 				}
@@ -1951,7 +2101,9 @@ EODOC;
 
 	public static function image_fallback_chain($with_post = false): array
 	{
-		if (!get_the_ID() && !is_home() && !is_archive()) {
+		list($object_id, $object_type, $base_type) = Plugin::get_queried_object();
+
+		if (!$object_id || 'unsupported' === $base_type) {
 			return [];
 		}
 
@@ -1961,22 +2113,22 @@ EODOC;
 		$settings = self::field_list()['admin'];
 		$layers['settings'] = $settings['image']['current_value'];
 		// layer 2, if enabled, the thumbnail/featured
-		if ('on' === $settings['image_use_thumbnail']['current_value']) {
+		if ('post' === $base_type && 'on' === $settings['image_use_thumbnail']['current_value']) {
 			$layers['thumbnail'] = get_post_thumbnail_id(get_the_ID());
 		}
 		// layer 3, if available, social plugins
 
 		// maybe Yoast SEO?
-		if (defined('WPSEO_VERSION')) {
+		if ('post' === $base_type && defined('WPSEO_VERSION')) {
 			$layers['yoast'] = get_post_meta(get_the_ID(), '_yoast_wpseo_opengraph-image-id', true);
 		}
 
 		// maybe RankMath? // latest rank math uses thumbnail ?????
-		if (class_exists(RankMath::class)) {
+		if ('post' === $base_type && class_exists(RankMath::class)) {
 			$layers['rankmath'] = get_post_meta(get_the_ID(), 'rank_math_facebook_image_id', true);
 		}
 
-		if ($with_post) {
+		if ('post' === $base_type && $with_post) {
 			$layers['meta'] = get_post_meta(get_the_ID(), Plugin::OPTION_PREFIX . 'image', true);
 		}
 

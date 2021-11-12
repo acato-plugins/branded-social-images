@@ -10,6 +10,10 @@ class Image
 {
 	private $manager;
 	public $image_id;
+
+	/**
+	 * @deprecated, please use Plugin::get_queried_object()
+	 */
 	public $post_id;
 
 	private $use_existing_cached_image = true;
@@ -19,18 +23,19 @@ class Image
 		$this->manager = $manager;
 
 		$this->post_id = get_the_ID();
-		Plugin::log('Selected post_id: ' . $this->post_id);
+		list($object_id, $object_type, $base_type, $link, $ogimage, $go) = Plugin::get_queried_object();
 		// hack for home (posts on front)
-		if (is_home()) {
+		if (is_home()) { // @todo: detect this using queryied object
 			$this->post_id = 0;
 			Plugin::log('Page is home (latest posts), post_id set to 0');
 		}
-		elseif (is_archive()) {
+		elseif (is_archive()) {// @todo: detect this using queryied object
 			$this->post_id = 'archive-' . get_post_type();
 			Plugin::log('Page is archive, post_id set to ' . $this->post_id);
 		}
 
 		// hack for front-page
+		// @todo: detect this using queryied object
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		if ('/' . Plugin::output_filename() . '/' === $current_url) {
 			Plugin::log('URI = Homepage BSI; ' . $current_url);
@@ -41,7 +46,12 @@ class Image
 			}
 		}
 
-		$this->image_id = $this->getImageIdForPost($this->post_id);
+		if ('post' === $base_type) {
+			$this->image_id = $this->getImageIdForPost($object_id);
+		}
+		else {
+			$this->image_id = $this->getImageIdForQueriedObject();
+		}
 		Plugin::log('Image selected: ' . $this->image_id);
 
 		if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -421,5 +431,11 @@ class Image
 	public static function removeFirstOccurrence(string $haystack, string $needle): string
 	{
 		return self::replaceFirstOccurence($haystack, $needle, '');
+	}
+
+	private function getImageIdForQueriedObject()
+	{
+		list($object_id, $object_type, $base_type, $link, $ogimage, $go) = Plugin::get_queried_object();
+		return false;
 	}
 }
