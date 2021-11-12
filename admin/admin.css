@@ -1439,7 +1439,7 @@
         @media screen and (max-width: 1200px) {
           #branded-social-images-editor .collapsible .inner > span {
             width: 100%; } }
-        #branded-social-images-editor .collapsible .inner > span.name-text_enabled, #branded-social-images-editor .collapsible .inner > span.name-image, #branded-social-images-editor .collapsible .inner > span.name-image_logo, #branded-social-images-editor .collapsible .inner > span.name-image_use_thumbnail, #branded-social-images-editor .collapsible .inner > span.name-disabled {
+        #branded-social-images-editor .collapsible .inner > span.name-text_enabled, #branded-social-images-editor .collapsible .inner > span.name-image, #branded-social-images-editor .collapsible .inner > span.name-image_logo, #branded-social-images-editor .collapsible .inner > span.name-image_use_thumbnail, #branded-social-images-editor .collapsible .inner > span.name-disabled, #branded-social-images-editor .collapsible .inner > span.wrap-full {
           width: 100%; }
   #branded-social-images-editor .area--options {
     position: relative;
