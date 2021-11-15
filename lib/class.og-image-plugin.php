@@ -1906,6 +1906,14 @@ EODOC;
 			}
 		}
 
+		foreach (apply_filters('bsi_editor_fields', []) as $group => $fields) {
+			// no, you are not allowed to override existing groups.
+			if ($group === 'admin' || $group === 'meta') {
+				continue;
+			}
+			$options[ $group ] = $fields;
+		}
+
 		return $options;
 	}
 
