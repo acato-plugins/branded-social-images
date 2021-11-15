@@ -4,6 +4,7 @@ namespace Clearsite\Plugins\OGImage;
 
 defined('ABSPATH') or die('You cannot be here.');
 
+use QueriedObject;
 use RankMath;
 
 class Image
@@ -23,7 +24,7 @@ class Image
 		$this->manager = $manager;
 
 		$this->post_id = get_the_ID();
-		list($object_id, $object_type, $base_type, $link, $ogimage, $go) = Plugin::get_queried_object();
+		list($object_id, $object_type, $base_type, $link, $ogimage, $go) = QueriedObject::getInstance();
 		// hack for home (posts on front)
 		if (is_home()) { // @todo: detect this using queryied object
 			$this->post_id = 0;
@@ -435,7 +436,7 @@ class Image
 
 	private function getImageIdForQueriedObject()
 	{
-		list($object_id, $object_type, $base_type, $link, $ogimage, $go) = Plugin::get_queried_object();
+		list($object_id, $object_type, $base_type, $link, $ogimage, $go) = QueriedObject::getInstance();
 		return false;
 	}
 }

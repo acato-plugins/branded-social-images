@@ -80,9 +80,20 @@ class Admin
 			));
 		});
 
-		add_action('save_post', [static::class, 'save_meta_data']);
-		add_action('add_meta_boxes', [static::class, 'add_meta_boxes']);
+		/** posts */
+		add_action('save_post', [static::class, 'save_post_meta_data']);
+		add_action('add_meta_boxes', [static::class, 'add_post_meta_boxes']);
+
+		/** categories */
+		add_action('create_category', [static::class, 'save_category_meta_data']);
+		add_action('edit_category', [static::class, 'save_category_meta_data']);
+		add_action('category_add_form_fields', [static::class, 'add_category_meta_boxes']);
+		add_action('category_edit_form', [static::class, 'add_category_meta_boxes']);
+
 		add_action('admin_notices', [static::class, 'admin_notices']);
+		if (defined('BSI_DEBUG') && true === BSI_DEBUG) {
+			add_action('admin_notices', [static::class, 'show_queried_object']);
+		}
 
 		add_filter('plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
 		add_filter('network_admin_plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
@@ -229,6 +240,7 @@ class Admin
 						<?php
 						break;
 					case 'show-config':
+					default:
 						$fields = Plugin::field_list()['admin'];
 						?>
 						<form method="POST"
@@ -423,7 +435,7 @@ class Admin
 			}
 
 		</style>
-		<?php // self::render_options($fields, ['disabled']);
+		<?php
 
 		$editor_class = [];
 		$editor_class[] = 'logo_position-' . (!empty($fields['logo_position']) ? $fields['logo_position']['current_value'] : $logo_settings['position']);
@@ -454,7 +466,7 @@ class Admin
 			 class="<?php print $editor_class; ?>"
 			 data-font="<?php print $text_settings['font-file']; ?>"
 			 data-use-thumbnail="<?php print Plugin::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
-			<?php if ($is_meta_panel) { ?>
+			<?php if ($is_meta_panel) { /* meta panel has shorter, more compact view */ ?>
 				<div class="settings">
 					<div class="area--settings">
 						<h2><?php _e('Settings', Plugin::TEXT_DOMAIN); ?></h2>
@@ -498,7 +510,7 @@ class Admin
 				</div>
 				<?php do_action('bsi_image_editor', 'after_adding_text'); ?>
 			</div>
-			<?php if (!$is_meta_panel) { ?>
+			<?php if (!$is_meta_panel) { /* Admin panel is longer */ ?>
 				<div class="settings">
 					<div class="area--options collapsible">
 						<h2><?php _e('Image and Logo options', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
@@ -618,7 +630,7 @@ class Admin
 		return $asRGBA ? vsprintf('rgba(%d, %d, %d, %0.1F)', $rgba) : array_combine(['red', 'green', 'blue', 'alpha'], $rgba);
 	}
 
-	public static function add_meta_boxes()
+	public static function add_post_meta_boxes()
 	{
 		$post_types = apply_filters('bsi_post_types', []);
 		$meta_location = get_option(Plugin::DEFAULTS_PREFIX . 'meta_location', 'advanced');
@@ -637,7 +649,34 @@ class Admin
 		}
 	}
 
-	public static function save_meta_data($post_id)
+	public static function add_category_meta_boxes()
+	{
+		$taxonomies = apply_filters('bsi_taxonomies', []);
+		$qo = \QueriedObject::getInstance();
+		foreach ($taxonomies as $taxonomy) {
+			if ($qo->base_type === 'category' && $qo->object_type === $taxonomy) {
+				call_user_func([static::class, 'meta_panel'], $taxonomy);
+				break; // in the unlikely event we have a situation where multiple taxonomies match, don't show them.
+			}
+		}
+	}
+
+	public static function save_category_meta_data($object): bool
+	{
+		if (is_string($object)) {
+			var_dump(__FUNCTION__, 'string', $object);
+			exit;
+		}
+
+		return self::save_meta_data($object->term_id, $object->taxonomy, 'category');
+	}
+
+	public static function save_post_meta_data($post_id): bool
+	{
+		return self::save_meta_data($post_id, get_post_type($post_id), 'post');
+	}
+
+	public static function save_meta_data($object_id, $object_type, $base_type): bool
 	{
 
 		if (array_key_exists('branded_social_images', $_POST)) {
@@ -659,17 +698,27 @@ class Admin
 						if ($key === 'text' && Plugin::text_is_identical($value, Plugin::getInstance()->dummy_data('text'))) {
 							$value = '';
 						}
-						update_post_meta($post_id, "$namespace$key", $value);
+						if ('post' === $base_type) {
+							update_post_meta($object_id, "$namespace$key", $value);
+						}
+						if ('category' === $base_type) {
+							update_term_meta($object_id, "$namespace$key", $value);
+						}
 					}
 				}
 			}
 
 			// clean the cache
 			$cache_file = wp_upload_dir();
-			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::output_filename() . '.lock';
-			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $post_id . '/' . Plugin::output_filename();
+			$cache_id = $object_id;
+			if ('category' === $base_type) {
+				$cache_id = 'term-'. $object_id;
+			}
+			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $cache_id . '/' . Plugin::output_filename() . '.lock';
+			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $cache_id . '/' . Plugin::output_filename();
 			array_map('unlink', array_merge(glob($lock_files), glob($cache_files)));
 		}
+		return true;
 	}
 
 	public static function meta_panel()
@@ -1011,4 +1060,17 @@ EOCSS;
 		return reset($array);
 	}
 
+	public static function show_queried_object()
+	{
+		$queried_object = \QueriedObject::getInstance()->getTable();
+		// nice table view
+		?>
+		<div class="updated"><table><thead><th>BSI Variable</th><th>Value</th></thead><?php
+			foreach ($queried_object as $key => $value) {
+				if ('go?' === $key) {
+					$value = $value ? 'Social image enabled and available' : 'Social image not available/not in use';
+				}
+				echo "<tr><td>$key</td><td>" . ($value ?: 'n/a') . "</td></tr>";
+			}?></table><p><em>This information is shown because BSI_DEBUG is enabled</em></p></div><?php
+	}
 }

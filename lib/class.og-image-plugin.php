@@ -3,6 +3,7 @@
 namespace Clearsite\Plugins\OGImage;
 
 use Exception;
+use QueriedObject;
 use RankMath;
 
 defined('ABSPATH') or die('You cannot be here.');
@@ -94,8 +95,8 @@ class Plugin
 			return $vars;
 		});
 
-		add_action('wp', [static::class, 'evaluate_queried_object'], PHP_INT_MIN);
-		add_action('admin_init', [static::class, 'evaluate_queried_object'], PHP_INT_MIN);
+		add_action('wp', [QueriedObject::class, 'setData'], PHP_INT_MIN, 0);
+		add_action('admin_init', [QueriedObject::class, 'setData'], PHP_INT_MIN, 0);
 
 		add_action('wp', function () {
 			// oh, my, this is a mess.
@@ -110,7 +111,7 @@ class Plugin
 			$this->text_options['position'] = get_option(self::DEFAULTS_PREFIX . 'text_position', 'top-left');
 			$this->logo_options['position'] = get_option(self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right');
 
-			list($id, $type, $base_type) = Plugin::get_queried_object();
+			list($id, $type, $base_type) = QueriedObject::getInstance();
 			if ($id && 'post' === $base_type) {
 				$allowed_meta = array_keys(self::field_list()['meta']);
 				$overrule_text_position = get_post_meta($id, self::OPTION_PREFIX . 'text_position', true);
@@ -303,6 +304,7 @@ class Plugin
 		});
 
 		add_filter('bsi_post_types', [static::class, 'post_types'], ~PHP_INT_MAX, 0);
+		add_filter('bsi_taxonomies', [static::class, 'taxonomies'], ~PHP_INT_MAX, 0);
 
 		/**
 		 * Patch the response to WordPress oembed request
@@ -310,7 +312,7 @@ class Plugin
 		add_filter('oembed_response_data', function ($data, $post) {
 			$id = $post->ID;
 
-			if (self::go_for_id($id, 'pots', 'post')) {
+			if (self::go_for_id($id, 'post', 'post')) {
 				$url = static::get_og_image_url($id, 'post', 'post');
 
 				$data['thumbnail_url'] = $url;
@@ -356,7 +358,7 @@ class Plugin
 			$killswitch = get_post_meta($object_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
 			$image = get_post_meta($object_id, self::OPTION_PREFIX . 'image', true);
 		}
-//		if ('tax' === $base_type) {
+//		if ('category' === $base_type) {
 //			$killswitch = get_term_meta($object_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
 //			$image = get_term_meta($object_id, self::OPTION_PREFIX . 'image', true);
 //		}
@@ -404,7 +406,7 @@ class Plugin
 			$log[] = "Start memory usage: " . ceil(memory_get_peak_usage() / (1024 * 1024)) . "M";
 			$log[] = '-- image generation --';
 			$log[] = "BSI Debug log for " . 'http' . (!empty($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg('debug');
-			$log = array_merge($log, Plugin::array_key_prefix(array_combine(['- object_id', '- object_type', '- base_type', '- permalink', '- og:image', '- go'], Plugin::get_queried_object())));
+			$log = array_merge($log, Plugin::array_key_prefix( QueriedObject::getInstance()->getTable() ));
 		}
 		if (count(func_get_args()) > 0) {
 			$item = func_get_arg(0);
@@ -718,120 +720,6 @@ class Plugin
 		}
 	}
 
-	public static function set_queried_object($object_array=null)
-	{
-		static $object;
-		if ($object_array) {
-			$object = $object_array;
-		}
-		return $object;
-	}
-
-	public static function get_queried_object()
-	{
-		return self::set_queried_object();
-	}
-
-	public static function evaluate_queried_object() {
-		static $result;
-		global $wp_query, $pagenow;
-		if (!$result) {
-			$link = null;
-			$id = get_queried_object_id();
-			$qo = get_queried_object();
-			switch (true) {
-				// post edit
-				case is_admin() && in_array($pagenow, ['post.php', 'post-new.php']):
-					$id = !empty($_GET['post']) ? intval($_GET['post']) : 'new';
-					$type = !empty($_GET['post_type']) ? $_GET['post_type'] : get_post_type($id);
-					$base_type = 'post';
-					$link = get_permalink($id);
-					break;
-
-				// post
-				case is_single():
-				case is_page():
-				case is_front_page():
-				case is_privacy_policy():
-				case is_singular():
-					$type = get_post_type();
-					$base_type = 'post';
-					$link = get_permalink($id);
-					break;
-
-				// post archive
-				case is_post_type_archive():
-				case is_archive() && !is_category() && !is_tag():
-				case is_home():
-					$id = 'archive';
-					$type = get_post_type();
-					$base_type = 'post';
-					$link = get_post_type_archive_link($type);
-					break;
-
-				// category edit
-				case is_admin() && in_array($pagenow, ['term.php', 'edit-tags.php']):
-					$id = !empty($_GET['tag_ID']) ? intval($_GET['tag_ID']) : 'new';
-					$type = !empty($_GET['taxonomy']) ? $_GET['taxonomy'] : get_post_type($id);
-					$base_type = 'tax';
-					$link = get_term_link($id, $type);
-					if (is_wp_error($link)) $link = null;
-					break;
-
-
-				// category archive
-				case is_category():
-				case is_tag():
-				case is_tax():
-					$type = $qo->taxonomy;
-					$base_type = 'tax';
-					$link = get_term_link($id, $type);
-					break;
-
-//				case is_archive():
-//					$id = 'archive';
-//					$base_type = 'tax';
-//					$type = 'the-taxonomy-here';
-//					var_dumP($wp_query);
-//					break;
-
-				// unsupported
-				case is_404():
-					$type = '404';
-					$base_type = 'unsupported';
-					break;
-				case is_robots():
-				case is_favicon():
-				case is_embed():
-				case is_paged():
-				case is_admin():
-				case is_attachment():
-				case is_preview():
-				case is_author():
-				case is_date():
-				case is_year():
-				case is_month():
-				case is_day():
-				case is_time():
-				case is_search():
-				case is_feed():
-				case is_comment_feed():
-				case is_trackback():
-				default:
-					$id = null;
-					$type = 'unsupported';
-					$base_type = 'unsupported';
-					break;
-
-			}
-			$result = [$id, $type, $base_type, $link, $link ? trailingslashit(trailingslashit($link) . self::output_filename()) : null ];
-			$result[] = self::go_for_id($id, $type, $base_type);
-
-			self::set_queried_object($result);
-		}
-		return $result;
-	}
-
 	public static function array_key_prefix($array_combine)
 	{
 		foreach ($array_combine as $key => &$value) {
@@ -843,7 +731,7 @@ class Plugin
 
 	public function _init()
 	{
-		list($id, $type, $base_type, $link, $ogimage, $go) = self::get_queried_object();
+		list($id, $type, $base_type, $link, $ogimage, $go) = QueriedObject::getInstance();
 		if ($go) {
 			if (!Plugin::getInstance()->og_image_available) {
 				$go = false;
@@ -950,6 +838,13 @@ class Plugin
 	public static function post_types(): array
 	{
 		$list = get_post_types(['public' => true]);
+
+		return array_values($list);
+	}
+
+	public static function taxonomies(): array
+	{
+		$list = get_taxonomies(['public' => true]);
 
 		return array_values($list);
 	}
@@ -1394,7 +1289,7 @@ class Plugin
 				return get_permalink($object_id) ? get_permalink($object_id) . self::output_filename() . '/' : false;
 			}
 		}
-		if ('tax' === $base_type) {
+		if ('category' === $base_type) {
 			if ('archive' === $object_id) {
 				return get_category_link($object_type) ? get_category_link($object_type) . self::output_filename() . '/' : false;
 			}
@@ -1699,6 +1594,8 @@ EODOC;
 
 	public static function field_list(): array
 	{
+		$qo = QueriedObject::getInstance();
+
 		$image_comment = __('The following process is used to determine the OG:Image (in order of importance)', Plugin::TEXT_DOMAIN) . ':
 <ol><li>' . __('Branded Social Image on page/post', Plugin::TEXT_DOMAIN) . '</li>';
 		if (defined('WPSEO_VERSION')) {
@@ -2081,7 +1978,7 @@ EODOC;
 			return $chain;
 		}
 
-		list($object_id, $object_type, $base_type) = Plugin::get_queried_object();
+		list($object_id, $object_type, $base_type) = QueriedObject::getInstance();
 
 		$layers = [];
 
@@ -2117,7 +2014,7 @@ EODOC;
 
 	public static function image_fallback_chain($with_post = false): array
 	{
-		list($object_id, $object_type, $base_type) = Plugin::get_queried_object();
+		list($object_id, $object_type, $base_type) = QueriedObject::getInstance()->getData();
 
 		if (!$object_id || 'unsupported' === $base_type) {
 			return [];

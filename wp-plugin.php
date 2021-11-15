@@ -43,7 +43,12 @@ use Clearsite\Plugins\OGImage\Plugin;
 
 define('BSI_PLUGIN_FILE', __FILE__);
 
+if (!defined('BSI_DEBUG')) {
+	define('BSI_DEBUG', false);
+}
+
 require_once __DIR__ . '/lib/inc.functions.php';
+require_once __DIR__ . '/lib/class.queried-object.php';
 require_once __DIR__ . '/lib/class.og-image-plugin.php';
 require_once __DIR__ . '/lib/class.og-image-admin.php';
 
