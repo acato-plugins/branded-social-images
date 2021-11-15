@@ -102,6 +102,9 @@ class Admin
 					add_query_arg('debug', 'BSI', Plugin::get_og_image_url(get_the_ID(), get_post_type(), 'post'))); ?></p><?php
 			}
 		});
+
+		add_action('bsi_settings_panels', [ static::class, 'config_panel']);
+		add_action('bsi_settings_panels', [ static::class, 'log_panel']);
 	}
 
 	public static function admin_icon(): string
@@ -377,27 +380,38 @@ class Admin
 			$logo = $m[1];
 		}
 
+		add_filter('bsi_editor_variables', function($list) use ($text_settings, $logo_settings, $logo, $width, $height) {
+			return array_merge($list, [
+				'padding' => Plugin::PADDING . 'px',
+				'text-width' => ceil(Plugin::getInstance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']) . 'px',
+				'text-height' => ceil(Plugin::getInstance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']) . 'px',
+
+				'text-background' => Admin::hex_to_rgba($text_settings['background-color'], true),
+				'text-color' => Admin::hex_to_rgba($text_settings['color'], true),
+				'text-font' => $text_settings['font-file'],
+				'letter-spacing' => '1px',
+				'text-shadow-color' => Admin::hex_to_rgba($text_settings['text-shadow-color'], true),
+				'text-shadow-top' => intval($text_settings['text-shadow-top']) . 'px',
+				'text-shadow-left' => intval($text_settings['text-shadow-left']) . 'px',
+				'font-size' => $text_settings['font-size'] . 'px',
+				'text-padding' => $text_settings['padding'] . 'px',
+				'line-height' => $text_settings['line-height'] . 'px',
+
+				'logo-scale' => $logo_settings['size'],
+				'logo-width' => ($logo ? $width : 410), /* example logo */
+				'logo-height' => ($logo ? $height : 82),
+			]);
+			}, PHP_INT_MAX);
 		?>
 		<style>
 			#branded-social-images-editor {
-				--padding: <?php print Plugin::PADDING; ?>px;
-				--text-width: <?php print ceil(Plugin::getInstance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']); ?>px;
-				--text-height: <?php print ceil(Plugin::getInstance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding']); ?>px;
-
-				--text-background: <?php print Admin::hex_to_rgba($text_settings['background-color'], true); ?>;
-				--text-color: <?php print Admin::hex_to_rgba($text_settings['color'], true); ?>;
-				--text-font: <?php print $text_settings['font-file']; ?>;
-				--letter-spacing: 1px;
-				--text-shadow-color: <?php print Admin::hex_to_rgba($text_settings['text-shadow-color'], true); ?>;
-				--text-shadow-top: <?php print intval($text_settings['text-shadow-top']); ?>px;
-				--text-shadow-left: <?php print intval($text_settings['text-shadow-left']); ?>px;
-				--font-size: <?php print $text_settings['font-size']; ?>px;
-				--text-padding: <?php print $text_settings['padding']; ?>px;
-				--line-height: <?php print $text_settings['line-height']; ?>px;
-
-				--logo-scale: <?php print $logo_settings['size']; ?>;
-				--logo-width: <?php print ($logo ? $width : 410); /* example logo */ ?>;
-				--logo-height: <?php print ($logo ? $height : 82); ?>;
+				<?php
+				$variables = apply_filters('bsi_editor_variables', []);
+				foreach ($variables as $variable => $value) {
+					print '
+--'. $variable .': '. $value .';';
+				}
+				?>
 			}
 
 		</style>
@@ -503,22 +517,7 @@ class Admin
 							]); ?>
 						</div>
 					</div>
-					<div class="area--config closed collapsible">
-						<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
-						<div class="inner">
-							<?php self::render_options($fields, ['disabled']); ?>
-						</div>
-					</div>
-					<?php if ($log = get_transient(Plugin::OPTION_PREFIX .'_debug_log')) { ?>
-						<div class="area--debug closed collapsible">
-							<h2><?php _e('Debug log', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
-							<div class="inner">
-								<pre><?php print $log; ?></pre>
-								<em><?php $date = date('d-m-Y H:i:s', get_option('_transient_timeout_'. Plugin::OPTION_PREFIX .'_debug_log'));
-									print sprintf(__('This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN), $date); ?></em>
-							</div>
-						</div>
-					<?php } ?>
+					<?php do_action('bsi_settings_panels', $fields); ?>
 				</div>
 			<?php } ?>
 		</div>
@@ -556,6 +555,32 @@ class Admin
 		}
 		HTML_Inputs::render($option_name, $option_atts, $label);
 		print '</span>';
+	}
+
+	public static function log_panel()
+	{
+		if ($log = get_transient(Plugin::OPTION_PREFIX .'_debug_log')) { ?>
+		<div class="area--debug closed collapsible">
+			<h2><?php _e('Debug log', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+			<div class="inner">
+				<pre><?php print $log; ?></pre>
+				<em><?php $date = date('d-m-Y H:i:s', get_option('_transient_timeout_'. Plugin::OPTION_PREFIX .'_debug_log'));
+					print sprintf(__('This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN), $date); ?></em>
+			</div>
+		</div>
+	<?php }
+	}
+
+	public static function config_panel($fields)
+	{
+		?>
+		<div class="area--config closed collapsible">
+			<h2><?php _e('Plugin configuration', Plugin::TEXT_DOMAIN); ?><span class="toggle"></span></h2>
+			<div class="inner">
+				<?php self::render_options($fields, ['disabled']); ?>
+			</div>
+		</div>
+		<?php
 	}
 
 	public static function hex_to_rgba($hex, $asRGBA = false)
@@ -845,6 +870,14 @@ EOCSS;
 			switch ($action) {
 				case 'save-settings':
 					$valid_post_keys = Plugin::get_valid_POST_keys('admin');
+					$fields = Plugin::field_list();
+
+					foreach ($fields as $group => $_fields) {
+						if ($group === 'admin' || $group === 'meta') { // skip groups arelady here
+							continue;
+						}
+						$valid_post_keys = array_merge($valid_post_keys, Plugin::get_valid_POST_keys($group));
+					}
 
 					foreach ($_POST['branded_social_images'] as $namespace => $values) {
 						if (is_array($values)) {
@@ -859,6 +892,7 @@ EOCSS;
 							}
 						}
 					}
+
 					wp_redirect(remove_query_arg('bsi-action', add_query_arg('updated', 1)));
 					exit;
 				case 'purge-cache-confirm':
