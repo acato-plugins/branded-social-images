@@ -311,7 +311,7 @@ class Plugin
 			$id = $post->ID;
 
 			if (self::go_for_id($id, 'pots', 'post')) {
-				$url = static::get_og_image_url($id, 'pots', 'post');
+				$url = static::get_og_image_url($id, 'post', 'post');
 
 				$data['thumbnail_url'] = $url;
 				$data['thumbnail_width'] = static::getInstance()->width;
