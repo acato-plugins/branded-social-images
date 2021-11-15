@@ -406,6 +406,14 @@ class Admin
 		<style>
 			#branded-social-images-editor {
 				<?php
+				/**
+				 * Allow extra editor-variables by add-ons
+ 				 * Note: you cannot overrule the BSI standard variables
+				 *
+				 * @since 1.0.18
+				 *
+				 * @param array  $variables     Add your variables to the list. skip the -- prefix.
+				 */
 				$variables = apply_filters('bsi_editor_variables', []);
 				foreach ($variables as $variable => $value) {
 					print '
@@ -517,7 +525,16 @@ class Admin
 							]); ?>
 						</div>
 					</div>
-					<?php do_action('bsi_settings_panels', $fields); ?>
+					<?php
+					/**
+					 * Allow extra settings panels by add-ons
+					 *
+					 * @since 1.0.18
+					 *
+					 * @param array  $fields     All available fields
+					 */
+					do_action('bsi_settings_panels', $fields);
+					?>
 				</div>
 			<?php } ?>
 		</div>

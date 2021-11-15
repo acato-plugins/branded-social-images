@@ -2055,6 +2055,14 @@ EODOC;
 			}
 		}
 
+		/**
+		 * Allow extra settings by add-ons
+		 *
+		 * @since 1.0.18
+		 *
+		 * @param array  $settings     Two-level array, yourGroup => [ yourSettings ]
+		 * @see Plugin::field_list for examples.
+		 */
 		foreach (apply_filters('bsi_editor_fields', []) as $group => $fields) {
 			// no, you are not allowed to override existing groups.
 			if ($group === 'admin' || $group === 'meta') {
