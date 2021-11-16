@@ -455,11 +455,20 @@ class Admin
 
 		$text_fallback_chain = Plugin::text_fallback_chain();
 		// in case of no 'scraped' title which resulted of a non-normal-page-code, build the title on-the-fly
-		if (get_the_ID() && empty($text_fallback_chain['meta'])) { // post but no title configured
-			$scraped = Plugin::scrape_title_data(get_the_ID());
+		$auto_title = false;
+		$qo = QueriedObject::getInstance();
+		if ('new' === $qo->object_id) {
+			$auto_title = true;
+		}
+		elseif ($qo->object_id) { // not new, but still see object
+			$scraped = Plugin::scrape_title_data(QueriedObject::getInstance()->permalink);
 			if ($scraped[0] >= 300) { // non-normal state
-				$editor_class[] = 'auto-title';
+				$auto_title = true;
 			}
+		}
+
+		if ($auto_title) {
+			$editor_class[] = 'auto-title';
 		}
 
 		$editor_class = implode(' ', $editor_class);
