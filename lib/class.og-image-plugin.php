@@ -1986,22 +1986,37 @@ EODOC;
 		list($object_id, $object_type, $base_type, $permalink) = QueriedObject::getInstance();
 
 		$layers = [];
+		switch ($base_type) {
+			case 'post':
+				$function = 'get_the_title';
+				break;
+			case 'category':
+				$function = 'get_cat_name';
+				break;
+			default:
+				$function = '__return_false';
+				break;
+		}
 
 		$title = '';
-		if ('post' === $base_type && $object_id) {
-			$new_post = 'auto-draft' == get_post_status($object_id);
+		if ($object_id) {
+			$new_post = 'new' === $object_id;
 
 			if (Plugin::setting('use_bare_post_title')) {
-				$title = apply_filters('the_title', get_the_title($object_id), $object_id);
-				if ($title) {
-					$layers['wordpress'] = $title;
+				if (!$new_post) {
+					$title = apply_filters('the_title', $function($object_id), $object_id);
+					if ($title) {
+						$layers['wordpress'] = $title;
+					}
 				}
 			}
 
 			if (!$title) {
-				$title = Plugin::scrape_title($permalink);
-				if ($title) {
-					$layers['scraped'] = $title;
+				if ($permalink) {
+					$title = Plugin::scrape_title($permalink);
+					if ($title) {
+						$layers['scraped'] = $title;
+					}
 				}
 			}
 			if (!$title) { // no text from scraping, build it

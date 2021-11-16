@@ -87,10 +87,16 @@ class Admin
 		add_action('add_meta_boxes', [static::class, 'add_post_meta_boxes']);
 
 		/** categories */
-		add_action('create_category', [static::class, 'save_category_meta_data']);
+		add_action('create_category', [static::class, 'save_category_meta_data']); // probably not needed. @todo: investigate
 		add_action('edit_category', [static::class, 'save_category_meta_data']);
 		add_action('category_add_form_fields', [static::class, 'add_category_meta_boxes']);
 		add_action('category_edit_form', [static::class, 'add_category_meta_boxes']);
+
+		/** tags */
+		add_action('create_post_tag', [static::class, 'save_category_meta_data']); // probably not needed. @todo: investigate
+		add_action('edit_post_tag', [static::class, 'save_category_meta_data']); // probably not needed. @todo: investigate
+		add_action('post_tag_add_form_fields', [static::class, 'add_category_meta_boxes']);
+		add_action('post_tag_edit_form', [static::class, 'add_category_meta_boxes']);
 
 		add_action('admin_notices', [static::class, 'admin_notices']);
 		if (defined('BSI_DEBUG') && true === BSI_DEBUG) {
@@ -454,7 +460,7 @@ class Admin
 		}
 
 		$text_fallback_chain = Plugin::text_fallback_chain();
-		// in case of no 'scraped' title which resulted of a non-normal-page-code, build the title on-the-fly
+
 		$auto_title = false;
 		$qo = QueriedObject::getInstance();
 		if ('new' === $qo->object_id) {
@@ -1105,7 +1111,7 @@ EOCSS;
 		$queried_object = QueriedObject::getInstance()->getTable();
 		// nice table view
 		?>
-		<div class="updated"><table><thead><th>BSI Variable</th><th>Value</th></thead><?php
+		<div class="updated"><table><thead><th align="left">BSI Variable</th><th align="left">Value</th></thead><?php
 			foreach ($queried_object as $key => $value) {
 				if ('go?' === $key) {
 					$value = $value ? 'Social image enabled and available' : 'Social image not available/not in use';

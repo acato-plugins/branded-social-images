@@ -510,7 +510,7 @@ import decodeEntities from './helpers/decode_entities';
 		setTimeout(monitor_space, 1000);
 
 		// monitor title
-		let title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php').find('#post #title,.block-editor #post-title-0').get(0);
+		let title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php,.edit-tags-php').find('#post #title,.block-editor .editor-post-title textarea,#tag-name').get(0);
 		let update_auto_title = () => {
 			// sure?
 			if (editor.is('.auto-title')) {
@@ -522,8 +522,18 @@ import decodeEntities from './helpers/decode_entities';
 			}
 		};
 
-		if (title_field) {
-			$(title_field).on('keyup change blur', update_auto_title).trigger('keyup');
+		if ($body.is('.block-editor-page')) { // gutenberg
+			subscribe(() => {
+				title_field = $('.block-editor-page .block-editor .editor-post-title textarea,#tag-name').get(0);
+				if (title_field && !$(title_field).is('bsi-bound')) {
+					$(title_field).addClass('bsi-bound').on('keyup change blur', update_auto_title).trigger('keyup');
+				}
+			});
+		}
+		else { // classic editor and category
+			if (title_field) {
+				$(title_field).on('keyup change blur', update_auto_title).trigger('keyup');
+			}
 		}
 
 	});
