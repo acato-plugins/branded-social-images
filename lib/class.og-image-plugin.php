@@ -209,7 +209,7 @@ class Plugin
 
 		add_action('init', function () {
 			// does not work in any possible way for Post-Type Archives
-			add_rewrite_endpoint(self::output_filename(), EP_PERMALINK | EP_ROOT | EP_PAGES, Plugin::QUERY_VAR);
+			add_rewrite_endpoint(self::output_filename(), EP_PERMALINK | EP_ROOT | EP_PAGES | EP_CATEGORIES | EP_TAGS, Plugin::QUERY_VAR);
 
 			if (get_option("bsi_needs_rewrite_rules") || Plugin::output_filename() !== get_option('_bsi_rewrite_rules_based_on')) {
 				delete_option("bsi_needs_rewrite_rules");
@@ -348,7 +348,7 @@ class Plugin
 	 * @return bool
 	 * @todo: future version will have to detect archives and categories as well
 	 */
-	public static function go_for_id($object_id, $post_type, $base_type): bool
+	public static function go_for_id($object_id, $object_type, $base_type): bool
 	{
 		// default to NO GO
 		$go = $image = false;
@@ -358,10 +358,10 @@ class Plugin
 			$killswitch = get_post_meta($object_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
 			$image = get_post_meta($object_id, self::OPTION_PREFIX . 'image', true);
 		}
-//		if ('category' === $base_type) {
-//			$killswitch = get_term_meta($object_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
-//			$image = get_term_meta($object_id, self::OPTION_PREFIX . 'image', true);
-//		}
+		if ('category' === $base_type) {
+			$killswitch = get_term_meta($object_id, self::OPTION_PREFIX . 'disabled', true) ?: get_option(self::DEFAULTS_PREFIX . 'disabled', 'off');
+			$image = get_term_meta($object_id, self::OPTION_PREFIX . 'image', true);
+		}
 		$go = !!self::image_fallback_chain() || $image;
 		if ('on' === $killswitch) {
 			$go = false;
@@ -534,14 +534,14 @@ class Plugin
 		return array_filter($cache, $filter);
 	}
 
-	public static function scrape_title($post_id)
+	public static function scrape_title($url)
 	{
-		return self::scrape_title_data($post_id)[1];
+		return self::scrape_title_data($url)[1];
 	}
 
-	public static function scrape_code($post_id)
+	public static function scrape_code($url)
 	{
-		return self::scrape_title_data($post_id)[0];
+		return self::scrape_title_data($url)[0];
 	}
 
 	/**
@@ -550,17 +550,17 @@ class Plugin
 	 * @param $post_id
 	 * @return array|mixed
 	 */
-	public static function scrape_title_data($post_id)
+	public static function scrape_title_data($url)
 	{
 		static $previous = [];
-		if (!empty($previous[$post_id])) {
-			return $previous[$post_id];
+		if (!empty($previous[$url])) {
+			return $previous[$url];
 		}
 
 		$title = $page = '';
 		$code = 0;
 		try {
-			$result = wp_remote_get(get_permalink($post_id), [
+			$result = wp_remote_get($url, [
 				'httpversion' => '1.1',
 				'user-agent' => $_SERVER["HTTP_USER_AGENT"],
 				'referer' => remove_query_arg('asd')
@@ -589,7 +589,7 @@ class Plugin
 			}
 		}
 
-		return $previous[$post_id] = [$code, html_entity_decode($title)];
+		return $previous[$url] = [$code, html_entity_decode($title)];
 	}
 
 	public static function title_format($post_id = null, $no_title = false)
@@ -1946,9 +1946,14 @@ EODOC;
 			$options['admin'][$field]['current_value'] = get_option($_['namespace'] . $field, !empty($_['default']) ? $_['default'] : null);
 		}
 
-		if (get_the_ID()) {
+		if ($qo->object_id) {
 			foreach ($options['meta'] as $field => $_) {
-				$options['meta'][$field]['current_value'] = get_post_meta(get_the_ID(), $_['namespace'] . $field, true) ?: (!empty($_['default']) ? $_['default'] : null);
+				if ($qo->isPost()) {
+					$options['meta'][$field]['current_value'] = get_post_meta($qo->object_id, $_['namespace'] . $field, true) ?: (!empty($_['default']) ? $_['default'] : null);
+				}
+				if ($qo->isCategory()) {
+					$options['meta'][$field]['current_value'] = get_term_meta($qo->object_id, $_['namespace'] . $field, true) ?: (!empty($_['default']) ? $_['default'] : null);
+				}
 			}
 		}
 
@@ -1978,7 +1983,7 @@ EODOC;
 			return $chain;
 		}
 
-		list($object_id, $object_type, $base_type) = QueriedObject::getInstance();
+		list($object_id, $object_type, $base_type, $permalink) = QueriedObject::getInstance();
 
 		$layers = [];
 
@@ -1994,7 +1999,7 @@ EODOC;
 			}
 
 			if (!$title) {
-				$title = Plugin::scrape_title($object_id);
+				$title = Plugin::scrape_title($permalink);
 				if ($title) {
 					$layers['scraped'] = $title;
 				}
@@ -2074,18 +2079,10 @@ EODOC;
 	public static function admin_bar($admin_bar)
 	{
 		global $pagenow;
-		if (!is_admin() || $pagenow == 'post.php' || $pagenow == 'post-new.php') {
-			if (!is_admin()) {
-				$permalink = is_single() ? get_permalink(get_the_ID()) : remove_query_arg('');
-			}
-			else {
-				$permalink = get_permalink(get_the_ID());
-			}
-			if (!parse_url($permalink, PHP_URL_HOST)) {
-				// somebody messed with the permalinks!
-				$permalink = trailingslashit(get_home_url()) . ltrim(parse_url($permalink, PHP_URL_PATH), '/');
-			}
-
+		$qo = QueriedObject::getInstance();
+		if ($qo->showInterface()) {
+			$og_image = $qo->og_image;
+			$permalink = $qo->permalink;
 			if (
 				defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
 				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
@@ -2093,7 +2090,7 @@ EODOC;
 				$args = array(
 					'id' => self::ADMIN_SLUG . '-view',
 					'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
-					'href' => $permalink . Plugin::output_filename() . '/',
+					'href' => $og_image,
 					'meta' => [
 						'target' => '_blank',
 						'class' => self::ADMIN_SLUG . '-view'

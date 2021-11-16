@@ -6,6 +6,8 @@ defined('ABSPATH') or die('You cannot be here.');
 
 use Clearsite\Tools\HTML_Inputs;
 use Exception;
+use QueriedObject;
+use WP_Term;
 
 class Admin
 {
@@ -642,7 +644,7 @@ class Admin
 			add_meta_box(
 				Plugin::ADMIN_SLUG,
 				'Branded Social Images',
-				[static::class, 'meta_panel'],
+				[static::class, 'post_meta_panel'],
 				$post_type,
 				$context
 			);
@@ -652,20 +654,29 @@ class Admin
 	public static function add_category_meta_boxes()
 	{
 		$taxonomies = apply_filters('bsi_taxonomies', []);
-		$qo = \QueriedObject::getInstance();
+		$qo = QueriedObject::getInstance();
 		foreach ($taxonomies as $taxonomy) {
 			if ($qo->base_type === 'category' && $qo->object_type === $taxonomy) {
-				call_user_func([static::class, 'meta_panel'], $taxonomy);
+				self::category_meta_panel();
 				break; // in the unlikely event we have a situation where multiple taxonomies match, don't show them.
 			}
 		}
 	}
 
+	private static function get_taxonomy_for_term($term_id): string
+	{
+		// why the @#$% does wordpress not have this
+		global $wpdb;
+		return $wpdb->get_var($wpdb->prepare("SELECT taxonomy FROM {$wpdb->term_taxonomy} WHERE term_id = %d", $term_id)) ?: 'category';
+	}
+
 	public static function save_category_meta_data($object): bool
 	{
-		if (is_string($object)) {
-			var_dump(__FUNCTION__, 'string', $object);
-			exit;
+		if (!is_a($object, WP_Term::class)) {
+			if (is_numeric($object)) {
+				// create a fake object because without Taxonmy, wordpress will not allow lookup by id ... !@#$ knows why
+				$object = (object) [ 'term_id' => $object, 'taxonomy' => self::get_taxonomy_for_term($object) ];
+			}
 		}
 
 		return self::save_meta_data($object->term_id, $object->taxonomy, 'category');
@@ -678,8 +689,18 @@ class Admin
 
 	public static function save_meta_data($object_id, $object_type, $base_type): bool
 	{
-
 		if (array_key_exists('branded_social_images', $_POST)) {
+			switch($base_type) {
+				case 'post':
+					$function = 'update_post_meta';
+					break;
+				case 'category':
+					$function = 'update_term_meta';
+					break;
+				default:
+					$function = '__return_false';
+			}
+
 			// save new BSI meta values
 			$valid_post_keys = Plugin::get_valid_POST_keys('meta');
 
@@ -698,27 +719,37 @@ class Admin
 						if ($key === 'text' && Plugin::text_is_identical($value, Plugin::getInstance()->dummy_data('text'))) {
 							$value = '';
 						}
-						if ('post' === $base_type) {
-							update_post_meta($object_id, "$namespace$key", $value);
-						}
-						if ('category' === $base_type) {
-							update_term_meta($object_id, "$namespace$key", $value);
-						}
+						$function($object_id, "$namespace$key", $value);
 					}
 				}
 			}
 
 			// clean the cache
 			$cache_file = wp_upload_dir();
-			$cache_id = $object_id;
-			if ('category' === $base_type) {
-				$cache_id = 'term-'. $object_id;
-			}
-			$lock_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $cache_id . '/' . Plugin::output_filename() . '.lock';
-			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . $cache_id . '/' . Plugin::output_filename();
+			$cache_files = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/*/' . QueriedObject::cacheDirFor($object_id, $object_type, $base_type) . '/' . Plugin::output_filename();
+			$lock_files = $cache_files . '.lock';
 			array_map('unlink', array_merge(glob($lock_files), glob($cache_files)));
 		}
 		return true;
+	}
+
+	public static function post_meta_panel()
+	{
+		self::meta_panel();
+	}
+
+	public static function category_meta_panel()
+	{
+		// taxonomy panel has no wrappings
+		?>
+		<div id="branded-social-images" class="fake-postbox">
+		<div class="postbox-header"><h2 class="wp-ui-primary">Branded Social Images</h2></div>
+		<div class="inside">
+			<?php
+			self::meta_panel();
+			?>
+		</div>
+		</div><?php
 	}
 
 	public static function meta_panel()
@@ -1062,7 +1093,7 @@ EOCSS;
 
 	public static function show_queried_object()
 	{
-		$queried_object = \QueriedObject::getInstance()->getTable();
+		$queried_object = QueriedObject::getInstance()->getTable();
 		// nice table view
 		?>
 		<div class="updated"><table><thead><th>BSI Variable</th><th>Value</th></thead><?php

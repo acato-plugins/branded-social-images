@@ -1,3 +1,27 @@
+#branded-social-images.fake-postbox {
+  position: relative;
+  min-width: 255px;
+  border: 1px solid #c3c4c7;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+  background: #fff;
+  margin-bottom: 20px;
+  padding: 0;
+  line-height: 1; }
+  #branded-social-images.fake-postbox .postbox-header {
+    display: block;
+    border-bottom: 1px solid #c3c4c7; }
+  #branded-social-images.fake-postbox .inside {
+    position: relative;
+    margin: 6px 0 0 0;
+    padding: 0 12px 12px;
+    line-height: 1.4;
+    font-size: 13px; }
+  #branded-social-images.fake-postbox h2 {
+    font-size: 14px;
+    padding: 8px 12px;
+    margin: 0;
+    line-height: 1.4; }
+
 #branded-social-images-editor {
   /* Interaction Cues
 ----------------------------------*/

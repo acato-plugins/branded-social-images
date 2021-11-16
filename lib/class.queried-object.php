@@ -119,9 +119,9 @@ class QueriedObject implements ArrayAccess
 						break;
 
 				}
-				$result = [$id, $type, $base_type, $link, $link ? trailingslashit(trailingslashit($link) . Plugin::output_filename()) : null];
+				$result = [$id, $type, $base_type, $link, $link ? trailingslashit(trailingslashit($link) . Plugin::output_filename()) : null, true];
 				$that->data = $result; // save, because next step is querying ... sorry...
-				$result[] = Plugin::go_for_id($id, $type, $base_type);
+				$result[5] = Plugin::go_for_id($id, $type, $base_type);
 				$that->data = $result;
 			}
 		}
@@ -183,8 +183,40 @@ class QueriedObject implements ArrayAccess
 	public function __get($offset)
 	{
 		if ($this->offsetExists($offset)) {
+			while (count($this->data) < count($this->keys)) {
+				$this->data[] = false;
+			}
 			return array_combine($this->keys, $this->data)[$offset];
 		}
 		return false;
+	}
+
+	public function isPost($post_type = null): bool
+	{
+		return $post_type ? $this->object_type == $post_type : $this->base_type == 'post';
+	}
+
+	public function isCategory($taxonomy = null): bool
+	{
+		return $taxonomy ? $this->object_type == $taxonomy : $this->base_type == 'category';
+	}
+
+	public function showInterface(): bool
+	{
+		return 'unsupported' !== $this->base_type;
+	}
+
+	public function cacheDir(): string
+	{
+		return self::cacheDirFor($this->object_id, $this->object_type, $this->base_type);
+	}
+
+	public static function cacheDirFor($object_id, $object_type, $base_type): string
+	{
+		$dir = $object_id;
+		if ('post' !== $base_type) {
+			$dir = $base_type .'-'. $dir;
+		}
+		return $dir;
 	}
 }

@@ -13,7 +13,7 @@ class Image
 	public $image_id;
 
 	/**
-	 * @deprecated, please use Plugin::get_queried_object()
+	 * @deprecated, please use QueriedObject::getInstance()->object_id, QueriedObject::getInstance()->object_type and ->base_type
 	 */
 	public $post_id;
 
@@ -23,26 +23,19 @@ class Image
 	{
 		$this->manager = $manager;
 
-		$this->post_id = get_the_ID();
 		list($object_id, $object_type, $base_type, $link, $ogimage, $go) = QueriedObject::getInstance();
 		// hack for home (posts on front)
-		if (is_home()) { // @todo: detect this using queryied object
-			$this->post_id = 0;
+		if (is_home()) {
+			$object_id = 0;
 			Plugin::log('Page is home (latest posts), post_id set to 0');
-		}
-		elseif (is_archive()) {// @todo: detect this using queryied object
-			$this->post_id = 'archive-' . get_post_type();
-			Plugin::log('Page is archive, post_id set to ' . $this->post_id);
 		}
 
 		// hack for front-page
-		// @todo: detect this using queryied object
 		$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		if ('/' . Plugin::output_filename() . '/' === $current_url) {
 			Plugin::log('URI = Homepage BSI; ' . $current_url);
 			$front = get_option('page_on_front');
 			if ($front) {
-				$this->post_id = $front;
 				Plugin::log('Using post_id for front-page: ' . $front);
 			}
 		}
@@ -92,7 +85,8 @@ class Image
 
 		Plugin::no_output_buffers(true);
 
-		$image_cache = $this->cache($this->image_id, $this->post_id);
+		$qo = QueriedObject::getInstance();
+		$image_cache = $this->cache($this->image_id, $qo);
 		if ($image_cache) {
 			// we have cache, or have created cache. In any way, we have an image :)
 			// serve-type = redirect?
@@ -111,14 +105,14 @@ class Image
 		exit;
 	}
 
-	public function cache($image_id, $post_id, $retry = 0)
+	public function cache($image_id, QueriedObject $queriedObject, $retry = 0)
 	{
 		// do we have cache?
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename() . '.lock';
-		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename();
+		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $queriedObject->cacheDir() . '/' . Plugin::output_filename();
+		$lock_file = $cache_file . '.lock';
 
 		if ($retry >= 2) {
 			header('X-OG-Error-Fail: Generating image failed.');
@@ -148,24 +142,24 @@ class Image
 			}
 		}
 		$this->manager->file_put_contents($lock_file, date('r'));
-		$cache_file = $this->build($image_id, $post_id);
+		$cache_file = $this->build($image_id, $queriedObject);
 		if (is_file($cache_file)) {
 			do_action('bsi_image_cache_built', $cache_file);
 			return ['file' => $cache_file, 'url' => str_replace($base_dir, $base_url, $cache_file)];
 		}
 		elseif ($retry < 2) {
-			return $this->cache($image_id, $post_id, $retry + 1);
+			return $this->cache($image_id, $queriedObject, $retry + 1);
 		}
 	}
 
-	public function build($image_id, $post_id)
+	public function build($image_id, QueriedObject $queriedObject)
 	{
 		$cache_file = wp_upload_dir();
 		$base_url = $cache_file['baseurl'];
 		$base_dir = $cache_file['basedir'];
-		$lock_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename() . '.lock';
-		$temp_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename() . '.tmp';
-		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $post_id . '/' . Plugin::output_filename();
+		$cache_file = $cache_file['basedir'] . '/' . Plugin::STORAGE . '/' . $image_id . '/' . $queriedObject->cacheDir() . '/' . Plugin::output_filename();
+		$lock_file = $cache_file . '.lock';
+		$temp_file = $cache_file . '.tmp';
 
 		Plugin::log('Base URL: ' . $base_url);
 		Plugin::log('Base DIR: ' . $base_dir);
@@ -261,7 +255,7 @@ class Image
 
 			if ($this->manager->text_options['enabled']) {
 				Plugin::log("Text overlay: enabled");
-				$image->text_overlay($this->manager->text_options, $this->getTextForPost($post_id));
+				$image->text_overlay($this->manager->text_options, $this->getTextForQueriedObject());
 			}
 			else {
 				Plugin::log("Text overlay: disabled");
@@ -306,14 +300,43 @@ class Image
 		return false;
 	}
 
-	public function getTextForPost($post_id)
+
+	private function getTextForQueriedObject()
 	{
+		list($object_id, $object_type, $base_type, $permalink, $ogimage, $go) = QueriedObject::getInstance();
+		return $this->getTextForMeta($base_type, $object_id, $permalink);
+	}
+
+	private function getTextForPost($post_id)
+	{
+		return $this->getTextForMeta('post', $post_id, get_permalink($post_id));
+	}
+
+	public function getTextForMeta($base_type, $object_id, $permalink)
+	{
+		Plugin::log('Using meta-data from '. $base_type .' with id '. $object_id);
 		$default = $this->manager->text_options['text'];
 		if (Plugin::text_is_identical($default, Plugin::getInstance()->dummy_data('text'))) {
 			$default = '';
 		}
 		Plugin::log('Text setting: default text; ' . ($default ?: '( no text )'));
-		$enabled = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text_enabled', true);
+
+		switch($base_type) {
+			case 'post':
+				$function = 'get_post_meta';
+				$title = apply_filters('the_title', get_the_title($object_id), $object_id);
+				break;
+			case 'category':
+				$function = 'get_term_meta';
+				$title = apply_filters('the_title', get_cat_name($object_id), $object_id);
+				break;
+			default:
+				Plugin::log('Unsupported type. sorry');
+				$function = '__return_false';
+				$title = $default;
+		}
+
+		$enabled = $function($object_id, Plugin::OPTION_PREFIX . 'text_enabled', true);
 		if ('off' === $enabled) {
 			Plugin::log('Text setting: post-meta has "text on this image" set to No');
 			return '';
@@ -321,31 +344,29 @@ class Image
 		$text = '';
 		$type = 'none';
 
-		$title = apply_filters('the_title', get_the_title($post_id), $post_id);
-
 		if (Plugin::setting('use_bare_post_title')) {
 			$type = 'wordpress';
 			$text = $title;
 			Plugin::log('Text consideration: WordPress title (bare); ' . $text);
 		}
 
-		$meta = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'text', true);
+		$meta = $function($object_id, Plugin::OPTION_PREFIX . 'text', true);
 		if ($meta) {
 			$type = 'meta';
 			$text = trim($meta);
 			Plugin::log('Text consideration: Meta-box text; ' . ($text ?: '( no text )'));
 		}
 
-		if (!$text && intval($post_id)) {
+		if (!$text && intval($object_id)) {
 			Plugin::log('Text: no text detected in meta-data, getting text from page;');
-			$scraped = Plugin::scrape_title($post_id);
+			$scraped = Plugin::scrape_title($permalink);
 			if ($scraped) {
 				$type = 'scraped';
 				$text = $scraped;
 			}
 
 			if (!$text) { // no text from scraping, build it
-				$text = Plugin::title_format($post_id);
+				$text = Plugin::title_format($object_id);
 				$type = 'by-format';
 			}
 		}
@@ -360,35 +381,64 @@ class Image
 			Plugin::log(' This is a failsafe, should not happen. Please check the editor javascript console.');
 			$text = str_replace('{title}', $title, $text);
 		}
+		if (false !== strpos($text, '{blogname}')) {
+			Plugin::log('{blogname} placeholder stored in database. Replacing with actual blogname.');
+			Plugin::log(' This is a failsafe, should not happen. Please check the editor javascript console.');
+			$text = str_replace('{blogname}', get_bloginfo('name'), $text);
+		}
 
 		Plugin::log('Text determination: text before filter  bsi_text; ' . ($text ?: '( no text )'));
-		$text = apply_filters('bsi_text', $text, $post_id, $this->image_id, $type);
+		$text = apply_filters('bsi_text', $text, $object_id, $this->image_id, $type);
 		Plugin::log('Text determination: text after filter  bsi_text; ' . ($text ?: '( no text )'));
 
 		return $text;
 	}
 
+
+	private function getImageIdForQueriedObject()
+	{
+		$qo = QueriedObject::getInstance();
+		return $this->getImageIdForMeta($qo->base_type, $qo->object_id);
+	}
+
 	private function getImageIdForPost($post_id)
 	{
+		return $this->getImageIdForMeta('post', $post_id);
+	}
+
+	private function getImageIdForMeta($type, $id)
+	{
 		$the_img = 'meta';
-		$image_id = get_post_meta($post_id, Plugin::OPTION_PREFIX . 'image', true);
+		Plugin::log('Using meta-data from '. $type .' with id '. $id);
+		switch($type) {
+			case 'post':
+				$function = 'get_post_meta';
+				break;
+			case 'category':
+				$function = 'get_term_meta';
+				break;
+			default:
+				Plugin::log('Unsupported type. sorry');
+				$function = '__return_false';
+		}
+		$image_id = $function($id, Plugin::OPTION_PREFIX . 'image', true);
 		Plugin::log('Image consideration: meta; ' . ($image_id ?: 'no image found'));
 		// maybe Yoast SEO?
 		if (defined('WPSEO_VERSION') && !$image_id) {
-			$image_id = get_post_meta($post_id, '_yoast_wpseo_opengraph-image-id', true);
+			$image_id = $function($id, '_yoast_wpseo_opengraph-image-id', true);
 			Plugin::log('Image consideration: Yoast SEO; ' . ($image_id ?: 'no image found'));
 			$the_img = 'yoast';
 		}
 		// maybe RankMath?
 		if (class_exists(RankMath::class) && !$image_id) {
-			$image_id = get_post_meta($post_id, 'rank_math_facebook_image_id', true);
+			$image_id = $function($id, 'rank_math_facebook_image_id', true);
 			Plugin::log('Image consideration: SEO by RankMath; ' . ($image_id ?: 'no image found'));
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if (!$image_id && ('on' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if ('post' === $type && !$image_id && ('on' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
-			$image_id = get_post_thumbnail_id($post_id);
+			$image_id = get_post_thumbnail_id($id);
 			Plugin::log('Image consideration: WordPress Featured Image; ' . ($image_id ?: 'no image found'));
 		}
 		// global Image?
@@ -398,9 +448,14 @@ class Image
 			Plugin::log('Image consideration: BSI Fallback Image; ' . ($image_id ?: 'no image found'));
 		}
 
-		Plugin::log('Image determination: ID before filter  bsi_image; ' . ($image_id ?: 'no image found'));
-		$image_id = apply_filters('bsi_image', $image_id, $post_id, $the_img);
-		Plugin::log('Image determination: ID after filter  bsi_image; ' . ($image_id ?: 'no image found'));
+		if ('post' === $type) {
+			Plugin::log('Image determination: ID before filter  bsi_image; ' . ($image_id ?: 'no image found'));
+			$image_id = apply_filters_deprecated('bsi_image', [$image_id, $id, $the_img], '1.0.20', 'bsi_image_id', 'Please use filter bsi_image_id and query the QueriedObject for information on the object');
+			Plugin::log('Image determination: ID after filter  bsi_image; ' . ($image_id ?: 'no image found'));
+		}
+		Plugin::log('Image determination: ID before filter  bsi_image_id; ' . ($image_id ?: 'no image found'));
+		$image_id = apply_filters('bsi_image_id', $image_id, QueriedObject::getInstance(), $the_img);
+		Plugin::log('Image determination: ID after filter  bsi_image_id; ' . ($image_id ?: 'no image found'));
 
 		return $image_id;
 	}
@@ -434,9 +489,4 @@ class Image
 		return self::replaceFirstOccurence($haystack, $needle, '');
 	}
 
-	private function getImageIdForQueriedObject()
-	{
-		list($object_id, $object_type, $base_type, $link, $ogimage, $go) = QueriedObject::getInstance();
-		return false;
-	}
 }

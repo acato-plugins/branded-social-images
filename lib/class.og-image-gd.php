@@ -286,7 +286,7 @@ class GD
 		$image_width = imagesx($this->resource);
 		$image_height = imagesy($this->resource);
 
-		Plugin::log("Logo overlay: logo dimensions; W:$image_width, H:$image_height");
+		Plugin::log("Logo overlay: logo dimensions; W:$logo_width, H:$logo_height");
 
 		// logo overlay
 		$w = $logoOptions['w'] * Plugin::AA * 0.5;
