@@ -213,7 +213,8 @@ class Plugin
 		 * @see https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html
 		 */
 
-		add_action('init', function () {
+		// in the new set-up, init was already done
+		add_action(did_action('init') ? 'wp' : 'init', function () {
 			// does not work in any possible way for Post-Type Archives
 			add_rewrite_endpoint(self::output_filename(), EP_PERMALINK | EP_ROOT | EP_PAGES | EP_CATEGORIES | EP_TAGS, Plugin::QUERY_VAR);
 
