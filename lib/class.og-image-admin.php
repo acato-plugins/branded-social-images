@@ -5,8 +5,6 @@ namespace Clearsite\Plugins\OGImage;
 defined('ABSPATH') or die('You cannot be here.');
 
 use Clearsite\Tools\HTML_Inputs;
-use Exception;
-use QueriedObject;
 use WP_Term;
 
 class Admin
@@ -87,21 +85,18 @@ class Admin
 		add_action('add_meta_boxes', [static::class, 'add_post_meta_boxes']);
 
 		/** categories */
-		add_action('create_category', [static::class, 'save_category_meta_data']); // probably not needed. @todo: investigate
-		add_action('edit_category', [static::class, 'save_category_meta_data']);
-		add_action('category_add_form_fields', [static::class, 'add_category_meta_boxes']);
-		add_action('category_edit_form', [static::class, 'add_category_meta_boxes']);
 
-		/** tags */
-		add_action('create_post_tag', [static::class, 'save_category_meta_data']); // probably not needed. @todo: investigate
-		add_action('edit_post_tag', [static::class, 'save_category_meta_data']); // probably not needed. @todo: investigate
-		add_action('post_tag_add_form_fields', [static::class, 'add_category_meta_boxes']);
-		add_action('post_tag_edit_form', [static::class, 'add_category_meta_boxes']);
+		$taxonomies = apply_filters('bsi_taxonomies', []);
+		foreach ($taxonomies as $taxonomy) {
+
+			add_action('create_'. $taxonomy, [static::class, 'save_category_meta_data']); // probably not needed. @todo: investigate
+			add_action('edit_'. $taxonomy, [static::class, 'save_category_meta_data']);
+			add_action($taxonomy . '_add_form_fields', [static::class, 'add_category_meta_boxes']);
+			add_action($taxonomy . '_edit_form', [static::class, 'add_category_meta_boxes']);
+
+		}
 
 		add_action('admin_notices', [static::class, 'admin_notices']);
-		if (defined('BSI_DEBUG') && true === BSI_DEBUG) {
-			add_action('admin_notices', [static::class, 'show_queried_object']);
-		}
 
 		add_filter('plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
 		add_filter('network_admin_plugin_action_links', [static::class, 'add_settings_link'], 10, 2);
@@ -668,14 +663,7 @@ class Admin
 
 	public static function add_category_meta_boxes()
 	{
-		$taxonomies = apply_filters('bsi_taxonomies', []);
-		$qo = QueriedObject::getInstance();
-		foreach ($taxonomies as $taxonomy) {
-			if ($qo->base_type === 'category' && $qo->object_type === $taxonomy) {
-				self::category_meta_panel();
-				break; // in the unlikely event we have a situation where multiple taxonomies match, don't show them.
-			}
-		}
+		self::category_meta_panel();
 	}
 
 	private static function get_taxonomy_for_term($term_id): string
@@ -1104,19 +1092,5 @@ EOCSS;
 	private static function array_first(array $array)
 	{
 		return reset($array);
-	}
-
-	public static function show_queried_object()
-	{
-		$queried_object = QueriedObject::getInstance()->getTable();
-		// nice table view
-		?>
-		<div class="updated"><table><thead><th align="left">BSI Variable</th><th align="left">Value</th></thead><?php
-			foreach ($queried_object as $key => $value) {
-				if ('go?' === $key) {
-					$value = $value ? 'Social image enabled and available' : 'Social image not available/not in use';
-				}
-				echo "<tr><td>$key</td><td>" . ($value ?: 'n/a') . "</td></tr>";
-			}?></table><p><em>This information is shown because BSI_DEBUG is enabled</em></p></div><?php
 	}
 }

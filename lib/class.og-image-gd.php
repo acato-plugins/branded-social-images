@@ -54,7 +54,10 @@ class GD
 		$h = $this->manager->height * Plugin::AA;
 		$this->resource = imagecreatetruecolor($w, $h);
 
-		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_creating_canvas', $this->handler->post_id, $this->handler->image_id]);
+		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
+		$action_function = (defined('WP_DEBUG_DISPLAY') && true === WP_DEBUG_DISPLAY) ? 'do_action_ref_array' : 'do_action_deprecated';
+		$action_function('bsi_image_gd', [&$this->resource, 'after_creating_canvas', $this->handler->post_id, $this->handler->image_id], '1.1.0', 'bsi_image_layer');
+		do_action_ref_array('bsi_image_layer', [&$this->resource, 'gd_after_creating_canvas', QueriedObject::getInstance(), $this->handler->image_id]);
 
 		imagealphablending($this->resource, true);
 		imagesavealpha($this->resource, true);
@@ -82,7 +85,10 @@ class GD
 			@unlink($this->source);
 		}
 
-		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_adding_background', $this->handler->post_id, $this->handler->image_id]);
+		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
+		$action_function = (defined('WP_DEBUG_DISPLAY') && true === WP_DEBUG_DISPLAY) ? 'do_action_ref_array' : 'do_action_deprecated';
+		$action_function('bsi_image_gd', [&$this->resource, 'after_adding_background', $this->handler->post_id, $this->handler->image_id], '1.1.0', 'bsi_image_layer');
+		do_action_ref_array('bsi_image_layer', [&$this->resource, 'gd_after_adding_background', QueriedObject::getInstance(), $this->handler->image_id]);
 	}
 
 	public function text_overlay($textOptions, $text)
@@ -228,7 +234,10 @@ class GD
 			'stroke_color' => $text_stroke_color,
 		]);
 
-		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_adding_text', $this->handler->post_id, $this->handler->image_id]);
+		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
+		$action_function = (defined('WP_DEBUG_DISPLAY') && true === WP_DEBUG_DISPLAY) ? 'do_action_ref_array' : 'do_action_deprecated';
+		$action_function('bsi_image_gd', [&$this->resource, 'after_adding_text', $this->handler->post_id, $this->handler->image_id], '1.1.0', 'bsi_image_layer');
+		do_action_ref_array('bsi_image_layer', [&$this->resource, 'gd_after_adding_text', QueriedObject::getInstance(), $this->handler->image_id]);
 	}
 
 	private function gradient_color($hex_rgba_start, $hex_rgba_end, $step, $steps = 100, $skip_alpha = false, $return_as_hex = true)
@@ -322,7 +331,10 @@ class GD
 		imagecopyresampled($this->resource, $logo, $logo_posX, $logo_posY, 0, 0, $w, $h, $logo_width, $logo_height);
 		imagedestroy($logo);
 
-		do_action_ref_array('bsi_image_gd', [&$this->resource, 'after_adding_logo', $this->handler->post_id, $this->handler->image_id]);
+		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
+		$action_function = (defined('WP_DEBUG_DISPLAY') && true === WP_DEBUG_DISPLAY) ? 'do_action_ref_array' : 'do_action_deprecated';
+		$action_function('bsi_image_gd', [&$this->resource, 'after_adding_logo', $this->handler->post_id, $this->handler->image_id], '1.1.0', 'bsi_image_layer');
+		do_action_ref_array('bsi_image_layer', [&$this->resource, 'gd_after_adding_logo', QueriedObject::getInstance(), $this->handler->image_id]);
 	}
 
 	public function save($format, $quality)

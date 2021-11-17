@@ -3,7 +3,6 @@
 namespace Clearsite\Plugins\OGImage;
 
 use Exception;
-use QueriedObject;
 use RankMath;
 
 defined('ABSPATH') or die('You cannot be here.');
@@ -97,6 +96,13 @@ class Plugin
 
 		add_action('wp', [QueriedObject::class, 'setData'], PHP_INT_MIN, 0);
 		add_action('admin_init', [QueriedObject::class, 'setData'], PHP_INT_MIN, 0);
+
+		if (defined('BSI_DEBUG') && true === BSI_DEBUG) {
+			add_action('admin_notices', [static::class, 'show_queried_object']);
+		}
+		if (defined('BSI_DEBUG') && true === BSI_DEBUG) {
+			add_action('wp_body_open', [static::class, 'show_queried_object']);
+		}
 
 		add_action('wp', function () {
 			// oh, my, this is a mess.
@@ -312,8 +318,8 @@ class Plugin
 		add_filter('oembed_response_data', function ($data, $post) {
 			$id = $post->ID;
 
-			if (self::go_for_id($id, 'post', 'post')) {
-				$url = static::get_og_image_url($id, 'post', 'post');
+			if (self::go_for_id($id, $post->post_type, 'post')) {
+				$url = static::get_og_image_url($id, $post->post_type, 'post');
 
 				$data['thumbnail_url'] = $url;
 				$data['thumbnail_width'] = static::getInstance()->width;
@@ -329,8 +335,8 @@ class Plugin
 		add_filter('rank_math/json_ld', function ($data, $RankMath_schema_jsonld) {
 			$id = $RankMath_schema_jsonld->post_id;
 
-			if ($id && self::go_for_id($id, 'post', 'post')) {
-				$url = static::get_og_image_url($id, 'post', 'post');
+			if ($id && self::go_for_id($id, get_post_type($id), 'post')) {
+				$url = static::get_og_image_url($id, get_post_type($id), 'post');
 
 				$data['primaryImage']['url'] = $url;
 				$data['primaryImage']['width'] = static::getInstance()->width;
@@ -729,6 +735,26 @@ class Plugin
 		return array_values($array_combine);
 	}
 
+	public static function show_queried_object()
+	{
+		$queried_object = QueriedObject::getInstance()->getTable();
+		// nice table view
+		?>
+		<div class="updated">
+		<table>
+			<thead>
+			<th align="left">BSI Variable</th>
+			<th align="left">Value</th>
+			</thead><?php
+			foreach ($queried_object as $key => $value) {
+				if ('go?' === $key) {
+					$value = $value ? 'Social image enabled and available' : 'Social image not available/not in use';
+				}
+				echo "<tr><td>$key</td><td>" . ($value ?: 'n/a') . "</td></tr>";
+			} ?></table>
+		<p><em>This information is shown because BSI_DEBUG is enabled</em></p></div><?php
+	}
+
 	public function _init()
 	{
 		list($id, $type, $base_type, $link, $ogimage, $go) = QueriedObject::getInstance();
@@ -844,7 +870,7 @@ class Plugin
 
 	public static function taxonomies(): array
 	{
-		$list = get_taxonomies(['public' => true]);
+		$list = get_taxonomies([ 'public' => true ]);
 
 		return array_values($list);
 	}

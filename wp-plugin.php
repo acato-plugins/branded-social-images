@@ -5,7 +5,7 @@
  * Plugin URI: https://clearsite.nl/branded-social-images
  * Author: Internetbureau Clearsite
  * Author URI: https://clearsite.nl/branded-social-images
- * Version: 1.0.17
+ * Version: 1.1.0
  * License: GPL2
  */
 
@@ -52,7 +52,8 @@ require_once __DIR__ . '/lib/class.queried-object.php';
 require_once __DIR__ . '/lib/class.og-image-plugin.php';
 require_once __DIR__ . '/lib/class.og-image-admin.php';
 
-add_action('plugins_loaded', [Plugin::class, 'init']);
+// was plugins_loaded, but convention is to hook post_types and taxonomies on init, so we needed to move this to init as well
+add_action('init', [Plugin::class, 'init'], 1000);
 
 /**
  * This will fix the "You are not allowed to upload to this post" error when in admin settings.

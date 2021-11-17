@@ -4,7 +4,6 @@ namespace Clearsite\Plugins\OGImage;
 
 defined('ABSPATH') or die('You cannot be here.');
 
-use QueriedObject;
 use RankMath;
 
 class Image
@@ -304,12 +303,12 @@ class Image
 	private function getTextForQueriedObject()
 	{
 		list($object_id, $object_type, $base_type, $permalink, $ogimage, $go) = QueriedObject::getInstance();
-		return $this->getTextForMeta($base_type, $object_id, $permalink);
-	}
 
-	private function getTextForPost($post_id)
-	{
-		return $this->getTextForMeta('post', $post_id, get_permalink($post_id));
+		$text = $this->getTextForMeta($base_type, $object_id, $permalink);
+		Plugin::log('Text determination: text before filter  bsi_image_text; ' . ($text ?: '( no text )'));
+		$text = apply_filters('bsi_image_text', $text, QueriedObject::getInstance(), $this->image_id);
+		Plugin::log('Text determination: text after filter  bsi_image_text; ' . ($text ?: '( no text )'));
+		return $text;
 	}
 
 	public function getTextForMeta($base_type, $object_id, $permalink)
@@ -387,9 +386,13 @@ class Image
 			$text = str_replace('{blogname}', get_bloginfo('name'), $text);
 		}
 
-		Plugin::log('Text determination: text before filter  bsi_text; ' . ($text ?: '( no text )'));
-		$text = apply_filters('bsi_text', $text, $object_id, $this->image_id, $type);
-		Plugin::log('Text determination: text after filter  bsi_text; ' . ($text ?: '( no text )'));
+		$old_text = $text;
+		$text = apply_filters_deprecated('bsi_text', [$text, $object_id, $this->image_id, $type], '1.1.0', 'bsi_image_text');
+		if ($text !== $old_text) {
+			Plugin::log('Text determination: text before filter  bsi_text; ' . ($old_text ?: '( no text )'));
+			Plugin::log('Text determination: text after filter  bsi_text; ' . ($text ?: '( no text )'));
+			Plugin::log('Warning: deprecated filter in use. Please switch to bsi_image_text with parameters  $text, QueriedObject $queriedObject, $image_id');
+		}
 
 		return $text;
 	}
@@ -406,11 +409,11 @@ class Image
 		return $this->getImageIdForMeta('post', $post_id);
 	}
 
-	private function getImageIdForMeta($type, $id)
+	private function getImageIdForMeta($meta_type, $id)
 	{
 		$the_img = 'meta';
-		Plugin::log('Using meta-data from '. $type .' with id '. $id);
-		switch($type) {
+		Plugin::log('Using meta-data from '. $meta_type .' with id '. $id);
+		switch($meta_type) {
 			case 'post':
 				$function = 'get_post_meta';
 				break;
@@ -436,7 +439,7 @@ class Image
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if ('post' === $type && !$image_id && ('on' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if ('post' === $meta_type && !$image_id && ('on' === get_option(Plugin::OPTION_PREFIX . 'image_use_thumbnail'))) { // this is a Carbon Fields field, defined in class.og-image-admin.php
 			$the_img = 'thumbnail';
 			$image_id = get_post_thumbnail_id($id);
 			Plugin::log('Image consideration: WordPress Featured Image; ' . ($image_id ?: 'no image found'));
@@ -448,9 +451,9 @@ class Image
 			Plugin::log('Image consideration: BSI Fallback Image; ' . ($image_id ?: 'no image found'));
 		}
 
-		if ('post' === $type) {
+		if ('post' === $meta_type) {
 			Plugin::log('Image determination: ID before filter  bsi_image; ' . ($image_id ?: 'no image found'));
-			$image_id = apply_filters_deprecated('bsi_image', [$image_id, $id, $the_img], '1.0.20', 'bsi_image_id', 'Please use filter bsi_image_id and query the QueriedObject for information on the object');
+			$image_id = apply_filters_deprecated('bsi_image', [$image_id, $id, $the_img], '1.1.0', 'bsi_image_id');
 			Plugin::log('Image determination: ID after filter  bsi_image; ' . ($image_id ?: 'no image found'));
 		}
 		Plugin::log('Image determination: ID before filter  bsi_image_id; ' . ($image_id ?: 'no image found'));

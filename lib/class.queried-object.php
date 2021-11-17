@@ -1,6 +1,7 @@
 <?php
+namespace Clearsite\Plugins\OGImage;
 
-use Clearsite\Plugins\OGImage\Plugin;
+use ArrayAccess;
 
 class QueriedObject implements ArrayAccess
 {
@@ -26,15 +27,16 @@ class QueriedObject implements ArrayAccess
 		$that = self::getInstance();
 
 		if (is_null($newData)) {
-			static $result;
 			global $wp_query, $pagenow;
 			if (!$that->data) {
 				$link = null;
 				$id = get_queried_object_id();
 				$qo = get_queried_object();
+
 				switch (true) {
 					// post edit
 					case is_admin() && in_array($pagenow, ['post.php', 'post-new.php']):
+//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id = !empty($_GET['post']) ? intval($_GET['post']) : 'new';
 						$type = !empty($_GET['post_type']) ? $_GET['post_type'] : get_post_type($id);
 						$base_type = 'post';
@@ -44,9 +46,10 @@ class QueriedObject implements ArrayAccess
 					// post
 					case is_single():
 					case is_page():
-					case is_front_page():
+					case is_front_page() && !is_home():
 					case is_privacy_policy():
 					case is_singular():
+//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type = get_post_type();
 						$base_type = 'post';
 						$link = get_permalink($id);
@@ -54,8 +57,9 @@ class QueriedObject implements ArrayAccess
 
 					// post archive
 					case is_post_type_archive():
-					case is_archive() && !is_category() && !is_tag():
+					case is_archive() && !is_category() && !is_tag() && !is_tax():
 					case is_home():
+//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id = 'archive';
 						$type = get_post_type();
 						$base_type = 'post';
@@ -64,6 +68,7 @@ class QueriedObject implements ArrayAccess
 
 					// category edit
 					case is_admin() && in_array($pagenow, ['term.php', 'edit-tags.php']):
+//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id = !empty($_GET['tag_ID']) ? intval($_GET['tag_ID']) : 'new';
 						$type = !empty($_GET['taxonomy']) ? $_GET['taxonomy'] : get_post_type($id);
 						$base_type = 'category';
@@ -78,20 +83,15 @@ class QueriedObject implements ArrayAccess
 					case is_category():
 					case is_tag():
 					case is_tax():
+//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type = $qo->taxonomy;
 						$base_type = 'category';
 						$link = get_term_link($id, $type);
 						break;
 
-//				case is_archive():
-//					$id = 'archive';
-//					$base_type = 'category';
-//					$type = 'the-taxonomy-here';
-//					var_dumP($wp_query);
-//					break;
-
 					// unsupported
 					case is_404():
+//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type = '404';
 						$base_type = 'unsupported';
 						break;
@@ -113,13 +113,15 @@ class QueriedObject implements ArrayAccess
 					case is_comment_feed():
 					case is_trackback():
 					default:
+//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id = null;
 						$type = 'unsupported';
 						$base_type = 'unsupported';
 						break;
 
 				}
-				$result = [$id, $type, $base_type, $link, $link ? trailingslashit(trailingslashit($link) . Plugin::output_filename()) : null, true];
+				$og_link = is_preview() ? add_query_arg(Plugin::QUERY_VAR, '1', $link) : trailingslashit(trailingslashit($link) . Plugin::output_filename());
+				$result = [$id, $type, $base_type, $link, $link ? $og_link : null, true];
 				$that->data = $result; // save, because next step is querying ... sorry...
 				$result[5] = Plugin::go_for_id($id, $type, $base_type);
 				$that->data = $result;
