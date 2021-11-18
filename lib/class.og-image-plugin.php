@@ -101,7 +101,7 @@ class Plugin
 			add_action('admin_notices', [static::class, 'show_queried_object']);
 		}
 		if (defined('BSI_DEBUG') && true === BSI_DEBUG) {
-			add_action('wp_body_open', [static::class, 'show_queried_object']);
+//			add_action('wp_body_open', [static::class, 'show_queried_object']);
 		}
 
 		add_action('wp', function () {
@@ -233,25 +233,6 @@ class Plugin
 				}
 			}
 		});
-
-		// todo: remove in 1.0.20 release
-//		add_action('admin_init', function () {
-//			$font_file = get_option(self::DEFAULTS_PREFIX . 'text__font');
-//
-//			// legacy code follows, todo: investigate removal.
-//			if (preg_match('/google:(.+)/', $font_file, $m)) {
-//				$defaults = Admin::base_settings();
-//				$this->text_options = $defaults['text_options'];
-//				$this->text_options['font-file'] = $font_file;
-//				$this->text_options['font-family'] = $font_file;
-//				$this->expand_text_options();
-//				if ($this->text_options['font-file'] && is_file($this->text_options['font-file']) && $this->text_options['font-file'] !== $font_file) { // PROCESSED!
-//					update_option(self::DEFAULTS_PREFIX . 'text__font', basename($this->text_options['font-file']));
-//					wp_redirect(remove_query_arg(''));
-//					exit;
-//				}
-//			}
-//		});
 
 		// this filter is used when a re-save permalink occurs
 		add_filter('rewrite_rules_array', function ($rules) {
@@ -629,7 +610,7 @@ class Plugin
 		if ('webp' === $output_format && !function_exists('imagewebp')) {
 			$output_format = $fallback_format;
 		}
-		if (!in_array($output_format, ['png', 'jpg', 'webp'])) {
+		if (!in_array($output_format, ['png', 'jpg', /* 'webp' */])) {
 			$output_format = $fallback_format;
 		}
 
@@ -764,24 +745,15 @@ class Plugin
 				$go = false;
 			}
 			if ($go) {
+				$image_main = function() use ($ogimage) { Plugin::getInstance()->page_already_has_og_image = true; return $ogimage; };
+				$image_additional = function() use ($ogimage) { return $ogimage; };
+
 				// overrule RankMath
-				add_filter('rank_math/opengraph/facebook/image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-				add_filter('rank_math/opengraph/facebook/image_secure_url', [
-					static::class,
-					'overrule_og_image'
-				], PHP_INT_MAX);
-				add_filter('rank_math/opengraph/facebook/og_image', [
-					static::class,
-					'overrule_og_image'
-				], PHP_INT_MAX);
-				add_filter('rank_math/opengraph/facebook/og_image_secure_url', [
-					static::class,
-					'overrule_og_image'
-				], PHP_INT_MAX);
-				add_filter('rank_math/opengraph/twitter/twitter_image', [
-					static::class,
-					'overrule_og_image'
-				], PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/image', $image_main, PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/image_secure_url', $image_main, PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/og_image', $image_main, PHP_INT_MAX);
+				add_filter('rank_math/opengraph/facebook/og_image_secure_url', $image_main, PHP_INT_MAX);
+				add_filter('rank_math/opengraph/twitter/twitter_image', $image_additional, PHP_INT_MAX);
 				add_filter('rank_math/opengraph/facebook/og_image_type', [
 					static::class,
 					'overrule_og_type'
@@ -794,8 +766,8 @@ class Plugin
 				}, PHP_INT_MAX);
 
 				// overrule Yoast SEO
-				add_filter('wpseo_opengraph_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
-				add_filter('wpseo_twitter_image', [static::class, 'overrule_og_image'], PHP_INT_MAX);
+				add_filter('wpseo_opengraph_image', $image_main, PHP_INT_MAX);
+				add_filter('wpseo_twitter_image', $image_additional, PHP_INT_MAX);
 
 				// this is a very intrusive way, but Yoast does not allow overruling the
 				// image dimensions.
@@ -806,16 +778,14 @@ class Plugin
 
 				add_filter('wpseo_schema_main_image', function ($graph_piece) use ($ogimage) {
 					$graph_piece['url'] = $graph_piece['contentUrl'] = $ogimage;
-					$graph_piece['width'] = $this->width;
-					$graph_piece['height'] = $this->height;
+					$graph_piece['width'] = static::getInstance()->width;
+					$graph_piece['height'] = static::getInstance()->height;
 
 					return $graph_piece;
 				}, 11);
 
 				// overrule WordPress JetPack recently acquired SocialImageGenerator, because, hey, we were here first!
-				add_filter('sig_image_url', function ($url, $post_id) use ($ogimage) {
-					return $ogimage;
-				}, PHP_INT_MAX, 2);
+				add_filter('sig_image_url', $image_additional, PHP_INT_MAX, 2);
 
 				// if an overrule did not take, we need to define our own.
 				add_action('wp_head', [static::class, 'late_head'], PHP_INT_MAX);
@@ -1266,7 +1236,7 @@ class Plugin
 		}
 		if (!self::getInstance()->page_already_has_og_image) {
 			?>
-			<meta property="og:image" content="<?php print self::overrule_og_image(); ?>"><?php
+<meta property="og:image" content="<?php print QueriedObject::getInstance()->og_image; ?>"><?php
 		}
 	}
 
@@ -1282,30 +1252,30 @@ class Plugin
 
 	public static function overrule_og_image(): string
 	{
-		// ignore twitter image; we want to overrule, but only skip our late head when the opengraph image is set
-		if (current_action() !== 'wpseo_twitter_image' && current_action() !== 'rank_math/opengraph/twitter/twitter_image') {
-			self::getInstance()->page_already_has_og_image = true;
-		}
-
-		// this construction is to please WPML;
-		// *_query_arg return domain-less root-based urls (/language/page/path/)
-		// get_bloginfo('url') returns https://somesite.com/language/
-		// we could use site_url, but this will be problematic with multi-site installations...
-		$base_url = get_bloginfo('url');
-		// from https://somesite.com/language/, keep only the base url, as the rest is included in the result from 'remove_query_arg'
-		$base_url = parse_url($base_url, PHP_URL_SCHEME) . '://' . parse_url($base_url, PHP_URL_HOST); // no trailing slash
-
-		return trailingslashit($base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::output_filename() . '/'; // yes, slash, WP will add it with a redirect anyway
+		_deprecated_function(__FUNCTION__, '1.1.0', '');
+		return QueriedObject::getInstance()->og_image;
 	}
 
 	public static function overrule_og_type(): string
 	{
 		$ext = explode('.', self::output_filename());
 		$ext = end($ext);
+		if ($ext == 'jpg') $ext = 'jpeg';
 
 		return 'image/' . $ext;
 	}
 
+	/**
+	 * DO NOT USE THIS TO GET THE URL FOR THE CURRENT PAGE/POST/...
+	 * Use QueriedObject::getInstance()->og_image for that.
+	 *
+	 * This function will not be updated to support more types and it may even be incorrect.
+	 *
+	 * @param $object_id
+	 * @param $object_type
+	 * @param $base_type
+	 * @return false|string
+	 */
 	public static function get_og_image_url($object_id, $object_type, $base_type)
 	{
 		if ('post' === $base_type) {
@@ -2125,21 +2095,6 @@ EODOC;
 		if ($qo->showInterface()) {
 			$og_image = $qo->og_image;
 			$permalink = $qo->permalink;
-			if (
-				defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
-				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
-			) {
-				$args = array(
-					'id' => self::ADMIN_SLUG . '-view',
-					'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
-					'href' => $og_image,
-					'meta' => [
-						'target' => '_blank',
-						'class' => self::ADMIN_SLUG . '-view'
-					]
-				);
-				$admin_bar->add_node($args);
-			}
 
 			$args = array(
 				'id' => self::ADMIN_SLUG . '-inspector',
@@ -2153,6 +2108,85 @@ EODOC;
 
 			$args['href'] = sprintf($args['href'], urlencode($permalink));
 			$admin_bar->add_node($args);
+
+			if (
+				(!defined('BSI_DEBUG') || false === BSI_DEBUG) &&
+				defined('BSI_SHOW_ADMIN_BAR_IMAGE_LINK') &&
+				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter(Plugin::image_fallback_chain(true))
+			) {
+				$args = array(
+					'id' => self::ADMIN_SLUG . '-view',
+					'parent' => self::ADMIN_SLUG . '-inspector',
+					'title' => __('View Social Image', Plugin::TEXT_DOMAIN),
+					'href' => $og_image,
+					'meta' => [
+						'target' => '_blank',
+						'class' => self::ADMIN_SLUG . '-view'
+					]
+				);
+				$admin_bar->add_node($args);
+			}
+
+			if (defined('BSI_DEBUG') && true === BSI_DEBUG) {
+				$admin_bar->add_group(
+					array(
+						'id' => self::ADMIN_SLUG . '-debug',
+						'parent' => self::ADMIN_SLUG . '-inspector',
+						'meta' => array(
+							'class' => 'ab-sub-secondary',
+						),
+					)
+				);
+				$admin_bar->add_group(
+					array(
+						'id' => self::ADMIN_SLUG . '-debug2',
+						'parent' => self::ADMIN_SLUG . '-inspector',
+					)
+				);
+
+				if ($qo->base_type !== 'unsupported') {
+					$admin_bar->add_node(array(
+						'id' => self::ADMIN_SLUG . '-object_id',
+						'parent' => self::ADMIN_SLUG . '-debug',
+						'title' => "Object ID: $qo->object_id",
+					));
+				}
+				$admin_bar->add_node(array(
+					'id' => self::ADMIN_SLUG . '-object_type',
+					'parent' => self::ADMIN_SLUG . '-debug',
+					'title' => "Object Type: $qo->object_type",
+				));
+				if ($qo->base_type !== 'unsupported') {
+					$admin_bar->add_node(array(
+						'id' => self::ADMIN_SLUG . '-base_type',
+						'parent' => self::ADMIN_SLUG . '-debug',
+						'title' => "Base Object Type: $qo->base_type",
+					));
+					$admin_bar->add_node(array(
+						'id' => self::ADMIN_SLUG . '-permalink',
+						'parent' => self::ADMIN_SLUG . '-debug2',
+						'title' => "Link to Object (new tab)",
+						'href' => $qo->permalink,
+						'meta' => [
+							'target' => '_blank',
+						]
+					));
+					$admin_bar->add_node(array(
+						'id' => self::ADMIN_SLUG . '-og_image',
+						'parent' => self::ADMIN_SLUG . '-debug2',
+						'title' => "Link to Image (new tab)",
+						'href' => $qo->og_image,
+						'meta' => [
+							'target' => '_blank',
+						]
+					));
+					$admin_bar->add_node(array(
+						'id' => self::ADMIN_SLUG . '-go',
+						'parent' => self::ADMIN_SLUG . '-debug',
+						'title' => "Ready to go?: " . ($qo->go ? 'yes' : 'no'),
+					));
+				}
+			}
 
 			add_action('wp_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
 			add_action('admin_footer', [static::class, 'admin_bar_icon_style'], PHP_INT_MAX);
