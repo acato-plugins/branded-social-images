@@ -4,6 +4,7 @@ namespace Clearsite\Plugins\OGImage;
 
 use Exception;
 use RankMath;
+use WP_Http_Cookie;
 
 defined('ABSPATH') or die('You cannot be here.');
 
@@ -589,11 +590,16 @@ class Plugin
 
 		$title = $page = '';
 		$code = 0;
+		$cookies = [];
+		foreach ($_COOKIE as $cookie => $value) {
+			$cookies[] = new WP_Http_Cookie(['name' => $cookie, 'value' => $value]);
+		}
 		try {
 			$result = wp_remote_get($url, [
 				'httpversion' => '1.1',
 				'user-agent' => $_SERVER["HTTP_USER_AGENT"],
-				'referer' => remove_query_arg('asd')
+				'referer' => remove_query_arg('asd'),
+				'cookies' => $cookies,
 			]);
 			$code = wp_remote_retrieve_response_code($result);
 			if (intval($code) === 200) {
