@@ -462,7 +462,7 @@ class Admin
 			$auto_title = true;
 		}
 		elseif ($qo->object_id) { // not new, but still see object
-			$scraped = Plugin::scrape_title_data(QueriedObject::getInstance()->permalink);
+			$scraped = Plugin::scrape_title_data($qo->permalink);
 			if ($scraped[0] >= 300) { // non-normal state
 				$auto_title = true;
 			}
