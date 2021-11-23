@@ -256,10 +256,23 @@ class Plugin
 			$pt_archives = [];
 			foreach ($rules as $target) {
 				if (preg_match('/^index.php\?post_type=([^&%]+)$/', $target, $m)) {
-					$pt_archives[$m[1] . '/' . Plugin::output_filename() . '/?$'] = $target . '&' . Plugin::QUERY_VAR . '=1';
+					$pt_archives[$m[1] . '/' . Plugin::output_filename() . '(/(.*))?/?$'] = $target . '&' . Plugin::QUERY_VAR . '=$matches[2]';
 				}
 			}
 			$rules = array_merge($pt_archives, $rules);
+
+			/**
+			 * Make custom taxonomies work
+			 */
+			$taxonomies = get_taxonomies( array( 'public' => true, '_builtin' => false ), 'objects' );
+			$taxonomy_rules = [];
+			$permalink_structure = get_option('permalink_structure', '');
+			$permalink_structure = explode('/%', $permalink_structure);
+			$prefix = ltrim(trailingslashit($permalink_structure[0]), '/');
+			foreach( $taxonomies as $tax_id => $tax ) {
+				$taxonomy_rules[ ($tax->rewrite['with_front'] ? $prefix : '') . $tax->rewrite['slug'] . '/(.+?)/'. self::output_filename() .'(/(.*))?/?$'] = 'index.php?' . $tax_id . '=$matches[1]&'. Plugin::QUERY_VAR .'=$matches[3]';
+			}
+			$rules = array_merge($taxonomy_rules, $rules);
 
 			/**
 			 * changes the rewrite rules so the endpoint is value-less and more a tag, like 'feed' is for WordPress.
@@ -280,7 +293,23 @@ class Plugin
 				$new_rules[$source] = $target;
 			}
 
-			return $new_rules;
+			/**
+			 * move all urls regarding social-image to the top
+			 */
+			$top = $bottom = [];
+			$si_name = self::output_filename();
+			foreach ($new_rules as $source => $target) {
+				if (false !== strpos($source, $si_name)) {
+					$top[ $source ] = $target;
+				}
+				else {
+					$bottom[ $source ] = $target;
+				}
+			}
+
+			$rules = array_merge($top, $bottom);
+//			var_dumP($top);exit;
+			return $rules;
 		});
 
 		// WordPress will not know what to do with the endpoint urls, and look for a template
