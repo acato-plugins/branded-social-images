@@ -1566,7 +1566,7 @@ function hex_to_rgba(hex) {
         texteditor_target.val(new_title);
         texteditor.text(new_title);
       } else {
-        $(title_field).off(update_auto_title);
+        $(title_field).off('keyup change blur', update_auto_title);
       }
     };
 
