@@ -86,6 +86,17 @@ class Plugin
 	/** @var bool keeps track of availability of an og:image */
 	public $og_image_available;
 
+
+	public static function getInstance()
+	{
+		static $instance;
+		if (!$instance) {
+			$instance = new static();
+		}
+
+		return $instance;
+	}
+
 	public function __construct()
 	{
 		add_filter('query_vars', function ($vars) {
@@ -1240,16 +1251,6 @@ class Plugin
 			?>
 <meta property="og:image" content="<?php print QueriedObject::getInstance()->og_image; ?>"><?php
 		}
-	}
-
-	public static function getInstance()
-	{
-		static $instance;
-		if (!$instance) {
-			$instance = new static();
-		}
-
-		return $instance;
 	}
 
 	public static function overrule_og_image(): string
