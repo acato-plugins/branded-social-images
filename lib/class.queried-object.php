@@ -33,6 +33,16 @@ class QueriedObject implements ArrayAccess
 				$link = null;
 				$id = get_queried_object_id();
 				$qo = get_queried_object();
+				$is_front_page = false;
+
+				// front-page hack
+				$current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+				$front = get_option('page_on_front');
+				if ($front && ('/' . Plugin::output_filename() . '/' === $current_url || '/' === $current_url) ) {
+					$id = $front;
+					$is_front_page = true;
+					// $qo is ignored for pages
+				}
 				$that->is_public = true;
 
 				switch (true) {
@@ -50,6 +60,7 @@ class QueriedObject implements ArrayAccess
 					// post
 					case is_single():
 					case is_page():
+					case $is_front_page: // front-page social-image-url hack
 					case is_front_page() && !is_home():
 					case is_privacy_policy():
 					case is_singular():
@@ -181,24 +192,29 @@ class QueriedObject implements ArrayAccess
 		};
 
 		if ($this->is_public) {
-			$rewrites_to = [];
-			foreach (['permalink' => $base_data['permalink'], 'og_image' => $base_data['og_image']] as $group => $item) {
-				if ($rewrite = Plugin::urlCanBeRewritten( $item )) {
-					$rewrites_to[$group] = $rewrite['target'];
-					$matching_rules[$group . ' matches rule #' . ($rewrite['rule#'] + 1)] = $rewrite['rule'] . '<br />' . $rewrites_to[$group];
+			if (get_option('permalink_structure')) {
+				$rewrites_to = [];
+				foreach (['permalink' => $base_data['permalink'], 'og_image' => $base_data['og_image']] as $group => $item) {
+					if ($rewrite = Plugin::urlCanBeRewritten( $item )) {
+						$rewrites_to[$group] = $rewrite['target'];
+						$matching_rules[$group . ' matches rule #' . ($rewrite['rule#'] + 1)] = $rewrite['rule'] . '<br />' . $rewrites_to[$group];
+					}
+					else {
+						$matching_rules[$group . ' Rewrite Error'] = 'There are no rewrite rules that match this URL';
+					}
+				}
+				if (!$rewrites_to && $url_differs_just_param($base_data['og_image'], $base_data['permalink'])) {
+					$matching_rules['Rewrite OK'] = 'URL based on parameter ' . Plugin::QUERY_VAR . ' should work fine';
+				}
+				elseif (count($rewrites_to) !== 2 || !$url_differs_just_param($rewrites_to['og_image'], $rewrites_to['permalink'])) {
+					$matching_rules['Rewrite Error'] = 'Rewrite targets should only differ ' . Plugin::QUERY_VAR . '=1 parameter';
 				}
 				else {
-					$matching_rules[$group . ' Rewrite Error'] = 'There are no rewrite rules that match this URL';
+					$matching_rules['Rewrite OK'] = 'Rewrite should work just fine!';
 				}
 			}
-			if (!$rewrites_to && $url_differs_just_param($base_data['og_image'], $base_data['permalink'])) {
-				$matching_rules['Rewrite OK'] = 'URL based on parameter ' . Plugin::QUERY_VAR . ' should work fine';
-			}
-			elseif (count($rewrites_to) !== 2 || !$url_differs_just_param($rewrites_to['og_image'], $rewrites_to['permalink'])) {
-				$matching_rules['Rewrite Error'] = 'Rewrite targets should only differ ' . Plugin::QUERY_VAR . '=1 parameter';
-			}
 			else {
-				$matching_rules['Rewrite OK'] = 'Rewrite should work just fine!';
+				$matching_rules['Rewrite Disabled in settings'] = 'URL based on parameter ' . Plugin::QUERY_VAR . ' should work fine';
 			}
 		}
 		return array_merge($base_data, $matching_rules);

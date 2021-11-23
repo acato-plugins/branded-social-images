@@ -278,6 +278,7 @@ class Plugin
 			/**
 			 * changes the rewrite rules so the endpoint is value-less and more a tag, like 'feed' is for WordPress.
 			 */
+
 			foreach ($rules as $source => $target) {
 				if (
 					preg_match('/' . strtr(self::output_filename(), [
@@ -795,23 +796,33 @@ class Plugin
 			return false;
 		}
 		$url_path = parse_url($url, PHP_URL_PATH);
-
-		$i = 0;
-		foreach ($rewriteRules as $rewriteRule => $rewriteTarget) {
-			if (preg_match('@^/' . str_replace('@', '\\@', $rewriteRule) . '@i', $url_path, $m)) {
-				$target = $rewriteTarget;
-				foreach ($m as $j => $t) {
-					$target = str_replace('$matches[' . $j . ']', $t, $target);
-				}
-				foreach (range($j+1,20) as $j) {
-					$target = preg_replace('/[^?&]+=\$matches\[' . $j . '\]/', '', $target);
-				}
-				$target = remove_query_arg('', $target); // abuse to cleanup
-				return ['rule#' => $i, 'rule' => $rewriteRule, 'target' => $target, 'has_query_var' => false !== strpos($target, Plugin::QUERY_VAR)];
-			}
-			$i++;
+		$is_front_page = false;
+		if ((!trim($url_path, '/') || $url_path == Plugin::output_filename()) && get_option('permalink_structure')) {
+			$url_path = '/' . $url_path;
+			$is_front_page = true;
 		}
-		return false;
+		$i = 0;
+		if (get_option('permalink_structure')) {
+			foreach ($rewriteRules as $rewriteRule => $rewriteTarget) {
+				$have_match = preg_match('@^/' . str_replace('@', '\\@', $rewriteRule) . '@i', $url_path, $m);
+
+				if ($have_match) {
+					$target = $rewriteTarget;
+					foreach ($m as $j => $t) {
+						$target = str_replace('$matches[' . $j . ']', $t, $target);
+					}
+					foreach (range($j+1,20) as $j) {
+						$target = preg_replace('/[^?&]+=\$matches\[' . $j . '\]/', '', $target);
+					}
+					// $target = remove_query_arg('', $target); // abuse to cleanup
+					$target = trim(trim($target), '&?');
+					return ['rule#' => $i, 'rule' => $rewriteRule, 'target' => $is_front_page ? 'index.php?' : $target, 'has_query_var' => false !== strpos($target, Plugin::QUERY_VAR)];
+				}
+				$i++;
+			}
+			return false;
+		}
+		return ['rule#' => 'n/a', 'rule' => 'n/a', 'target' => $url, 'has_query_var' => false !== strpos($url, Plugin::QUERY_VAR)];
 	}
 
 	public function _init()
