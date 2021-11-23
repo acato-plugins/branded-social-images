@@ -7,6 +7,7 @@ class QueriedObject implements ArrayAccess
 {
 	private $data;
 	private $keys = ['object_id', 'object_type', 'base_type', 'permalink', 'og_image', 'go'];
+	private $is_public;
 
 	public function __construct()
 	{
@@ -123,8 +124,7 @@ class QueriedObject implements ArrayAccess
 						break;
 
 				}
-				$og_link = is_preview() ? add_query_arg(Plugin::QUERY_VAR, '1', $link) : trailingslashit(trailingslashit($link) . Plugin::output_filename());
-				$result = [$id, $type, $base_type, $link, $link ? $og_link : null, true];
+
 				switch($base_type) {
 					case 'post':
 						$type_o = get_post_type_object($type);
@@ -140,8 +140,18 @@ class QueriedObject implements ArrayAccess
 						break;
 				}
 
+				$og_link_perma = trailingslashit(trailingslashit($link) . Plugin::output_filename());
+				$og_link_param = add_query_arg(Plugin::QUERY_VAR, '1', $link);
+				$og_link = is_preview() || !Plugin::urlCanBeRewritten($link) || !Plugin::urlCanBeRewritten($og_link_perma) ? $og_link_param : $og_link_perma;
+
+				$result = [$id, $type, $base_type, $link, $link ? $og_link : null, $that->is_public];
 				$that->data = $result; // save, because next step is querying ... sorry...
-				$result[5] = Plugin::go_for_id($id, $type, $base_type);
+				if ($that->is_public) {
+					$result[5] = Plugin::go_for_id($id, $type, $base_type) && $result[3] && $result[4];
+				}
+				else {
+					$result[4] = false;
+				}
 				$that->data = $result;
 			}
 		}
@@ -159,7 +169,39 @@ class QueriedObject implements ArrayAccess
 
 	public function getTable()
 	{
-		return array_combine($this->keys, $this->data);
+		$base_data = array_combine($this->keys, $this->data);
+		$base_data['go'] = $base_data['go'] ? 'yes' : 'no';
+		$base_data['object is public?'] = $this->is_public ? 'yes' : 'no';
+		$matching_rules = [];
+
+		$url_differs_just_param = function($haystack, $needle) {
+			$diff = str_replace($needle, '', $haystack);
+			$diff = trim($diff, '&?');
+			return $diff == Plugin::QUERY_VAR .'=1';
+		};
+
+		if ($this->is_public) {
+			$rewrites_to = [];
+			foreach (['permalink' => $base_data['permalink'], 'og_image' => $base_data['og_image']] as $group => $item) {
+				if ($rewrite = Plugin::urlCanBeRewritten( $item )) {
+					$rewrites_to[$group] = $rewrite['target'];
+					$matching_rules[$group . ' matches rule #' . ($rewrite['rule#'] + 1)] = $rewrite['rule'] . '<br />' . $rewrites_to[$group];
+				}
+				else {
+					$matching_rules[$group . ' Rewrite Error'] = 'There are no rewrite rules that match this URL';
+				}
+			}
+			if (!$rewrites_to && $url_differs_just_param($base_data['og_image'], $base_data['permalink'])) {
+				$matching_rules['Rewrite OK'] = 'URL based on parameter ' . Plugin::QUERY_VAR . ' should work fine';
+			}
+			elseif (count($rewrites_to) !== 2 || !$url_differs_just_param($rewrites_to['og_image'], $rewrites_to['permalink'])) {
+				$matching_rules['Rewrite Error'] = 'Rewrite targets should only differ ' . Plugin::QUERY_VAR . '=1 parameter';
+			}
+			else {
+				$matching_rules['Rewrite OK'] = 'Rewrite should work just fine!';
+			}
+		}
+		return array_merge($base_data, $matching_rules);
 	}
 
 	/**

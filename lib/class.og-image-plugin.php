@@ -779,6 +779,35 @@ class Plugin
 		<p><em>This information is shown because BSI_DEBUG is enabled</em></p></div><?php
 	}
 
+	public static function urlCanBeRewritten($url)
+	{
+		static $rewriteRules, $base;
+		if (!$rewriteRules) {
+			$rewriteRules = get_option('rewrite_rules', []);
+		}
+		if (!$rewriteRules) {
+			return false;
+		}
+		$url_path = parse_url($url, PHP_URL_PATH);
+
+		$i = 0;
+		foreach ($rewriteRules as $rewriteRule => $rewriteTarget) {
+			if (preg_match('@^/' . str_replace('@', '\\@', $rewriteRule) . '@i', $url_path, $m)) {
+				$target = $rewriteTarget;
+				foreach ($m as $j => $t) {
+					$target = str_replace('$matches[' . $j . ']', $t, $target);
+				}
+				foreach (range($j+1,20) as $j) {
+					$target = preg_replace('/[^?&]+=\$matches\[' . $j . '\]/', '', $target);
+				}
+				$target = remove_query_arg('', $target); // abuse to cleanup
+				return ['rule#' => $i, 'rule' => $rewriteRule, 'target' => $target, 'has_query_var' => false !== strpos($target, Plugin::QUERY_VAR)];
+			}
+			$i++;
+		}
+		return false;
+	}
+
 	public function _init()
 	{
 		list($id, $type, $base_type, $link, $ogimage, $go) = QueriedObject::getInstance();
