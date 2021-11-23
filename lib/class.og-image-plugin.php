@@ -104,6 +104,29 @@ class Plugin
 //			add_action('wp_body_open', [static::class, 'show_queried_object']);
 		}
 
+		add_action('init', [static::class, 'init'], 1000);
+
+		// in the new set-up, init was already done
+		add_action('init', function () {
+			// does not work in any possible way for Post-Type Archives
+			add_rewrite_endpoint(self::output_filename(), EP_PERMALINK | EP_ROOT | EP_PAGES | EP_CATEGORIES | EP_TAGS, Plugin::QUERY_VAR);
+
+			if (get_option("bsi_needs_rewrite_rules") || Plugin::output_filename() !== get_option('_bsi_rewrite_rules_based_on')) {
+				delete_option("bsi_needs_rewrite_rules");
+				global $wp_rewrite;
+				update_option("rewrite_rules", false);
+				$wp_rewrite->flush_rules(true);
+				update_option('_bsi_rewrite_rules_based_on', Plugin::output_filename());
+				Plugin::purge_cache();
+			}
+			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
+			if (Plugin::AA > 1) {
+				for ($i = Plugin::AA; $i > 1; $i--) {
+					add_image_size(Plugin::IMAGE_SIZE_NAME . "@{$i}x", $this->width * $i, $this->height * $i, true);
+				}
+			}
+		}, PHP_INT_MAX);
+
 		add_action('wp', function () {
 			// oh, my, this is a mess.
 			// ...
@@ -212,27 +235,6 @@ class Plugin
 		 * For more information on apache rewrite rules, see
 		 * @see https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html
 		 */
-
-		// in the new set-up, init was already done
-		add_action(did_action('init') ? 'wp' : 'init', function () {
-			// does not work in any possible way for Post-Type Archives
-			add_rewrite_endpoint(self::output_filename(), EP_PERMALINK | EP_ROOT | EP_PAGES | EP_CATEGORIES | EP_TAGS, Plugin::QUERY_VAR);
-
-			if (get_option("bsi_needs_rewrite_rules") || Plugin::output_filename() !== get_option('_bsi_rewrite_rules_based_on')) {
-				delete_option("bsi_needs_rewrite_rules");
-				global $wp_rewrite;
-				update_option("rewrite_rules", false);
-				$wp_rewrite->flush_rules(true);
-				update_option('_bsi_rewrite_rules_based_on', Plugin::output_filename());
-				Plugin::purge_cache();
-			}
-			add_image_size(Plugin::IMAGE_SIZE_NAME, $this->width, $this->height, true);
-			if (Plugin::AA > 1) {
-				for ($i = Plugin::AA; $i > 1; $i--) {
-					add_image_size(Plugin::IMAGE_SIZE_NAME . "@{$i}x", $this->width * $i, $this->height * $i, true);
-				}
-			}
-		});
 
 		// this filter is used when a re-save permalink occurs
 		add_filter('rewrite_rules_array', function ($rules) {

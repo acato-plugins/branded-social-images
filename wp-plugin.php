@@ -53,7 +53,7 @@ require_once __DIR__ . '/lib/class.og-image-plugin.php';
 require_once __DIR__ . '/lib/class.og-image-admin.php';
 
 // was plugins_loaded, but convention is to hook post_types and taxonomies on init, so we needed to move this to init as well
-add_action('init', [Plugin::class, 'init'], 1000);
+Plugin::getInstance();
 
 /**
  * This will fix the "You are not allowed to upload to this post" error when in admin settings.
