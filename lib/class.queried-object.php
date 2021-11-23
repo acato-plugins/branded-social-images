@@ -32,13 +32,16 @@ class QueriedObject implements ArrayAccess
 				$link = null;
 				$id = get_queried_object_id();
 				$qo = get_queried_object();
+				$that->is_public = true;
 
 				switch (true) {
 					// post edit
 					case is_admin() && in_array($pagenow, ['post.php', 'post-new.php']):
 //						var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id = !empty($_GET['post']) ? intval($_GET['post']) : 'new';
-						$type = !empty($_GET['post_type']) ? $_GET['post_type'] : get_post_type($id);
+						$type = empty($_GET['post_type']) ? false : $_GET['post_type'];
+						$type = !$type && $pagenow == 'post-new.php' ? 'post' : $type;
+						$type = !$type ? get_post_type($id) : $type;
 						$base_type = 'post';
 						$link = get_permalink($id);
 						break;
@@ -122,6 +125,21 @@ class QueriedObject implements ArrayAccess
 				}
 				$og_link = is_preview() ? add_query_arg(Plugin::QUERY_VAR, '1', $link) : trailingslashit(trailingslashit($link) . Plugin::output_filename());
 				$result = [$id, $type, $base_type, $link, $link ? $og_link : null, true];
+				switch($base_type) {
+					case 'post':
+						$type_o = get_post_type_object($type);
+						if (!$type_o->public) {
+							$that->is_public = false;
+						}
+						break;
+					case 'category':
+						$type_o = get_taxonomy($type);
+						if (!$type_o->public) {
+							$that->is_public = false;
+						}
+						break;
+				}
+
 				$that->data = $result; // save, because next step is querying ... sorry...
 				$result[5] = Plugin::go_for_id($id, $type, $base_type);
 				$that->data = $result;
