@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.17
+Stable tag: 1.0.18
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -132,6 +132,9 @@ When in doubt, contact us before sharing.
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.18 =
+* fixed: more protection on functions that might not exist and a try/catch does not prevent crashing
 
 = 1.0.17 =
 * fixed: editor issues with colors fixed; sprintf for formatting floats was set to locale aware. oops.

@@ -373,7 +373,7 @@ class Plugin
 				$static[] = ($key + 1) . ": $value";
 			}
 			$static[] = '-- php/wp functions --';
-			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype'] as $function) {
+			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype', 'exec', 'shell_exec', 'passthru', 'system'] as $function) {
 				$static[] = "$function: " . (constant(strtoupper($function) .'_EXISTED_BEFORE_PATCH') ? 'exists' : 'does not exist');
 			}
 			$static[] = '-- php settings --';
@@ -1335,7 +1335,7 @@ class Plugin
 
 		$bin = dirname(__DIR__) . '/bin';
 		// not downloaded yet
-		if (!file_exists("$bin/dwebp")) {
+		if (function_exists('exec') && !file_exists("$bin/dwebp")) {
 			// can we fake support?
 			ob_start();
 			try {
@@ -1346,7 +1346,7 @@ class Plugin
 			ob_end_clean();
 		}
 		if (file_exists("$bin/dwebp")) {
-			// downloaded but did not run conversion tool successfully
+			// downloaded and ran conversion tool successfully
 			if (file_exists($bin . '/can-execute-binaries-from-php.success')) {
 				$support = true;
 			}
