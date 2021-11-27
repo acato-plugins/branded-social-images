@@ -133,7 +133,7 @@ When in doubt, contact us before sharing.
 
 == Changelog ==
 
-= 1.0.18 =
+= 1.0.19 =
 * fixed: more protection on functions that might not exist and a try/catch does not prevent crashing
 
 = 1.0.17 =
