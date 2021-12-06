@@ -1241,7 +1241,12 @@ class Plugin
 		// from https://somesite.com/language/, keep only the base url, as the rest is included in the result from 'remove_query_arg'
 		$base_url = parse_url($base_url, PHP_URL_SCHEME) . '://' . parse_url($base_url, PHP_URL_HOST); // no trailing slash
 
-		return trailingslashit($base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::output_filename() . '/'; // yes, slash, WP will add it with a redirect anyway
+		$og_url = trailingslashit($base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::output_filename() . '/'; // yes, slash, WP will add it with a redirect anyway
+
+		/**
+		 * @since 1.0.20 allows for final filtering of the output OG:Image url.
+		 */
+		return apply_filters('bsi_image_url', $og_url);
 	}
 
 	public static function overrule_og_type(): string
