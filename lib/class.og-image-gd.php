@@ -29,23 +29,6 @@ class GD
 		$this->manager = $handler->getManager();
 		$this->source_is_temporary = false;
 		$this->text_area_width = Plugin::TEXT_AREA_WIDTH;
-
-		// use this construction, so we don't have to check file mime
-		if (is_file($source) && preg_match('@\.webp$@', strtolower(trim($source)))) {
-			// do we have webp support?
-			$support = function_exists('imagewebp');
-
-			if (!$support) {
-				// we cannot support natively
-				$support = Plugin::maybe_fake_support_webp();
-				if ($support) {
-					// we fake support, so we need to convert the input image to PNG
-					$source = Plugin::convert_webp_to_png($source);
-					$this->source_is_temporary = true;
-				}
-			}
-		}
-
 		$this->source = $source;
 		$this->target = $target;
 
@@ -331,9 +314,6 @@ class GD
 		switch($format) {
 			case 'jpg':
 				imagejpeg(imagescale($this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED), $this->target, $quality);
-			break;
-			case 'webp':
-				imagewebp(imagescale($this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED), $this->target, $quality);
 			break;
 			case 'png':
 			default:

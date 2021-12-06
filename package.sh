@@ -43,16 +43,8 @@ SVN_DIRECTORY="$(pwd -P)"
 
 cp -a "$GIT_DIRECTORY"/* "$GIT_DIRECTORY"/.??* "$SVN_DIRECTORY"/
 
-# want these, but clean
-for i in bin; do
-	echo reverting bin to git state. this removes downloaded stuff.
-	rm -rf "$SVN_DIRECTORY"/$i
-	git checkout $i
-	echo done.
-done
-
 # don't want these
-for i in .git .gitignore .github .jshintrc .babelrc src webpack.config.js node_modules assets composer.json composer.lock package.sh tmp package.json package-lock.json gulpfile.js languages/make-pot.sh; do
+for i in bin .git .gitignore .github .jshintrc .babelrc src webpack.config.js node_modules assets composer.json composer.lock package.sh tmp package.json package-lock.json gulpfile.js languages/make-pot.sh; do
 	rm -rf "$SVN_DIRECTORY"/$i
 done
 find . -name '.DS_Store' -exec rm {} \;

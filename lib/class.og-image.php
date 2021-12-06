@@ -271,11 +271,6 @@ class Image
 					$quality = is_int($quality) ? min(max(0, $quality), 100) : 75;
 					Plugin::log('Using JPEG quality: '. $quality .' ( 0 - 100 )');
 					break;
-				case 'webp':
-					$quality = Plugin::setting('webp_quality_level', 75);
-					$quality = is_int($quality) ? min(max(0, $quality), 100) : 75;
-					Plugin::log('Using WEBP quality: '. $quality .' ( 0 - 100 )');
-					break;
 				case 'png':
 					$quality = Plugin::setting('png_compression_level', 2);
 					$quality = is_int($quality) ? min(max(0, $quality), 9) : 2;

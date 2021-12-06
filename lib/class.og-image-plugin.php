@@ -373,7 +373,7 @@ class Plugin
 				$static[] = ($key + 1) . ": $value";
 			}
 			$static[] = '-- php/wp functions --';
-			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype', 'exec', 'shell_exec', 'passthru', 'system'] as $function) {
+			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype'] as $function) {
 				$static[] = "$function: " . (constant(strtoupper($function) .'_EXISTED_BEFORE_PATCH') ? 'exists' : 'does not exist');
 			}
 			$static[] = '-- php settings --';
@@ -484,7 +484,7 @@ class Plugin
 				$ext = '/*';
 				break;
 			case 'images':
-				$ext = '/*.{png,jpg,webp}';
+				$ext = '/*.{png,jpg}';
 				break;
 			case 'locks':
 				$ext = '/*.lock';
@@ -599,13 +599,10 @@ class Plugin
 			$fallback_format = $output_format[1];
 			$output_format = $output_format[0];
 		}
-		if (!in_array($fallback_format, ['png', 'jpg', /* 'webp' */])) {
+		if (!in_array($fallback_format, ['png', 'jpg'])) {
 			$fallback_format = 'jpg';
 		}
-		if ('webp' === $output_format && !function_exists('imagewebp')) {
-			$output_format = $fallback_format;
-		}
-		if (!in_array($output_format, ['png', 'jpg', 'webp'])) {
+		if (!in_array($output_format, ['png', 'jpg'])) {
 			$output_format = $fallback_format;
 		}
 
@@ -1295,71 +1292,6 @@ class Plugin
 		load_plugin_textdomain(Plugin::TEXT_DOMAIN, false, basename(dirname(__DIR__)) . '/languages');
 	}
 
-	/**
-	 * EXPERIMENTAL
-	 *
-	 * @param $source
-	 *
-	 * @return mixed|string
-	 * @uses exec to execute system command. this might not be supported.
-	 * @see  file php.ini. disable_functions = "show_source,system, shell_exec,exec" <- remove exec
-	 */
-	public static function convert_webp_to_png($source)
-	{
-		$support = self::maybe_fake_support_webp(); // just in case
-		$target = false;
-		if ($support) {
-			$bin = dirname(__DIR__) . '/bin';
-			$target = "$source.temp.png";
-			$command = "$bin/dwebp \"$source\" -o \"$target\"";
-			ob_start();
-			try {
-				print $command;
-				exec($command);
-			} catch (Exception $e) {
-
-			}
-			ob_get_clean();
-		}
-
-		if (!$target || !file_exists($target)) {
-			$target = $source;
-		}
-
-		return $target;
-	}
-
-	/**
-	 * @return bool
-	 * @uses exec to execute system command. this might not be supported.
-	 * @see  file php.ini. disable_functions = "show_source,system, shell_exec,exec" <- remove exec
-	 */
-	public static function maybe_fake_support_webp(): bool
-	{
-		$support = false;
-
-		$bin = dirname(__DIR__) . '/bin';
-		// not downloaded yet
-		if (function_exists('exec') && !file_exists("$bin/dwebp")) {
-			// can we fake support?
-			ob_start();
-			try {
-				exec($bin . '/download.sh');
-			} catch (Exception $e) {
-
-			}
-			ob_end_clean();
-		}
-		if (file_exists("$bin/dwebp")) {
-			// downloaded and ran conversion tool successfully
-			if (file_exists($bin . '/can-execute-binaries-from-php.success')) {
-				$support = true;
-			}
-		}
-
-		return $support;
-	}
-
 	public static function font_rendering_tweaks_for($font, $section)
 	{
 		$tweaks = self::font_rendering_tweaks();
@@ -1764,7 +1696,7 @@ EODOC;
 				'image' => [
 					'namespace' => self::OPTION_PREFIX,
 					'type' => 'image',
-					'types' => 'image/png,image/jpeg,image/webp',
+					'types' => 'image/png,image/jpeg',
 					'label' => __('You can upload/select a specific Social Image here', Plugin::TEXT_DOMAIN),
 					'comment' => __('You can use JPEG and PNG.', Plugin::TEXT_DOMAIN) . ' ' . __('Recommended size: 1200x630 pixels.', Plugin::TEXT_DOMAIN),
 					'info-icon' => 'dashicons-info',

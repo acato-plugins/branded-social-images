@@ -75,9 +75,6 @@ For image generation; NO. The plugin is self-contained in that manner.
 
 The plugin does use external services, namely the following, and only once after install or update.
 1. Google Fonts - to download a set of sample fonts for you to use (on install or loss of cache folder),
-2. Google APIs - to download image conversion software for converting WEBP to PNG so the images can be used by GD2 (on install and on update).
-
-Number 2 might fail silently, resulting in not being able to use WEBP, but this will in no way affect the plugin itself when using PNG and JPEG.
 
 = I am using plugin XYZ for SEO and your plugin does not use the selected image or configured text, what can I do? =
 
@@ -135,6 +132,7 @@ When in doubt, contact us before sharing.
 
 = 1.0.20 =
 * added: filter `bsi_image_url` added to allow filtering of the final output OG:Image url.
+* removed: experimental webp support for hosts that do not support natively has been removed. This experimental feature relied on downloading a conversion tool from Google which could be considered insecure. On top of that, reports suggest a 7 out of 10 failure rate so there is no good reason to keep it.
 
 = 1.0.19 =
 * fixed: more protection on functions that might not exist and a try/catch does not prevent crashing

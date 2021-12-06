@@ -4,7 +4,7 @@
  * Some hosts do not have the mime_content_type function.
  * In case it is missing, try alternatives
  */
-foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype', 'exec', 'shell_exec', 'passthru', 'system'] as $function) {
+foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype'] as $function) {
 	define(strtoupper($function .'_EXISTED_BEFORE_PATCH'), function_exists($function));
 }
 
