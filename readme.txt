@@ -3,7 +3,7 @@ Contributors: clearsite
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
 Tested up to: 5.8.1
-Stable tag: 1.0.20
+Stable tag: 1.0.21
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -132,6 +132,9 @@ When in doubt, contact us before sharing.
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.21 =
+* fixed: shutdown function not always triggered, leaving a stray lock file after building an image. lock file now removed just before serving the image after building.
 
 = 1.0.20 =
 * added: filter `bsi_image_url` added to allow filtering of the final output OG:Image url.
