@@ -2,8 +2,8 @@
 Contributors: clearsite
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
-Tested up to: 5.8.1
-Stable tag: 1.0.21
+Tested up to: 5.9.3
+Stable tag: 1.0.22
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -132,6 +132,9 @@ When in doubt, contact us before sharing.
 3. Post-meta
 
 == Changelog ==
+
+= 1.0.22 =
+* fixed: fatal error due to strong typing of function OGImage::getWidthPixels() ( PHP Fatal error: Uncaught TypeError: Return value of Clearsite\Plugins\OGImage\GD::getWidthPixels() must be of the type int, float returned )
 
 = 1.0.21 =
 * fixed: shutdown function not always triggered, leaving a stray lock file after building an image. lock file now removed just before serving the image after building.
