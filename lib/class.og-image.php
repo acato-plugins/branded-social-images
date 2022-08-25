@@ -92,6 +92,10 @@ class Image
 			header('Content-Type: '. mime_content_type($image_cache['file']));
 			header('Content-Disposition: inline; filename=' . Plugin::output_filename());
 			header('Content-Length: ' . filesize($image_cache['file']));
+			if (is_file($image_cache['file'] . '.lock')) {
+				header('X-OG-Stray-Lock: removed');
+				@unlink($image_cache['file'] . '.lock');
+			}
 			readfile($image_cache['file']);
 			exit;
 		}

@@ -387,7 +387,7 @@ class GD
 
 
 	// Returns expected width of rendered text in pixels
-	private function getWidthPixels(string $text, string $font, int $font_size): int
+	private function getWidthPixels($text, $font, $font_size)
 	{
 		if (!trim($text)) {
 			return 0;
@@ -456,12 +456,7 @@ class GD
 
 	// Returns wrapped format (with newlines) of a piece of text (meant to be rendered on an image)
 	// using the width of rendered bounding box of text
-	private function wrapTextByPixels(
-		string $text,
-		int    $line_max_pixels,
-		int    $font_size,
-		string $font
-	): string
+	private function wrapTextByPixels( $text, $line_max_pixels, $font_size, $font )
 	{
 		$words = explode(' ', $text);
 		$lines = [];

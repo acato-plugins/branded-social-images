@@ -49,7 +49,7 @@ class Plugin
 	/** @var string External URL: the WP Plugin repository URL */
 	const PLUGIN_URL_WPORG = 'https://wordpress.org/plugins/branded-social-images/';
 	/** @var string External URL: Our website */
-	const CLEARSITE_URL_INFO = 'https://www.clearsite.nl/';
+	const AUTHOR_URL_INFO = 'https://acato.nl/';
 	/** @var string External URL: the WP Plugin support URL */
 	const BSI_URL_CONTACT = 'https://wordpress.org/support/plugin/branded-social-images/';
 	/** @var string External URL: the GitHub  repository URL */
@@ -62,6 +62,8 @@ class Plugin
 	const ADMIN_SLUG = 'branded-social-images';
 	/** @var string Which image to use in admin */
 	const ICON = 'icon.svg';
+	/** @var string Which image to use in admin menu */
+	const ADMIN_ICON = 'admin-icon.svg';
 	/** @var string The WordPress text-domain. If you change this, you also must change the filenames of the po and mo files in the 'languages' folder. */
 	const TEXT_DOMAIN = 'bsi';
 	/** @var string The WordPress query-var variable name. In the rare case there is a conflict, this can be changed, but re-save permalinks after. */
@@ -421,7 +423,7 @@ class Plugin
 				$static[] = ($key + 1) . ": $value";
 			}
 			$static[] = '-- php/wp functions --';
-			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype'] as $function) {
+			foreach (['mime_content_type', 'finfo_open', 'wp_check_filetype', 'exec', 'shell_exec', 'passthru', 'system'] as $function) {
 				$static[] = "$function: " . (constant(strtoupper($function) . '_EXISTED_BEFORE_PATCH') ? 'exists' : 'does not exist');
 			}
 			$static[] = '-- php settings --';
@@ -1330,8 +1332,10 @@ class Plugin
 
 	public static function overrule_og_image(): string
 	{
-		_deprecated_function(__FUNCTION__, '1.1.0', '');
-		return QueriedObject::getInstance()->og_image;
+		_deprecated_function(__FUNCTION__, '2.0.0', '');
+		$og_url = QueriedObject::getInstance()->og_image;
+
+		return apply_filters('bsi_image_url', $og_url);
 	}
 
 	public static function overrule_og_type(): string
@@ -1454,7 +1458,7 @@ class Plugin
 
 		$bin = dirname(__DIR__) . '/bin';
 		// not downloaded yet
-		if (!file_exists("$bin/dwebp")) {
+		if (function_exists('exec') && !file_exists("$bin/dwebp")) {
 			// can we fake support?
 			ob_start();
 			try {
@@ -1465,7 +1469,7 @@ class Plugin
 			ob_end_clean();
 		}
 		if (file_exists("$bin/dwebp")) {
-			// downloaded but did not run conversion tool successfully
+			// downloaded and ran conversion tool successfully
 			if (file_exists($bin . '/can-execute-binaries-from-php.success')) {
 				$support = true;
 			}

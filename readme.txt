@@ -1,10 +1,10 @@
 === Branded Social Images - Open Graph Images with logo and extra text layer ===
-Contributors: clearsite
+Contributors: acato,clearsite
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
-Tested up to: 5.8.1
-Stable tag: 1.0.17
-Requires PHP: 7.1
+Tested up to: 6.0.1
+Stable tag: 1.1.0
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,8 +16,6 @@ The simplest way to brand your social images. Provide all your social images (Op
 This plugin creates branded social images to match with your company’s style. Including a company logo and title.
 These open graph images can either be auto-generated for the entire site or you have the option to overrule this per page/post.
 # Works with every (public) post-type in WordPress!
-
-For more information, visit our [website](https://clearsite.nl/branded-social-images/ "Our webpage about Branded Social Images")
 
 == Installation ==
 
@@ -132,6 +130,25 @@ When in doubt, contact us before sharing.
 3. Post-meta
 
 == Changelog ==
+
+= 1.1.0 =
+* *Important message*
+* [Acato](https://acato.nl) has recently acquired the Web Agency that created this plugin. You will see this name in the plugin code (Clearsite) but this will change in the future.
+* This version (1.1.0) will be the last backward compatible version of the plugin, version 2.0.0 will be released sometime this year (probably november) that may or may not break your website.
+* Please DO NOT upgrade this plugin on a live, production website to version 2.0.0 before you have done ample testing. You can find a test version on github in the branch 'version-2.0.0'.
+* Please note that this test version will NOT be supported via WordPress.org, only on github. If you want to help with the development, make a fork and submit pull-requests.
+
+= 1.0.22 =
+* fixed: fatal error due to strong typing of function OGImage::getWidthPixels() ( PHP Fatal error: Uncaught TypeError: Return value of Clearsite\Plugins\OGImage\GD::getWidthPixels() must be of the type int, float returned )
+
+= 1.0.21 =
+* fixed: shutdown function not always triggered, leaving a stray lock file after building an image. lock file now removed just before serving the image after building.
+
+= 1.0.20 =
+* added: filter `bsi_image_url` added to allow filtering of the final output OG:Image url.
+
+= 1.0.19 =
+* fixed: more protection on functions that might not exist and a try/catch does not prevent crashing
 
 = 1.0.17 =
 * fixed: editor issues with colors fixed; sprintf for formatting floats was set to locale aware. oops.

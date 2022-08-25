@@ -2,10 +2,10 @@
 /**
  * Plugin Name: Branded Social Images
  * Description: The simplest way to brand your social images. Provide all your social images (Open Graph Images) with your brand en text. In just a few clicks.
- * Plugin URI: https://clearsite.nl/branded-social-images
- * Author: Internetbureau Clearsite
- * Author URI: https://clearsite.nl/branded-social-images
- * Version: 1.1.0
+ * Plugin URI: https://github.com/clearsite/branded-social-images
+ * Author: Acato
+ * Author URI: https://acato.nl
+ * Version: 2.0.0
  * License: GPL2
  */
 
