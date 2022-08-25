@@ -109,36 +109,11 @@ class Admin
 
 	public static function admin_icon(): string
 	{
-		static $once;
-		if (!$once) {
-			$once = true;
-			add_action('admin_footer', function () {
-				?>
-				<style>
-					.toplevel_page_branded-social-images .wp-menu-image img {
-						display: none;
-					}
-
-					.toplevel_page_branded-social-images .wp-menu-image svg {
-						height: 110%;
-					}
-
-					.wp-menu-image svg path {
-						fill: currentColor;
-					}
-				</style><?php
-			});
+		if ( is_file( dirname( __DIR__ ) . '/assets/' . basename( '/' . Plugin::ADMIN_ICON ) ) ) {
+			return plugins_url( '/assets/' . basename( '/' . Plugin::ADMIN_ICON ), __DIR__ );
 		}
 
-		if (preg_match('/\.svg$/', Plugin::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON))) {
-			// this is absolute horror; why can't WordPress allow inline html images ?!
-			return '" alt="" />' . file_get_contents(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON)) . '<link href="';
-		}
-//
-//		if (preg_match('/\.svg$/', Plugin::ICON) && is_file(dirname(__DIR__) . '/img/' . basename('/' . Plugin::ICON))) {
-//			return plugins_url('/img/' . basename('/' . Plugin::ICON), __DIR__);
-//		}
-		return Plugin::ICON;
+		return Plugin::ADMIN_ICON;
 	}
 
 	/**

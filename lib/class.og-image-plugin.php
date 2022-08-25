@@ -61,6 +61,8 @@ class Plugin
 	const ADMIN_SLUG = 'branded-social-images';
 	/** @var string Which image to use in admin */
 	const ICON = 'icon.svg';
+	/** @var string Which image to use in admin menu */
+	const ADMIN_ICON = 'admin-icon.svg';
 	/** @var string The WordPress text-domain. If you change this, you also must change the filenames of the po and mo files in the 'languages' folder. */
 	const TEXT_DOMAIN = 'bsi';
 	/** @var string The WordPress query-var variable name. In the rare case there is a conflict, this can be changed, but re-save permalinks after. */
