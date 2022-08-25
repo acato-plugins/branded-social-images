@@ -1,6 +1,6 @@
 <?php
 
-namespace Clearsite\Plugins\OGImage;
+namespace Acato\Plugins\OGImage;
 
 defined('ABSPATH') or die('You cannot be here.');
 

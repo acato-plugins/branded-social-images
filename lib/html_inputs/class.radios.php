@@ -1,6 +1,6 @@
 <?php
 
-namespace Clearsite\Tools\HTML_Inputs;
+namespace Acato\Tools\HTML_Inputs;
 
 defined('ABSPATH') or die('You cannot be here.');
 

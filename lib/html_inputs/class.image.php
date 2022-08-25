@@ -1,8 +1,8 @@
 <?php
 
-namespace Clearsite\Tools\HTML_Inputs;
+namespace Acato\Tools\HTML_Inputs;
 
-use Clearsite\Plugins\OGImage\Plugin;
+use Acato\Plugins\OGImage\Plugin;
 
 defined('ABSPATH') or die('You cannot be here.');
 

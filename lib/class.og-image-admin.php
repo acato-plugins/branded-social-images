@@ -1,10 +1,10 @@
 <?php
 
-namespace Clearsite\Plugins\OGImage;
+namespace Acato\Plugins\OGImage;
 
 defined('ABSPATH') or die('You cannot be here.');
 
-use Clearsite\Tools\HTML_Inputs;
+use Acato\Tools\HTML_Inputs;
 use WP_Term;
 
 class Admin

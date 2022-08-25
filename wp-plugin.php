@@ -39,7 +39,7 @@
  * 6. Code refactoring
  */
 
-use Clearsite\Plugins\OGImage\Plugin;
+use Acato\Plugins\OGImage\Plugin;
 
 define('BSI_PLUGIN_FILE', __FILE__);
 

@@ -1,5 +1,5 @@
 <?php
-namespace Clearsite\Plugins\OGImage;
+namespace Acato\Plugins\OGImage;
 
 use ArrayAccess;
 

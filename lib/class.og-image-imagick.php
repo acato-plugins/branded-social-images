@@ -2,11 +2,11 @@
 
 /** NOT YET IMPLEMENTED */
 
-namespace Clearsite\Plugins\OGImage;
+namespace Acato\Plugins\OGImage;
 
 defined('ABSPATH') or die('You cannot be here.');
 
-use Clearsite\Plugins\OGImage;
+use Acato\Plugins\OGImage;
 use \Imagick as ImageMagick;
 use ImagickDraw;
 
