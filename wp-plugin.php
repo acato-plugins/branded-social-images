@@ -7,6 +7,8 @@
  * Author URI: https://acato.nl
  * Version: 2.0.0
  * License: GPL2
+ *
+ * @package    Acato/Plugins/BrandedSocialImages
  */
 
 /**
@@ -19,6 +21,7 @@
  *
  * Found bugs? Need help?
  * Please visit the WordPress support page;
+ *
  * @see: https://wordpress.org/support/plugin/branded-social-images/
  *
  * The code ain't pretty. I know.
@@ -42,14 +45,14 @@
 use Acato\Plugins\OGImage\Plugin;
 use GDText\Box;
 
-define('BSI_PLUGIN_FILE', __FILE__);
+define( 'BSI_PLUGIN_FILE', __FILE__ );
 
-if (!defined('BSI_DEBUG')) {
-	define('BSI_DEBUG', false);
+if ( ! defined( 'BSI_DEBUG' ) ) {
+	define( 'BSI_DEBUG', false );
 }
 
-if ( !class_exists( Box::class ) && is_file( __DIR__ .'/vendor/autoload.php' ) ) {
-	require_once __DIR__ .'/vendor/autoload.php';
+if ( ! class_exists( Box::class ) && is_file( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
 }
 
 require_once __DIR__ . '/lib/inc.functions.php';
@@ -57,27 +60,33 @@ require_once __DIR__ . '/lib/class.queried-object.php';
 require_once __DIR__ . '/lib/class.og-image-plugin.php';
 require_once __DIR__ . '/lib/class.og-image-admin.php';
 
-// was plugins_loaded, but convention is to hook post_types and taxonomies on init, so we needed to move this to init as well
+// was plugins_loaded, but convention is to hook post_types and taxonomies on init, so we needed to move this to init as well.
 Plugin::getInstance();
 
 /**
  * This will fix the "You are not allowed to upload to this post" error when in admin settings.
  * This only happens occasionally, most often on Gutenberg enabled WP sites, but once it happens, it keeps happening.
  */
-add_action('check_ajax_referer', function ($action) {
-	if ('media-form' === $action && !empty($_REQUEST['action']) && 'upload-attachment' === $_REQUEST['action'] && isset($_REQUEST['post_id']) && empty($_REQUEST['post_id'])) {
-		unset($_REQUEST['post_id']);
+add_action(
+	'check_ajax_referer',
+	function ( $action ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- not a form .
+		if ( 'media-form' === $action && ! empty( $_REQUEST['action'] ) && 'upload-attachment' === $_REQUEST['action'] && isset( $_REQUEST['post_id'] ) && empty( $_REQUEST['post_id'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- not a form .
+			unset( $_REQUEST['post_id'] );
+		}
 	}
-});
+);
 
 /**
- * plugin activation/deactivation/uninstall hooks
+ * Plugin activation/deactivation/uninstall hooks.
  */
-register_activation_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_activation']);
-register_deactivation_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_deactivation']);
-register_uninstall_hook(BSI_PLUGIN_FILE, [Plugin::class, 'on_uninstall']);
+register_activation_hook( BSI_PLUGIN_FILE, [ Plugin::class, 'on_activation' ] );
+register_deactivation_hook( BSI_PLUGIN_FILE, [ Plugin::class, 'on_deactivation' ] );
+register_uninstall_hook( BSI_PLUGIN_FILE, [ Plugin::class, 'on_uninstall' ] );
 
 /**
- * Reference list
- * @see https://www.cssscript.com/color-picker-alpha-selection/
+ * Reference list.
+ *
+ * @see https://www.cssscript.com/color-picker-alpha-selection/ .
  */

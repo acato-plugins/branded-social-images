@@ -4,38 +4,38 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitd581cbfb17b5b823a2d65e303c990640
-{
-    public static $prefixLengthsPsr4 = array (
-        'G' => 
-        array (
-            'GDText\\Tests\\' => 13,
-            'GDText\\' => 7,
-        ),
+use Closure;
+
+class ComposerStaticInitd581cbfb17b5b823a2d65e303c990640 {
+    public static $prefixLengthsPsr4 = array(
+        'G' =>
+            array(
+                'GDText\\Tests\\' => 13,
+                'GDText\\'        => 7,
+            ),
     );
 
-    public static $prefixDirsPsr4 = array (
-        'GDText\\Tests\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/stil/gd-text/tests',
-        ),
-        'GDText\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/stil/gd-text/src',
-        ),
+    public static $prefixDirsPsr4 = array(
+        'GDText\\Tests\\' =>
+            array(
+                0 => __DIR__ . '/..' . '/stil/gd-text/tests',
+            ),
+        'GDText\\'        =>
+            array(
+                0 => __DIR__ . '/..' . '/stil/gd-text/src',
+            ),
     );
 
-    public static $classMap = array (
+    public static $classMap = array(
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
-    public static function getInitializer(ClassLoader $loader)
-    {
-        return \Closure::bind(function () use ($loader) {
+    public static function getInitializer( ClassLoader $loader ) {
+        return Closure::bind( function () use ( $loader ) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitd581cbfb17b5b823a2d65e303c990640::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitd581cbfb17b5b823a2d65e303c990640::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitd581cbfb17b5b823a2d65e303c990640::$classMap;
+            $loader->prefixDirsPsr4    = ComposerStaticInitd581cbfb17b5b823a2d65e303c990640::$prefixDirsPsr4;
+            $loader->classMap          = ComposerStaticInitd581cbfb17b5b823a2d65e303c990640::$classMap;
 
-        }, null, ClassLoader::class);
+        }, null, ClassLoader::class );
     }
 }

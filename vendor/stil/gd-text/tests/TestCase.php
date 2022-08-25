@@ -1,39 +1,40 @@
 <?php
+
 namespace GDText\Tests;
 
-class TestCase extends \PHPUnit_Framework_TestCase
-{
+use PHPUnit_Framework_TestCase;
+
+class TestCase extends PHPUnit_Framework_TestCase {
     /**
      * @param $name
+     *
      * @return resource
      */
-    protected function openImageResource($name)
-    {
-        return imagecreatefromstring(file_get_contents(__DIR__.'/images/'.$name));
+    protected function openImageResource( $name ) {
+        return imagecreatefromstring( file_get_contents( __DIR__ . '/images/' . $name ) );
     }
 
     /**
      * @param $name
+     *
      * @return string
      */
-    protected function sha1ImageResource($name)
-    {
-        return sha1_file(__DIR__.'/images/'.$name);
+    protected function sha1ImageResource( $name ) {
+        return sha1_file( __DIR__ . '/images/' . $name );
     }
 
     /**
-     * @param string $name
+     * @param string   $name
      * @param resource $im
      */
-    protected function assertImageEquals($name, $im)
-    {
+    protected function assertImageEquals( $name, $im ) {
         //return imagepng($im, __DIR__.'/images/'.$name);
 
         ob_start();
-        imagepng($im);
-        $sha1 = sha1(ob_get_contents());
+        imagepng( $im );
+        $sha1 = sha1( ob_get_contents() );
         ob_end_clean();
 
-        $this->assertEquals($this->sha1ImageResource($name), $sha1);
+        $this->assertEquals( $this->sha1ImageResource( $name ), $sha1 );
     }
 }
