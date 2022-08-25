@@ -48,7 +48,7 @@ class Plugin
 	/** @var string External URL: the WP Plugin repository URL */
 	const PLUGIN_URL_WPORG = 'https://wordpress.org/plugins/branded-social-images/';
 	/** @var string External URL: Our website */
-	const CLEARSITE_URL_INFO = 'https://www.clearsite.nl/';
+	const AUTHOR_URL_INFO = 'https://acato.nl/';
 	/** @var string External URL: the WP Plugin support URL */
 	const BSI_URL_CONTACT = 'https://wordpress.org/support/plugin/branded-social-images/';
 	/** @var string External URL: the GitHub  repository URL */

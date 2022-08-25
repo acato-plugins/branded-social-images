@@ -91,7 +91,7 @@ class Admin
 
 		add_action('bsi_footer', function () {
 			?><p><?php
-			print sprintf(__('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Clearsite</a>.', Plugin::TEXT_DOMAIN), Plugin::PLUGIN_URL_WPORG, Plugin::CLEARSITE_URL_INFO)
+			print sprintf(__('<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Acato</a>.', Plugin::TEXT_DOMAIN), Plugin::PLUGIN_URL_WPORG, Plugin::AUTHOR_URL_INFO)
 				. ' ' . __('Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN)
 				. ' ' . sprintf(__('<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN), Plugin::BSI_URL_CONTACT); ?></p><?php
 			if (get_the_ID()) {
