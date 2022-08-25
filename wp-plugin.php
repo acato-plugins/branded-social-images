@@ -40,6 +40,7 @@
  */
 
 use Acato\Plugins\OGImage\Plugin;
+use GDText\Box;
 
 define('BSI_PLUGIN_FILE', __FILE__);
 
@@ -47,7 +48,7 @@ if (!defined('BSI_DEBUG')) {
 	define('BSI_DEBUG', false);
 }
 
-if ( is_file( __DIR__ .'/vendor/autoload.php' ) ) {
+if ( !class_exists( Box::class ) && is_file( __DIR__ .'/vendor/autoload.php' ) ) {
 	require_once __DIR__ .'/vendor/autoload.php';
 }
 
