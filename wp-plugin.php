@@ -47,6 +47,10 @@ if (!defined('BSI_DEBUG')) {
 	define('BSI_DEBUG', false);
 }
 
+if ( is_file( __DIR__ .'/vendor/autoload.php' ) ) {
+	require_once __DIR__ .'/vendor/autoload.php';
+}
+
 require_once __DIR__ . '/lib/inc.functions.php';
 require_once __DIR__ . '/lib/class.queried-object.php';
 require_once __DIR__ . '/lib/class.og-image-plugin.php';

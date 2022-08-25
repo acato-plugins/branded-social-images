@@ -7,8 +7,6 @@ defined('ABSPATH') or die('You cannot be here.');
 use GDText\Box;
 use GDText\Color;
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
 class GD
 {
 	private $handler;

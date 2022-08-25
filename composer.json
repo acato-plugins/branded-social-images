@@ -1,5 +1,17 @@
 {
-    "require": {
-        "stil/gd-text": "^1.1"
+  "name": "acato/branded-social-images",
+  "authors": [
+    {
+      "name": "Remon Pel",
+      "email": "remon@acato.nl"
+    },
+    {
+      "name": "Gijs van Arem",
+      "email": "gijsvanarem@acato.nl"
     }
+  ],
+  "type": "wordpress-plugin",
+  "require": {
+    "stil/gd-text": "^1.1"
+  }
 }
