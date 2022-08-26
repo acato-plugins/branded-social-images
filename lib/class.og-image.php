@@ -11,7 +11,7 @@ class Image {
 	public $image_id;
 
 	/**
-	 * @deprecated, please use QueriedObject::getInstance()->object_id, QueriedObject::getInstance()->object_type and ->base_type
+	 * @deprecated, please use QueriedObject::instance()->object_id, QueriedObject::instance()->object_type and ->base_type
 	 */
 	public $post_id;
 
@@ -20,7 +20,7 @@ class Image {
 	public function __construct( Plugin $manager ) {
 		$this->manager = $manager;
 
-		list( $object_id, $object_type, $base_type, $link, $ogimage, $go ) = QueriedObject::getInstance();
+		list( $object_id, $object_type, $base_type, $link, $ogimage, $go ) = QueriedObject::instance();
 		// hack for home (posts on front)
 		if ( is_home() ) {
 			$object_id = 0;
@@ -79,7 +79,7 @@ class Image {
 
 		Plugin::no_output_buffers( true );
 
-		$qo          = QueriedObject::getInstance();
+		$qo          = QueriedObject::instance();
 		$image_cache = $this->cache( $this->image_id, $qo );
 		if ( $image_cache ) {
 			// we have cache, or have created cache. In any way, we have an image :)
@@ -123,10 +123,13 @@ class Image {
 		header( 'X-OG-Cache: miss' );
 		if ( ! $this->use_existing_cached_image ) {
 			header( 'X-OG-Cache: ignored', true );
-		} else if ( is_file( $cache_file ) ) {
+		} elseif ( is_file( $cache_file ) ) {
 			header( 'X-OG-Cache: hit', true );
 
-			return [ 'file' => $cache_file, 'url' => str_replace( $base_dir, $base_url, $cache_file ) ];
+			return [
+				'file' => $cache_file,
+				'url'  => str_replace( $base_dir, $base_url, $cache_file ),
+			];
 		}
 		if ( is_file( $lock_file ) ) {
 			// we're already building this file.
@@ -144,7 +147,10 @@ class Image {
 		if ( is_file( $cache_file ) ) {
 			do_action( 'bsi_image_cache_built', $cache_file );
 
-			return [ 'file' => $cache_file, 'url' => str_replace( $base_dir, $base_url, $cache_file ) ];
+			return [
+				'file' => $cache_file,
+				'url'  => str_replace( $base_dir, $base_url, $cache_file ),
+			];
 		} elseif ( $retry < 2 ) {
 			return $this->cache( $image_id, $queriedObject, $retry + 1 );
 		}
@@ -226,14 +232,14 @@ class Image {
 				return false;
 			}
 
-//			$editor = wp_get_image_editor( $image_file );
+			// $editor = wp_get_image_editor( $image_file );
 			// we assume GD because we cannot be sure Imagick is there.
 			// TODO: add IMagick variant
-//			if (is_a($editor, \WP_Image_Editor_Imagick::class)) {
-//				require_once __DIR__ .'/class.og-image-imagick.php';
-//				$image = new IMagick($this, $image_file, $cache_file);
-//			}
-//			elseif (is_a($editor, \WP_Image_Editor_GD::class)) {
+			// if (is_a($editor, \WP_Image_Editor_Imagick::class)) {
+			// require_once __DIR__ .'/class.og-image-imagick.php';
+			// $image = new IMagick($this, $image_file, $cache_file);
+			// }
+			// elseif (is_a($editor, \WP_Image_Editor_GD::class)) {
 			if ( true ) { // hard coded GD now
 				require_once __DIR__ . '/class.og-image-gd.php';
 				$image = new GD( $this, $image_file, $cache_file );
@@ -245,23 +251,26 @@ class Image {
 			}
 
 			if ( $this->manager->logo_options['enabled'] ) {
-				Plugin::log( "Logo overlay: enabled" );
+				Plugin::log( 'Logo overlay: enabled' );
 				$image->logo_overlay( $this->manager->logo_options );
 			} else {
-				Plugin::log( "Logo overlay: disabled" );
+				Plugin::log( 'Logo overlay: disabled' );
 			}
 
 			if ( $this->manager->text_options['enabled'] ) {
-				Plugin::log( "Text overlay: enabled" );
+				Plugin::log( 'Text overlay: enabled' );
 				$image->text_overlay( $this->manager->text_options, $this->getTextForQueriedObject() );
 			} else {
-				Plugin::log( "Text overlay: disabled" );
+				Plugin::log( 'Text overlay: disabled' );
 			}
 
-			add_action( 'shutdown', function () use ( $lock_file, $temp_file ) {
-				@unlink( $lock_file );
-				@unlink( $temp_file );
-			} );
+			add_action(
+				'shutdown',
+				function () use ( $lock_file, $temp_file ) {
+					@unlink( $lock_file );
+					@unlink( $temp_file );
+				}
+			);
 
 			$filename = Plugin::output_filename();
 			$format   = explode( '.', $filename );
@@ -300,11 +309,11 @@ class Image {
 
 
 	private function getTextForQueriedObject() {
-		list( $object_id, $object_type, $base_type, $permalink, $ogimage, $go ) = QueriedObject::getInstance();
+		list( $object_id, $object_type, $base_type, $permalink, $ogimage, $go ) = QueriedObject::instance();
 
 		$text = $this->getTextForMeta( $base_type, $object_id, $permalink );
 		Plugin::log( 'Text determination: text before filter  bsi_image_text; ' . ( $text ?: '( no text )' ) );
-		$text = apply_filters( 'bsi_image_text', $text, QueriedObject::getInstance(), $this->image_id );
+		$text = apply_filters( 'bsi_image_text', $text, QueriedObject::instance(), $this->image_id );
 		Plugin::log( 'Text determination: text after filter  bsi_image_text; ' . ( $text ?: '( no text )' ) );
 
 		return $text;
@@ -313,7 +322,7 @@ class Image {
 	public function getTextForMeta( $base_type, $object_id, $permalink ) {
 		Plugin::log( 'Using meta-data from ' . $base_type . ' with id ' . $object_id );
 		$default = $this->manager->text_options['text'];
-		if ( Plugin::text_is_identical( $default, Plugin::getInstance()->dummy_data( 'text' ) ) ) {
+		if ( Plugin::text_is_identical( $default, Plugin::instance()->dummy_data( 'text' ) ) ) {
 			$default = '';
 		}
 		Plugin::log( 'Text setting: default text; ' . ( $default ?: '( no text )' ) );
@@ -343,7 +352,7 @@ class Image {
 		$type = 'none';
 
 		if ( Plugin::setting( 'use_bare_post_title' ) ) {
-			$type = 'wordpress';
+			$type = 'WordPress';
 			$text = $title;
 			Plugin::log( 'Text consideration: WordPress title (bare); ' . $text );
 		}
@@ -386,12 +395,17 @@ class Image {
 		}
 
 		$old_text = $text;
-		$text     = apply_filters_deprecated( 'bsi_text', [
-			$text,
-			$object_id,
-			$this->image_id,
-			$type
-		], '1.1.0', 'bsi_image_text' );
+		$text     = apply_filters_deprecated(
+			'bsi_text',
+			[
+				$text,
+				$object_id,
+				$this->image_id,
+				$type,
+			],
+			'1.1.0',
+			'bsi_image_text'
+		);
 		if ( $text !== $old_text ) {
 			Plugin::log( 'Text determination: text before filter  bsi_text; ' . ( $old_text ?: '( no text )' ) );
 			Plugin::log( 'Text determination: text after filter  bsi_text; ' . ( $text ?: '( no text )' ) );
@@ -403,7 +417,7 @@ class Image {
 
 
 	private function getImageIdForQueriedObject() {
-		$qo = QueriedObject::getInstance();
+		$qo = QueriedObject::instance();
 
 		return $this->getImageIdForMeta( $qo->base_type, $qo->object_id );
 	}
@@ -459,7 +473,7 @@ class Image {
 			Plugin::log( 'Image determination: ID after filter  bsi_image; ' . ( $image_id ?: 'no image found' ) );
 		}
 		Plugin::log( 'Image determination: ID before filter  bsi_image_id; ' . ( $image_id ?: 'no image found' ) );
-		$image_id = apply_filters( 'bsi_image_id', $image_id, QueriedObject::getInstance(), $the_img );
+		$image_id = apply_filters( 'bsi_image_id', $image_id, QueriedObject::instance(), $the_img );
 		Plugin::log( 'Image determination: ID after filter  bsi_image_id; ' . ( $image_id ?: 'no image found' ) );
 
 		return $image_id;

@@ -6,7 +6,7 @@ defined( 'ABSPATH' ) or die( 'You cannot be here.' );
 
 class Input {
 
-	protected $type = 'text';
+	protected $type  = 'text';
 	protected $empty = true;
 
 	protected $name;
@@ -16,9 +16,9 @@ class Input {
 	protected $info_icon;
 	protected $comment;
 	protected $comment_icon;
-	protected $atts = [];
-	protected $content = '';
-	protected $value = null;
+	protected $atts          = [];
+	protected $content       = '';
+	protected $value         = null;
 	protected $current_value = null;
 
 	public function __construct( $attribute_name, $atts ) {
@@ -145,7 +145,6 @@ class Input {
 		$this->atts['value'] = $this->get_tag_value();
 		$atts                = $this->attributes();
 
-
 		return $label . '<input type="' . $this->type . '" ' . $atts . '>' . ( $this->empty ? '' : $this->content . '</' . $this->type . '>' );
 	}
 
@@ -178,7 +177,7 @@ class Input {
 		if ( $this->comment ) {
 			$comment = '<span class="comment">' . $this->comment;
 			if ( $this->the_info() ) {
-				$comment         .= $this->the_info();
+				$comment        .= $this->the_info();
 				$this->info      = false;
 				$this->info_icon = false;
 			}

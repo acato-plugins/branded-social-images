@@ -16,17 +16,17 @@ require __DIR__ . '/html_inputs/class.radios.php';
 require __DIR__ . '/html_inputs/class.slider.php';
 require __DIR__ . '/html_inputs/class.image.php';
 require __DIR__ . '/html_inputs/class.color.php';
-//require __DIR__ .'/html_inputs/class.email.php';
-//require __DIR__ .'/html_inputs/class.tel.php';
-//require __DIR__ .'/html_inputs/class.number.php';
+// require __DIR__ .'/html_inputs/class.email.php';
+// require __DIR__ .'/html_inputs/class.tel.php';
+// require __DIR__ .'/html_inputs/class.number.php';
 
 class HTML_Inputs {
 
 	/**
 	 * @param        $option_name
-	 * @param array  $option_atts
-	 * @param string $option_label
-	 * @param bool   $echo
+	 * @param array       $option_atts
+	 * @param string      $option_label
+	 * @param bool        $echo
 	 *
 	 * @return string|null
 	 */

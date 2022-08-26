@@ -27,7 +27,6 @@ class file extends text {
 		$this->atts['value'] = $this->get_current_value();
 		$atts                = $this->attributes(); // builds HTML attributes
 
-
 		return $label . '<span class="add-file-select" data-types="' . $types . '">
 			<input type="' . $this->type . '" ' . $atts . '/>
 			<input type="button" class="button" value="' . esc_attr( $button ) . '"/>
@@ -43,15 +42,19 @@ class file extends text {
 		}
 		$once = true;
 		wp_enqueue_media();
-		add_action( 'admin_footer', function () {
-			?>
+		add_action(
+			'admin_footer',
+			function () {
+				?>
 			<script>
 				;(function ($) {
 					$(document).ready(function () {
 						$('.add-file-select').BSIattachFileUpload();
 					});
 				})(jQuery);
-			</script><?php
-		} );
+			</script>
+				<?php
+			}
+		);
 	}
 }

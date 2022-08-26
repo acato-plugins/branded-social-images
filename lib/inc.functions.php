@@ -12,7 +12,7 @@ foreach (
 		'exec',
 		'shell_exec',
 		'passthru',
-		'system'
+		'system',
 	] as $function
 ) {
 	define( strtoupper( $function . '_EXISTED_BEFORE_PATCH' ), function_exists( $function ) );

@@ -52,18 +52,26 @@ class GD {
 
 		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
 		$action_function = ( defined( 'WP_DEBUG_DISPLAY' ) && true === WP_DEBUG_DISPLAY ) ? 'do_action_ref_array' : 'do_action_deprecated';
-		$action_function( 'bsi_image_gd', [
-			&$this->resource,
-			'after_creating_canvas',
-			$this->handler->post_id,
-			$this->handler->image_id
-		], '1.1.0', 'bsi_image_layer' );
-		do_action_ref_array( 'bsi_image_layer', [
-			&$this->resource,
-			'gd_after_creating_canvas',
-			QueriedObject::getInstance(),
-			$this->handler->image_id
-		] );
+		$action_function(
+			'bsi_image_gd',
+			[
+				&$this->resource,
+				'after_creating_canvas',
+				$this->handler->post_id,
+				$this->handler->image_id,
+			],
+			'1.1.0',
+			'bsi_image_layer'
+		);
+		do_action_ref_array(
+			'bsi_image_layer',
+			[
+				&$this->resource,
+				'gd_after_creating_canvas',
+				QueriedObject::instance(),
+				$this->handler->image_id,
+			]
+		);
 
 		imagealphablending( $this->resource, true );
 		imagesavealpha( $this->resource, true );
@@ -93,18 +101,26 @@ class GD {
 
 		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
 		$action_function = ( defined( 'WP_DEBUG_DISPLAY' ) && true === WP_DEBUG_DISPLAY ) ? 'do_action_ref_array' : 'do_action_deprecated';
-		$action_function( 'bsi_image_gd', [
-			&$this->resource,
-			'after_adding_background',
-			$this->handler->post_id,
-			$this->handler->image_id
-		], '1.1.0', 'bsi_image_layer' );
-		do_action_ref_array( 'bsi_image_layer', [
-			&$this->resource,
-			'gd_after_adding_background',
-			QueriedObject::getInstance(),
-			$this->handler->image_id
-		] );
+		$action_function(
+			'bsi_image_gd',
+			[
+				&$this->resource,
+				'after_adding_background',
+				$this->handler->post_id,
+				$this->handler->image_id,
+			],
+			'1.1.0',
+			'bsi_image_layer'
+		);
+		do_action_ref_array(
+			'bsi_image_layer',
+			[
+				&$this->resource,
+				'gd_after_adding_background',
+				QueriedObject::instance(),
+				$this->handler->image_id,
+			]
+		);
 	}
 
 	public function text_overlay( $textOptions, $text ) {
@@ -118,7 +134,7 @@ class GD {
 		if ( 'on' === $textOptions['background-enabled'] && $textOptions['background-color'] ) {
 			$background_color_rgba = $this->manager->hex_to_rgba( $textOptions['background-color'], true );
 			if ( $background_color_rgba[3] < 127 ) { // not 100% transparent
-				//		var_dump($background_color);exit;
+				// var_dump($background_color);exit;
 				$background_color = imagecolorallocatealpha( $this->resource, $background_color_rgba[0], $background_color_rgba[1], $background_color_rgba[2], $background_color_rgba[3] );
 				imagecolortransparent( $this->resource, $background_color );
 			}
@@ -172,7 +188,7 @@ class GD {
 		}
 		$text_width  += 2;
 		$line_height *= $this->line_height_factor;
-		$text_height = $line_height * count( $lines );
+		$text_height  = $line_height * count( $lines );
 
 		$p = $textOptions['padding'] * Plugin::AA;
 
@@ -205,7 +221,7 @@ class GD {
 		// text-background
 		if ( false !== $background_color ) {
 			if ( 'inline' === $textOptions['display'] ) {
-				//  /.75 points to pixels
+				// .75 points to pixels
 				imagefilledrectangle( $this->resource, $text_posX - $p, $text_posY - $p, $text_posX + $text_width + $p, $text_posY + ( $text_height / .75 ) + $p, $background_color );
 			}
 		}
@@ -229,39 +245,58 @@ class GD {
 				$shiftY_step            = self::gradient_value( 0, $shiftY, $step, $steps );
 				$text_shadow_color_step = $this->gradient_color( $start_color, $end_color, $step, $steps, true );
 				$text_shadow_color_step = $this->manager->hex_to_rgba( $text_shadow_color_step, true );
-//				$text_shadow_color_step = imagecolorallocatealpha($this->resource, $text_shadow_color_step[0], $text_shadow_color_step[1], $text_shadow_color_step[2], $text_shadow_color_step[3]);
+				// $text_shadow_color_step = imagecolorallocatealpha($this->resource, $text_shadow_color_step[0], $text_shadow_color_step[1], $text_shadow_color_step[2], $text_shadow_color_step[3]);
 				$text_shadow_color_step = new Color( $text_shadow_color_step[0], $text_shadow_color_step[1], $text_shadow_color_step[2], $text_shadow_color_step[3] );
-//				imagecolortransparent($this->resource, $text_shadow_color_step);
-//				imagettftext($this->resource, $fontSize, 0, $text_posX + $shiftX_step, $text_posY + $shiftY_step + $line_height - .2*$line_height , $text_shadow_color_step, $font, $text);
+				// imagecolortransparent($this->resource, $text_shadow_color_step);
+				// imagettftext($this->resource, $fontSize, 0, $text_posX + $shiftX_step, $text_posY + $shiftY_step + $line_height - .2*$line_height , $text_shadow_color_step, $font, $text);
 				$this->imagettftextbox( $this->resource, $fontSize, $text_posX + $shiftX_step, $text_posY + $shiftY_step, $text_width, $text_height, $text_shadow_color_step, $font, $text, [ 'align' => $textOptions['halign'] ] );
 			}
 		}
 
-//		if (false !== $text_stroke_color) {
-//			$this->imagettftextbox_stroke($this->resource, $fontSize, $text_posX, $text_posY, $text_width, $text_height,
-//				$text_stroke_color, $font, $text, $textOptions['text-stroke'], $textOptions['halign']);
-//		}
-//		imagettftext($this->resource, $fontSize, 0, $text_posX, $text_posY + $line_height - .2*$line_height , $text_color, $font, $text);
-		$this->imagettftextbox( $this->resource, $fontSize, $text_posX, $text_posY, $text_width, $text_height, $text_color, $font, $text, [
-			'align'        => $textOptions['halign'],
-			'stroke_width' => $textOptions['text-stroke'],
-			'stroke_color' => $text_stroke_color,
-		] );
+		// if (false !== $text_stroke_color) {
+		// $this->imagettftextbox_stroke($this->resource, $fontSize, $text_posX, $text_posY, $text_width, $text_height,
+		// $text_stroke_color, $font, $text, $textOptions['text-stroke'], $textOptions['halign']);
+		// }
+		// imagettftext($this->resource, $fontSize, 0, $text_posX, $text_posY + $line_height - .2*$line_height , $text_color, $font, $text);
+		$this->imagettftextbox(
+			$this->resource,
+			$fontSize,
+			$text_posX,
+			$text_posY,
+			$text_width,
+			$text_height,
+			$text_color,
+			$font,
+			$text,
+			[
+				'align'        => $textOptions['halign'],
+				'stroke_width' => $textOptions['text-stroke'],
+				'stroke_color' => $text_stroke_color,
+			]
+		);
 
 		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
 		$action_function = ( defined( 'WP_DEBUG_DISPLAY' ) && true === WP_DEBUG_DISPLAY ) ? 'do_action_ref_array' : 'do_action_deprecated';
-		$action_function( 'bsi_image_gd', [
-			&$this->resource,
-			'after_adding_text',
-			$this->handler->post_id,
-			$this->handler->image_id
-		], '1.1.0', 'bsi_image_layer' );
-		do_action_ref_array( 'bsi_image_layer', [
-			&$this->resource,
-			'gd_after_adding_text',
-			QueriedObject::getInstance(),
-			$this->handler->image_id
-		] );
+		$action_function(
+			'bsi_image_gd',
+			[
+				&$this->resource,
+				'after_adding_text',
+				$this->handler->post_id,
+				$this->handler->image_id,
+			],
+			'1.1.0',
+			'bsi_image_layer'
+		);
+		do_action_ref_array(
+			'bsi_image_layer',
+			[
+				&$this->resource,
+				'gd_after_adding_text',
+				QueriedObject::instance(),
+				$this->handler->image_id,
+			]
+		);
 	}
 
 	private function gradient_color( $hex_rgba_start, $hex_rgba_end, $step, $steps = 100, $skip_alpha = false, $return_as_hex = true ) {
@@ -354,18 +389,26 @@ class GD {
 
 		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
 		$action_function = ( defined( 'WP_DEBUG_DISPLAY' ) && true === WP_DEBUG_DISPLAY ) ? 'do_action_ref_array' : 'do_action_deprecated';
-		$action_function( 'bsi_image_gd', [
-			&$this->resource,
-			'after_adding_logo',
-			$this->handler->post_id,
-			$this->handler->image_id
-		], '1.1.0', 'bsi_image_layer' );
-		do_action_ref_array( 'bsi_image_layer', [
-			&$this->resource,
-			'gd_after_adding_logo',
-			QueriedObject::getInstance(),
-			$this->handler->image_id
-		] );
+		$action_function(
+			'bsi_image_gd',
+			[
+				&$this->resource,
+				'after_adding_logo',
+				$this->handler->post_id,
+				$this->handler->image_id,
+			],
+			'1.1.0',
+			'bsi_image_layer'
+		);
+		do_action_ref_array(
+			'bsi_image_layer',
+			[
+				&$this->resource,
+				'gd_after_adding_logo',
+				QueriedObject::instance(),
+				$this->handler->image_id,
+			]
+		);
 	}
 
 	public function save( $format, $quality ) {
@@ -388,11 +431,16 @@ class GD {
 		/** @var $align string left, center or right */
 		/** @var $stroke_width int */
 		/** @var $stroke_color false|Color a color */
-		extract( shortcode_atts( [
-			'align'        => 'left',
-			'stroke_width' => 0,
-			'stroke_color' => false,
-		], $options ) );
+		extract(
+			shortcode_atts(
+				[
+					'align'        => 'left',
+					'stroke_width' => 0,
+					'stroke_color' => false,
+				],
+				$options
+			)
+		);
 		$textbox = new Box( $image );
 		$textbox->setFontSize( $size / .75 );
 		$textbox->setFontFace( $fontfile );
@@ -452,9 +500,16 @@ class GD {
 		$black = imagecolorallocate( $img, 0, 0, 0 );
 		imagefilledrectangle( $img, 0, 0, imagesx( $img ), imagesy( $img ), $black );
 		// for sure the text is completely in the image!
-		imagettftext( $img, $font_size,
-			$font_angle, $left, $top,
-			$white, $font_file, $text );
+		imagettftext(
+			$img,
+			$font_size,
+			$font_angle,
+			$left,
+			$top,
+			$white,
+			$font_file,
+			$text
+		);
 		// start scanning (0=> black => empty)
 		$rleft   = $w4 = $width << 2;
 		$rright  = 0;
@@ -474,10 +529,10 @@ class GD {
 		imagedestroy( $img );
 
 		return array(
-			"left"   => $left - $rleft,
-			"top"    => $top - $rtop,
-			"width"  => $rright - $rleft + 1,
-			"height" => $rbottom - $rtop + 1
+			'left'   => $left - $rleft,
+			'top'    => $top - $rtop,
+			'width'  => $rright - $rleft + 1,
+			'height' => $rbottom - $rtop + 1,
 		);
 	}
 

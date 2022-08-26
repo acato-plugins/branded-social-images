@@ -13,7 +13,7 @@ class QueriedObject implements ArrayAccess {
 		$this->data = [];
 	}
 
-	public static function getInstance() {
+	public static function instance() {
 		static $instance;
 		if ( ! $instance ) {
 			$instance = new static();
@@ -23,7 +23,7 @@ class QueriedObject implements ArrayAccess {
 	}
 
 	public static function setData( $newData = null ) {
-		$that = self::getInstance();
+		$that = self::instance();
 
 		if ( is_null( $newData ) ) {
 			global $wp_query, $pagenow;
@@ -46,7 +46,7 @@ class QueriedObject implements ArrayAccess {
 				switch ( true ) {
 					// post edit
 					case is_admin() && in_array( $pagenow, [ 'post.php', 'post-new.php' ] ):
-//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
+						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id        = ! empty( $_GET['post'] ) ? intval( $_GET['post'] ) : 'new';
 						$type      = empty( $_GET['post_type'] ) ? false : $_GET['post_type'];
 						$type      = ! $type && $pagenow == 'post-new.php' ? 'post' : $type;
@@ -62,7 +62,7 @@ class QueriedObject implements ArrayAccess {
 					case is_front_page() && ! is_home():
 					case is_privacy_policy():
 					case is_singular():
-//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
+						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type      = get_post_type();
 						$base_type = 'post';
 						$link      = get_permalink( $id );
@@ -72,7 +72,7 @@ class QueriedObject implements ArrayAccess {
 					case is_post_type_archive():
 					case is_archive() && ! is_category() && ! is_tag() && ! is_tax():
 					case is_home():
-//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
+						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id        = 'archive';
 						$type      = get_post_type();
 						$base_type = 'post';
@@ -81,7 +81,7 @@ class QueriedObject implements ArrayAccess {
 
 					// category edit
 					case is_admin() && in_array( $pagenow, [ 'term.php', 'edit-tags.php' ] ):
-//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
+						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id        = ! empty( $_GET['tag_ID'] ) ? intval( $_GET['tag_ID'] ) : 'new';
 						$type      = ! empty( $_GET['taxonomy'] ) ? $_GET['taxonomy'] : get_post_type( $id );
 						$base_type = 'category';
@@ -91,12 +91,11 @@ class QueriedObject implements ArrayAccess {
 						}
 						break;
 
-
 					// category archive
 					case is_category():
 					case is_tag():
 					case is_tax():
-//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
+						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type      = $qo->taxonomy;
 						$base_type = 'category';
 						$link      = get_term_link( $id, $type );
@@ -104,7 +103,7 @@ class QueriedObject implements ArrayAccess {
 
 					// unsupported
 					case is_404():
-//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
+						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type      = '404';
 						$base_type = 'unsupported';
 						break;
@@ -126,7 +125,7 @@ class QueriedObject implements ArrayAccess {
 					case is_comment_feed():
 					case is_trackback():
 					default:
-//						var_dump(__LINE__, $wp_query, $id, $qo);exit;
+						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id        = null;
 						$type      = 'unsupported';
 						$base_type = 'unsupported';
@@ -151,7 +150,7 @@ class QueriedObject implements ArrayAccess {
 
 				$og_link_perma = trailingslashit( trailingslashit( $link ) . Plugin::output_filename() );
 				$og_link_param = add_query_arg( Plugin::QUERY_VAR, '1', $link );
-				$og_link       = is_preview() || ! Plugin::urlCanBeRewritten( $link ) || ! Plugin::urlCanBeRewritten( $og_link_perma ) ? $og_link_param : $og_link_perma;
+				$og_link       = is_preview() || ! Plugin::url_can_be_rewritten( $link ) || ! Plugin::url_can_be_rewritten( $og_link_perma ) ? $og_link_param : $og_link_perma;
 
 				$result     = [ $id, $type, $base_type, $link, $link ? $og_link : null, $that->is_public ];
 				$that->data = $result; // save, because next step is querying ... sorry...
@@ -192,11 +191,11 @@ class QueriedObject implements ArrayAccess {
 				foreach (
 					[
 						'permalink' => $base_data['permalink'],
-						'og_image'  => $base_data['og_image']
+						'og_image'  => $base_data['og_image'],
 					] as $group => $item
 				) {
-					if ( $rewrite = Plugin::urlCanBeRewritten( $item ) ) {
-						$rewrites_to[ $group ]                                                    = $rewrite['target'];
+					if ( $rewrite = Plugin::url_can_be_rewritten( $item ) ) {
+						$rewrites_to[ $group ] = $rewrite['target'];
 						$matching_rules[ $group . ' matches rule #' . ( $rewrite['rule#'] + 1 ) ] = $rewrite['rule'] . '<br />' . $rewrites_to[ $group ];
 					} else {
 						$matching_rules[ $group . ' Rewrite Error' ] = 'There are no rewrite rules that match this URL';

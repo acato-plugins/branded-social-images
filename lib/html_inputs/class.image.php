@@ -27,14 +27,13 @@ class image extends text {
 		$this->atts['value'] = $this->get_current_value();
 		$atts                = $this->attributes(); // builds HTML attributes
 
-
 		return $label . '<span class="add-image-select" data-types="' . $types . '">
 			<input type="' . $this->type . '" ' . $atts . '/>
 			<div class="image-preview-wrapper">
 				<img src="' . esc_attr( wp_get_attachment_url( $this->get_current_value() ) ) . '" width="200">
 			</div>
-			<input type="button" class="button" value="' . esc_attr( __( "Choose image", Plugin::TEXT_DOMAIN ) ) . '"/>
-			<input type="button" class="button remove" value="' . esc_attr( __( "Remove image", Plugin::TEXT_DOMAIN ) ) . '"/>
+			<input type="button" class="button" value="' . esc_attr( __( 'Choose image', Plugin::TEXT_DOMAIN ) ) . '"/>
+			<input type="button" class="button remove" value="' . esc_attr( __( 'Remove image', Plugin::TEXT_DOMAIN ) ) . '"/>
 		</span>';
 	}
 
@@ -45,15 +44,19 @@ class image extends text {
 		}
 		$once = true;
 		wp_enqueue_media();
-		add_action( 'admin_footer', function () {
-			?>
+		add_action(
+			'admin_footer',
+			function () {
+				?>
 			<script>
 				;(function ($) {
 					$(document).ready(function () {
 						$('.add-image-select').attachMediaUpload();
 					});
 				})(jQuery);
-			</script><?php
-		} );
+			</script>
+				<?php
+			}
+		);
 	}
 }

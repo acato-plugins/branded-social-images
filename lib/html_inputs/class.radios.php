@@ -29,7 +29,7 @@ class radios extends radio {
 			$radio = new radio( $this->name, $_atts );
 			$radio->set_label( $option_label, true );
 			$radio->current_value = $this->get_current_value();
-			$options              .= "<span class='option-wrap'>$radio</span>";
+			$options             .= "<span class='option-wrap'>$radio</span>";
 		}
 
 		return $label . '<span class="options-wrap">' . $options . '</span>';

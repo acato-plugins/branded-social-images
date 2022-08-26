@@ -11,82 +11,126 @@ class Admin {
 	public $storage = '';
 
 	public function __construct() {
-		add_filter( 'wp_check_filetype_and_ext', function ( $result, $file, $filename ) {
-			if ( substr( strtolower( $filename ), - 4, 4 ) == '.ttf' ) {
-				$result['ext']             = 'ttf';
-				$result['type']            = 'font/ttf';
-				$result['proper_filename'] = $filename;
+		add_filter(
+			'wp_check_filetype_and_ext',
+			function ( $result, $file, $filename ) {
+				if ( substr( strtolower( $filename ), - 4, 4 ) == '.ttf' ) {
+					$result['ext']             = 'ttf';
+					$result['type']            = 'font/ttf';
+					$result['proper_filename'] = $filename;
+				}
+				if ( substr( strtolower( $filename ), - 4, 4 ) == '.otf' ) {
+					$result['ext']             = 'otf';
+					$result['type']            = 'font/otf';
+					$result['proper_filename'] = $filename;
+				}
+
+				return $result;
+			},
+			11,
+			3
+		);
+
+		add_filter(
+			'upload_mimes',
+			function ( $existing_mimes ) {
+				$existing_mimes['ttf'] = 'font/ttf';
+				$existing_mimes['otf'] = 'font/otf';
+
+				return $existing_mimes;
 			}
-			if ( substr( strtolower( $filename ), - 4, 4 ) == '.otf' ) {
-				$result['ext']             = 'otf';
-				$result['type']            = 'font/otf';
-				$result['proper_filename'] = $filename;
-			}
-
-			return $result;
-		}, 11, 3 );
-
-		add_filter( 'upload_mimes', function ( $existing_mimes ) {
-			$existing_mimes['ttf'] = 'font/ttf';
-			$existing_mimes['otf'] = 'font/otf';
-
-			return $existing_mimes;
-		} );
+		);
 
 		add_action( 'admin_head', [ static::class, 'maybe_move_font' ] );
 		add_action( 'admin_head', [ static::class, 'add_fontface_definitions' ] );
 		add_action( 'admin_init', [ static::class, 'process_post' ], 11 );
-		add_action( 'admin_enqueue_scripts', function () {
-			$script = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.min.js' : 'admin/admin.js' );
-			$style  = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.css' : 'admin/admin.min.css' );
-			wp_enqueue_script( Plugin::SCRIPT_STYLE_HANDLE, plugins_url( $script, __DIR__ ), [
-				'jquery',
-				'jquery-ui-slider'
-			], filemtime( dirname( __DIR__ ) . '/' . $script ), true );
-			wp_localize_script( Plugin::SCRIPT_STYLE_HANDLE, 'bsi_settings', [
-				'preview_url'     => get_permalink() . Plugin::output_filename(),
-				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
-				'title_format'    => Plugin::title_format( 1, true ),
-				'text'            => [
-					'image_upload_title'  => __( 'Select an image or upload one.', Plugin::TEXT_DOMAIN ),
-					'image_upload_button' => __( 'Use this image', Plugin::TEXT_DOMAIN ),
-					'file_upload_title'   => __( 'Select an file or upload one.', Plugin::TEXT_DOMAIN ),
-					'file_upload_button'  => __( 'Use this file', Plugin::TEXT_DOMAIN ),
+		add_action(
+			'admin_enqueue_scripts',
+			function () {
+				$script = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.min.js' : 'admin/admin.js' );
+				$style  = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.css' : 'admin/admin.min.css' );
+				wp_enqueue_script(
+					Plugin::SCRIPT_STYLE_HANDLE,
+					plugins_url( $script, __DIR__ ),
+					[
+						'jquery',
+						'jquery-ui-slider',
+					],
+					filemtime( dirname( __DIR__ ) . '/' . $script ),
+					true
+				);
+				wp_localize_script(
+					Plugin::SCRIPT_STYLE_HANDLE,
+					'bsi_settings',
+					[
+						'preview_url'     => get_permalink() . Plugin::output_filename(),
+						'image_size_name' => Plugin::IMAGE_SIZE_NAME,
+						'title_format'    => Plugin::title_format( 1, true ),
+						'text'            => [
+							'image_upload_title'  => __( 'Select an image or upload one.', Plugin::TEXT_DOMAIN ),
+							'image_upload_button' => __( 'Use this image', Plugin::TEXT_DOMAIN ),
+							'file_upload_title'   => __( 'Select an file or upload one.', Plugin::TEXT_DOMAIN ),
+							'file_upload_button'  => __( 'Use this file', Plugin::TEXT_DOMAIN ),
 
-				]
-			] );
+						],
+					]
+				);
 
-			wp_enqueue_style( Plugin::SCRIPT_STYLE_HANDLE, plugins_url( $style, __DIR__ ), '', filemtime( dirname( __DIR__ ) . '/' . $style ) );
-		} );
-
-		add_action( 'admin_menu', function () {
-			$location_setting = get_option( Plugin::DEFAULTS_PREFIX . 'menu_location', 'main' );
-			$location         = apply_filters( 'bsi_admin_menu_location', $location_setting );
-			if ( 'main' == $location ) {
-				add_menu_page( 'Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [
-					self::class,
-					'admin_panel'
-				], self::admin_icon() );
-			} else {
-				$parent = 'options-general.php';
-				if ( 'media' === $location_setting ) {
-					$parent = 'upload.php';
-				}
-				add_submenu_page( $parent, 'Branded Social Images', 'Branded Social Images', Plugin::get_management_permission(), Plugin::ADMIN_SLUG, [
-					self::class,
-					'admin_panel'
-				] );
+				wp_enqueue_style( Plugin::SCRIPT_STYLE_HANDLE, plugins_url( $style, __DIR__ ), '', filemtime( dirname( __DIR__ ) . '/' . $style ) );
 			}
-		} );
+		);
+
+		add_action(
+			'admin_menu',
+			function () {
+				$location_setting = get_option( Plugin::DEFAULTS_PREFIX . 'menu_location', 'main' );
+				$location         = apply_filters( 'bsi_admin_menu_location', $location_setting );
+				if ( 'main' == $location ) {
+					add_menu_page(
+						'Branded Social Images',
+						'Branded Social Images',
+						Plugin::get_management_permission(),
+						Plugin::ADMIN_SLUG,
+						[
+							self::class,
+							'admin_panel',
+						],
+						self::admin_icon()
+					);
+				} else {
+					$parent = 'options-general.php';
+					if ( 'media' === $location_setting ) {
+						$parent = 'upload.php';
+					}
+					add_submenu_page(
+						$parent,
+						'Branded Social Images',
+						'Branded Social Images',
+						Plugin::get_management_permission(),
+						Plugin::ADMIN_SLUG,
+						[
+							self::class,
+							'admin_panel',
+						]
+					);
+				}
+			}
+		);
 
 		add_action( 'admin_init', [ static::class, 'sanitize_fonts' ] );
 
-		add_filter( 'image_size_names_choose', function ( $default_sizes ) {
-			// todo: support the experimental ::AA feature here.
-			return array_merge( $default_sizes, array(
-				Plugin::IMAGE_SIZE_NAME => __( 'The OG:Image recommended size', Plugin::TEXT_DOMAIN ),
-			) );
-		} );
+		add_filter(
+			'image_size_names_choose',
+			function ( $default_sizes ) {
+				// todo: support the experimental ::AA feature here.
+				return array_merge(
+					$default_sizes,
+					array(
+						Plugin::IMAGE_SIZE_NAME => __( 'The OG:Image recommended size', Plugin::TEXT_DOMAIN ),
+					)
+				);
+			}
+		);
 
 		/** posts */
 		add_action( 'save_post', [ static::class, 'save_post_meta_data' ] );
@@ -97,10 +141,13 @@ class Admin {
 		$taxonomies = apply_filters( 'bsi_taxonomies', [] );
 		foreach ( $taxonomies as $taxonomy ) {
 
-			add_action( 'create_' . $taxonomy, [
-				static::class,
-				'save_category_meta_data'
-			] ); // probably not needed. @todo: investigate
+			add_action(
+				'create_' . $taxonomy,
+				[
+					static::class,
+					'save_category_meta_data',
+				]
+			); // probably not needed. @todo: investigate
 			add_action( 'edit_' . $taxonomy, [ static::class, 'save_category_meta_data' ] );
 			add_action( $taxonomy . '_add_form_fields', [ static::class, 'add_category_meta_boxes' ] );
 			add_action( $taxonomy . '_edit_form', [ static::class, 'add_category_meta_boxes' ] );
@@ -114,19 +161,40 @@ class Admin {
 
 		add_action( 'wp_ajax_' . Plugin::ADMIN_SLUG . '_get-font', [ static::class, 'wp_ajax_bsi_get_font' ] );
 
-		add_action( 'bsi_footer', function () {
-			?><p><?php
-			print sprintf( __( '<a href="%s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%s" target="_blank">Acato</a>.', Plugin::TEXT_DOMAIN ), Plugin::PLUGIN_URL_WPORG, Plugin::AUTHOR_URL_INFO )
+		add_action(
+			'bsi_footer',
+			function () {
+				?><p>
+				<?php
+				print sprintf( __( '<a href="%1$s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%2$s" target="_blank">Acato</a>.', Plugin::TEXT_DOMAIN ), Plugin::PLUGIN_URL_WPORG, Plugin::AUTHOR_URL_INFO )
 				  . ' ' . __( 'Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN )
-				  . ' ' . sprintf( __( '<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN ), Plugin::BSI_URL_CONTACT ); ?></p><?php
-			if ( get_the_ID() ) {
+				  . ' ' . sprintf( __( '<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN ), Plugin::BSI_URL_CONTACT );
 				?>
-				<p><?php print sprintf( __( 'Use <a href="%s" target="_blank">%s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN ),
-						sprintf( Plugin::EXTERNAL_INSPECTOR, urlencode( get_permalink( get_the_ID() ) ) ), Plugin::EXTERNAL_INSPECTOR_NAME ); ?></p>
-				<p><?php print sprintf( __( '<a href="%s" target="_blank">Show debug information</a> for the social-image of this post.', Plugin::TEXT_DOMAIN ),
-					add_query_arg( 'debug', 'BSI', Plugin::get_og_image_url( get_the_ID(), get_post_type(), 'post' ) ) ); ?></p><?php
+				  </p>
+				  <?php
+					if ( get_the_ID() ) {
+						?>
+				<p>
+						<?php
+						print sprintf(
+							__( 'Use <a href="%1$s" target="_blank">%2$s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN ),
+							sprintf( Plugin::EXTERNAL_INSPECTOR, urlencode( get_permalink( get_the_ID() ) ) ),
+							Plugin::EXTERNAL_INSPECTOR_NAME
+						);
+						?>
+						</p>
+				<p>
+						<?php
+						print sprintf(
+							__( '<a href="%s" target="_blank">Show debug information</a> for the social-image of this post.', Plugin::TEXT_DOMAIN ),
+							add_query_arg( 'debug', 'BSI', Plugin::get_og_image_url( get_the_ID(), get_post_type(), 'post' ) )
+						);
+						?>
+					</p>
+										<?php
+					}
 			}
-		} );
+		);
 
 		add_action( 'bsi_settings_panels', [ static::class, 'config_panel' ] );
 		add_action( 'bsi_settings_panels', [ static::class, 'log_panel' ] );
@@ -186,7 +254,7 @@ class Admin {
 		return $defaults;
 	}
 
-	public static function getInstance(): Admin {
+	public static function instance(): Admin {
 		static $instance;
 		if ( ! $instance ) {
 			$instance = new static();
@@ -205,23 +273,27 @@ class Admin {
 			$errors = self::getErrors();
 			foreach ( $errors as $error ) {
 				?>
-				<div class="updated error"><p><?php print $error; ?></p></div><?php
+				<div class="updated error"><p><?php print $error; ?></p></div>
+														  <?php
 			}
 			?>
-			<div><?php
-				switch ( $action ) {
-					case 'purge-cache':
-						$purgable = Plugin::get_purgable_cache( 'images' );
-						$purgable_dirs = Plugin::get_purgable_cache( 'directories' );
-						if ( ! $purgable && ! $purgable_dirs ) {
-							_e( 'The cache is empty', Plugin::TEXT_DOMAIN );
-							?><br/><a class="action button-primary"
-									  href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Ok', Plugin::TEXT_DOMAIN ); ?></a><?php
-							break;
-						} else {
-							print sprintf( __( 'This will clear the cache, %d image(s) and %d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN ), count( $purgable ), count( $purgable_dirs ) );
-						}
+			<div>
+			<?php
+			switch ( $action ) {
+				case 'purge-cache':
+					$purgable      = Plugin::get_purgable_cache( 'images' );
+					$purgable_dirs = Plugin::get_purgable_cache( 'directories' );
+					if ( ! $purgable && ! $purgable_dirs ) {
+						_e( 'The cache is empty', Plugin::TEXT_DOMAIN );
 						?>
+							<br/><a class="action button-primary"
+									  href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Ok', Plugin::TEXT_DOMAIN ); ?></a>
+														<?php
+														break;
+					} else {
+						print sprintf( __( 'This will clear the cache, %1$d image(s) and %2$d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN ), count( $purgable ), count( $purgable_dirs ) );
+					}
+					?>
 						<form method="POST"
 							  action="<?php print esc_attr( add_query_arg( 'bsi-action', 'purge-cache-confirm' ) ); ?>">
 							<input type="hidden" name="bsi-action" value="purge-cache-confirm"/>
@@ -231,14 +303,14 @@ class Admin {
 							   href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Cancel', Plugin::TEXT_DOMAIN ); ?></a>
 						</form>
 						<?php
-						break;
-					case 'show-config':
-					default:
-						$fields = Plugin::field_list()['admin'];
-						?>
+					break;
+				case 'show-config':
+				default:
+					$fields = Plugin::field_list()['admin'];
+					?>
 						<form method="POST"
 							  action="<?php print esc_attr( add_query_arg( 'bsi-action', 'save-settings' ) ); ?>">
-							<?php self::show_editor( $fields ); ?>
+						<?php self::show_editor( $fields ); ?>
 							<br/>
 							<br/>
 							<button
@@ -250,9 +322,10 @@ class Admin {
 						<?php
 						do_action( 'bsi_footer' );
 
-						break;
-				}
-				?></div>
+					break;
+			}
+			?>
+				</div>
 		</div>
 		<?php
 	}
@@ -260,6 +333,7 @@ class Admin {
 
 	/**
 	 * Add a link to the settings on the Plugins screen.
+	 *
 	 * @return array list of links to show in the plugins table
 	 */
 	public static function add_settings_link( $links, $file ): array {
@@ -315,7 +389,7 @@ class Admin {
 			if ( ! empty( $m[2] ) && $m[2] === 'Italic' ) {
 				$entry['style'] = 'italic';
 			}
-//			$entry[]
+			// $entry[]
 
 			// display name
 			$entry['display_name'] = $entry['name'] . ' - ' . self::weight_to_suffix( $entry['weight'], $entry['style'] == 'italic' );
@@ -344,7 +418,7 @@ class Admin {
 	public static function nice_font_name( $font ) {
 		// w400 to normal, w700 to bold etc
 		list( $name ) = explode( '-w', $font . '-w400', 2 );
-		$weights = implode( '|', self::font_name_weights() );
+		$weights      = implode( '|', self::font_name_weights() );
 
 		return preg_replace( "/-($weights)?(Italic)?$/", '', $name );
 	}
@@ -359,8 +433,8 @@ class Admin {
 	public static function show_editor( $fields, $is_meta_panel = false ) {
 		$fields['text']['current_value'] = trim( $fields['text']['current_value'] ) ? $fields['text']['current_value'] : self::array_first( Plugin::text_fallback_chain() );
 
-		$text_settings = Plugin::getInstance()->text_options;
-		$logo_settings = Plugin::getInstance()->logo_options;
+		$text_settings = Plugin::instance()->text_options;
+		$logo_settings = Plugin::instance()->logo_options;
 
 		$image = $fields['image']['current_value'];
 		if ( $image && is_numeric( $image ) ) {
@@ -381,45 +455,51 @@ class Admin {
 			$logo = $m[1];
 		}
 
-		add_filter( 'bsi_editor_variables', function ( $list ) use ( $text_settings, $logo_settings, $logo, $width, $height ) {
-			return array_merge( $list, [
-				'padding'     => Plugin::PADDING . 'px',
-				'text-width'  => ceil( Plugin::getInstance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding'] ) . 'px',
-				'text-height' => ceil( Plugin::getInstance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding'] ) . 'px',
+		add_filter(
+			'bsi_editor_variables',
+			function ( $list ) use ( $text_settings, $logo_settings, $logo, $width, $height ) {
+				return array_merge(
+					$list,
+					[
+						'padding'           => Plugin::PADDING . 'px',
+						'text-width'        => ceil( Plugin::instance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding'] ) . 'px',
+						'text-height'       => ceil( Plugin::instance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding'] ) . 'px',
 
-				'text-background'   => Admin::hex_to_rgba( $text_settings['background-color'], true ),
-				'text-color'        => Admin::hex_to_rgba( $text_settings['color'], true ),
-				'text-font'         => $text_settings['font-file'],
-				'letter-spacing'    => '1px',
-				'text-shadow-color' => Admin::hex_to_rgba( $text_settings['text-shadow-color'], true ),
-				'text-shadow-top'   => intval( $text_settings['text-shadow-top'] ) . 'px',
-				'text-shadow-left'  => intval( $text_settings['text-shadow-left'] ) . 'px',
-				'font-size'         => $text_settings['font-size'] . 'px',
-				'text-padding'      => $text_settings['padding'] . 'px',
-				'line-height'       => $text_settings['line-height'] . 'px',
+						'text-background'   => Admin::hex_to_rgba( $text_settings['background-color'], true ),
+						'text-color'        => Admin::hex_to_rgba( $text_settings['color'], true ),
+						'text-font'         => $text_settings['font-file'],
+						'letter-spacing'    => '1px',
+						'text-shadow-color' => Admin::hex_to_rgba( $text_settings['text-shadow-color'], true ),
+						'text-shadow-top'   => intval( $text_settings['text-shadow-top'] ) . 'px',
+						'text-shadow-left'  => intval( $text_settings['text-shadow-left'] ) . 'px',
+						'font-size'         => $text_settings['font-size'] . 'px',
+						'text-padding'      => $text_settings['padding'] . 'px',
+						'line-height'       => $text_settings['line-height'] . 'px',
 
-				'logo-scale'  => $logo_settings['size'],
-				'logo-width'  => ( $logo ? $width : 410 ), /* example logo */
-				'logo-height' => ( $logo ? $height : 82 ),
-			] );
-		}, PHP_INT_MAX );
+						'logo-scale'        => $logo_settings['size'],
+						'logo-width'        => ( $logo ? $width : 410 ), /* example logo */
+						'logo-height'       => ( $logo ? $height : 82 ),
+					]
+				);
+			},
+			PHP_INT_MAX
+		);
 		?>
 		<style>
 			#branded-social-images-editor {
 			<?php
 			/**
 			 * Allow extra editor-variables by add-ons
-			  * Note: you cannot overrule the BSI standard variables
+			 * Note: you cannot overrule the BSI standard variables
 			 *
 			 * @param array  $variables     Add your variables to the list. skip the -- prefix.
 			 *
-			 *@since 1.0.18
-			 *
+			 * @since 1.0.18
 			 */
-			$variables = apply_filters('bsi_editor_variables', []);
-			foreach ($variables as $variable => $value) {
+			$variables = apply_filters( 'bsi_editor_variables', [] );
+			foreach ( $variables as $variable => $value ) {
 				print '
---'. $variable .': '. $value .';';
+--' . $variable . ': ' . $value . ';';
 			}
 			?>
 			}
@@ -444,7 +524,7 @@ class Admin {
 		$text_fallback_chain = Plugin::text_fallback_chain();
 
 		$auto_title = false;
-		$qo         = QueriedObject::getInstance();
+		$qo         = QueriedObject::instance();
 		if ( 'new' === $qo->object_id ) {
 			$auto_title = true;
 		} elseif ( $qo->object_id ) { // not new, but still see object
@@ -479,13 +559,16 @@ class Admin {
 				<?php foreach ( Plugin::image_fallback_chain() as $kind => $fallback_image ) { ?>
 					<div class="area--background-alternate image-source-<?php print $kind; ?>">
 						<div class="background"
-							 <?php if ( $fallback_image ) { ?>style="background-image:url('<?php print esc_attr( $fallback_image ); ?>')"<?php } ?>>
+							 <?php
+								if ( $fallback_image ) {
+									?>
+									style="background-image:url('<?php print esc_attr( $fallback_image ); ?>')"<?php } ?>>
 						</div>
 					</div>
 				<?php } ?>
 				<div class="area--logo logo-alternate">
 					<div class="logo"
-						 style="background-image:url('<?php print plugins_url( 'img/example-logo.svg', __DIR__ ) ?>')"></div>
+						 style="background-image:url('<?php print plugins_url( 'img/example-logo.svg', __DIR__ ); ?>')"></div>
 				</div>
 				<?php do_action( 'bsi_image_editor', 'after_creating_canvas' ); ?>
 				<div class="area--background">
@@ -500,10 +583,13 @@ class Admin {
 					<div class="editable-container">
 						<pre contenteditable="true"
 							 class="editable"><?php print $fields['text']['current_value']; ?></pre>
-						<?php foreach ( $text_fallback_chain as $type => $text ) {
+						<?php
+						foreach ( $text_fallback_chain as $type => $text ) {
 							?>
-							<div class="text-alternate type-<?php print $type; ?>"><?php print $text; ?></div><?php
-						} ?>
+							<div class="text-alternate type-<?php print $type; ?>"><?php print $text; ?></div>
+																		<?php
+						}
+						?>
 					</div>
 				</div>
 				<?php do_action( 'bsi_image_editor', 'after_adding_text' ); ?>
@@ -514,36 +600,46 @@ class Admin {
 						<h2><?php _e( 'Image and Logo options', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span>
 						</h2>
 						<div class="inner">
-							<?php self::render_options( $fields, [
-								'image',
-								'image_use_thumbnail',
-								'image_logo',
-								'logo_position',
-								'image_logo_size',
-							] ); ?>
+							<?php
+							self::render_options(
+								$fields,
+								[
+									'image',
+									'image_use_thumbnail',
+									'image_logo',
+									'logo_position',
+									'image_logo_size',
+								]
+							);
+							?>
 						</div>
 					</div>
 					<div class="area--settings collapsible">
 						<h2><?php _e( 'Text settings', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
 						<div class="inner">
-							<?php self::render_options( $fields, [
-								'text',
-								'text_enabled',
-								'color',
-								'text_shadow_enabled',
-								'text__font',
-								'text__ttf_upload',
-								'text_position',
-								'text__font_size',
-								'background_enabled',
-								'background_color',
-								'text_shadow_color',
-								'text_shadow_top',
-								'text_shadow_left',
-								'text_stroke_color',
-								'text_stroke',
-								'text__google_download',
-							] ); ?>
+							<?php
+							self::render_options(
+								$fields,
+								[
+									'text',
+									'text_enabled',
+									'color',
+									'text_shadow_enabled',
+									'text__font',
+									'text__ttf_upload',
+									'text_position',
+									'text__font_size',
+									'background_enabled',
+									'background_color',
+									'text_shadow_color',
+									'text_shadow_top',
+									'text_shadow_left',
+									'text_stroke_color',
+									'text_stroke',
+									'text__google_download',
+								]
+							);
+							?>
 						</div>
 					</div>
 					<?php
@@ -553,7 +649,6 @@ class Admin {
 					 * @param array $fields All available fields
 					 *
 					 * @since 1.0.18
-					 *
 					 */
 					do_action( 'bsi_settings_panels', $fields );
 					?>
@@ -573,7 +668,7 @@ class Admin {
 		$filter = array_diff( $filter, $seen );
 
 		foreach ( $filter as $option_name ) {
-			if ( ! empty ( $options[ $option_name ] ) ) {
+			if ( ! empty( $options[ $option_name ] ) ) {
 				$seen[] = $option_name;
 				self::render_option( $option_name, $options[ $option_name ] );
 			}
@@ -595,16 +690,22 @@ class Admin {
 	}
 
 	public static function log_panel() {
-		if ( $log = get_transient( Plugin::OPTION_PREFIX . '_debug_log' ) ) { ?>
+		if ( $log = get_transient( Plugin::OPTION_PREFIX . '_debug_log' ) ) {
+			?>
 			<div class="area--debug closed collapsible">
 				<h2><?php _e( 'Debug log', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
 				<div class="inner">
 					<pre><?php print $log; ?></pre>
-					<em><?php $date = date( 'd-m-Y H:i:s', get_option( '_transient_timeout_' . Plugin::OPTION_PREFIX . '_debug_log' ) );
-						print sprintf( __( 'This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN ), $date ); ?></em>
+					<em>
+					<?php
+					$date = date( 'd-m-Y H:i:s', get_option( '_transient_timeout_' . Plugin::OPTION_PREFIX . '_debug_log' ) );
+						print sprintf( __( 'This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN ), $date );
+					?>
+						</em>
 				</div>
 			</div>
-		<?php }
+			<?php
+		}
 	}
 
 	public static function config_panel( $fields ) {
@@ -632,12 +733,15 @@ class Admin {
 		$int  = hexdec( $hex );
 		$rgba = [ ( $int >> 24 ) & 255, ( $int >> 16 ) & 255, ( $int >> 8 ) & 255, floatval( $int & 255 ) / 255 ];
 
-		return $asRGBA ? vsprintf( 'rgba(%d, %d, %d, %0.1F)', $rgba ) : array_combine( [
-			'red',
-			'green',
-			'blue',
-			'alpha'
-		], $rgba );
+		return $asRGBA ? vsprintf( 'rgba(%d, %d, %d, %0.1F)', $rgba ) : array_combine(
+			[
+				'red',
+				'green',
+				'blue',
+				'alpha',
+			],
+			$rgba
+		);
 	}
 
 	public static function add_post_meta_boxes() {
@@ -663,7 +767,7 @@ class Admin {
 	}
 
 	private static function get_taxonomy_for_term( $term_id ): string {
-		// why the @#$% does wordpress not have this
+		// why the @#$% does WordPress not have this
 		global $wpdb;
 
 		return $wpdb->get_var( $wpdb->prepare( "SELECT taxonomy FROM {$wpdb->term_taxonomy} WHERE term_id = %d", $term_id ) ) ?: 'category';
@@ -672,8 +776,11 @@ class Admin {
 	public static function save_category_meta_data( $object ): bool {
 		if ( ! is_a( $object, WP_Term::class ) ) {
 			if ( is_numeric( $object ) ) {
-				// create a fake object because without Taxonmy, wordpress will not allow lookup by id ... !@#$ knows why
-				$object = (object) [ 'term_id' => $object, 'taxonomy' => self::get_taxonomy_for_term( $object ) ];
+				// create a fake object because without Taxonmy, WordPress will not allow lookup by id ... !@#$ knows why
+				$object = (object) [
+					'term_id'  => $object,
+					'taxonomy' => self::get_taxonomy_for_term( $object ),
+				];
 			}
 		}
 
@@ -712,7 +819,7 @@ class Admin {
 						if ( $key === 'text' && Plugin::text_is_identical( $value, self::array_first( Plugin::text_fallback_chain() ) ) ) {
 							$value = '';
 						}
-						if ( $key === 'text' && Plugin::text_is_identical( $value, Plugin::getInstance()->dummy_data( 'text' ) ) ) {
+						if ( $key === 'text' && Plugin::text_is_identical( $value, Plugin::instance()->dummy_data( 'text' ) ) ) {
 							$value = '';
 						}
 						$function( $object_id, "$namespace$key", $value );
@@ -744,7 +851,8 @@ class Admin {
 			self::meta_panel();
 			?>
 		</div>
-		</div><?php
+		</div>
+		<?php
 	}
 
 	public static function meta_panel() {
@@ -757,7 +865,8 @@ class Admin {
 		$errors = self::getErrors();
 		foreach ( $errors as $error ) {
 			?>
-			<div class="updated error"><p><?php print $error; ?></p></div><?php
+			<div class="updated error"><p><?php print $error; ?></p></div>
+													  <?php
 		}
 	}
 
@@ -792,7 +901,7 @@ class Admin {
 			foreach (
 				[
 					'ttf' => 'truetype',
-					'otf' => 'opentype'
+					'otf' => 'opentype',
 					/*, 'woff2' => 'woff2', 'woff' => 'woff'*/
 				] as $extention => $format
 			) {
@@ -862,17 +971,22 @@ EOCSS;
 		/** @var $formats array User-Agent => file extension */
 		$formats = [ ' ' => '.ttf' ];
 		// also get woff2? doesn't seem required as all browsers currently support rendering ttf...
-//		$formats['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36'] = '.woff';
+		// $formats['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36'] = '.woff';
 
 		foreach ( $formats as $user_agent => $extension ) {
-			$font_css = wp_remote_retrieve_body( wp_remote_get( $font_url, [
-				'headers'     => [
-					'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', // emulate browser
-				],
-				'user-agent'  => $user_agent,  // emulate browser
-				'httpversion' => '1.1',  // emulate browser
-				'referer'     => site_url(),  // emulate browser
-			] ) );
+			$font_css = wp_remote_retrieve_body(
+				wp_remote_get(
+					$font_url,
+					[
+						'headers'     => [
+							'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', // emulate browser
+						],
+						'user-agent'  => $user_agent,  // emulate browser
+						'httpversion' => '1.1',  // emulate browser
+						'referer'     => site_url(),  // emulate browser
+					]
+				)
+			);
 			if ( false !== strpos( $font_css, 'Font family not found' ) ) {
 				var_dump( $font_family, $font_weight, $font_style, $font_css, $font_url );
 				exit;
@@ -936,7 +1050,7 @@ EOCSS;
 		if ( is_admin() && ( $font_id = get_option( Plugin::DEFAULTS_PREFIX . 'text__ttf_upload' ) ) ) {
 			$font = get_attached_file( $font_id );
 			if ( is_file( $font ) ) {
-				$instance = Plugin::getInstance();
+				$instance = Plugin::instance();
 				update_option( Plugin::DEFAULTS_PREFIX . 'text__ttf_upload', false );
 				$b    = basename( $font );
 				$base = basename( $font, '.ttf' );
@@ -1000,7 +1114,7 @@ EOCSS;
 		$weight  = intval( round( $weight / 100 ) * 100 );
 		$weights = self::font_name_weights();
 
-		if ( ! array_key_exists( $weight, $weights ) || (/* Special case; RegularItalic is just called Italic */ 400 == $weight && $is_italic ) ) {
+		if ( ! array_key_exists( $weight, $weights ) || ( /* Special case; RegularItalic is just called Italic */ 400 == $weight && $is_italic ) ) {
 			$suffix = '';
 		} else {
 			$suffix = $weights[ $weight ];

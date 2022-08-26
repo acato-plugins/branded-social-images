@@ -29,7 +29,6 @@ class color extends Input {
 		$this->atts['value'] = $this->get_tag_value();
 		$atts                = $this->attributes();
 
-
 		return $label . '<span class="field-wrap"><input type="' . $this->type . '" ' . $atts . '/><span class="swatch"></span></span>';
 	}
 }

@@ -23,7 +23,6 @@ class radio extends Input {
 		}
 		$atts = $this->attributes(); // builds HTML attributes
 
-
 		return '<input type="' . $this->type . '" ' . $atts . '>' . ( $this->empty ? '' : $this->content . '</' . $this->type . '>' ) . $label;
 	}
 }

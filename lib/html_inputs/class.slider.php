@@ -25,7 +25,6 @@ class slider extends text {
 		}
 		$atts = $this->attributes(); // builds HTML attributes
 
-
 		return $label . '<span class="add-slider"><input type="' . $this->type . '" ' . $atts . '>' . ( $this->empty ? '' : $this->content . '</' . $this->type . '>' ) . '</span>';
 	}
 }

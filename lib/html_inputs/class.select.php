@@ -26,7 +26,7 @@ class select extends Input {
 			$option = new option( $this->name, $_atts );
 			$option->set_label( $option_label, true );
 			$option->current_value = $this->get_current_value();
-			$options               .= "$option";
+			$options              .= "$option";
 		}
 
 		$atts = $this->attributes(); // builds HTML attributes

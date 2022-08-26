@@ -23,6 +23,7 @@
 		-->
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax.Found"/>
 		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+		<exclude name="WordPress.PHP.DisallowShortTernary.Found"/>
 	</rule>
 
 	<!-- Let's also check that everything is properly documented. -->
