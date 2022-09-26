@@ -2326,7 +2326,7 @@ EODOC;
 				'text_enabled' => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Deselect if you do not wish text on this image.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Display text on this image.', self::TEXT_DOMAIN ),
 					'default'   => 'yes',
 					'value'     => 'yes',
 				],

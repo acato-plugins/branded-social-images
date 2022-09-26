@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Branded Social Images\n"
-"POT-Creation-Date: 2022-08-25 15:13+0200\n"
+"POT-Creation-Date: 2022-09-26 14:05+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Remon Pel <remon@acato.nl>\n"
 "Language-Team: Acato <wordpress@acato.nl>\n"
@@ -20,36 +20,36 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-2: vendor\n"
 "X-Poedit-SearchPathExcluded-3: admin\n"
 
-#: lib/class.og-image-admin.php:48
+#: lib/class.og-image-admin.php:70
 msgid "Select an image or upload one."
 msgstr "Selecteer een afbeelding of upload er een."
 
-#: lib/class.og-image-admin.php:49
+#: lib/class.og-image-admin.php:71
 msgid "Use this image"
 msgstr "Gebruik deze afbeelding"
 
-#: lib/class.og-image-admin.php:50
+#: lib/class.og-image-admin.php:72
 msgid "Select an file or upload one."
 msgstr "Selecteer een bestand of upload er een."
 
-#: lib/class.og-image-admin.php:51
+#: lib/class.og-image-admin.php:73
 msgid "Use this file"
 msgstr "Gebruik dit bestand"
 
-#: lib/class.og-image-admin.php:79
+#: lib/class.og-image-admin.php:129
 msgid "The OG:Image recommended size"
 msgstr "De aanbevolen OG:Image afmetingen"
 
-#: lib/class.og-image-admin.php:94
+#: lib/class.og-image-admin.php:169
 #, php-format
 msgid ""
-"<a href=\"%s\" target=\"_blank\">Branded Social Images</a> is a free plugin "
-"by <a href=\"%s\" target=\"_blank\">Acato</a>."
+"<a href=\"%1$s\" target=\"_blank\">Branded Social Images</a> is a free "
+"plugin by <a href=\"%2$s\" target=\"_blank\">Acato</a>."
 msgstr ""
-"<a href=\"%s\" target=\"_blank\">Branded Social Images</a> is een gratis "
-"plugin van <a href=\"%s\" target=\"_blank\">Acato</a>."
+"<a href=\"%1$s\" target=\"_blank\">Branded Social Images</a> is een gratis "
+"plugin van <a href=\"%2$s\" target=\"_blank\">Acato</a>."
 
-#: lib/class.og-image-admin.php:95
+#: lib/class.og-image-admin.php:170
 msgid ""
 "Please let us know what you think of this plugin and what you wish to see in "
 "future versions."
@@ -57,21 +57,21 @@ msgstr ""
 "Vertel ons wat je van deze plugin vindt en wat je graag zou zien in "
 "toekomstige versies."
 
-#: lib/class.og-image-admin.php:96
+#: lib/class.og-image-admin.php:171
 #, php-format
 msgid "<a href=\"%s\" target=\"_blank\">Contact us here</a>."
 msgstr "<a href=\"%s\" target=\"_blank\">Neem contact met ons op</a>."
 
-#: lib/class.og-image-admin.php:99
+#: lib/class.og-image-admin.php:180
 #, php-format
 msgid ""
-"Use <a href=\"%s\" target=\"_blank\">%s</a> to preview what your social "
+"Use <a href=\"%1$s\" target=\"_blank\">%2$s</a> to preview what your social "
 "image looks like on social media."
 msgstr ""
-"Gebruik <a href=\"%s\" target=\"_blank\">%s</a> om een voorbeeld te krijgen "
-"hoe de afbeelding er op social media uitziet."
+"Gebruik <a href=\"%1$s\" target=\"_blank\">%2$s</a> om een voorbeeld te "
+"krijgen hoe de afbeelding er op social media uitziet."
 
-#: lib/class.og-image-admin.php:101
+#: lib/class.og-image-admin.php:189
 #, php-format
 msgid ""
 "<a href=\"%s\" target=\"_blank\">Show debug information</a> for the social-"
@@ -80,103 +80,103 @@ msgstr ""
 "<a href=\"%s\" target=\"_blank\">Toon informatie voor fout-opsporing</a> "
 "voor de Branded Social Image voor deze post."
 
-#: lib/class.og-image-admin.php:212
+#: lib/class.og-image-admin.php:287
 msgid "The cache is empty"
 msgstr "De cache is leeg"
 
-#: lib/class.og-image-admin.php:214
+#: lib/class.og-image-admin.php:290
 msgid "Ok"
 msgstr "O.k."
 
-#: lib/class.og-image-admin.php:218
+#: lib/class.og-image-admin.php:294
 #, php-format
 msgid ""
-"This will clear the cache, %d image(s) and %d folder(s) will be removed. New "
-"images will be generated on demand."
+"This will clear the cache, %1$d image(s) and %2$d folder(s) will be removed. "
+"New images will be generated on demand."
 msgstr ""
-"Hiermee leeg je de cache, %d afbeelding(en) en %d folder(s) zullen worden "
-"verwijderd. De cache zal vanzelf weer worden gevuld."
+"Hiermee leeg je de cache, %1$d afbeelding(en) en %2$d folder(s) zullen "
+"worden verwijderd. De cache zal vanzelf weer worden gevuld."
 
-#: lib/class.og-image-admin.php:225
+#: lib/class.og-image-admin.php:301
 msgid "Confirm"
 msgstr "Bevestigen"
 
-#: lib/class.og-image-admin.php:227
+#: lib/class.og-image-admin.php:303
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: lib/class.og-image-admin.php:240
+#: lib/class.og-image-admin.php:317
 msgid "Save settings"
 msgstr "Instellingen opslaan"
 
-#: lib/class.og-image-admin.php:242
+#: lib/class.og-image-admin.php:319
 msgid "Purge cache"
 msgstr "Cache legen"
 
-#: lib/class.og-image-admin.php:268 lib/class.og-image-admin.php:460
+#: lib/class.og-image-admin.php:346 lib/class.og-image-admin.php:550
 msgid "Settings"
 msgstr "Instellingen"
 
-#: lib/class.og-image-admin.php:271
+#: lib/class.og-image-admin.php:349
 msgid "Support"
 msgstr "Ondersteuning"
 
-#: lib/class.og-image-admin.php:274
+#: lib/class.og-image-admin.php:352
 msgid "Contribute"
 msgstr "Bijdragen"
 
-#: lib/class.og-image-admin.php:335 lib/class.og-image-plugin.php:1000
+#: lib/class.og-image-admin.php:411 lib/class.og-image-plugin.php:1578
 msgid "Could not create the storage directory in the uploads folder."
 msgstr ""
 "De directory voor opslag van gegevens kon niet worden aangemaakt in de "
 "uploads folder."
 
-#: lib/class.og-image-admin.php:335 lib/class.og-image-plugin.php:1000
+#: lib/class.og-image-admin.php:411 lib/class.og-image-plugin.php:1578
 msgid "In a WordPress site the uploads folder should always be writable."
 msgstr ""
 "In een WordPress website behoort de uploads folder altijd beschrijfbaar te "
 "zijn."
 
-#: lib/class.og-image-admin.php:335 lib/class.og-image-plugin.php:1000
+#: lib/class.og-image-admin.php:411 lib/class.og-image-plugin.php:1578
 msgid "Please fix this."
 msgstr "Los dit a.u.b. op."
 
-#: lib/class.og-image-admin.php:335 lib/class.og-image-plugin.php:1000
+#: lib/class.og-image-admin.php:411 lib/class.og-image-plugin.php:1578
 msgid "This error will disappear once the problem has been corrected."
 msgstr "Deze foutmelding zal verdwijnen wanneer het probleem is verholpen."
 
-#: lib/class.og-image-admin.php:504
+#: lib/class.og-image-admin.php:600
 msgid "Image and Logo options"
 msgstr "Afbeelding en Logo instellingen"
 
-#: lib/class.og-image-admin.php:513
+#: lib/class.og-image-admin.php:618
 msgid "Text settings"
 msgstr "Tekst instellingen"
 
-#: lib/class.og-image-admin.php:581
+#: lib/class.og-image-admin.php:696
 msgid "Debug log"
 msgstr "Logboek voor foutopsporing"
 
-#: lib/class.og-image-admin.php:585
+#: lib/class.og-image-admin.php:702
 #, php-format
 msgid "This log will be available until %s or until overwritten by a new log."
 msgstr ""
 "Dit logboek blijft beschikbaar tot %s tenzij overschreven door een nieuw "
 "logboek."
 
-#: lib/class.og-image-admin.php:595
+#: lib/class.og-image-admin.php:714
 msgid "Plugin configuration"
 msgstr "Plugin instellingen"
 
-#: lib/class.og-image-admin.php:806 lib/class.og-image-plugin.php:1031
+#: lib/class.og-image-admin.php:995 lib/class.og-image-plugin.php:1607
 msgid "Could not download font from Google Fonts."
 msgstr "Kon het font niet downloaden van Google Fonts."
 
-#: lib/class.og-image-admin.php:806 lib/class.og-image-plugin.php:1031
+#: lib/class.og-image-admin.php:995 lib/class.og-image-plugin.php:1607
 msgid "Please download yourself and upload here."
 msgstr "Download het font a.u.b. zelf en upload het hier."
 
-#: lib/class.og-image-admin.php:920
+#: lib/class.og-image-admin.php:1103
 #, php-format
 msgid ""
 "Not all cache items could be removed. Please try again, or check the cache "
@@ -185,331 +185,334 @@ msgstr ""
 "Niet alle bestanden in de cache konden worden verwijderd. Probeer nogmaals "
 "of controleer zelf de cache folder. Locatie: %s"
 
-#: lib/class.og-image-plugin.php:1019
+#: lib/class.og-image-plugin.php:1595
 msgid "Don't know where to get this font."
 msgstr "Ik weet niet hoe ik aan dit font moet komen."
 
-#: lib/class.og-image-plugin.php:1019
+#: lib/class.og-image-plugin.php:1595
 msgid "Sorry."
 msgstr "Sorry."
 
-#: lib/class.og-image-plugin.php:1044
+#: lib/class.og-image-plugin.php:1619
 msgid "This Google Fonts does not offer a TTF or OTF file."
 msgstr "Dit Google Font heeft geen TTF of OTF versie."
 
-#: lib/class.og-image-plugin.php:1044
+#: lib/class.og-image-plugin.php:1619
 msgid "Sorry, cannot continue at this time."
 msgstr "Sorry, ik kan helaas niet verder."
 
-#: lib/class.og-image-plugin.php:1522
+#: lib/class.og-image-plugin.php:2092
 msgid "Top Left"
 msgstr "Linksboven"
 
-#: lib/class.og-image-plugin.php:1523
+#: lib/class.og-image-plugin.php:2093
 msgid "Top Center"
 msgstr "Midden-boven"
 
-#: lib/class.og-image-plugin.php:1524
+#: lib/class.og-image-plugin.php:2094
 msgid "Top Right"
 msgstr "Rechtsboven"
 
-#: lib/class.og-image-plugin.php:1525
+#: lib/class.og-image-plugin.php:2095
 msgid "Left Middle"
 msgstr "Links"
 
-#: lib/class.og-image-plugin.php:1526
+#: lib/class.og-image-plugin.php:2096
 msgid "Centered"
 msgstr "Gecentreerd"
 
-#: lib/class.og-image-plugin.php:1527
+#: lib/class.og-image-plugin.php:2097
 msgid "Right Middle"
 msgstr "Rechts"
 
-#: lib/class.og-image-plugin.php:1528
+#: lib/class.og-image-plugin.php:2098
 msgid "Bottom Left"
 msgstr "Linksonder"
 
-#: lib/class.og-image-plugin.php:1529
+#: lib/class.og-image-plugin.php:2099
 msgid "Bottom Center"
 msgstr "Midden-onder"
 
-#: lib/class.og-image-plugin.php:1530
+#: lib/class.og-image-plugin.php:2100
 msgid "Bottom Right"
 msgstr "Rechtsonder"
 
-#: lib/class.og-image-plugin.php:1558
+#: lib/class.og-image-plugin.php:2128
 msgid ""
 "The following process is used to determine the OG:Image (in order of "
 "importance)"
 msgstr "De OG:Image afbeelding wordt gekozen in deze volgorde."
 
-#: lib/class.og-image-plugin.php:1559
+#: lib/class.og-image-plugin.php:2129
 msgid "Branded Social Image on page/post"
 msgstr "Branded Social Image bij pagina/bericht"
 
-#: lib/class.og-image-plugin.php:1561
+#: lib/class.og-image-plugin.php:2131
 msgid "Yoast Social image on page/post"
 msgstr "Yoast Social Image bij pagina/bericht"
 
-#: lib/class.og-image-plugin.php:1563
+#: lib/class.og-image-plugin.php:2133
 msgid "Featured image on page/post (when checked in general settings)"
 msgstr ""
 "Uitgelichte afbeelding bij pagina/bericht (indien ingeschakeld in "
 "instellingen)"
 
-#: lib/class.og-image-plugin.php:1564
+#: lib/class.og-image-plugin.php:2134
 msgid "Fallback Branded Social image in general settings"
 msgstr "Fallback Branded Social image in instellingen"
 
-#: lib/class.og-image-plugin.php:1571
+#: lib/class.og-image-plugin.php:2141
 msgid "Select to disable the plugin Branded Social Images by default."
 msgstr ""
 "Selecteer om de plugin Branded Social Images standaard uitgeschakeld te "
 "hebben."
 
-#: lib/class.og-image-plugin.php:1577
+#: lib/class.og-image-plugin.php:2147
 msgid "Where does Branded Social Images live in the menu?"
 msgstr "Waar in het menu staat Branded Social Images?"
 
-#: lib/class.og-image-plugin.php:1580
+#: lib/class.og-image-plugin.php:2150
 msgid "At the main level"
 msgstr "Op het hoofd-niveau"
 
-#: lib/class.og-image-plugin.php:1581
+#: lib/class.og-image-plugin.php:2151
 msgid "In the Settings sub-menu"
 msgstr "In het Instellingen sub-menu"
 
-#: lib/class.og-image-plugin.php:1582
+#: lib/class.og-image-plugin.php:2152
 msgid "In the Media sub-menu"
 msgstr "In het Media sub-menu"
 
-#: lib/class.og-image-plugin.php:1588
+#: lib/class.og-image-plugin.php:2158
 msgid "Branded Social Images meta-box location"
 msgstr "Branded Social Images meta-box positie"
 
-#: lib/class.og-image-plugin.php:1591
+#: lib/class.og-image-plugin.php:2161
 msgid "Below the content editor"
 msgstr "Onder de WordPress editor"
 
-#: lib/class.og-image-plugin.php:1592
+#: lib/class.og-image-plugin.php:2162
 msgid "In the sidebar"
 msgstr "In de zijbalk"
 
-#: lib/class.og-image-plugin.php:1601
+#: lib/class.og-image-plugin.php:2171
 msgid "Fallback OG:Image."
 msgstr "Fallback OG:Image."
 
-#: lib/class.og-image-plugin.php:1602
+#: lib/class.og-image-plugin.php:2172
 msgid "Used for any page/post that has no OG image selected."
 msgstr ""
 "Wordt gebruikt voor elke pagina/elk bericht zonder ingestelde OG image."
 
-#: lib/class.og-image-plugin.php:1602 lib/class.og-image-plugin.php:1769
+#: lib/class.og-image-plugin.php:2172 lib/class.og-image-plugin.php:2339
 msgid "You can use JPEG and PNG."
 msgstr "Je mag JPEG en PNG gebruiken."
 
-#: lib/class.og-image-plugin.php:1602 lib/class.og-image-plugin.php:1769
+#: lib/class.og-image-plugin.php:2172 lib/class.og-image-plugin.php:2339
 msgid "Recommended size: 1200x630 pixels."
 msgstr "Aanbevolen afmeting: 1200x630 pixels."
 
-#: lib/class.og-image-plugin.php:1607
+#: lib/class.og-image-plugin.php:2177
 msgid "Use the WordPress Featured image."
 msgstr "Gebruik de WordPress uitgelichte afbeelding."
 
-#: lib/class.og-image-plugin.php:1617 lib/class.og-image-plugin.php:1865
+#: lib/class.og-image-plugin.php:2187 lib/class.og-image-plugin.php:2435
 msgid "Your logo"
 msgstr "Je logo"
 
-#: lib/class.og-image-plugin.php:1618 lib/class.og-image-plugin.php:1866
+#: lib/class.og-image-plugin.php:2188 lib/class.og-image-plugin.php:2436
 msgid "Image should be approximately 600 pixels wide/high."
 msgstr "Afbeelding dient ongeveer 600 pixels breed/hoog te zijn."
 
-#: lib/class.og-image-plugin.php:1618 lib/class.og-image-plugin.php:1866
+#: lib/class.og-image-plugin.php:2188 lib/class.og-image-plugin.php:2436
 msgid "Use a transparent PNG for best results."
 msgstr "Gebruik een transparante PNG voor het beste resultaat."
 
-#: lib/class.og-image-plugin.php:1625
+#: lib/class.og-image-plugin.php:2195
 msgid "Default logo position"
 msgstr "Standaard logo positie"
 
-#: lib/class.og-image-plugin.php:1632
+#: lib/class.og-image-plugin.php:2202
 msgid "Logo-scale (%)"
 msgstr "Logo-schaal (%)"
 
-#: lib/class.og-image-plugin.php:1644
+#: lib/class.og-image-plugin.php:2214
 msgid "The text to overlay if no other text or title can be found."
 msgstr ""
 "De tekst om weer te geven als geen andere tekst of titel kan worden bepaald."
 
-#: lib/class.og-image-plugin.php:1645
+#: lib/class.og-image-plugin.php:2215
 msgid "This should be a generic text that is applicable to the entire website."
 msgstr ""
 "Dit zou een tekst moeten zijn die toepasselijk is voor de gehele website."
 
-#: lib/class.og-image-plugin.php:1651
+#: lib/class.og-image-plugin.php:2221
 msgid "Select a font"
 msgstr "Selecteer een lettertype"
 
-#: lib/class.og-image-plugin.php:1659
+#: lib/class.og-image-plugin.php:2229
 msgid "Font upload"
 msgstr "Lettertype-bestand uploaden"
 
-#: lib/class.og-image-plugin.php:1660
+#: lib/class.og-image-plugin.php:2230
 msgid "Upload .ttf/.otf file"
 msgstr ".ttf/.otf bestand uploaden"
 
-#: lib/class.og-image-plugin.php:1662
+#: lib/class.og-image-plugin.php:2232
 msgid "Custom font must be a .ttf or .otf file."
 msgstr "Eigen font moet een .ttf of .otf bestand zijn."
 
-#: lib/class.og-image-plugin.php:1662
+#: lib/class.og-image-plugin.php:2232
 msgid ""
 "You're responsible for the proper permissions and usage rights of the font."
 msgstr ""
 "Jij bent verantwoordelijk voor de juiste toestemming en rechten voor dit "
 "font."
 
-#: lib/class.og-image-plugin.php:1670 lib/class.og-image-plugin.php:1791
+#: lib/class.og-image-plugin.php:2240 lib/class.og-image-plugin.php:2361
 msgid "Text position"
 msgstr "Tekst positie"
 
-#: lib/class.og-image-plugin.php:1678
+#: lib/class.og-image-plugin.php:2248
 msgid "Default Text color"
 msgstr "Standaard tekst-kleur"
 
-#: lib/class.og-image-plugin.php:1685
+#: lib/class.og-image-plugin.php:2255
 msgid "Font-size (px)"
 msgstr "Letter-grootte (pixels)"
 
-#: lib/class.og-image-plugin.php:1696 lib/class.og-image-plugin.php:1800
+#: lib/class.og-image-plugin.php:2266 lib/class.og-image-plugin.php:2370
 msgid "Text background color"
 msgstr "Kleur van achtergrond achter tekst"
 
-#: lib/class.og-image-plugin.php:1702
+#: lib/class.og-image-plugin.php:2272
 msgid "Use text background"
 msgstr "Gebruik tekst-achtergrond"
 
-#: lib/class.og-image-plugin.php:1712 lib/class.og-image-plugin.php:1808
+#: lib/class.og-image-plugin.php:2282 lib/class.og-image-plugin.php:2378
 msgid "Stroke color"
 msgstr "Tekst-rand kleur"
 
-#: lib/class.og-image-plugin.php:1718 lib/class.og-image-plugin.php:1814
+#: lib/class.og-image-plugin.php:2288 lib/class.og-image-plugin.php:2384
 msgid "Default stroke width"
 msgstr "Tekst-rand dikte"
 
-#: lib/class.og-image-plugin.php:1725
+#: lib/class.og-image-plugin.php:2295
 msgid "Default Text shadow color"
 msgstr "Tekst-schaduw kleur"
 
-#: lib/class.og-image-plugin.php:1731 lib/class.og-image-plugin.php:1827
+#: lib/class.og-image-plugin.php:2301 lib/class.og-image-plugin.php:2397
 msgid "Shadow offset - vertical."
 msgstr "Schaduw positie - vertikaal."
 
-#: lib/class.og-image-plugin.php:1731 lib/class.og-image-plugin.php:1827
+#: lib/class.og-image-plugin.php:2301 lib/class.og-image-plugin.php:2397
 msgid "Negative numbers to top, Positive numbers to bottom."
 msgstr "Negatieve nummer voor naar boven, positieve nummers voor naar beneden."
 
-#: lib/class.og-image-plugin.php:1737 lib/class.og-image-plugin.php:1833
+#: lib/class.og-image-plugin.php:2307 lib/class.og-image-plugin.php:2403
 msgid "Shadow offset - horizontal."
 msgstr "Schaduw positie - horizontaal."
 
-#: lib/class.og-image-plugin.php:1737 lib/class.og-image-plugin.php:1833
+#: lib/class.og-image-plugin.php:2307 lib/class.og-image-plugin.php:2403
 msgid "Negative numbers to left, Positive numbers to right."
 msgstr "Negatieve nummers naar links, positieve nummers naar rechts."
 
-#: lib/class.og-image-plugin.php:1743 lib/class.og-image-plugin.php:1839
+#: lib/class.og-image-plugin.php:2313 lib/class.og-image-plugin.php:2409
 msgid "Use a text shadow"
 msgstr "Gebruik een tekst schaduw"
 
-#: lib/class.og-image-plugin.php:1752
+#: lib/class.og-image-plugin.php:2322
 msgid "Select to disable the plugin Branded Social Images for this post."
 msgstr ""
 "Selecteer om de plugin Branded Social Images uit te schakelen voor deze post."
 
-#: lib/class.og-image-plugin.php:1754
+#: lib/class.og-image-plugin.php:2324
 msgid "The plugin Branded Social Images is disabled for this post."
 msgstr "De plugin Branded Social Images is uitgeschakeld voor deze post."
 
-#: lib/class.og-image-plugin.php:1759
-msgid "Deselect if you do not wish text on this image."
-msgstr "Deselecteer als je geen tekst wenst op deze afbeelding."
+#: lib/class.og-image-plugin.php:2329
+msgid "Display text on this image."
+msgstr "Gebruik text op deze afbeelding?"
 
-#: lib/class.og-image-plugin.php:1768
+#: lib/class.og-image-plugin.php:2338
 msgid "You can upload/select a specific Social Image here"
 msgstr "Je kunt hier een specifieke Social Image selecteren/uploaden"
 
-#: lib/class.og-image-plugin.php:1778
+#: lib/class.og-image-plugin.php:2348
 msgid "Text on image"
 msgstr "Tekst op afbeelding"
 
-#: lib/class.og-image-plugin.php:1784
+#: lib/class.og-image-plugin.php:2354
 msgid "Text color"
 msgstr "Tekst kleur"
 
-#: lib/class.og-image-plugin.php:1821
+#: lib/class.og-image-plugin.php:2391
 msgid "Text shadow color"
 msgstr "Tekst-schaduw kleur"
 
-#: lib/class.og-image-plugin.php:1840
+#: lib/class.og-image-plugin.php:2410
 msgid "Will improve readability of light text on light background."
 msgstr "Zal de leesbaarheid van lichte tekst op lichte achtergrond verbeteren."
 
-#: lib/class.og-image-plugin.php:1848
+#: lib/class.og-image-plugin.php:2418
 msgid "Use a logo on this image?"
 msgstr "Gebruik logo op deze afbeelding?"
 
-#: lib/class.og-image-plugin.php:1850
+#: lib/class.og-image-plugin.php:2420
 msgid ""
 "Uncheck if you do not wish a logo on this image, or choose a position below."
 msgstr ""
 "Vinkje weghalen als je geen logo wilt op deze afbeelding, of bepaal de "
 "positie hieronder."
 
-#: lib/class.og-image-plugin.php:1855
+#: lib/class.og-image-plugin.php:2425
 msgid "Logo position"
 msgstr "Logo positie"
 
-#: lib/class.og-image-plugin.php:2051
-msgid "View Social Image"
-msgstr "Bekijk Social Image"
-
-#: lib/class.og-image-plugin.php:2063
+#: lib/class.og-image-plugin.php:2629
 msgid "Inspect Social Image"
 msgstr "Social Image inspecteren"
 
-#: lib/class.og-image-plugin.php:2067
+#: lib/class.og-image-plugin.php:2633
 msgid "Shows how this post is shared using an external, unaffiliated service."
 msgstr ""
 "Toont hoe deze post wordt gedeeld op social media middels een externe dienst "
 "(niet geaffilieerd)."
 
-#: lib/class.og-image-plugin.php:2194
+#: lib/class.og-image-plugin.php:2647
+msgid "View Social Image"
+msgstr "Bekijk Social Image"
+
+#: lib/class.og-image-plugin.php:2843
 msgid "Type here to change the text on the image"
 msgstr "Type hier om de tekst op de afbeelding te veranderen"
 
-#: lib/class.og-image-plugin.php:2195
+#: lib/class.og-image-plugin.php:2844
 msgid "Change logo and image below"
 msgstr "Verander hieronder je logo en afbeelding"
 
-#: lib/class.og-image.php:73
+#: lib/class.og-image.php:71
 msgid "Sorry, could not find an OG Image configured."
 msgstr "Sorry, kon geen afbeelding vinden om te gebruiken als OG:Image."
 
-#: lib/class.og-image.php:98
+#: lib/class.og-image.php:97
 msgid "Sorry, we could not create the image."
 msgstr "Sorry, kon de afbeelding niet genereren."
 
-#: lib/html_inputs/class.file.php:27
+#: lib/html_inputs/class.file.php:24
 msgid "Choose file"
 msgstr "Kies bestand"
 
-#: lib/html_inputs/class.image.php:39
+#: lib/html_inputs/class.image.php:35
 msgid "Choose image"
 msgstr "Kies afbeelding"
 
-#: lib/html_inputs/class.image.php:40
+#: lib/html_inputs/class.image.php:36
 msgid "Remove image"
 msgstr "Verwijder afbeelding"
+
+#~ msgid "Deselect if you do not wish text on this image."
+#~ msgstr "Deselecteer als je geen tekst wenst op deze afbeelding."
 
 #~ msgid "This is probably a temporary error."
 #~ msgstr "Dit is waarschijnlijk een tijdelijk probleem."
