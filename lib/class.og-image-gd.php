@@ -188,7 +188,7 @@ class GD {
 		}
 		$text_width  += 2;
 		$line_height *= $this->line_height_factor;
-		$text_height  = $line_height * count( $lines );
+		$text_height = $line_height * count( $lines );
 
 		$p = $textOptions['padding'] * Plugin::AA;
 
@@ -413,16 +413,28 @@ class GD {
 
 	public function save( $format, $quality ) {
 		$this->manager->file_put_contents( $this->target, '' ); // prime the file, creating all directories
+		$scaled = imagescale( $this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED );
+		header( 'X-OG-Scaler: imagescale' );
+		if ( false === $scaled ) {
+			header( 'X-OG-Scaler: imagecopyresized', true );
+			$scaled = imagecreatetruecolor( $this->manager->width, $this->manager->height );
+			imagecopyresized( $scaled, $this->resource, 0, 0, 0, 0, $this->manager->width, $this->manager->height, imagesx( $this->resource ), imagesy( $this->resource ) );
+		}
+		if ( false === $scaled ) {
+			header( 'X-OG-Scaler: none', true );
+			$scaled = &$this->resource;
+		}
+
 		switch ( $format ) {
 			case 'jpg':
-				imagejpeg( imagescale( $this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED ), $this->target, $quality );
+				imagejpeg( $scaled, $this->target, $quality );
 				break;
 			case 'webp':
-				imagewebp( imagescale( $this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED ), $this->target, $quality );
+				imagewebp( $scaled, $this->target, $quality );
 				break;
 			case 'png':
 			default:
-				imagepng( imagescale( $this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED ), $this->target, $quality );
+				imagepng( $scaled, $this->target, $quality );
 				break;
 		}
 	}
