@@ -528,6 +528,22 @@ class Plugin {
 		add_action(
 			'template_redirect',
 			function () {
+				global $wp_query;
+
+				/**
+				 * Fix for permalink manager.
+				 *
+				 * @see https://wordpress.org/support/topic/does-plugin-work-with-custom-post-types/
+				 */
+				$bsi_filename = basename( Plugin::output_filename() );
+				if ( array_key_exists( $bsi_filename, $wp_query->query ) && array_key_exists( 'do_not_redirect', $wp_query->query ) && $wp_query->query['do_not_redirect'] ) {
+					$wp_query->query[ Plugin::QUERY_VAR ] = 1;
+					set_query_var( Plugin::QUERY_VAR, 1 );
+				}
+
+				/**
+				 * Handle the call.
+				 */
 				if ( get_query_var( Plugin::QUERY_VAR ) ) {
 					require_once __DIR__ . '/class.og-image.php';
 					$og_image = new Image( $this );
