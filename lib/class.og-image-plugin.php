@@ -2623,8 +2623,7 @@ EODOC;
 
 			if (
 				( ! defined( 'BSI_DEBUG' ) || false === BSI_DEBUG ) &&
-				defined( 'BSI_SHOW_ADMIN_BAR_IMAGE_LINK' ) &&
-				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter( self::image_fallback_chain( true ) )
+				array_filter( self::image_fallback_chain( true ) )
 			) {
 				$args = array(
 					'id'     => self::ADMIN_SLUG . '-view',
