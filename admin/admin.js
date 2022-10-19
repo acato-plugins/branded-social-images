@@ -3,6 +3,13 @@
 var __webpack_exports__ = {};
 
 ;// CONCATENATED MODULE: ./node_modules/vanilla-picker/dist/vanilla-picker.mjs
+/*!
+ * vanilla-picker v2.12.1
+ * https://vanilla-picker.js.org
+ *
+ * Copyright 2017-2021 Andreas Borgen (https://github.com/Sphinxxxx), Adam Brooks (https://github.com/dissimulate)
+ * Released under the ISC license.
+ */
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -172,7 +179,7 @@ var Color = function () {
         }
     }, {
         key: 'rgba',
-        get: function get$$1() {
+        get: function get() {
             if (this._rgba) {
                 return this._rgba;
             }
@@ -182,7 +189,7 @@ var Color = function () {
 
             return this._rgba = Color.hslToRgb(this._hsla);
         },
-        set: function set$$1(rgb) {
+        set: function set(rgb) {
             if (rgb.length === 3) {
                 rgb[3] = 1;
             }
@@ -192,17 +199,17 @@ var Color = function () {
         }
     }, {
         key: 'rgbString',
-        get: function get$$1() {
+        get: function get() {
             return this.printRGB();
         }
     }, {
         key: 'rgbaString',
-        get: function get$$1() {
+        get: function get() {
             return this.printRGB(true);
         }
     }, {
         key: 'hsla',
-        get: function get$$1() {
+        get: function get() {
             if (this._hsla) {
                 return this._hsla;
             }
@@ -212,7 +219,7 @@ var Color = function () {
 
             return this._hsla = Color.rgbToHsl(this._rgba);
         },
-        set: function set$$1(hsl) {
+        set: function set(hsl) {
             if (hsl.length === 3) {
                 hsl[3] = 1;
             }
@@ -222,17 +229,17 @@ var Color = function () {
         }
     }, {
         key: 'hslString',
-        get: function get$$1() {
+        get: function get() {
             return this.printHSL();
         }
     }, {
         key: 'hslaString',
-        get: function get$$1() {
+        get: function get() {
             return this.printHSL(true);
         }
     }, {
         key: 'hex',
-        get: function get$$1() {
+        get: function get() {
             var rgb = this.rgba,
                 hex = rgb.map(function (x, i) {
                 return i < 3 ? x.toString(16) : Math.round(x * 255).toString(16);
@@ -242,7 +249,7 @@ var Color = function () {
                 return x.padStart(2, '0');
             }).join('');
         },
-        set: function set$$1(hex) {
+        set: function set(hex) {
             this.rgba = Color.hexToRgb(hex);
         }
     }], [{
@@ -477,7 +484,7 @@ function dragTrack(eventBucket, area, callback) {
     });
 }
 
-var BG_TRANSP = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'2\' height=\'2\'%3E%3Cpath d=\'M1,0H0V1H2V2H1\' fill=\'lightgrey\'/%3E%3C/svg%3E")';
+var BG_TRANSP = 'linear-gradient(45deg, lightgrey 25%, transparent 25%, transparent 75%, lightgrey 75%) 0 0 / 2em 2em,\n                   linear-gradient(45deg, lightgrey 25%,       white 25%,       white 75%, lightgrey 75%) 1em 1em / 2em 2em';
 var HUES = 360;
 
 var EVENT_KEY = 'keydown',
@@ -503,10 +510,6 @@ function onKey(bucket, target, keys, handler, stop) {
         }
     });
 }
-
-var _style = document.createElement('style');
-_style.textContent = '.picker_wrapper.no_alpha .picker_alpha{display:none}.picker_wrapper.no_editor .picker_editor{position:absolute;z-index:-1;opacity:0}.picker_wrapper.no_cancel .picker_cancel{display:none}.layout_default.picker_wrapper{display:-webkit-box;display:flex;-webkit-box-orient:horizontal;-webkit-box-direction:normal;flex-flow:row wrap;-webkit-box-pack:justify;justify-content:space-between;-webkit-box-align:stretch;align-items:stretch;font-size:10px;width:25em;padding:.5em}.layout_default.picker_wrapper input,.layout_default.picker_wrapper button{font-size:1rem}.layout_default.picker_wrapper>*{margin:.5em}.layout_default.picker_wrapper::before{content:\'\';display:block;width:100%;height:0;-webkit-box-ordinal-group:2;order:1}.layout_default .picker_slider,.layout_default .picker_selector{padding:1em}.layout_default .picker_hue{width:100%}.layout_default .picker_sl{-webkit-box-flex:1;flex:1 1 auto}.layout_default .picker_sl::before{content:\'\';display:block;padding-bottom:100%}.layout_default .picker_editor{-webkit-box-ordinal-group:2;order:1;width:6.5rem}.layout_default .picker_editor input{width:100%;height:100%}.layout_default .picker_sample{-webkit-box-ordinal-group:2;order:1;-webkit-box-flex:1;flex:1 1 auto}.layout_default .picker_done,.layout_default .picker_cancel{-webkit-box-ordinal-group:2;order:1}.picker_wrapper{box-sizing:border-box;background:#f2f2f2;box-shadow:0 0 0 1px silver;cursor:default;font-family:sans-serif;color:#444;pointer-events:auto}.picker_wrapper:focus{outline:none}.picker_wrapper button,.picker_wrapper input{box-sizing:border-box;border:none;box-shadow:0 0 0 1px silver;outline:none}.picker_wrapper button:focus,.picker_wrapper button:active,.picker_wrapper input:focus,.picker_wrapper input:active{box-shadow:0 0 2px 1px dodgerblue}.picker_wrapper button{padding:.4em .6em;cursor:pointer;background-color:whitesmoke;background-image:-webkit-gradient(linear, left bottom, left top, from(gainsboro), to(transparent));background-image:linear-gradient(0deg, gainsboro, transparent)}.picker_wrapper button:active{background-image:-webkit-gradient(linear, left bottom, left top, from(transparent), to(gainsboro));background-image:linear-gradient(0deg, transparent, gainsboro)}.picker_wrapper button:hover{background-color:white}.picker_selector{position:absolute;z-index:1;display:block;-webkit-transform:translate(-50%, -50%);transform:translate(-50%, -50%);border:2px solid white;border-radius:100%;box-shadow:0 0 3px 1px #67b9ff;background:currentColor;cursor:pointer}.picker_slider .picker_selector{border-radius:2px}.picker_hue{position:relative;background-image:-webkit-gradient(linear, left top, right top, from(red), color-stop(yellow), color-stop(lime), color-stop(cyan), color-stop(blue), color-stop(magenta), to(red));background-image:linear-gradient(90deg, red, yellow, lime, cyan, blue, magenta, red);box-shadow:0 0 0 1px silver}.picker_sl{position:relative;box-shadow:0 0 0 1px silver;background-image:-webkit-gradient(linear, left top, left bottom, from(white), color-stop(50%, rgba(255,255,255,0))),-webkit-gradient(linear, left bottom, left top, from(black), color-stop(50%, rgba(0,0,0,0))),-webkit-gradient(linear, left top, right top, from(gray), to(rgba(128,128,128,0)));background-image:linear-gradient(180deg, white, rgba(255,255,255,0) 50%),linear-gradient(0deg, black, rgba(0,0,0,0) 50%),linear-gradient(90deg, gray, rgba(128,128,128,0))}.picker_alpha,.picker_sample{position:relative;background:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'2\' height=\'2\'%3E%3Cpath d=\'M1,0H0V1H2V2H1\' fill=\'lightgrey\'/%3E%3C/svg%3E") left top/contain white;box-shadow:0 0 0 1px silver}.picker_alpha .picker_selector,.picker_sample .picker_selector{background:none}.picker_editor input{font-family:monospace;padding:.2em .4em}.picker_sample::before{content:\'\';position:absolute;display:block;width:100%;height:100%;background:currentColor}.picker_arrow{position:absolute;z-index:-1}.picker_wrapper.popup{position:absolute;z-index:2;margin:1.5em}.picker_wrapper.popup,.picker_wrapper.popup .picker_arrow::before,.picker_wrapper.popup .picker_arrow::after{background:#f2f2f2;box-shadow:0 0 10px 1px rgba(0,0,0,0.4)}.picker_wrapper.popup .picker_arrow{width:3em;height:3em;margin:0}.picker_wrapper.popup .picker_arrow::before,.picker_wrapper.popup .picker_arrow::after{content:"";display:block;position:absolute;top:0;left:0;z-index:-99}.picker_wrapper.popup .picker_arrow::before{width:100%;height:100%;-webkit-transform:skew(45deg);transform:skew(45deg);-webkit-transform-origin:0 100%;transform-origin:0 100%}.picker_wrapper.popup .picker_arrow::after{width:150%;height:150%;box-shadow:none}.popup.popup_top{bottom:100%;left:0}.popup.popup_top .picker_arrow{bottom:0;left:0;-webkit-transform:rotate(-90deg);transform:rotate(-90deg)}.popup.popup_bottom{top:100%;left:0}.popup.popup_bottom .picker_arrow{top:0;left:0;-webkit-transform:rotate(90deg) scale(1, -1);transform:rotate(90deg) scale(1, -1)}.popup.popup_left{top:0;right:100%}.popup.popup_left .picker_arrow{top:0;right:0;-webkit-transform:scale(-1, 1);transform:scale(-1, 1)}.popup.popup_right{top:0;left:100%}.popup.popup_right .picker_arrow{top:0;left:0}';
-document.documentElement.firstElementChild.appendChild(_style);
 
 var Picker = function () {
     function Picker(options) {
@@ -943,7 +946,7 @@ var Picker = function () {
                 transp = opaque.replace('hsl', 'hsla').replace(')', ', 0)'),
                 bg = 'linear-gradient(' + [opaque, transp] + ')';
 
-            this._domA.style.backgroundImage = bg + ', ' + BG_TRANSP;
+            this._domA.style.background = bg + ', ' + BG_TRANSP;
 
             if (!flags.fromEditor) {
                 var format = this.settings.editorFormat,
@@ -988,26 +991,28 @@ var Picker = function () {
             }
             return toggle;
         }
-    }], [{
-        key: 'StyleElement',
-        get: function get$$1() {
-            return _style;
-        }
     }]);
     return Picker;
 }();
 
-/* harmony default export */ var vanilla_picker = (Picker);
+{
+    var style = document.createElement('style');
+    style.textContent = '.picker_wrapper.no_alpha .picker_alpha{display:none}.picker_wrapper.no_editor .picker_editor{position:absolute;z-index:-1;opacity:0}.picker_wrapper.no_cancel .picker_cancel{display:none}.layout_default.picker_wrapper{display:flex;flex-flow:row wrap;justify-content:space-between;align-items:stretch;font-size:10px;width:25em;padding:.5em}.layout_default.picker_wrapper input,.layout_default.picker_wrapper button{font-size:1rem}.layout_default.picker_wrapper>*{margin:.5em}.layout_default.picker_wrapper::before{content:"";display:block;width:100%;height:0;order:1}.layout_default .picker_slider,.layout_default .picker_selector{padding:1em}.layout_default .picker_hue{width:100%}.layout_default .picker_sl{flex:1 1 auto}.layout_default .picker_sl::before{content:"";display:block;padding-bottom:100%}.layout_default .picker_editor{order:1;width:6.5rem}.layout_default .picker_editor input{width:100%;height:100%}.layout_default .picker_sample{order:1;flex:1 1 auto}.layout_default .picker_done,.layout_default .picker_cancel{order:1}.picker_wrapper{box-sizing:border-box;background:#f2f2f2;box-shadow:0 0 0 1px silver;cursor:default;font-family:sans-serif;color:#444;pointer-events:auto}.picker_wrapper:focus{outline:none}.picker_wrapper button,.picker_wrapper input{box-sizing:border-box;border:none;box-shadow:0 0 0 1px silver;outline:none}.picker_wrapper button:focus,.picker_wrapper button:active,.picker_wrapper input:focus,.picker_wrapper input:active{box-shadow:0 0 2px 1px #1e90ff}.picker_wrapper button{padding:.4em .6em;cursor:pointer;background-color:#f5f5f5;background-image:linear-gradient(0deg, gainsboro, transparent)}.picker_wrapper button:active{background-image:linear-gradient(0deg, transparent, gainsboro)}.picker_wrapper button:hover{background-color:#fff}.picker_selector{position:absolute;z-index:1;display:block;-webkit-transform:translate(-50%, -50%);transform:translate(-50%, -50%);border:2px solid #fff;border-radius:100%;box-shadow:0 0 3px 1px #67b9ff;background:currentColor;cursor:pointer}.picker_slider .picker_selector{border-radius:2px}.picker_hue{position:relative;background-image:linear-gradient(90deg, red, yellow, lime, cyan, blue, magenta, red);box-shadow:0 0 0 1px silver}.picker_sl{position:relative;box-shadow:0 0 0 1px silver;background-image:linear-gradient(180deg, white, rgba(255, 255, 255, 0) 50%),linear-gradient(0deg, black, rgba(0, 0, 0, 0) 50%),linear-gradient(90deg, #808080, rgba(128, 128, 128, 0))}.picker_alpha,.picker_sample{position:relative;background:linear-gradient(45deg, lightgrey 25%, transparent 25%, transparent 75%, lightgrey 75%) 0 0/2em 2em,linear-gradient(45deg, lightgrey 25%, white 25%, white 75%, lightgrey 75%) 1em 1em/2em 2em;box-shadow:0 0 0 1px silver}.picker_alpha .picker_selector,.picker_sample .picker_selector{background:none}.picker_editor input{font-family:monospace;padding:.2em .4em}.picker_sample::before{content:"";position:absolute;display:block;width:100%;height:100%;background:currentColor}.picker_arrow{position:absolute;z-index:-1}.picker_wrapper.popup{position:absolute;z-index:2;margin:1.5em}.picker_wrapper.popup,.picker_wrapper.popup .picker_arrow::before,.picker_wrapper.popup .picker_arrow::after{background:#f2f2f2;box-shadow:0 0 10px 1px rgba(0,0,0,.4)}.picker_wrapper.popup .picker_arrow{width:3em;height:3em;margin:0}.picker_wrapper.popup .picker_arrow::before,.picker_wrapper.popup .picker_arrow::after{content:"";display:block;position:absolute;top:0;left:0;z-index:-99}.picker_wrapper.popup .picker_arrow::before{width:100%;height:100%;-webkit-transform:skew(45deg);transform:skew(45deg);-webkit-transform-origin:0 100%;transform-origin:0 100%}.picker_wrapper.popup .picker_arrow::after{width:150%;height:150%;box-shadow:none}.popup.popup_top{bottom:100%;left:0}.popup.popup_top .picker_arrow{bottom:0;left:0;-webkit-transform:rotate(-90deg);transform:rotate(-90deg)}.popup.popup_bottom{top:100%;left:0}.popup.popup_bottom .picker_arrow{top:0;left:0;-webkit-transform:rotate(90deg) scale(1, -1);transform:rotate(90deg) scale(1, -1)}.popup.popup_left{top:0;right:100%}.popup.popup_left .picker_arrow{top:0;right:0;-webkit-transform:scale(-1, 1);transform:scale(-1, 1)}.popup.popup_right{top:0;left:100%}.popup.popup_right .picker_arrow{top:0;left:0}';
+    document.documentElement.firstElementChild.appendChild(style);
+
+    Picker.StyleElement = style;
+}
+
+
 
 ;// CONCATENATED MODULE: ./src/helpers/hex_to_rgba.js
 function hex_to_rgba(hex) {
-  var c; // #ABC or #ABCD
-
+  var c;
+  // #ABC or #ABCD
   if (/^#([A-Fa-f0-9]{3,4})$/.test(hex)) {
     c = (hex + 'F').substring(1).split('');
     return hex_to_rgba(c[0], c[0], c[1], c[1], c[2], c[2], c[3], c[3]);
   }
-
   c = '0x' + (hex.substring(1) + 'FF').substring(0, 8);
   return 'rgba(' + [c >> 24 & 255, c >> 16 & 255, c >> 8 & 255, Math.round((c & 255) / 25.5) / 10].join(',') + ')';
 }
@@ -1015,20 +1020,27 @@ function hex_to_rgba(hex) {
 /* harmony default export */ var decode_entities = ((function () {
   // this prevents any overhead from creating the object each time
   var element = document.createElement('div');
-
   function decodeHTMLEntities(str) {
     if (str && typeof str === 'string') {
-      // strip script/html tags
-      str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
-      str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+      // Fill HTML into element.
       element.innerHTML = str;
+      // Find all script tags and remove them.
+      element.querySelectorAll('script').forEach(function (n) {
+        return n.remove();
+      });
+      element.querySelectorAll('iframe').forEach(function (n) {
+        return n.remove();
+      });
+      // Convert all other tags to their plain-text content.
+      element.querySelectorAll('*').forEach(function (n) {
+        return n.textContent;
+      });
+      // Get the plain text.
       str = element.textContent;
       element.textContent = '';
     }
-
     return str;
   }
-
   return decodeHTMLEntities;
 })());
 ;// CONCATENATED MODULE: ./src/admin.js
@@ -1037,34 +1049,30 @@ function hex_to_rgba(hex) {
 
 
 ;
-
 (function ($, s) {
   var editor = $('#' + s);
-
   if (editor.length < 1) {
     return false;
   }
-
   var $body = $('body'),
-      imageeditor = editor.find('.area--background .background'),
-      logoeditor = editor.find('.area--logo:not(.logo-alternate) .logo');
-
+    imageeditor = editor.find('.area--background .background'),
+    logoeditor = editor.find('.area--logo:not(.logo-alternate) .logo');
   $.fn.attachMediaUpload = function () {
     var wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
-    // Restore the main ID when the add media button is pressed
 
+    // Restore the main ID when the add media button is pressed
     $('a.add_media').on('click', function () {
       // console.log('is this really needed?');
       wp.media.model.settings.post.id = wp_media_post_id;
     });
     return $(this).each(function (i, element) {
       var file_frame,
-          wrap = $(element),
-          input = wrap.find('input').not('.button'),
-          preview = wrap.find('.image-preview-wrapper img'),
-          current_image_id = input.val(),
-          button = wrap.find('.button').not('.remove'),
-          remove = wrap.find('.button.remove');
+        wrap = $(element),
+        input = wrap.find('input').not('.button'),
+        preview = wrap.find('.image-preview-wrapper img'),
+        current_image_id = input.val(),
+        button = wrap.find('.button').not('.remove'),
+        remove = wrap.find('.button.remove');
       remove.on('click', function () {
         var attachment = {
           id: '0',
@@ -1074,15 +1082,16 @@ function hex_to_rgba(hex) {
         input.trigger('image:select', [attachment]);
         input.val(attachment.id);
         current_image_id = attachment.id;
-      }); // Uploading files
+      });
 
+      // Uploading files
       button.on('click', function (event) {
-        event.preventDefault(); // If the media frame already exists, reopen it.
-
+        event.preventDefault();
+        // If the media frame already exists, reopen it.
         if (!file_frame) {
           // console.log('new file_frame');
-          wp.media.model.settings.post.id = current_image_id; // Create the media frame.
-
+          wp.media.model.settings.post.id = current_image_id;
+          // Create the media frame.
           file_frame = wp.media.frames.file_frame = wp.media({
             title: bsi_settings.text.image_upload_title,
             button: {
@@ -1092,64 +1101,60 @@ function hex_to_rgba(hex) {
               type: wrap.data('types').split(',')
             },
             multiple: false // Set to true to allow multiple files to be selected
+          });
 
-          }); // When an image is selected, run a callback.
-
+          // When an image is selected, run a callback.
           file_frame.on('select', function () {
             // We set multiple to false so only get one image from the uploader
             var attachment = file_frame.state().get('selection').first().toJSON();
-
             if ('sizes' in attachment && 'og-image' in attachment.sizes) {
               attachment.url = attachment.sizes['og-image'].url;
-            } // Do something with attachment.id and/or attachment.url here
-
-
+            }
+            // Do something with attachment.id and/or attachment.url here
             preview.attr('src', attachment.url);
             input.trigger('image:select', [attachment]);
             input.val(attachment.id);
-            current_image_id = attachment.id; // Restore the main post ID
-
+            current_image_id = attachment.id;
+            // Restore the main post ID
             wp.media.model.settings.post.id = wp_media_post_id;
           }).on('open', function () {
             var selection = file_frame.state().get('selection');
-
             if (current_image_id) {
               selection.add(wp.media.attachment(current_image_id));
             }
           });
-        } // Set the post ID to what we want
+        }
+        // Set the post ID to what we want
         // file_frame.uploader.options.uploader.params.post_id = current_image_id;
         // Open frame
         // console.log('opening file_frame');
-
-
         file_frame.open();
       });
     });
   };
-
   $.fn.BSIattachFileUpload = function () {
     var wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
-    // Restore the main ID when the add media button is pressed
 
+    // Restore the main ID when the add media button is pressed
     $('a.add_media').on('click', function () {
       // console.log('is this really needed?');
       wp.media.model.settings.post.id = wp_media_post_id;
     });
     return $(this).each(function () {
       var file_frame,
-          wrap = $(this),
-          input = wrap.find('input').not('.button'),
-          current_image_id = input.val(),
-          button = wrap.find('.button').not('.remove'); // Uploading files
+        wrap = $(this),
+        input = wrap.find('input').not('.button'),
+        current_image_id = input.val(),
+        button = wrap.find('.button').not('.remove');
 
+      // Uploading files
       button.on('click', function (event) {
-        event.preventDefault(); // If the media frame already exists, reopen it.
-
+        event.preventDefault();
+        // If the media frame already exists, reopen it.
         if (!file_frame) {
           // console.log('new file_frame');
-          wp.media.model.settings.post.id = current_image_id; // Create the media frame.
-
+          wp.media.model.settings.post.id = current_image_id;
+          // Create the media frame.
           file_frame = wp.media.frames.file_frame = wp.media({
             title: bsi_settings.text.file_upload_title,
             button: {
@@ -1159,97 +1164,99 @@ function hex_to_rgba(hex) {
               type: wrap.data('types').split(',')
             },
             multiple: false // Set to true to allow multiple files to be selected
-
-          }); // console.log(file_frame);
+          });
+          // console.log(file_frame);
           // When an image is selected, run a callback.
-
           file_frame.on('select', function () {
             // We set multiple to false so only get one image from the uploader
-            var attachment = file_frame.state().get('selection').first().toJSON(); // Do something with attachment.id and/or attachment.url here
-
-            input.trigger('file:select', [attachment]); // console.log(attachment);
-
+            var attachment = file_frame.state().get('selection').first().toJSON();
+            // Do something with attachment.id and/or attachment.url here
+            input.trigger('file:select', [attachment]);
+            // console.log(attachment);
             input.val(attachment.id);
-            current_image_id = attachment.id; // Restore the main post ID
-
+            current_image_id = attachment.id;
+            // Restore the main post ID
             wp.media.model.settings.post.id = wp_media_post_id;
           }).on('open', function () {
             var selection = file_frame.state().get('selection');
-
             if (current_image_id) {
               selection.add(wp.media.attachment(current_image_id));
             }
           });
-        } // Set the post ID to what we want
+        }
+        // Set the post ID to what we want
         // file_frame.uploader.options.uploader.params.post_id = current_image_id;
         // Open frame
         // console.log('opening file_frame');
-
-
         file_frame.open();
       });
     });
   };
-
   $(document).ready(function () {
     var texteditor = editor.find('.editable');
     var texteditor_target = editor.find('textarea.editable-target');
     editor.find('h2 .toggle').on('click touchend', function (e) {
       $(e.target).closest('[class^="area"]').toggleClass('closed');
-    }); // bugfix: compose.js is preventing things like undo.
+    });
 
+    // bugfix: compose.js is preventing things like undo.
     editor.on('keypress keyup keydown', function (e) {
       e.stopPropagation();
-    }); // native JS solution for paste-fix
+    });
 
+    // native JS solution for paste-fix
     texteditor.get(0).addEventListener('paste', function () {
       // console.log('PASTE with visual editor');
       setTimeout(function () {
         // strip all HTML
         var text = texteditor.text();
         var html = texteditor.html();
-
         if (text !== html) {
-          text = text.replace('<br[^>]*>/g', '\n'); // console.log('cleaning from', html);
+          text = text.replace('<br[^>]*>/g', '\n');
+          // console.log('cleaning from', html);
           // console.log('cleaning to', text);
-
           texteditor.text(text).trigger('keyup');
         }
       }, 250);
-    }); // update target when editor edited
+    });
 
+    // update target when editor edited
     texteditor.on('blur keyup paste', function () {
       // console.log('interaction with visual editor: ', e);
       setTimeout(function () {
         texteditor_target.val(texteditor.text());
-      }, 250); // once we edit, remove the automatic update
+      }, 250);
 
+      // once we edit, remove the automatic update
       editor.removeClass('auto-title');
     });
     texteditor_target.on('blur keyup input', function () {
       // console.log('interaction with hidden field: ', e);
       texteditor_target.val(texteditor_target.val().replace(/&nbsp;<br/g, '<br'));
       texteditor_target.val(texteditor_target.val().replace(/&nbsp;\n/g, '\n'));
-      texteditor.text(texteditor_target.val()); // once we edit, remove the automatic update
+      texteditor.text(texteditor_target.val());
 
+      // once we edit, remove the automatic update
       editor.removeClass('auto-title');
-    }); // update editor when target edited
+    });
 
+    // update editor when target edited
     texteditor_target.on('blur keyup paste', function () {
       // console.log('copy hidden field to visual: ', e);
       texteditor.text(decode_entities(texteditor_target.val()));
-    }).trigger('paste'); // text color
+    }).trigger('paste');
 
+    // text color
     editor.find('#color').on('keyup blur paste input', function () {
       editor.get(0).style.setProperty('--text-color', hex_to_rgba($(this).val()));
-    }); // text background color
-
+    });
+    // text background color
     editor.find('#background_enabled,#background_color').on('keyup blur paste input change', function () {
       var use_background = editor.find('#background_enabled').is(':checked');
       editor.toggleClass('with-text-background', use_background);
       editor.get(0).style.setProperty('--text-background', hex_to_rgba(editor.find('#background_color').val()));
-    }).trigger('blur'); // text shadow options
-
+    }).trigger('blur');
+    // text shadow options
     editor.find('#text_shadow_color').on('keyup blur paste input', function () {
       editor.get(0).style.setProperty('--text-shadow-color', hex_to_rgba($(this).val()));
     }).trigger('blur');
@@ -1268,49 +1275,47 @@ function hex_to_rgba(hex) {
     }).trigger('change');
     editor.find('#disabled').on('change', function () {
       editor.toggleClass('bsi-disabled', $(this).is(':checked'));
-    }); // positions
+    });
 
+    // positions
     $('.wrap-position-grid input').on('change', function () {
       var c = $(this).closest('.wrap-position-grid');
       var n = c.data('name');
       editor.removeClass(function (index, className) {
         return (className.match(new RegExp('(^|\\s)' + n + '-\\S+', 'g')) || []).join(' ');
       }).addClass(n + '-' + c.find('input:checked').attr('value'));
-    }).trigger('change'); // logo size
+    }).trigger('change');
 
+    // logo size
     $('#image_logo_size').on('keyup blur paste input', function () {
       var v = parseInt('0' + $(this).val(), 10);
       var logo_min = parseInt($(this).attr('min'), 10);
       var logo_max = parseInt($(this).attr('max'), 10);
-
       if (v < logo_min) {
         v = logo_min;
       }
-
       if (v > logo_max) {
         v = logo_max;
       }
-
       editor.get(0).style.setProperty('--logo-scale', v);
-    }).trigger('blur'); // font size
+    }).trigger('blur');
 
+    // font size
     $('#text__font_size').on('keyup blur paste input', function () {
       var v = parseInt('0' + $(this).val(), 10);
       var fs_min = parseInt($(this).attr('min'), 10);
       var fs_max = parseInt($(this).attr('max'), 10);
-
       if (v < fs_min) {
         v = fs_min;
       }
-
       if (v > fs_max) {
         v = fs_max;
       }
-
       editor.get(0).style.setProperty('--font-size', v + 'px');
       editor.get(0).style.setProperty('--line-height', v * 1.25 + 'px');
-    }).trigger('blur'); // sliders
+    }).trigger('blur');
 
+    // sliders
     $('.add-slider').each(function () {
       var $input = $(this).find('input');
       $input.attr('size', 4).on('blur change', function () {
@@ -1341,7 +1346,6 @@ function hex_to_rgba(hex) {
         editor.addClass('with-logo');
       } else {
         editor.get(0).style.setProperty('--logo-width', 410); // this is the example logo
-
         editor.get(0).style.setProperty('--logo-height', 82);
         logoeditor.get(0).style.backgroundImage = '';
         editor.removeClass('with-logo');
@@ -1364,99 +1368,82 @@ function hex_to_rgba(hex) {
 
     $('.input-color', editor).each(function () {
       var $input = $(this).find('input');
-      new vanilla_picker({
+      new Picker({
         parent: this,
         popup: 'top',
         color: $input.val(),
         onChange: function onChange(color) {
           $input.val(color.hex.toUpperCase()).parent().get(0).style.setProperty('--the-color', hex_to_rgba(color.hex));
           $input.trigger('blur');
-        } // onDone: function(color){},
+        }
+        // onDone: function(color){},
         // onOpen: function(color){},
         // onClose: function(color){}
-
       });
     });
 
-    var getFeaturedImage = function getFeaturedImage() {}; // window.getFeaturedImage = getFeaturedImage;
-
-
+    var getFeaturedImage = function getFeaturedImage() {};
+    // window.getFeaturedImage = getFeaturedImage;
     var subscribe,
-        state = {
-      yoast: false,
-      rankmath: false,
-      featured: false
-    };
-
+      state = {
+        yoast: false,
+        rankmath: false,
+        featured: false
+      };
     if ($body.is('.block-editor-page')) {
       var select = wp.data.select;
       subscribe = wp.data.subscribe;
-
       var _coreDataSelect, _coreEditorSelect;
-
       var getMediaById = function getMediaById(mediaId) {
         if (!_coreDataSelect) {
           _coreDataSelect = select('core');
         }
-
         return _coreDataSelect.getMedia(mediaId);
       };
-
       var getPostAttribute = function getPostAttribute(attribute) {
         if (!_coreEditorSelect) {
           _coreEditorSelect = select('core/editor');
         }
-
         return _coreEditorSelect.getEditedPostAttribute(attribute);
       };
-
       getFeaturedImage = function getFeaturedImage() {
         var featuredImage = getPostAttribute('featured_media');
-
         if (featuredImage) {
           var mediaObj = getMediaById(featuredImage);
-
           if (mediaObj) {
             if (bsi_settings.image_size_name in mediaObj.media_details.sizes) {
               return mediaObj.media_details.sizes[bsi_settings.image_size_name].source_url;
             }
-
             return mediaObj.source_url;
           }
         }
-
         return null;
       };
     } else {
       getFeaturedImage = function getFeaturedImage() {
         return $('#set-post-thumbnail img').attr('src') || '';
       };
-    } // yoast?? no events on the input, use polling
+    }
 
-
+    // yoast?? no events on the input, use polling
     var getYoastFacebookImage = function getYoastFacebookImage() {
       var url;
       var $field = $('#facebook-url-input-metabox');
       var $preview = $('#wpseo-section-social > div:n' + 'th(0) .yoast-image-select__preview--image');
-
       if (!$field.length && !$preview.length) {
         return false;
       }
-
       url = $field.val();
-
       if (!url) {
         url = $preview.attr('src');
       }
-
       return url;
-    }; // rankmath?? no events on the input, use polling
+    };
 
-
+    // rankmath?? no events on the input, use polling
     var getRankMathFacebookImage = function getRankMathFacebookImage() {
       var url;
       var $preview = $('.rank-math-social-preview-facebook .rank-math-social-image-thumbnail');
-
       if (!$preview.length) {
         url = state.rankmath;
       } else if ($preview.attr('src').match(/wp-content\/plugins\/seo-by-rank-math\//)) {
@@ -1464,59 +1451,53 @@ function hex_to_rgba(hex) {
       } else {
         url = $preview.attr('src');
       }
-
       return url;
     };
-
     state = {
       yoast: getYoastFacebookImage(),
       rankmath: getYoastFacebookImage(),
       featured: getFeaturedImage()
-    }; // window.i_state = state;
+    };
+
+    // window.i_state = state;
     // window.i_gyfi = getYoastFacebookImage;
     // window.i_grmfi = getRankMathFacebookImage;
     // window.i_gfi = getFeaturedImage;
 
     var external_images_maybe_changed = function external_images_maybe_changed() {
       setTimeout(function () {
-        var url; // yoast
-
+        var url;
+        // yoast
         if ($('.area--background-alternate.image-source-yoast').length) {
           url = getYoastFacebookImage();
-
           if (state.yoast !== url) {
             state.yoast = url;
-
             if (url) {
               $('.area--background-alternate.image-source-yoast .background').get(0).style.backgroundImage = 'url("' + url + '")';
             } else {
               $('.area--background-alternate.image-source-yoast .background').get(0).style.backgroundImage = '';
             }
           }
-        } // rankmath
+        }
 
-
+        // rankmath
         if ($('.area--background-alternate.image-source-rankmath').length) {
           url = getRankMathFacebookImage();
-
           if (state.rankmath !== url) {
             state.rankmath = url;
-
             if (url) {
               $('.area--background-alternate.image-source-rankmath .background').get(0).style.backgroundImage = 'url("' + url + '")';
             } else {
               $('.area--background-alternate.image-source-rankmath .background').get(0).style.backgroundImage = '';
             }
           }
-        } // thumbnail
+        }
 
-
+        // thumbnail
         if ($('.area--background-alternate.image-source-thumbnail').length) {
           url = getFeaturedImage();
-
           if (state.featured !== url) {
             state.featured = url;
-
             if (url) {
               $('.area--background-alternate.image-source-thumbnail .background').get(0).style.backgroundImage = 'url("' + url + '")';
             } else {
@@ -1526,39 +1507,35 @@ function hex_to_rgba(hex) {
         }
       }, 500);
     };
-
     if ($body.is('.block-editor-page')) {
       var debounce;
       subscribe(function () {
         if (debounce) {
           clearTimeout(debounce);
         }
-
         debounce = setTimeout(function () {
           external_images_maybe_changed();
         }, 1000);
       });
     }
+    setInterval(external_images_maybe_changed, 5000);
 
-    setInterval(external_images_maybe_changed, 5000); // monitor available space for editor 
+    // monitor available space for editor 
     // you might be wondering, why?
     // we use zoom to scale the entire interface because otherwise we would have to size all images and the text based on viewport width... which is even more crap
-
     var monitor_space = function monitor_space() {
       var w = $('#branded-social-images').outerWidth();
-
       if (w < 600) {
         editor.get(0).style.setProperty('--editor-scale', (w - 26) / 600 * 0.5);
       } else {
         editor.get(0).style.setProperty('--editor-scale', 0.5);
       }
     };
-
     $(window).on('resize', monitor_space);
-    setTimeout(monitor_space, 1000); // monitor title
+    setTimeout(monitor_space, 1000);
 
+    // monitor title
     var title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php,.edit-tags-php').find('#post #title,.block-editor .editor-post-title textarea,#tag-name').get(0);
-
     var update_auto_title = function update_auto_title() {
       // sure?
       if (editor.is('.auto-title')) {
@@ -1569,12 +1546,10 @@ function hex_to_rgba(hex) {
         $(title_field).off('keyup change blur', update_auto_title);
       }
     };
-
     if ($body.is('.block-editor-page')) {
       // gutenberg
       subscribe(function () {
         title_field = $('.block-editor-page .block-editor .editor-post-title textarea,#tag-name').get(0);
-
         if (title_field && !$(title_field).is('bsi-bound')) {
           $(title_field).addClass('bsi-bound').on('keyup change blur', update_auto_title).trigger('keyup');
         }
