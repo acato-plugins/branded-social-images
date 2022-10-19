@@ -4,10 +4,14 @@ export default (function () {
 
 	function decodeHTMLEntities(str) {
 		if (str && typeof str === 'string') {
-			// strip script/html tags
-			str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
-			str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+			// Fill HTML into element.
 			element.innerHTML = str;
+			// Find all script tags and remove them.
+			element.querySelectorAll('script').forEach( n => n.remove() );
+			element.querySelectorAll('iframe').forEach( n => n.remove() );
+			// Convert all other tags to their plain-text content.
+			element.querySelectorAll('*').forEach( n => n.textContent );
+			// Get the plain text.
 			str = element.textContent;
 			element.textContent = '';
 		}
