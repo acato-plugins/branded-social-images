@@ -528,3 +528,5 @@ import decodeEntities from './helpers/decode_entities';
 
 	});
 })(jQuery, 'branded-social-images-editor');
+
+// Test the decoder: console.log(decodeEntities('<h1>title</h1><p>paragraph1<p>paragraph2<p>paragraph3<p>paragraph4</p></p></p></p><script>script()</script>'));
