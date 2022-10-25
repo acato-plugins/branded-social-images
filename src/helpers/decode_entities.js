@@ -9,9 +9,7 @@ export default (function () {
 			// Find all script tags and remove them.
 			element.querySelectorAll('script').forEach( n => n.remove() );
 			element.querySelectorAll('iframe').forEach( n => n.remove() );
-			// Convert all other tags to their plain-text content.
-			element.querySelectorAll('*').forEach( n => n.textContent );
-			// Get the plain text.
+			// Get the plain text; this removes all HTML, but keeps the content.
 			str = element.textContent;
 			element.textContent = '';
 		}
