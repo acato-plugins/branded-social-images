@@ -422,7 +422,7 @@ class Plugin {
 		 * 2. because it is in essence a page-modifier, WP considers this a page, therefore
 		 * - adds a trailing slash
 		 * - confusing caching plugins into thinking the content-type should be text/html
-		 * 3. the WP construction assumes an /endpoint/value/ set-up, requiring cleanup, see fileter rewrite_rules_array implementation below
+		 * 3. the WP construction assumes an /endpoint/value/ set-up, requiring cleanup, see filter rewrite_rules_array implementation below
 		 *
 		 * Why this way?
 		 *
