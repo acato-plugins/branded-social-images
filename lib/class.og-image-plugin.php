@@ -196,13 +196,6 @@ class Plugin {
 	const ADMIN_ICON = 'admin-icon.svg';
 
 	/**
-	 * The WordPress text-domain. If you change this, you also must change the filenames of the po and mo files in the 'languages' folder.
-	 *
-	 * @var string
-	 */
-	const TEXT_DOMAIN = 'bsi';
-
-	/**
 	 * The WordPress query-var variable name. In the rare case there is a conflict, this can be changed, but re-save permalinks after.
 	 *
 	 * @var string
@@ -463,7 +456,10 @@ class Plugin {
 				 * Make custom taxonomies work.
 				 */
 				$taxonomies          = get_taxonomies(
-					[ 'public' => true, '_builtin' => false ],
+					[
+						'public'   => true,
+						'_builtin' => false,
+					],
 					'objects'
 				);
 				$taxonomy_rules      = [];
@@ -1472,6 +1468,7 @@ class Plugin {
 
 		// text positioning.
 		list( $valign, $halign ) = $this->evaluate_positions( $this->text_options['top'], $this->text_options['right'], $this->text_options['bottom'], $this->text_options['left'] );
+		// Store values.
 		$this->text_options['valign'] = $valign;
 		$this->text_options['halign'] = $halign;
 
@@ -1498,11 +1495,11 @@ class Plugin {
 	public function evaluate_font_weight( $weight, $default = 400 ) {
 		$translate = Admin::font_weights();
 
-		if ( (int) $weight === 0 ) {
+		if ( 0 === (int) $weight ) {
 			$weight = $translate[ strtolower( $weight ) ] ?? $default;
 		}
 		$weight = floor( $weight / 100 ) * 100;
-		if ( $weight === 0.0 ) {
+		if ( 0.0 === $weight ) {
 			$weight = $default;
 		}
 		if ( $weight > 800 ) {
@@ -1522,7 +1519,7 @@ class Plugin {
 	 */
 	public function evaluate_font_style( $style, $default = 'normal' ) {
 		$allowed = [ 'normal', 'italic' ];
-		if ( ! in_array( $style, $allowed ) ) {
+		if ( ! in_array( $style, $allowedm, true ) ) {
 			return $default;
 		}
 
@@ -1532,7 +1529,7 @@ class Plugin {
 	/**
 	 * Get a font filename for a Google font.
 	 *
-	 * @param string     $font_family The font family
+	 * @param string     $font_family The font family.
 	 * @param int|string $font_weight The font weight.
 	 * @param string     $font_style  The font style.
 	 *
@@ -1540,12 +1537,12 @@ class Plugin {
 	 */
 	public function font_filename( $font_family, $font_weight, $font_style ): string {
 		if ( preg_match( '/google:(.+)/', $font_family, $m ) ) {
-			$italic = $font_style == 'italic' ? 'italic' : '';
+			$italic = 'italic' === $font_style ? 'italic' : '';
 
-			return $m[1] /* fontname */ . '-w' . $font_weight . ( $italic !== '' && $italic !== '0' ? '-' . $italic : '' ) . '.ttf';
+			return $m[1] /* fontname */ . '-w' . $font_weight . ( '' !== $italic ? '-' . $italic : '' ) . '.ttf';
 		}
 
-		// don't know what to do with any other
+		// don't know what to do with any other.
 		return '';
 	}
 
@@ -1560,26 +1557,43 @@ class Plugin {
 		if ( ! is_dir( $dir ) ) {
 			mkdir( $dir );
 		}
-		self::setError( 'storage', null );
+		self::set_error( 'storage', null );
 		if ( ! is_dir( $dir ) ) {
-			self::setError( 'storage', __( 'Could not create the storage directory in the uploads folder.', self::TEXT_DOMAIN ) . ' ' . __( 'In a WordPress site the uploads folder should always be writable.', self::TEXT_DOMAIN ) . ' ' . __( 'Please fix this.', self::TEXT_DOMAIN ) . ' ' . __( 'This error will disappear once the problem has been corrected.', self::TEXT_DOMAIN ) );
+			self::set_error( 'storage', __( 'Could not create the storage directory in the uploads folder.', 'bsi' ) . ' ' . __( 'In a WordPress site the uploads folder should always be writable.', 'bsi' ) . ' ' . __( 'Please fix this.', 'bsi' ) . ' ' . __( 'This error will disappear once the problem has been corrected.', 'bsi' ) );
 		}
 
 		return $dir;
 	}
 
-	public static function setError( $tag, $text ) {
+	/**
+	 * Set error for displaying.
+	 *
+	 * @param string $tag  A tag unique for this message.
+	 * @param string $text The message.
+	 *
+	 * @return void
+	 */
+	public static function set_error( $tag, $text ) {
 		$errors         = get_option( self::OPTION_PREFIX . 'image__errors', [] );
 		$errors[ $tag ] = $text;
 		$errors         = array_filter( $errors );
 		update_option( self::OPTION_PREFIX . 'image__og_logo_errors', $errors );
 	}
 
+	/**
+	 * Download a Google font.
+	 *
+	 * @param string     $font_family The font family name.
+	 * @param string|int $font_weight The font weight, bold, normal, or 400, 700 etc.
+	 * @param string     $font_style  The font style, either italic or empty.
+	 *
+	 * @return false|mixed|string
+	 */
 	public function download_font( $font_family, $font_weight, $font_style ) {
-		self::setError( 'font-family', null );
+		self::set_error( 'font-family', null );
 		$font_filename = $this->font_filename( $font_family, $font_weight, $font_style );
-		if ( $font_filename === '' || $font_filename === '0' ) {
-			self::setError( 'font-family', __( 'Don\'t know where to get this font.', self::TEXT_DOMAIN ) . ' ' . __( 'Sorry.', self::TEXT_DOMAIN ) );
+		if ( '' === $font_filename ) {
+			self::set_error( 'font-family', __( 'Don\'t know where to get this font.', 'bsi' ) . ' ' . __( 'Sorry.', 'bsi' ) );
 
 			return false;
 		}
@@ -1587,68 +1601,101 @@ class Plugin {
 			return $font_filename;
 		}
 		if ( preg_match( '/google:(.+)/', $font_family, $m ) ) {
-			$italic   = $font_style == 'italic' ? 'italic' : '';
-			$font_css = wp_remote_retrieve_body( wp_remote_get( 'https://fonts.googleapis.com/css?family=' . urlencode( $m[1] ) . ':' . $font_weight . $italic, [ 'useragent' => ' ' ] ) );
+			$italic   = 'italic' === $font_style ? 'italic' : '';
+			$font_css = wp_remote_retrieve_body( wp_remote_get( 'https://fonts.googleapis.com/css?family=' . rawurlencode( $m[1] ) . ':' . $font_weight . $italic, [ 'useragent' => ' ' ] ) );
 
 			if ( ! $font_css ) {
-				self::setError( 'font-family', __( 'Could not download font from Google Fonts.', self::TEXT_DOMAIN ) . ' ' . __( 'Please download yourself and upload here.', self::TEXT_DOMAIN ) );
+				self::set_error( 'font-family', __( 'Could not download font from Google Fonts.', 'bsi' ) . ' ' . __( 'Please download yourself and upload here.', 'bsi' ) );
 
 				return false;
 			}
-			// grab any url
-			self::setError( 'font-family', null );
+			// grab any url.
+			self::set_error( 'font-family', null );
 			if ( preg_match( '@https?://[^)]+[ot]tf@', $font_css, $n ) ) {
 				$font_ttf = wp_remote_retrieve_body( wp_remote_get( $n[0] ) );
 				$this->file_put_contents( $this->storage() . '/' . $font_filename, $font_ttf );
 
 				return $font_filename;
 			} else {
-				self::setError( 'font-family', __( 'This Google Fonts does not offer a TTF or OTF file.', self::TEXT_DOMAIN ) . ' ' . __( 'Sorry, cannot continue at this time.', self::TEXT_DOMAIN ) );
+				self::set_error( 'font-family', __( 'This Google Fonts does not offer a TTF or OTF file.', 'bsi' ) . ' ' . __( 'Sorry, cannot continue at this time.', 'bsi' ) );
 
 				return false;
 			}
 		}
 
-		// don't know what to do with any other
+		// don't know what to do with any other.
 		return $font_family;
 	}
 
+	/**
+	 * Wrapper for file_put_contents that creates the path to the file when needed, but only works if the target path is in the configured storage folder.
+	 *
+	 * @param string $filename Filepath.
+	 * @param string $content  Content.
+	 *
+	 * @return false|int
+	 *
+	 * @see file_put_contents()
+	 */
 	public function file_put_contents( $filename, $content ) {
-		// for security reasons, $filename must be in $this->storage()
+		// for security reasons, $filename must be in $this->storage() .
 		if ( substr( trim( $filename ), 0, strlen( $this->storage() ) ) !== $this->storage() ) {
 			return false;
 		}
 		$dirs = [];
-		$dir  = $filename; // we will be dirname-ing this
+		$dir  = $filename; // we will be dirname-ing this .
 
-		while ( ( $dir = dirname( $dir ) ) && $dir && $dir !== '.' && $dir !== $this->storage() && ! is_dir( $dir ) ) {
+		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition -- Intentional for recurse purposes.
+		while ( ( $dir = dirname( $dir ) ) && $dir && '.' !== $dir && $this->storage() !== $dir && ! is_dir( $dir ) ) {
 			array_unshift( $dirs, $dir );
 		}
 
 		array_map( 'mkdir', $dirs );
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents -- No. If your server needs the FTP methods for WordPress; time to move on to a better hosting platform.
 		return file_put_contents( $filename, $content );
 	}
 
+	/**
+	 * Evaluate percentage distance vertically.
+	 *
+	 * @param int|null|string $top    If set and ending in %, calculated against image height.
+	 * @param int|null|string $bottom If set and ending in %, calculated against image height.
+	 *
+	 * @return void
+	 */
 	private function evaluate_vertical( &$top, &$bottom ) {
-		if ( $top && substr( $top, - 1 ) == '%' ) {
+		if ( $top && '%' === substr( $top, - 1 ) ) {
 			$top = (int) floor( (int) $top / 100 * $this->height );
 		}
 
-		if ( $bottom && substr( $bottom, - 1 ) == '%' ) {
+		if ( $bottom && '%' === substr( $bottom, - 1 ) ) {
 			$bottom = (int) ceil( (int) $bottom / 100 * $this->height );
 		}
 	}
 
+	/**
+	 * Evaluate percentage distance horizontally.
+	 *
+	 * @param int|null|string $left  If set and ending in %, calculated against image width.
+	 * @param int|null|string $right If set and ending in %, calculated against image width.
+	 *
+	 * @return void
+	 */
 	private function evaluate_horizontal( &$left, &$right ) {
-		if ( $left && substr( $left, - 1 ) == '%' ) {
+		if ( $left && '%' === substr( $left, - 1 ) ) {
 			$left = (int) floor( (int) $left / 100 * $this->width );
 		}
-		if ( $right && substr( $right, - 1 ) == '%' ) {
+		if ( $right && '%' === substr( $right, - 1 ) ) {
 			$right = (int) ceil( (int) $right / 100 * $this->width );
 		}
 	}
 
+	/**
+	 * Evaluate logo options.
+	 *
+	 * @return void
+	 */
 	public function expand_logo_options() {
 		if ( empty( $this->logo_options['enabled'] ) && false !== $this->logo_options['enabled'] ) {
 			$this->logo_options['enabled'] = true;
@@ -1705,7 +1752,7 @@ class Plugin {
 			$this->logo_options['source_height']      = $sh;
 			$this->logo_options['source_aspectratio'] = $sa;
 		} else {
-			// not an image
+			// not an image.
 			$this->logo_options['file']    = false;
 			$this->logo_options['error']   = 'Not an image';
 			$this->logo_options['enabled'] = false;
@@ -1713,27 +1760,38 @@ class Plugin {
 			return;
 		}
 
-		// logo positioning
+		// logo positioning.
 		list( $valign, $halign ) = $this->evaluate_positions( $this->logo_options['top'], $this->logo_options['right'], $this->logo_options['bottom'], $this->logo_options['left'] );
 
 		$this->logo_options['valign'] = $valign;
 		$this->logo_options['halign'] = $halign;
 
-		// size w and h are bounding box!
+		// size w and h are bounding box!.
 		$this->logo_options['size'] = (int) $this->logo_options['size'];
 		$this->logo_options['size'] = min( self::MAX_LOGO_SCALE, $this->logo_options['size'] );
 		$this->logo_options['size'] = max( self::MIN_LOGO_SCALE, $this->logo_options['size'] );
 		$this->logo_options['w']    = $this->logo_options['size'] / 100 * $sw;
 		$this->logo_options['h']    = $this->logo_options['size'] / 100 * $sh;
+		// set size to a percentage.
 		$this->logo_options['size'] .= '%';
 
-		// resolve aspect issues
-		// -> this makes bounding box actual image size
+		// resolve aspect issues.
+		// -> this makes bounding box actual image size.
 		$scale                   = min( $this->logo_options['w'] / $sw, $this->logo_options['h'] / $sh );
 		$this->logo_options['w'] = $sw * $scale;
 		$this->logo_options['h'] = $sh * $scale;
 	}
 
+	/**
+	 * Evaluate locational position.
+	 *
+	 * @param null|int $top    The position offset-top.
+	 * @param null|int $right  The position offset-right.
+	 * @param null|int $bottom The position offset-bottom.
+	 * @param null|int $left   The position offset-left.
+	 *
+	 * @return string[]
+	 */
 	public function evaluate_positions( &$top, &$right, &$bottom, &$left ) {
 		$top    = empty( $top ) || 'null' === $top ? null : $top;
 		$right  = empty( $right ) || 'null' === $right ? null : $right;
@@ -1761,17 +1819,27 @@ class Plugin {
 		return [ $valign, $halign ];
 	}
 
+	/**
+	 * Runs on wp_head, as late as possible.
+	 *
+	 * @return void
+	 */
 	public static function late_head() {
 		if ( ! self::instance()->og_image_available ) {
 			return;
 		}
 		if ( ! self::instance()->page_already_has_og_image ) {
 			?>
-			<meta property="og:image" content="<?php print QueriedObject::instance()->og_image; ?>">
+			<meta property="og:image" content="<?php print esc_attr( QueriedObject::instance()->og_image ); ?>">
 			<?php
 		}
 	}
 
+	/**
+	 * Deprecated, do not use, here to prevent breaking sites.
+	 *
+	 * @return string
+	 */
 	public static function overrule_og_image(): string {
 		_deprecated_function( __FUNCTION__, '2.0.0', '' );
 		$og_url = QueriedObject::instance()->og_image;
@@ -1779,10 +1847,15 @@ class Plugin {
 		return apply_filters( 'bsi_image_url', $og_url );
 	}
 
+	/**
+	 * Allows overruling the Rank Math image type, using filter rank_math/opengraph/facebook/og_image_type .
+	 *
+	 * @return string
+	 */
 	public static function overrule_og_type(): string {
 		$ext = explode( '.', self::output_filename() );
 		$ext = end( $ext );
-		if ( $ext == 'jpg' ) {
+		if ( 'jpg' === $ext ) {
 			$ext = 'jpeg';
 		}
 
@@ -1793,11 +1866,11 @@ class Plugin {
 	 * DO NOT USE THIS TO GET THE URL FOR THE CURRENT PAGE/POST/...
 	 * Use QueriedObject::instance()->og_image for that.
 	 *
-	 * This function will not be updated to support more types and it may even be incorrect.
+	 * This function will not be updated to support more types, and it may even be incorrect.
 	 *
-	 * @param $object_id
-	 * @param $object_type
-	 * @param $base_type
+	 * @param int    $object_id   Object id, like, post-id.
+	 * @param string $object_type The object type, like 'post'.
+	 * @param string $base_type   The base object type. Unlike object_type, this can only be post or category.
 	 *
 	 * @return false|string
 	 */
@@ -1820,6 +1893,9 @@ class Plugin {
 		return false;
 	}
 
+	/**
+	 * Handler to fix the output of YoastSEO.
+	 */
 	public static function patch_wpseo_head() {
 		static $step;
 		if ( ! $step ) {
@@ -1837,10 +1913,16 @@ class Plugin {
 					$wpseo_head = preg_replace( '/og:image:width" content="(\d+)"/', 'og:image:width" content="' . self::instance()->width . '"', $wpseo_head );
 					$wpseo_head = preg_replace( '/og:image:height" content="(\d+)"/', 'og:image:height" content="' . self::instance()->height . '"', $wpseo_head );
 				}
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- No. Garbage In, Garbage Out.
 				print $wpseo_head;
 		}
 	}
 
+	/**
+	 * Runs on Init.
+	 *
+	 * @return void
+	 */
 	public static function init() {
 		$instance = self::instance();
 		if ( is_admin() ) {
@@ -1848,20 +1930,22 @@ class Plugin {
 			$admin->storage = $instance->storage();
 		}
 
-		load_plugin_textdomain( self::TEXT_DOMAIN, false, basename( dirname( __DIR__ ) ) . '/languages' );
+		load_plugin_textdomain( 'bsi', false, basename( dirname( __DIR__ ) ) . '/languages' );
 	}
 
 	/**
-	 * EXPERIMENTAL
+	 * EXPERIMENTAL.
 	 *
-	 * @param $source
+	 * @param string $source Source image path.
 	 *
 	 * @return mixed|string
+	 *
 	 * @uses exec to execute system command. this might not be supported.
-	 * @see  file php.ini. disable_functions = "show_source,system, shell_exec,exec" <- remove exec
+	 *
+	 * @see  file php.ini. disable_functions = "show_source,system,shell_exec,exec" <- remove exec
 	 */
 	public static function convert_webp_to_png( $source ) {
-		$support = self::maybe_fake_support_webp(); // just in case
+		$support = self::maybe_fake_support_webp(); // just in case.
 		$target  = false;
 		if ( $support ) {
 			$bin     = dirname( __DIR__ ) . '/bin';
@@ -1869,10 +1953,12 @@ class Plugin {
 			$command = "$bin/dwebp \"$source\" -o \"$target\"";
 			ob_start();
 			try {
-				print $command;
+				// @phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+				// print $command; .
+				// @phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec
 				exec( $command );
 			} catch ( Exception $e ) {
-
+				$target = false;
 			}
 			ob_get_clean();
 		}
@@ -1885,26 +1971,31 @@ class Plugin {
 	}
 
 	/**
+	 * Try to fake WebP support in GD by using tools to convert the file.
+	 *
 	 * @return bool
-	 * @uses exec to execute system command. this might not be supported.
+	 *
 	 * @see  file php.ini. disable_functions = "show_source,system, shell_exec,exec" <- remove exec
+	 *
+	 * @uses exec to execute system command. this might not be supported.
 	 */
 	public static function maybe_fake_support_webp(): bool {
 		$support = false;
 
 		$bin = dirname( __DIR__ ) . '/bin';
-		// not downloaded yet
+		// not downloaded yet.
 		if ( function_exists( 'exec' ) && ! file_exists( "$bin/dwebp" ) ) {
-			// can we fake support?
+			// can we fake support?.
 			ob_start();
 			try {
+				// @phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec -- We know! We try anyway.
 				exec( $bin . '/download.sh' );
 			} catch ( Exception $e ) {
-
+				$support = false;
 			}
 			ob_end_clean();
 		}
-		// downloaded and ran conversion tool successfully
+		// downloaded and ran conversion tool successfully.
 		if ( file_exists( "$bin/dwebp" ) && file_exists( $bin . '/can-execute-binaries-from-php.success' ) ) {
 			$support = true;
 		}
@@ -1912,6 +2003,14 @@ class Plugin {
 		return $support;
 	}
 
+	/**
+	 * Fetches pixel corrections dor fonts.
+	 *
+	 * @param string $font    The font.
+	 * @param string $section A section of the tweak to fetch.
+	 *
+	 * @return false|mixed
+	 */
 	public static function font_rendering_tweaks_for( $font, $section ) {
 		$tweaks = self::font_rendering_tweaks();
 		$b      = basename( $font );
@@ -1927,10 +2026,15 @@ class Plugin {
 		return false;
 	}
 
+	/**
+	 * Get the list of supported Google fonts (as in: packaged with the plugin).
+	 *
+	 * @return array
+	 */
 	public static function default_google_fonts(): array {
 		return array_map(
 			function ( $font ) {
-				// PATCH THE DATA
+				// PATCH THE DATA.
 				$font['font_family'] = $font['font_name'];
 				unset( $font['admin'], $font['gd'] );
 
@@ -1940,9 +2044,17 @@ class Plugin {
 		);
 	}
 
+	/**
+	 * Fonts packaged with the plugin with their pixel-perfect tweaking values.
+	 *
+	 * @param bool $write_json Write the data back to disk.
+	 * @param bool $read_disk  Read from disk.
+	 *
+	 * @return array
+	 */
 	public static function font_rendering_tweaks( $write_json = false, $read_disk = true ): array {
 		$tweaks = [
-			/** letter-spacing: px, line-height: factor */
+			// letter-spacing: px, line-height: factor .
 			'Anton'             => [
 				'font_name'   => 'Anton',
 				'font_weight' => 400,
@@ -2019,15 +2131,16 @@ class Plugin {
 				if ( empty( $tweaks[ $font ] ) ) {
 					$tweaks[ $font ] = [];
 				}
+				// @phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- WHAT!? If file_get_contents doesn't work, then PHP cannot read any file. Why is this a rule?.
 				$tweaks[ $font ] = array_merge( $tweaks[ $font ], json_decode( file_get_contents( $file ), true ) );
 			}
 		}
 
 		if ( $write_json ) {
 			foreach ( $tweaks as $font => $data ) {
-				self::instance()->file_put_contents( self::instance()->storage() . '/' . $font . '.json', json_encode( $data, JSON_PRETTY_PRINT ) );
+				self::instance()->file_put_contents( self::instance()->storage() . '/' . $font . '.json', wp_json_encode( $data, JSON_PRETTY_PRINT ) );
 			}
-			$DOCUMENTATION = <<< EODOC
+			$documentation_literal = <<< EODOC
 Files in here:
 - *.otf, *.ttf:             These are the fonts :) You can place any TTF or OTF font here.
                             Just make sure you have the proper license for the font(s).
@@ -2066,31 +2179,40 @@ The gd sub-tree can contain:
 Need more? Let us know. See the WordPress BSI Settings panel for details on contacting us.
 EODOC;
 			// force Windows line endings, because I KNOW that most users that need this documentation are not Linux, Unix or macOS users.
-			$DOCUMENTATION = str_replace( "\n", "\r\n", str_replace( "\r", '', $DOCUMENTATION ) );
-			self::instance()->file_put_contents( self::instance()->storage() . '/what-are-these-files.txt', $DOCUMENTATION );
+			$documentation_literal = str_replace( "\n", "\r\n", str_replace( "\r", '', $documentation_literal ) );
+			self::instance()->file_put_contents( self::instance()->storage() . '/what-are-these-files.txt', $documentation_literal );
 		}
 
 		return $tweaks;
 	}
 
+	/**
+	 * Items in the position grid.
+	 *
+	 * @return array
+	 */
 	public static function position_grid(): array {
 		return [
-			'top-left'     => __( 'Top Left', self::TEXT_DOMAIN ),
-			'top'          => __( 'Top Center', self::TEXT_DOMAIN ),
-			'top-right'    => __( 'Top Right', self::TEXT_DOMAIN ),
-			'left'         => __( 'Left Middle', self::TEXT_DOMAIN ),
-			'center'       => __( 'Centered', self::TEXT_DOMAIN ),
-			'right'        => __( 'Right Middle', self::TEXT_DOMAIN ),
-			'bottom-left'  => __( 'Bottom Left', self::TEXT_DOMAIN ),
-			'bottom'       => __( 'Bottom Center', self::TEXT_DOMAIN ),
-			'bottom-right' => __( 'Bottom Right', self::TEXT_DOMAIN ),
+			'top-left'     => __( 'Top Left', 'bsi' ),
+			'top'          => __( 'Top Center', 'bsi' ),
+			'top-right'    => __( 'Top Right', 'bsi' ),
+			'left'         => __( 'Left Middle', 'bsi' ),
+			'center'       => __( 'Centered', 'bsi' ),
+			'right'        => __( 'Right Middle', 'bsi' ),
+			'bottom-left'  => __( 'Bottom Left', 'bsi' ),
+			'bottom'       => __( 'Bottom Center', 'bsi' ),
+			'bottom-right' => __( 'Bottom Right', 'bsi' ),
 		];
 	}
 
 	/**
-	 * @function used to combat injection/request forgery
+	 * Used to combat injection/request forgery.
+	 *
+	 * @param string|false $section Limit processing to this section.
+	 *
+	 * @return array
 	 */
-	public static function get_valid_POST_keys( $section = false ): array {
+	public static function get_valid_post_keys( $section = false ): array {
 		$list  = self::field_list();
 		$valid = [];
 		foreach ( $list as $_section => $sublist ) {
@@ -2108,318 +2230,309 @@ EODOC;
 		return $valid;
 	}
 
+	/**
+	 * Field lists for the interface.
+	 *
+	 * @return array
+	 */
 	public static function field_list(): array {
 		$qo = QueriedObject::instance();
 
-		$image_comment = __( 'The following process is used to determine the OG:Image (in order of importance)', self::TEXT_DOMAIN ) . ':
-<ol><li>' . __( 'Branded Social Image on page/post', self::TEXT_DOMAIN ) . '</li>';
+		$image_comment = __( 'The following process is used to determine the OG:Image (in order of importance)', 'bsi' ) . ':
+<ol><li>' . __( 'Branded Social Image on page/post', 'bsi' ) . '</li>';
 		if ( defined( 'WPSEO_VERSION' ) ) {
-			$image_comment .= '<li>' . __( 'Yoast Social image on page/post', self::TEXT_DOMAIN ) . '</li>';
+			$image_comment .= '<li>' . __( 'Yoast Social image on page/post', 'bsi' ) . '</li>';
 		}
-		$image_comment .= '<li>' . __( 'Featured image on page/post (when checked in general settings)', self::TEXT_DOMAIN ) . '</li>';
-		$image_comment .= '<li>' . __( 'Fallback Branded Social image in general settings', self::TEXT_DOMAIN ) . '</li></ol>';
+		$image_comment .= '<li>' . __( 'Featured image on page/post (when checked in general settings)', 'bsi' ) . '</li>';
+		$image_comment .= '<li>' . __( 'Fallback Branded Social image in general settings', 'bsi' ) . '</li></ol>';
 
 		$options = [
 			'admin' => [
-				'disabled'      => [
+				'disabled'            => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Select to disable the plugin Branded Social Images by default.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Select to disable the plugin Branded Social Images by default.', 'bsi' ),
 					'default'   => 'off',
 				],
-				'menu_location' => [
+				'menu_location'       => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'select',
-					'label'     => __( 'Where does Branded Social Images live in the menu?', self::TEXT_DOMAIN ),
+					'label'     => __( 'Where does Branded Social Images live in the menu?', 'bsi' ),
 					'default'   => 'main',
 					'options'   => [
-						'main'    => __( 'At the main level', self::TEXT_DOMAIN ),
-						'options' => __( 'In the Settings sub-menu', self::TEXT_DOMAIN ),
-						'media'   => __( 'In the Media sub-menu', self::TEXT_DOMAIN ),
+						'main'    => __( 'At the main level', 'bsi' ),
+						'options' => __( 'In the Settings sub-menu', 'bsi' ),
+						'media'   => __( 'In the Media sub-menu', 'bsi' ),
 					],
 				],
-				'meta_location' => [
+				'meta_location'       => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'select',
-					'label'     => __( 'Branded Social Images meta-box location', self::TEXT_DOMAIN ),
+					'label'     => __( 'Branded Social Images meta-box location', 'bsi' ),
 					'default'   => 'advanced',
 					'options'   => [
-						'advanced' => __( 'Below the content editor', self::TEXT_DOMAIN ),
-						'side'     => __( 'In the sidebar', self::TEXT_DOMAIN ),
+						'advanced' => __( 'Below the content editor', 'bsi' ),
+						'side'     => __( 'In the sidebar', 'bsi' ),
 					],
 				],
-
 				'image'               => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'image',
 					'types'     => 'image/png,image/jpeg,image/webp',
 					'class'     => '-no-remove',
-					'label'     => __( 'Fallback OG:Image.', self::TEXT_DOMAIN ),
-					'comment'   => __( 'Used for any page/post that has no OG image selected.', self::TEXT_DOMAIN ) . ' ' . __( 'You can use JPEG and PNG.', self::TEXT_DOMAIN ) . ' ' . __( 'Recommended size: 1200x630 pixels.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Fallback OG:Image.', 'bsi' ),
+					'comment'   => __( 'Used for any page/post that has no OG image selected.', 'bsi' ) . ' ' . __( 'You can use JPEG and PNG.', 'bsi' ) . ' ' . __( 'Recommended size: 1200x630 pixels.', 'bsi' ),
 				],
 				'image_use_thumbnail' => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Use the WordPress Featured image.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Use the WordPress Featured image.', 'bsi' ),
 					'default'   => 'on',
 					'info-icon' => 'dashicons-info',
 					'info'      => $image_comment,
 				],
-
-				'image_logo'      => [
+				'image_logo'          => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'image',
 					'types'     => 'image/gif,image/png',
-					'label'     => __( 'Your logo', self::TEXT_DOMAIN ),
-					'comment'   => __( 'Image should be approximately 600 pixels wide/high.', self::TEXT_DOMAIN ) . ' ' . __( 'Use a transparent PNG for best results.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Your logo', 'bsi' ),
+					'comment'   => __( 'Image should be approximately 600 pixels wide/high.', 'bsi' ) . ' ' . __( 'Use a transparent PNG for best results.', 'bsi' ),
 				],
-				'logo_position'   => [
+				'logo_position'       => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'radios',
 					'class'     => 'position-grid',
 					'options'   => self::position_grid(),
-					'label'     => __( 'Default logo position', self::TEXT_DOMAIN ),
+					'label'     => __( 'Default logo position', 'bsi' ),
 					'default'   => 'top-left',
 				],
-				'image_logo_size' => [
+				'image_logo_size'     => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'slider',
 					'class'     => 'single-slider',
-					'label'     => __( 'Logo-scale (%)', self::TEXT_DOMAIN ),
+					'label'     => __( 'Logo-scale (%)', 'bsi' ),
 					'comment'   => '',
 					'default'   => '100',
 					'min'       => self::MIN_LOGO_SCALE,
 					'max'       => self::MAX_LOGO_SCALE,
 					'step'      => 1,
 				],
-
-				'text'             => [
+				'text'                => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'class'     => 'hidden editable-target',
 					'type'      => 'textarea',
-					'label'     => __( 'The text to overlay if no other text or title can be found.', self::TEXT_DOMAIN ),
-					'comment'   => __( 'This should be a generic text that is applicable to the entire website.', self::TEXT_DOMAIN ),
+					'label'     => __( 'The text to overlay if no other text or title can be found.', 'bsi' ),
+					'comment'   => __( 'This should be a generic text that is applicable to the entire website.', 'bsi' ),
 					'default'   => self::instance()->dummy_data( 'text' ),
 				],
-				'text__font'       => [
+				'text__font'          => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'select',
-					'label'     => __( 'Select a font', self::TEXT_DOMAIN ),
+					'label'     => __( 'Select a font', 'bsi' ),
 					'options'   => self::get_font_list(),
 					'default'   => 'Roboto-Bold',
 				],
-				'text__ttf_upload' => [
+				'text__ttf_upload'    => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'file',
 					'types'     => 'font/ttf,font/otf',
-					'label'     => __( 'Font upload', self::TEXT_DOMAIN ),
-					'upload'    => __( 'Upload .ttf/.otf file', self::TEXT_DOMAIN ),
+					'label'     => __( 'Font upload', 'bsi' ),
+					'upload'    => __( 'Upload .ttf/.otf file', 'bsi' ),
 					'info-icon' => 'dashicons-info',
-					'info'      => __( 'Custom font must be a .ttf or .otf file.', self::TEXT_DOMAIN ) . ' ' . __( 'You\'re responsible for the proper permissions and usage rights of the font.', self::TEXT_DOMAIN ),
+					'info'      => __( 'Custom font must be a .ttf or .otf file.', 'bsi' ) . ' ' . __( 'You\'re responsible for the proper permissions and usage rights of the font.', 'bsi' ),
 				],
-				// 'text__google_download' => ['namespace' => self::DEFAULTS_PREFIX, 'type' => 'text', 'label' => 'Google Font Download', 'comment' => 'Enter a Google font name as it is listed on fonts.google.com'],
-
-				'text_position'      => [
+				'text_position'       => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'radios',
 					'class'     => 'position-grid',
-					'label'     => __( 'Text position', self::TEXT_DOMAIN ),
+					'label'     => __( 'Text position', 'bsi' ),
 					'options'   => self::position_grid(),
 					'default'   => 'bottom-left',
 				],
-				'color'              => [
+				'color'               => [
 					'namespace'  => self::DEFAULTS_PREFIX,
 					'type'       => 'color',
 					'attributes' => 'rgba',
-					'label'      => __( 'Default Text color', self::TEXT_DOMAIN ),
+					'label'      => __( 'Default Text color', 'bsi' ),
 					'default'    => '#FFFFFFFF',
 				],
-				'text__font_size'    => [
+				'text__font_size'     => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'slider',
 					'class'     => 'single-slider',
-					'label'     => __( 'Font-size (px)', self::TEXT_DOMAIN ),
+					'label'     => __( 'Font-size (px)', 'bsi' ),
 					'comment'   => '',
 					'default'   => self::DEF_FONT_SIZE,
 					'min'       => self::MIN_FONT_SIZE,
 					'max'       => self::MAX_FONT_SIZE,
 					'step'      => 1,
 				],
-				'background_color'   => [
+				'background_color'    => [
 					'namespace'  => self::DEFAULTS_PREFIX,
 					'type'       => 'color',
 					'attributes' => 'rgba',
-					'label'      => __( 'Text background color', self::TEXT_DOMAIN ),
+					'label'      => __( 'Text background color', 'bsi' ),
 					'default'    => '#66666666',
 				],
-				'background_enabled' => [
+				'background_enabled'  => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Use text background', self::TEXT_DOMAIN ),
+					'label'     => __( 'Use text background', 'bsi' ),
 					'value'     => 'on',
 					'default'   => 'on',
 				],
-
-				'text_stroke_color' => [
+				'text_stroke_color'   => [
 					'namespace'  => self::DEFAULTS_PREFIX,
 					'type'       => 'text',
 					'color',
 					'attributes' => 'rgba',
-					'label'      => __( 'Stroke color', self::TEXT_DOMAIN ),
+					'label'      => __( 'Stroke color', 'bsi' ),
 					'default'    => '#00000000',
 				],
-				'text_stroke'       => [
+				'text_stroke'         => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'text',
-					'label'     => __( 'Default stroke width', self::TEXT_DOMAIN ),
+					'label'     => __( 'Default stroke width', 'bsi' ),
 					'default'   => 0,
 				],
-
 				'text_shadow_color'   => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'color',
-					'label'     => __( 'Default Text shadow color', self::TEXT_DOMAIN ),
+					'label'     => __( 'Default Text shadow color', 'bsi' ),
 					'#00000000',
 				],
 				'text_shadow_top'     => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'text',
-					'label'     => __( 'Shadow offset - vertical.', self::TEXT_DOMAIN ) . ' ' . __( 'Negative numbers to top, Positive numbers to bottom.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Shadow offset - vertical.', 'bsi' ) . ' ' . __( 'Negative numbers to top, Positive numbers to bottom.', 'bsi' ),
 					'default'   => '-2',
 				],
 				'text_shadow_left'    => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'text',
-					'label'     => __( 'Shadow offset - horizontal.', self::TEXT_DOMAIN ) . ' ' . __( 'Negative numbers to left, Positive numbers to right.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Shadow offset - horizontal.', 'bsi' ) . ' ' . __( 'Negative numbers to left, Positive numbers to right.', 'bsi' ),
 					'default'   => '2',
 				],
 				'text_shadow_enabled' => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Use a text shadow', self::TEXT_DOMAIN ),
+					'label'     => __( 'Use a text shadow', 'bsi' ),
 					'value'     => 'on',
 					'default'   => 'off',
 				],
 			],
 			'meta'  => [
-				'disabled'     => [
+				'disabled'            => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Select to disable the plugin Branded Social Images for this post.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Select to disable the plugin Branded Social Images for this post.', 'bsi' ),
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'disabled', 'off' ),
-					'comment'   => '<div class="disabled-notice">' . __( 'The plugin Branded Social Images is disabled for this post.', self::TEXT_DOMAIN ) . '</div>',
+					'comment'   => '<div class="disabled-notice">' . __( 'The plugin Branded Social Images is disabled for this post.', 'bsi' ) . '</div>',
 				],
-				'text_enabled' => [
+				'text_enabled'        => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Display text on this image.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Display text on this image.', 'bsi' ),
 					'default'   => 'yes',
 					'value'     => 'yes',
 				],
-
-				'image' => [
+				'image'               => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'image',
 					'types'     => 'image/png,image/jpeg,image/webp',
-					'label'     => __( 'You can upload/select a specific Social Image here', self::TEXT_DOMAIN ),
-					'comment'   => __( 'You can use JPEG and PNG.', self::TEXT_DOMAIN ) . ' ' . __( 'Recommended size: 1200x630 pixels.', self::TEXT_DOMAIN ),
+					'label'     => __( 'You can upload/select a specific Social Image here', 'bsi' ),
+					'comment'   => __( 'You can use JPEG and PNG.', 'bsi' ) . ' ' . __( 'Recommended size: 1200x630 pixels.', 'bsi' ),
 					'info-icon' => 'dashicons-info',
 					'info'      => $image_comment,
 				],
-
-				'text'          => [
+				'text'                => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'textarea',
 					'class'     => 'hidden editable-target',
-					'label'     => __( 'Text on image', self::TEXT_DOMAIN ),
+					'label'     => __( 'Text on image', 'bsi' ),
 				],
-				'color'         => [
+				'color'               => [
 					'namespace'  => self::OPTION_PREFIX,
 					'type'       => 'color',
 					'attributes' => 'rgba',
-					'label'      => __( 'Text color', self::TEXT_DOMAIN ),
+					'label'      => __( 'Text color', 'bsi' ),
 					'default'    => get_option( self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF' ),
 				],
-				'text_position' => [
+				'text_position'       => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'radios',
 					'class'     => 'position-grid',
-					'label'     => __( 'Text position', self::TEXT_DOMAIN ),
+					'label'     => __( 'Text position', 'bsi' ),
 					'options'   => self::position_grid(),
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'text_position', 'bottom-left' ),
 				],
-
-				'background_color' => [
+				'background_color'    => [
 					'namespace'  => self::OPTION_PREFIX,
 					'type'       => 'color',
 					'attributes' => 'rgba',
-					'label'      => __( 'Text background color', self::TEXT_DOMAIN ),
+					'label'      => __( 'Text background color', 'bsi' ),
 					'default'    => get_option( self::DEFAULTS_PREFIX . 'background_color', '#66666666' ),
 				],
-
-				'text_stroke_color' => [
+				'text_stroke_color'   => [
 					'namespace'  => self::OPTION_PREFIX,
 					'type'       => 'color',
 					'attributes' => 'rgba',
-					'label'      => __( 'Stroke color', self::TEXT_DOMAIN ),
+					'label'      => __( 'Stroke color', 'bsi' ),
 					'default'    => get_option( self::DEFAULTS_PREFIX . 'text_stroke_color', '#00000000' ),
 				],
-				'text_stroke'       => [
+				'text_stroke'         => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'text',
-					'label'     => __( 'Default stroke width', self::TEXT_DOMAIN ),
+					'label'     => __( 'Default stroke width', 'bsi' ),
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'text_stroke', '0' ),
 				],
-
 				'text_shadow_color'   => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'color',
-					'label'     => __( 'Text shadow color', self::TEXT_DOMAIN ),
+					'label'     => __( 'Text shadow color', 'bsi' ),
 					get_option( self::DEFAULTS_PREFIX . 'text_shadow', '#00000000' ),
 				],
 				'text_shadow_top'     => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'text',
-					'label'     => __( 'Shadow offset - vertical.', self::TEXT_DOMAIN ) . ' ' . __( 'Negative numbers to top, Positive numbers to bottom.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Shadow offset - vertical.', 'bsi' ) . ' ' . __( 'Negative numbers to top, Positive numbers to bottom.', 'bsi' ),
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'shadow_top', '-2' ),
 				],
 				'text_shadow_left'    => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'text',
-					'label'     => __( 'Shadow offset - horizontal.', self::TEXT_DOMAIN ) . ' ' . __( 'Negative numbers to left, Positive numbers to right.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Shadow offset - horizontal.', 'bsi' ) . ' ' . __( 'Negative numbers to left, Positive numbers to right.', 'bsi' ),
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'shadow_left', '2' ),
 				],
 				'text_shadow_enabled' => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Use a text shadow', self::TEXT_DOMAIN ),
-					'comment'   => __( 'Will improve readability of light text on light background.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Use a text shadow', 'bsi' ),
+					'comment'   => __( 'Will improve readability of light text on light background.', 'bsi' ),
 					'value'     => 'on',
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'shadow_enabled', 'off' ),
 				],
-
-				'logo_enabled'  => [
+				'logo_enabled'        => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Use a logo on this image?', self::TEXT_DOMAIN ),
+					'label'     => __( 'Use a logo on this image?', 'bsi' ),
 					'default'   => 'yes',
-					'comment'   => __( 'Uncheck if you do not wish a logo on this image, or choose a position below.', self::TEXT_DOMAIN ),
+					'comment'   => __( 'Uncheck if you do not wish a logo on this image, or choose a position below.', 'bsi' ),
 				],
-				'logo_position' => [
+				'logo_position'       => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'radios',
-					'label'     => __( 'Logo position', self::TEXT_DOMAIN ),
+					'label'     => __( 'Logo position', 'bsi' ),
 					'class'     => 'position-grid',
 					'options'   => self::position_grid(),
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'logo_position', 'top-left' ),
 				],
-
-				'image_logo' => [
+				'image_logo'          => [
 					'namespace' => self::DO_NOT_RENDER,
 					'type'      => 'image',
 					'types'     => 'image/gif,image/png',
-					'label'     => __( 'Your logo', self::TEXT_DOMAIN ),
-					'comment'   => __( 'Image should be approximately 600 pixels wide/high.', self::TEXT_DOMAIN ) . ' ' . __( 'Use a transparent PNG for best results.', self::TEXT_DOMAIN ),
+					'label'     => __( 'Your logo', 'bsi' ),
+					'comment'   => __( 'Image should be approximately 600 pixels wide/high.', 'bsi' ) . ' ' . __( 'Use a transparent PNG for best results.', 'bsi' ),
 					'default'   => get_option( self::OPTION_PREFIX . 'image_logo' ),
 				],
 			],
@@ -2482,7 +2595,7 @@ EODOC;
 		 */
 		foreach ( apply_filters( 'bsi_editor_fields', [] ) as $group => $fields ) {
 			// no, you are not allowed to override existing groups.
-			if ( $group === 'admin' || $group === 'meta' ) {
+			if ( 'admin' === $group || 'meta' === $group ) {
 				continue;
 			}
 			$options[ $group ] = $fields;
@@ -2491,8 +2604,13 @@ EODOC;
 		return $options;
 	}
 
+	/**
+	 * Grab the text for the image in a chain of options.
+	 *
+	 * @return array
+	 */
 	public static function text_fallback_chain(): array {
-		static $chain; // prevent double work
+		static $chain; // prevent double work.
 		if ( $chain ) {
 			return $chain;
 		}
@@ -2517,6 +2635,7 @@ EODOC;
 			$new_post = 'new' === $object_id;
 
 			if ( self::setting( 'use_bare_post_title' ) && ! $new_post ) {
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 				$title = apply_filters( 'the_title', $function( $object_id ), $object_id );
 				if ( $title ) {
 					$layers['wordpress'] = $title;
@@ -2529,9 +2648,9 @@ EODOC;
 					$layers['scraped'] = $title;
 				}
 			}
-			if ( ! $title ) { // no text from scraping, build it
+			if ( ! $title ) { // no text from scraping, build it.
 				$title = self::title_format( $object_id, $new_post );
-				if ( $title !== '' && $title !== '0' ) {
+				if ( '' !== $title ) {
 					$layers['by-format'] = $title;
 				}
 			}
@@ -2539,9 +2658,20 @@ EODOC;
 			$layers['default'] = get_option( self::DEFAULTS_PREFIX . 'text', esc_attr( self::instance()->dummy_data( 'text' ) ) );
 		}
 
-		return $chain = array_filter( $layers );
+		// Set chain in the static.
+		$chain = array_filter( $layers );
+
+		// Return it. Next time, the static will be used.
+		return $chain;
 	}
 
+	/**
+	 * Grab the image for the social-image in a chain of options.
+	 *
+	 * @param bool $with_post Include the image selected with the post?.
+	 *
+	 * @return array
+	 */
 	public static function image_fallback_chain( $with_post = false ): array {
 		list( $object_id, $object_type, $base_type ) = QueriedObject::instance()->getData();
 
@@ -2549,23 +2679,23 @@ EODOC;
 			return [];
 		}
 
-		// layers are stacked in order, bottom first
+		// layers are stacked in order, bottom first.
 		$layers = [];
-		// layer 1: the configured default
+		// layer 1: the configured default.
 		$settings           = self::field_list()['admin'];
 		$layers['settings'] = $settings['image']['current_value'];
-		// layer 2, if enabled, the thumbnail/featured
+		// layer 2, if enabled, the thumbnail/featured.
 		if ( 'post' === $base_type && 'on' === $settings['image_use_thumbnail']['current_value'] ) {
 			$layers['thumbnail'] = get_post_thumbnail_id( get_the_ID() );
 		}
-		// layer 3, if available, social plugins
+		// layer 3, if available, social plugins.
 
-		// maybe Yoast SEO?
+		// maybe Yoast SEO?.
 		if ( 'post' === $base_type && defined( 'WPSEO_VERSION' ) ) {
 			$layers['yoast'] = get_post_meta( get_the_ID(), '_yoast_wpseo_opengraph-image-id', true );
 		}
 
-		// maybe RankMath? // latest rank math uses thumbnail ?????
+		// maybe RankMath? Latest version of rank math uses thumbnail ?????.
 		if ( 'post' === $base_type && class_exists( RankMath::class ) ) {
 			$layers['rankmath'] = get_post_meta( get_the_ID(), 'rank_math_facebook_image_id', true );
 		}
@@ -2584,6 +2714,11 @@ EODOC;
 		return $layers;
 	}
 
+	/**
+	 * Get a list of fonts.
+	 *
+	 * @return array
+	 */
 	public static function get_font_list(): array {
 		$fonts   = Admin::valid_fonts();
 		$options = [];
@@ -2599,6 +2734,13 @@ EODOC;
 		return $options;
 	}
 
+	/**
+	 * Handles the Admin Bar items.
+	 *
+	 * @param \WP_Admin_Bar $admin_bar The admin bar.
+	 *
+	 * @return void
+	 */
 	public static function admin_bar( $admin_bar ) {
 		global $pagenow;
 		$qo = QueriedObject::instance();
@@ -2608,15 +2750,15 @@ EODOC;
 
 			$args = [
 				'id'    => self::ADMIN_SLUG . '-inspector',
-				'title' => self::icon() . __( 'Inspect Social Image', self::TEXT_DOMAIN ),
+				'title' => self::icon() . __( 'Inspect Social Image', 'bsi' ),
 				'href'  => self::EXTERNAL_INSPECTOR,
 				'meta'  => [
 					'target' => '_blank',
-					'title'  => __( 'Shows how this post is shared using an external, unaffiliated service.', self::TEXT_DOMAIN ),
+					'title'  => __( 'Shows how this post is shared using an external, unaffiliated service.', 'bsi' ),
 				],
 			];
 
-			$args['href'] = sprintf( $args['href'], urlencode( $permalink ) );
+			$args['href'] = sprintf( $args['href'], rawurlencode( $permalink ) );
 			$admin_bar->add_node( $args );
 
 			if (
@@ -2626,7 +2768,7 @@ EODOC;
 				$args = [
 					'id'     => self::ADMIN_SLUG . '-view',
 					'parent' => self::ADMIN_SLUG . '-inspector',
-					'title'  => __( 'View Social Image', self::TEXT_DOMAIN ),
+					'title'  => __( 'View Social Image', 'bsi' ),
 					'href'   => $og_image,
 					'meta'   => [
 						'target' => '_blank',
@@ -2638,34 +2780,41 @@ EODOC;
 
 			if ( defined( 'BSI_DEBUG' ) && BSI_DEBUG ) {
 				$admin_bar->add_group(
-					[ 'id'     => self::ADMIN_SLUG . '-debug',
-					  'parent' => self::ADMIN_SLUG . '-inspector',
-					  'meta'   => [ 'class' => 'ab-sub-secondary' ],
+					[
+						'id'     => self::ADMIN_SLUG . '-debug',
+						'parent' => self::ADMIN_SLUG . '-inspector',
+						'meta'   => [ 'class' => 'ab-sub-secondary' ],
 					]
 				);
 				$admin_bar->add_group(
-					[ 'id' => self::ADMIN_SLUG . '-debug2', 'parent' => self::ADMIN_SLUG . '-inspector' ]
+					[
+						'id'     => self::ADMIN_SLUG . '-debug2',
+						'parent' => self::ADMIN_SLUG . '-inspector',
+					]
 				);
 
-				if ( $qo->base_type !== 'unsupported' ) {
+				if ( 'unsupported' !== $qo->base_type ) {
 					$admin_bar->add_node(
-						[ 'id'     => self::ADMIN_SLUG . '-object_id',
-						  'parent' => self::ADMIN_SLUG . '-debug',
-						  'title'  => "Object ID: $qo->object_id",
+						[
+							'id'     => self::ADMIN_SLUG . '-object_id',
+							'parent' => self::ADMIN_SLUG . '-debug',
+							'title'  => "Object ID: $qo->object_id",
 						]
 					);
 				}
 				$admin_bar->add_node(
-					[ 'id'     => self::ADMIN_SLUG . '-object_type',
-					  'parent' => self::ADMIN_SLUG . '-debug',
-					  'title'  => "Object Type: $qo->object_type",
+					[
+						'id'     => self::ADMIN_SLUG . '-object_type',
+						'parent' => self::ADMIN_SLUG . '-debug',
+						'title'  => "Object Type: $qo->object_type",
 					]
 				);
-				if ( $qo->base_type !== 'unsupported' ) {
+				if ( 'unsupported' !== $qo->base_type ) {
 					$admin_bar->add_node(
-						[ 'id'     => self::ADMIN_SLUG . '-base_type',
-						  'parent' => self::ADMIN_SLUG . '-debug',
-						  'title'  => "Base Object Type: $qo->base_type",
+						[
+							'id'     => self::ADMIN_SLUG . '-base_type',
+							'parent' => self::ADMIN_SLUG . '-debug',
+							'title'  => "Base Object Type: $qo->base_type",
 						]
 					);
 					$admin_bar->add_node(
@@ -2691,9 +2840,10 @@ EODOC;
 						]
 					);
 					$admin_bar->add_node(
-						[ 'id'     => self::ADMIN_SLUG . '-go',
-						  'parent' => self::ADMIN_SLUG . '-debug',
-						  'title'  => 'Ready to go?: ' . ( $qo->go ? 'yes' : 'no' ),
+						[
+							'id'     => self::ADMIN_SLUG . '-go',
+							'parent' => self::ADMIN_SLUG . '-debug',
+							'title'  => 'Ready to go?: ' . ( $qo->go ? 'yes' : 'no' ),
 						]
 					);
 				}
@@ -2704,17 +2854,29 @@ EODOC;
 		}
 	}
 
+	/**
+	 * Style for the admin bar icon.
+	 *
+	 * @return void
+	 */
 	public static function admin_bar_icon_style() {
+
 		?>
-		<style>#wp-admin-bar-<?php print self::ADMIN_SLUG; ?>-inspector svg {
+		<style>#wp-admin-bar-<?php print self::ADMIN_SLUG; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Yeah... No... ?>-inspector svg {
 				position: relative;
 				top: 3px;
 			}</style>
 		<?php
 	}
 
+	/**
+	 * The icon.
+	 *
+	 * @return string
+	 */
 	private static function icon() {
 		if ( preg_match( '/\.svg$/', self::ICON ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Not a URL, shut up.
 			$icon = file_get_contents( dirname( __DIR__ ) . '/img/' . basename( '/' . self::ICON ) );
 
 			return str_replace( '<path', '<path fill="currentColor"', $icon );
@@ -2723,14 +2885,25 @@ EODOC;
 		}
 	}
 
+	/**
+	 * Path to the plugin main file.
+	 *
+	 * @return string
+	 */
 	public static function get_plugin_file() {
 		return str_replace( trailingslashit( WP_PLUGIN_DIR ), '', BSI_PLUGIN_FILE );
 	}
 
+	/**
+	 * Management permission of BSI.
+	 *
+	 * @return string
+	 */
 	public static function get_management_permission() {
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// @todo: improve this. This is crap.
 		$permission = apply_filters( 'bsi_management_permission', 'edit_posts' );
-		if ( ! $permission || trim( $permission ) == 'read' ) {
+		if ( ! $permission || 'read' === trim( $permission ) ) {
 			$permission = 'edit_posts';
 		}
 
@@ -2811,8 +2984,8 @@ EODOC;
 	 */
 	public function dummy_data( $what ) {
 		if ( $what === 'text' ) {
-			return __( 'Type here to change the text on the image', self::TEXT_DOMAIN ) . "\n" .
-			       __( 'Change logo and image below', self::TEXT_DOMAIN );
+			return __( 'Type here to change the text on the image', 'bsi' ) . "\n" .
+			       __( 'Change logo and image below', 'bsi' );
 		}
 	}
 

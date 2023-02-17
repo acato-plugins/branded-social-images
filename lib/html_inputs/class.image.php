@@ -32,8 +32,8 @@ class image extends text {
 			<div class="image-preview-wrapper">
 				<img src="' . esc_attr( wp_get_attachment_url( $this->get_current_value() ) ) . '" width="200">
 			</div>
-			<input type="button" class="button" value="' . esc_attr( __( 'Choose image', Plugin::TEXT_DOMAIN ) ) . '"/>
-			<input type="button" class="button remove" value="' . esc_attr( __( 'Remove image', Plugin::TEXT_DOMAIN ) ) . '"/>
+			<input type="button" class="button" value="' . esc_attr( __( 'Choose image', 'bsi' ) ) . '"/>
+			<input type="button" class="button remove" value="' . esc_attr( __( 'Remove image', 'bsi' ) ) . '"/>
 		</span>';
 	}
 

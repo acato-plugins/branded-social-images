@@ -64,7 +64,7 @@ class Image {
 		// well, we tried :(
 		if ( ! $this->image_id ) {
 			header( 'HTTP/1.1 404 Not found' );
-			$error = __( 'Sorry, could not find an OG Image configured.', Plugin::TEXT_DOMAIN );
+			$error = __( 'Sorry, could not find an OG Image configured.', 'bsi' );
 			header( 'X-OG-Error: ' . $error );
 			Plugin::log( $error );
 			Plugin::display_log();
@@ -90,7 +90,7 @@ class Image {
 			readfile( $image_cache['file'] );
 			exit;
 		}
-		$error = __( 'Sorry, we could not create the image.', Plugin::TEXT_DOMAIN );
+		$error = __( 'Sorry, we could not create the image.', 'bsi' );
 		header( 'X-OG-Error: ' . $error );
 		Plugin::log( $error );
 		Plugin::display_log();

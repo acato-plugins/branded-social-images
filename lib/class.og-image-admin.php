@@ -67,10 +67,10 @@ class Admin {
 						'image_size_name' => Plugin::IMAGE_SIZE_NAME,
 						'title_format'    => Plugin::title_format( 1, true ),
 						'text'            => [
-							'image_upload_title'  => __( 'Select an image or upload one.', Plugin::TEXT_DOMAIN ),
-							'image_upload_button' => __( 'Use this image', Plugin::TEXT_DOMAIN ),
-							'file_upload_title'   => __( 'Select an file or upload one.', Plugin::TEXT_DOMAIN ),
-							'file_upload_button'  => __( 'Use this file', Plugin::TEXT_DOMAIN ),
+							'image_upload_title'  => __( 'Select an image or upload one.', 'bsi' ),
+							'image_upload_button' => __( 'Use this image', 'bsi' ),
+							'file_upload_title'   => __( 'Select an file or upload one.', 'bsi' ),
+							'file_upload_button'  => __( 'Use this file', 'bsi' ),
 
 						],
 					]
@@ -125,7 +125,7 @@ class Admin {
 				// todo: support the experimental ::AA feature here.
 				return array_merge(
 					$default_sizes,
-					[ Plugin::IMAGE_SIZE_NAME => __( 'The OG:Image recommended size', Plugin::TEXT_DOMAIN ) ]
+					[ Plugin::IMAGE_SIZE_NAME => __( 'The OG:Image recommended size', 'bsi' ) ]
 				);
 			}
 		);
@@ -164,9 +164,9 @@ class Admin {
 			function () {
 				?><p>
 				<?php
-				print sprintf( __( '<a href="%1$s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%2$s" target="_blank">Acato</a>.', Plugin::TEXT_DOMAIN ), Plugin::PLUGIN_URL_WPORG, Plugin::AUTHOR_URL_INFO )
-				      . ' ' . __( 'Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN )
-				      . ' ' . sprintf( __( '<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN ), Plugin::BSI_URL_CONTACT );
+				print sprintf( __( '<a href="%1$s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%2$s" target="_blank">Acato</a>.', 'bsi' ), Plugin::PLUGIN_URL_WPORG, Plugin::AUTHOR_URL_INFO )
+				      . ' ' . __( 'Please let us know what you think of this plugin and what you wish to see in future versions.', 'bsi' )
+				      . ' ' . sprintf( __( '<a href="%s" target="_blank">Contact us here</a>.', 'bsi' ), Plugin::BSI_URL_CONTACT );
 				?>
 				</p>
 				<?php
@@ -175,7 +175,7 @@ class Admin {
 					<p>
 						<?php
 						print sprintf(
-							__( 'Use <a href="%1$s" target="_blank">%2$s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN ),
+							__( 'Use <a href="%1$s" target="_blank">%2$s</a> to preview what your social image looks like on social media.', 'bsi' ),
 							sprintf( Plugin::EXTERNAL_INSPECTOR, urlencode( get_permalink( get_the_ID() ) ) ),
 							Plugin::EXTERNAL_INSPECTOR_NAME
 						);
@@ -184,7 +184,7 @@ class Admin {
 					<p>
 						<?php
 						print sprintf(
-							__( '<a href="%s" target="_blank">Show debug information</a> for the social-image of this post.', Plugin::TEXT_DOMAIN ),
+							__( '<a href="%s" target="_blank">Show debug information</a> for the social-image of this post.', 'bsi' ),
 							add_query_arg( 'debug', 'BSI', Plugin::get_og_image_url( get_the_ID(), get_post_type(), 'post' ) )
 						);
 						?>
@@ -281,15 +281,15 @@ class Admin {
 						$purgable = Plugin::get_purgable_cache( 'images' );
 						$purgable_dirs = Plugin::get_purgable_cache( 'directories' );
 						if ( ! $purgable && ! $purgable_dirs ) {
-							_e( 'The cache is empty', Plugin::TEXT_DOMAIN );
+							_e( 'The cache is empty', 'bsi' );
 							?>
 							<br/><a
 								class="action button-primary"
-								href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Ok', Plugin::TEXT_DOMAIN ); ?></a>
+								href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Ok', 'bsi' ); ?></a>
 							<?php
 							break;
 						} else {
-							print sprintf( __( 'This will clear the cache, %1$d image(s) and %2$d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN ), count( $purgable ), count( $purgable_dirs ) );
+							print sprintf( __( 'This will clear the cache, %1$d image(s) and %2$d folder(s) will be removed. New images will be generated on demand.', 'bsi' ), count( $purgable ), count( $purgable_dirs ) );
 						}
 						?>
 						<form
@@ -297,10 +297,10 @@ class Admin {
 							action="<?php print esc_attr( add_query_arg( 'bsi-action', 'purge-cache-confirm' ) ); ?>">
 							<input type="hidden" name="bsi-action" value="purge-cache-confirm"/>
 							<button
-								class="action button-primary"><?php _e( 'Confirm', Plugin::TEXT_DOMAIN ); ?></button>
+								class="action button-primary"><?php _e( 'Confirm', 'bsi' ); ?></button>
 							<a
 								class="action button cancel"
-								href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Cancel', Plugin::TEXT_DOMAIN ); ?></a>
+								href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Cancel', 'bsi' ); ?></a>
 						</form>
 						<?php
 						break;
@@ -315,10 +315,10 @@ class Admin {
 							<br/>
 							<br/>
 							<button
-								class="action button-primary"><?php _e( 'Save settings', Plugin::TEXT_DOMAIN ); ?></button>
+								class="action button-primary"><?php _e( 'Save settings', 'bsi' ); ?></button>
 							<a
 								class="action button-secondary" target="_blank"
-								href="<?php print esc_attr( add_query_arg( 'bsi-action', 'purge-cache' ) ); ?>"><?php _e( 'Purge cache', Plugin::TEXT_DOMAIN ); ?></a>
+								href="<?php print esc_attr( add_query_arg( 'bsi-action', 'purge-cache' ) ); ?>"><?php _e( 'Purge cache', 'bsi' ); ?></a>
 						</form>
 
 						<?php
@@ -345,13 +345,13 @@ class Admin {
 			if ( ! is_array( $links ) ) {
 				$links = (array) $links;
 			}
-			$links[] = sprintf( '<a href="%s">%s</a>', $url, __( 'Settings', Plugin::TEXT_DOMAIN ) );
+			$links[] = sprintf( '<a href="%s">%s</a>', $url, __( 'Settings', 'bsi' ) );
 
 			// add support link
-			$links[] = sprintf( '<a href="%s">%s</a>', Plugin::BSI_URL_CONTACT, __( 'Support', Plugin::TEXT_DOMAIN ) );
+			$links[] = sprintf( '<a href="%s">%s</a>', Plugin::BSI_URL_CONTACT, __( 'Support', 'bsi' ) );
 
 			// add contribute link
-			$links[] = sprintf( '<a href="%s">%s</a>', Plugin::BSI_URL_CONTRIBUTE, __( 'Contribute', Plugin::TEXT_DOMAIN ) );
+			$links[] = sprintf( '<a href="%s">%s</a>', Plugin::BSI_URL_CONTRIBUTE, __( 'Contribute', 'bsi' ) );
 		}
 
 		return $links;
@@ -410,7 +410,7 @@ class Admin {
 			mkdir( $dir );
 		}
 		if ( ! is_dir( $dir ) ) {
-			self::setError( 'storage', __( 'Could not create the storage directory in the uploads folder.', Plugin::TEXT_DOMAIN ) . ' ' . __( 'In a WordPress site the uploads folder should always be writable.', Plugin::TEXT_DOMAIN ) . ' ' . __( 'Please fix this.', Plugin::TEXT_DOMAIN ) . ' ' . __( 'This error will disappear once the problem has been corrected.', Plugin::TEXT_DOMAIN ) );
+			self::setError( 'storage', __( 'Could not create the storage directory in the uploads folder.', 'bsi' ) . ' ' . __( 'In a WordPress site the uploads folder should always be writable.', 'bsi' ) . ' ' . __( 'Please fix this.', 'bsi' ) . ' ' . __( 'This error will disappear once the problem has been corrected.', 'bsi' ) );
 		}
 		Plugin::protect_dir( $dir );
 
@@ -433,7 +433,7 @@ class Admin {
 	}
 
 	public static function show_editor( $fields, $is_meta_panel = false ) {
-		$fields['text']['current_value'] = trim( $fields['text']['current_value'] ) !== '' && trim( $fields['text']['current_value'] ) !== '0' ? $fields['text']['current_value'] : self::array_first( Plugin::text_fallback_chain() );
+		$fields['text']['current_value'] = trim( $fields['text']['current_value'] ) !== '' ? $fields['text']['current_value'] : self::array_first( Plugin::text_fallback_chain() );
 
 		$text_settings = Plugin::instance()->text_options;
 		$logo_settings = Plugin::instance()->logo_options;
@@ -551,7 +551,7 @@ class Admin {
 			<?php if ( $is_meta_panel ) { /* meta panel has shorter, more compact view */ ?>
 				<div class="settings">
 					<div class="area--settings">
-						<h2><?php _e( 'Settings', Plugin::TEXT_DOMAIN ); ?></h2>
+						<h2><?php _e( 'Settings', 'bsi' ); ?></h2>
 						<div class="inner">
 							<?php self::render_options( $fields ); ?>
 						</div>
@@ -604,7 +604,7 @@ class Admin {
 			<?php if ( ! $is_meta_panel ) { /* Admin panel is longer */ ?>
 				<div class="settings">
 					<div class="area--options collapsible">
-						<h2><?php _e( 'Image and Logo options', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span>
+						<h2><?php _e( 'Image and Logo options', 'bsi' ); ?><span class="toggle"></span>
 						</h2>
 						<div class="inner">
 							<?php
@@ -622,7 +622,7 @@ class Admin {
 						</div>
 					</div>
 					<div class="area--settings collapsible">
-						<h2><?php _e( 'Text settings', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
+						<h2><?php _e( 'Text settings', 'bsi' ); ?><span class="toggle"></span></h2>
 						<div class="inner">
 							<?php
 							self::render_options(
@@ -700,13 +700,13 @@ class Admin {
 		if ( $log = get_transient( Plugin::OPTION_PREFIX . '_debug_log' ) ) {
 			?>
 			<div class="area--debug closed collapsible">
-				<h2><?php _e( 'Debug log', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
+				<h2><?php _e( 'Debug log', 'bsi' ); ?><span class="toggle"></span></h2>
 				<div class="inner">
 					<pre><?php print $log; ?></pre>
 					<em>
 						<?php
 						$date = date( 'd-m-Y H:i:s', get_option( '_transient_timeout_' . Plugin::OPTION_PREFIX . '_debug_log' ) );
-						print sprintf( __( 'This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN ), $date );
+						print sprintf( __( 'This log will be available until %s or until overwritten by a new log.', 'bsi' ), $date );
 						?>
 					</em>
 				</div>
@@ -718,7 +718,7 @@ class Admin {
 	public static function config_panel( $fields ) {
 		?>
 		<div class="area--config closed collapsible">
-			<h2><?php _e( 'Plugin configuration', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
+			<h2><?php _e( 'Plugin configuration', 'bsi' ); ?><span class="toggle"></span></h2>
 			<div class="inner">
 				<?php self::render_options( $fields, [ 'disabled' ] ); ?>
 			</div>
@@ -810,7 +810,7 @@ class Admin {
 			}
 
 			// save new BSI meta values
-			$valid_post_keys = Plugin::get_valid_POST_keys( 'meta' );
+			$valid_post_keys = Plugin::get_valid_post_keys( 'meta' );
 
 			foreach ( $_POST['branded_social_images'] as $namespace => $values ) {
 				if ( is_array( $values ) ) {
@@ -998,7 +998,7 @@ EOCSS;
 				exit;
 			}
 			if ( ! $font_css ) {
-				self::setError( 'font-family', __( 'Could not download font from Google Fonts.', Plugin::TEXT_DOMAIN ) . ' ' . __( 'Please download yourself and upload here.', Plugin::TEXT_DOMAIN ) );
+				self::setError( 'font-family', __( 'Could not download font from Google Fonts.', 'bsi' ) . ' ' . __( 'Please download yourself and upload here.', 'bsi' ) );
 			} else {
 				$font_css_parts = explode( '@font-face', $font_css );
 				$font_css       = '@font-face' . end( $font_css_parts );
@@ -1076,14 +1076,14 @@ EOCSS;
 			$action = empty( $_REQUEST['bsi-action'] ) ? 'nop' : $_REQUEST['bsi-action'];
 			switch ( $action ) {
 				case 'save-settings':
-					$valid_post_keys = Plugin::get_valid_POST_keys( 'admin' );
+					$valid_post_keys = Plugin::get_valid_post_keys( 'admin' );
 					$fields          = Plugin::field_list();
 
 					foreach ( array_keys( $fields ) as $group ) {
 						if ( $group === 'admin' || $group === 'meta' ) { // skip groups arelady here
 							continue;
 						}
-						$valid_post_keys = array_merge( $valid_post_keys, Plugin::get_valid_POST_keys( $group ) );
+						$valid_post_keys = array_merge( $valid_post_keys, Plugin::get_valid_post_keys( $group ) );
 					}
 
 					foreach ( $_POST['branded_social_images'] as $namespace => $values ) {
@@ -1107,7 +1107,7 @@ EOCSS;
 
 					$purgable = Plugin::get_purgable_cache();
 					if ( $purgable ) {
-						self::setError( 'generic', sprintf( __( 'Not all cache items could be removed. Please try again, or check the cache folder yourself. Location: %s', Plugin::TEXT_DOMAIN ), $base ) );
+						self::setError( 'generic', sprintf( __( 'Not all cache items could be removed. Please try again, or check the cache folder yourself. Location: %s', 'bsi' ), $base ) );
 						wp_redirect( remove_query_arg( 'bsi-action', add_query_arg( 'purged', 'error' ) ) );
 					} else {
 						wp_redirect( remove_query_arg( 'bsi-action', add_query_arg( 'purged', 1 ) ) );

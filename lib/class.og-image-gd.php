@@ -168,7 +168,7 @@ class GD {
 			}
 		}
 		$fontSize = $textOptions['font-size'] * Plugin::AA;
-		if ( trim( $text ) === '' || trim( $text ) === '0' ) {
+		if ( trim( $text ) === '' ) {
 			$background_color = false;
 		}
 
@@ -479,7 +479,7 @@ class GD {
 
 	// Returns expected width of rendered text in pixels
 	private function getWidthPixels( $text, $font, $font_size ) {
-		if ( trim( $text ) === '' || trim( $text ) === '0' ) {
+		if ( trim( $text ) === ''  ) {
 			return 0;
 		}
 		static $widthCorrection;
