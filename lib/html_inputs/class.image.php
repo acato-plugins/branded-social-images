@@ -4,7 +4,7 @@ namespace Acato\Tools\HTML_Inputs;
 
 use Acato\Plugins\OGImage\Plugin;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 require_once __DIR__ . '/class.text.php'; // dependency
 
@@ -48,13 +48,13 @@ class image extends text {
 			'admin_footer',
 			function () {
 				?>
-			<script>
-				;(function ($) {
-					$(document).ready(function () {
-						$('.add-image-select').attachMediaUpload();
-					});
-				})(jQuery);
-			</script>
+				<script>
+					;(function ($) {
+						$(document).ready(function () {
+							$('.add-image-select').attachMediaUpload();
+						});
+					})(jQuery);
+				</script>
 				<?php
 			}
 		);

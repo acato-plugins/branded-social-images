@@ -2,7 +2,7 @@
 
 namespace Acato\Plugins\OGImage;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 use RankMath;
 
@@ -37,11 +37,7 @@ class Image {
 			}
 		}
 
-		if ( 'post' === $base_type ) {
-			$this->image_id = $this->getImageIdForPost( $object_id );
-		} else {
-			$this->image_id = $this->getImageIdForQueriedObject();
-		}
+		$this->image_id = 'post' === $base_type ? $this->getImageIdForPost( $object_id ) : $this->getImageIdForQueriedObject();
 		Plugin::log( 'Image selected: ' . $this->image_id );
 
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -131,16 +127,15 @@ class Image {
 				'url'  => str_replace( $base_dir, $base_url, $cache_file ),
 			];
 		}
-		if ( is_file( $lock_file ) ) {
-			// we're already building this file.
-			if ( filemtime( $lock_file ) > time() - 3600 ) {
-				// but if we already took an hour.
-				// we can safely assume we failed
-				// right now, at this point, we must assume 'busy'
-				header( 'Retry-After: 10' ); // try again in 10 seconds
-				http_response_code( 503 );
-				exit;
-			}
+		// we're already building this file.
+		if ( is_file( $lock_file ) && filemtime( $lock_file ) > time() - 3600 ) {
+			// but if we already took an hour.
+			// we can safely assume we failed
+			// right now, at this point, we must assume 'busy'
+			header( 'Retry-After: 10' );
+			// try again in 10 seconds
+			http_response_code( 503 );
+			exit;
 		}
 		$this->manager->file_put_contents( $lock_file, date( 'r' ) );
 		$cache_file = $this->build( $image_id, $queriedObject );
@@ -179,7 +174,7 @@ class Image {
 			}
 		}
 
-		if ( ! $source ) {
+		if ( $source === '' ) {
 			// use x1 source, no matter what dimensions
 			Plugin::log( 'Source: trying image size "' . Plugin::IMAGE_SIZE_NAME . '" for ' . $image_id );
 			$source = Plugin::wp_get_attachment_image_data( $image_id, Plugin::IMAGE_SIZE_NAME );
@@ -192,7 +187,7 @@ class Image {
 			return false;
 		}
 
-		if ( $source ) {
+		if ( $source !== [] ) {
 			list( $image, $width, $height, $_, $image_file ) = $source;
 			Plugin::log( 'Source: found: ' . "W: $width, H: $height,\n URL: $image,\n Filepath: $image_file" );
 			if ( $this->manager->height > $height || $this->manager->width > $width ) {
@@ -211,7 +206,7 @@ class Image {
 				$base_url_path_only = parse_url( $base_url, PHP_URL_PATH );
 				$image_file         = explode( $base_url_path_only, $image );
 				$image_file         = $base_dir . end( $image_file );
-				Plugin::log( "Source error fixed?: $image_file; " . is_file( $image_file ) ? 'yes' : 'no' );
+				Plugin::log( "Source error fixed?: $image_file; " . is_file( $image_file ) !== '' ? 'yes' : 'no' );
 
 				if ( ! is_file( $image_file ) ) {
 					// create temp file
@@ -220,7 +215,7 @@ class Image {
 					Plugin::log( "Source error: $error" );
 					$this->manager->file_put_contents( $temp_file, wp_remote_retrieve_body( wp_remote_get( $image ) ) );
 					$image_file = $temp_file;
-					Plugin::log( "Source error fixed?: $image_file; " . is_file( $image_file ) ? 'yes' : 'no' );
+					Plugin::log( "Source error fixed?: $image_file; " . is_file( $image_file ) !== '' ? 'yes' : 'no' );
 				}
 			}
 
@@ -364,7 +359,7 @@ class Image {
 			Plugin::log( 'Text consideration: Meta-box text; ' . ( $text ?: '( no text )' ) );
 		}
 
-		if ( ! $text && intval( $object_id ) ) {
+		if ( ! $text && (int) $object_id ) {
 			Plugin::log( 'Text: no text detected in meta-data, getting text from page;' );
 			$scraped = Plugin::scrape_title( $permalink );
 			if ( $scraped ) {

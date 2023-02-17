@@ -2,7 +2,7 @@
 
 namespace Acato\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 require_once __DIR__ . '/class.option.php'; // dependency
 

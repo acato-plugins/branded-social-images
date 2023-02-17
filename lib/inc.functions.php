@@ -56,7 +56,7 @@ if ( ! function_exists( 'mime_content_type' ) ) {
 		 * For our purposes, we only need image/jpeg and image/png, but since this function is missing and we are not alone
 		 * in this universe, we need to provide a fairly complete solution.
 		 */
-		$mime_types = array(
+		$mime_types = [
 			'txt'  => 'text/plain',
 			'htm'  => 'text/html',
 			'html' => 'text/html',
@@ -67,7 +67,6 @@ if ( ! function_exists( 'mime_content_type' ) ) {
 			'xml'  => 'application/xml',
 			'swf'  => 'application/x-shockwave-flash',
 			'flv'  => 'video/x-flv',
-
 			// images
 			'png'  => 'image/png',
 			'jpe'  => 'image/jpeg',
@@ -80,36 +79,31 @@ if ( ! function_exists( 'mime_content_type' ) ) {
 			'tif'  => 'image/tiff',
 			'svg'  => 'image/svg+xml',
 			'svgz' => 'image/svg+xml',
-
 			// archives
 			'zip'  => 'application/zip',
 			'rar'  => 'application/x-rar-compressed',
 			'exe'  => 'application/x-msdownload',
 			'msi'  => 'application/x-msdownload',
 			'cab'  => 'application/vnd.ms-cab-compressed',
-
 			// audio/video
 			'mp3'  => 'audio/mpeg',
 			'qt'   => 'video/quicktime',
 			'mov'  => 'video/quicktime',
-
 			// adobe
 			'pdf'  => 'application/pdf',
 			'psd'  => 'image/vnd.adobe.photoshop',
 			'ai'   => 'application/postscript',
 			'eps'  => 'application/postscript',
 			'ps'   => 'application/postscript',
-
 			// ms office
 			'doc'  => 'application/msword',
 			'rtf'  => 'application/rtf',
 			'xls'  => 'application/vnd.ms-excel',
 			'ppt'  => 'application/vnd.ms-powerpoint',
-
 			// open office
 			'odt'  => 'application/vnd.oasis.opendocument.text',
 			'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
-		);
+		];
 
 		$file = explode( '.', $file );
 		$ext  = strtolower( array_pop( $file ) );

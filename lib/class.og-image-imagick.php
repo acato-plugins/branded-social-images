@@ -4,7 +4,7 @@
 
 namespace Acato\Plugins\OGImage;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 class IMagick {
 }

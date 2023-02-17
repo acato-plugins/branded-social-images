@@ -2,7 +2,7 @@
 
 namespace Acato\Plugins\OGImage;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 use Acato\Tools\HTML_Inputs;
 use WP_Term;
@@ -47,8 +47,8 @@ class Admin {
 		add_action(
 			'admin_enqueue_scripts',
 			function () {
-				$script = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.min.js' : 'admin/admin.js' );
-				$style  = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.css' : 'admin/admin.min.css' );
+				$script = ( defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.js' : 'admin/admin.min.js' );
+				$style  = ( defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.min.css' : 'admin/admin.css' );
 				wp_enqueue_script(
 					Plugin::SCRIPT_STYLE_HANDLE,
 					plugins_url( $script, __DIR__ ),
@@ -125,9 +125,7 @@ class Admin {
 				// todo: support the experimental ::AA feature here.
 				return array_merge(
 					$default_sizes,
-					array(
-						Plugin::IMAGE_SIZE_NAME => __( 'The OG:Image recommended size', Plugin::TEXT_DOMAIN ),
-					)
+					[ Plugin::IMAGE_SIZE_NAME => __( 'The OG:Image recommended size', Plugin::TEXT_DOMAIN ) ]
 				);
 			}
 		);
@@ -167,14 +165,14 @@ class Admin {
 				?><p>
 				<?php
 				print sprintf( __( '<a href="%1$s" target="_blank">Branded Social Images</a> is a free plugin by <a href="%2$s" target="_blank">Acato</a>.', Plugin::TEXT_DOMAIN ), Plugin::PLUGIN_URL_WPORG, Plugin::AUTHOR_URL_INFO )
-				  . ' ' . __( 'Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN )
-				  . ' ' . sprintf( __( '<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN ), Plugin::BSI_URL_CONTACT );
+				      . ' ' . __( 'Please let us know what you think of this plugin and what you wish to see in future versions.', Plugin::TEXT_DOMAIN )
+				      . ' ' . sprintf( __( '<a href="%s" target="_blank">Contact us here</a>.', Plugin::TEXT_DOMAIN ), Plugin::BSI_URL_CONTACT );
 				?>
-				  </p>
-				  <?php
-					if ( get_the_ID() ) {
-						?>
-				<p>
+				</p>
+				<?php
+				if ( get_the_ID() ) {
+					?>
+					<p>
 						<?php
 						print sprintf(
 							__( 'Use <a href="%1$s" target="_blank">%2$s</a> to preview what your social image looks like on social media.', Plugin::TEXT_DOMAIN ),
@@ -182,8 +180,8 @@ class Admin {
 							Plugin::EXTERNAL_INSPECTOR_NAME
 						);
 						?>
-						</p>
-				<p>
+					</p>
+					<p>
 						<?php
 						print sprintf(
 							__( '<a href="%s" target="_blank">Show debug information</a> for the social-image of this post.', Plugin::TEXT_DOMAIN ),
@@ -191,8 +189,8 @@ class Admin {
 						);
 						?>
 					</p>
-										<?php
-					}
+					<?php
+				}
 			}
 		);
 
@@ -213,45 +211,44 @@ class Admin {
 	 * todo: This needs to be refactored!
 	 */
 	public static function base_settings(): array {
-		$defaults                 = [];
-		$defaults['text_options'] = [ // colors are RGBA in hex format
-			'enabled'             => 'on',
-			'left'                => null,
-			'bottom'              => null,
-			'top'                 => null,
-			'right'               => null,
-			'position'            => 'bottom-left',
-			'font-size'           => Plugin::DEF_FONT_SIZE,
-			'color'               => '#ffffffff',
-			'line-height'         => Plugin::DEF_FONT_SIZE * 1.25,
-			'font-file'           => '',
-			'font-family'         => 'Roboto-Bold',
-			'font-weight'         => 700,
-			'font-style'          => 'normal',
-			'display'             => 'inline',
-			// determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
-			'padding'             => '20',
-			// background padding
-			'background-color'    => '#66666666',
-			'background-enabled'  => 'on',
-			'text-shadow-color'   => '',
-			'text-shadow-left'    => '2',
-			'text-shadow-top'     => '-2',
-			'text-shadow-enabled' => 'off',
-			'text-stroke-color'   => '',
-			'text-stroke'         => '2',
+		return [
+			'text_options' => [ // colors are RGBA in hex format
+				'enabled'             => 'on',
+				'left'                => null,
+				'bottom'              => null,
+				'top'                 => null,
+				'right'               => null,
+				'position'            => 'bottom-left',
+				'font-size'           => Plugin::DEF_FONT_SIZE,
+				'color'               => '#ffffffff',
+				'line-height'         => Plugin::DEF_FONT_SIZE * 1.25,
+				'font-file'           => '',
+				'font-family'         => 'Roboto-Bold',
+				'font-weight'         => 700,
+				'font-style'          => 'normal',
+				'display'             => 'inline',
+				// determines background-dimensions block: 100% width??? inline-block: rectangle around all text, inline: behind text only
+				'padding'             => '20',
+				// background padding
+				'background-color'    => '#66666666',
+				'background-enabled'  => 'on',
+				'text-shadow-color'   => '',
+				'text-shadow-left'    => '2',
+				'text-shadow-top'     => '-2',
+				'text-shadow-enabled' => 'off',
+				'text-stroke-color'   => '',
+				'text-stroke'         => '2',
+			],
+			'logo_options' => [
+				'enabled'  => 'on',
+				'position' => 'top-left',
+				'left'     => null,
+				'bottom'   => null,
+				'top'      => null,
+				'right'    => null,
+				'size'     => get_option( Plugin::OPTION_PREFIX . 'image_logo_size', '100' ),
+			],
 		];
-		$defaults['logo_options'] = [
-			'enabled'  => 'on',
-			'position' => 'top-left',
-			'left'     => null,
-			'bottom'   => null,
-			'top'      => null,
-			'right'    => null,
-			'size'     => get_option( Plugin::OPTION_PREFIX . 'image_logo_size', '100' ),
-		];
-
-		return $defaults;
 	}
 
 	public static function instance(): Admin {
@@ -264,7 +261,7 @@ class Admin {
 	}
 
 	public static function admin_panel() {
-		$action = ! empty( $_REQUEST['bsi-action'] ) ? $_REQUEST['bsi-action'] : 'show-config';
+		$action = empty( $_REQUEST['bsi-action'] ) ? 'show-config' : $_REQUEST['bsi-action'];
 
 		?>
 		<div class="wrap">
@@ -274,58 +271,63 @@ class Admin {
 			foreach ( $errors as $error ) {
 				?>
 				<div class="updated error"><p><?php print $error; ?></p></div>
-														  <?php
+				<?php
 			}
 			?>
 			<div>
-			<?php
-			switch ( $action ) {
-				case 'purge-cache':
-					$purgable      = Plugin::get_purgable_cache( 'images' );
-					$purgable_dirs = Plugin::get_purgable_cache( 'directories' );
-					if ( ! $purgable && ! $purgable_dirs ) {
-						_e( 'The cache is empty', Plugin::TEXT_DOMAIN );
+				<?php
+				switch ( $action ) {
+					case 'purge-cache':
+						$purgable = Plugin::get_purgable_cache( 'images' );
+						$purgable_dirs = Plugin::get_purgable_cache( 'directories' );
+						if ( ! $purgable && ! $purgable_dirs ) {
+							_e( 'The cache is empty', Plugin::TEXT_DOMAIN );
+							?>
+							<br/><a
+								class="action button-primary"
+								href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Ok', Plugin::TEXT_DOMAIN ); ?></a>
+							<?php
+							break;
+						} else {
+							print sprintf( __( 'This will clear the cache, %1$d image(s) and %2$d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN ), count( $purgable ), count( $purgable_dirs ) );
+						}
 						?>
-							<br/><a class="action button-primary"
-									  href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Ok', Plugin::TEXT_DOMAIN ); ?></a>
-														<?php
-														break;
-					} else {
-						print sprintf( __( 'This will clear the cache, %1$d image(s) and %2$d folder(s) will be removed. New images will be generated on demand.', Plugin::TEXT_DOMAIN ), count( $purgable ), count( $purgable_dirs ) );
-					}
-					?>
-						<form method="POST"
-							  action="<?php print esc_attr( add_query_arg( 'bsi-action', 'purge-cache-confirm' ) ); ?>">
+						<form
+							method="POST"
+							action="<?php print esc_attr( add_query_arg( 'bsi-action', 'purge-cache-confirm' ) ); ?>">
 							<input type="hidden" name="bsi-action" value="purge-cache-confirm"/>
 							<button
 								class="action button-primary"><?php _e( 'Confirm', Plugin::TEXT_DOMAIN ); ?></button>
-							<a class="action button cancel"
-							   href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Cancel', Plugin::TEXT_DOMAIN ); ?></a>
+							<a
+								class="action button cancel"
+								href="<?php print esc_attr( remove_query_arg( 'bsi-action' ) ); ?>"><?php _e( 'Cancel', Plugin::TEXT_DOMAIN ); ?></a>
 						</form>
 						<?php
-					break;
-				case 'show-config':
-				default:
-					$fields = Plugin::field_list()['admin'];
-					?>
-						<form method="POST"
-							  action="<?php print esc_attr( add_query_arg( 'bsi-action', 'save-settings' ) ); ?>">
-						<?php self::show_editor( $fields ); ?>
+						break;
+					case 'show-config':
+					default:
+						$fields = Plugin::field_list()['admin'];
+						?>
+						<form
+							method="POST"
+							action="<?php print esc_attr( add_query_arg( 'bsi-action', 'save-settings' ) ); ?>">
+							<?php self::show_editor( $fields ); ?>
 							<br/>
 							<br/>
 							<button
 								class="action button-primary"><?php _e( 'Save settings', Plugin::TEXT_DOMAIN ); ?></button>
-							<a class="action button-secondary" target="_blank"
-							   href="<?php print esc_attr( add_query_arg( 'bsi-action', 'purge-cache' ) ); ?>"><?php _e( 'Purge cache', Plugin::TEXT_DOMAIN ); ?></a>
+							<a
+								class="action button-secondary" target="_blank"
+								href="<?php print esc_attr( add_query_arg( 'bsi-action', 'purge-cache' ) ); ?>"><?php _e( 'Purge cache', Plugin::TEXT_DOMAIN ); ?></a>
 						</form>
 
 						<?php
 						do_action( 'bsi_footer' );
 
-					break;
-			}
-			?>
-				</div>
+						break;
+				}
+				?>
+			</div>
 		</div>
 		<?php
 	}
@@ -373,15 +375,15 @@ class Admin {
 			}
 			preg_match( '/-w([1-9]00)(-italic)?\./', $font, $m );
 			$entry   = [
-				'weight' => ! empty( $m[1] ) ? $m[1] : 400,
-				'style'  => ! empty( $m[2] ) ? trim( $m[2], '-' ) : 'normal',
+				'weight' => empty( $m[1] ) ? 400 : $m[1],
+				'style'  => empty( $m[2] ) ? 'normal' : trim( $m[2], '-' ),
 				'name'   => $meta && ! empty( $meta->font_name ) ? $meta->font_name : self::nice_font_name( $base ),
 				'valid'  => true,
 				$t       => self::storage() . '/' . $base . '.' . $t,
 			];
 			$weights = implode( '|', self::font_name_weights() );
 			if ( preg_match( "/-($weights)?(Italic)?$/", $base, $m ) && ! empty( $m[1] ) ) {
-				$weight = array_search( $m[1], self::font_name_weights() );
+				$weight = array_search( $m[1], self::font_name_weights(), true );
 				if ( $weight ) {
 					$entry['weight'] = $weight;
 				}
@@ -418,7 +420,7 @@ class Admin {
 	public static function nice_font_name( $font ) {
 		// w400 to normal, w700 to bold etc
 		list( $name ) = explode( '-w', $font . '-w400', 2 );
-		$weights      = implode( '|', self::font_name_weights() );
+		$weights = implode( '|', self::font_name_weights() );
 
 		return preg_replace( "/-($weights)?(Italic)?$/", '', $name );
 	}
@@ -431,7 +433,7 @@ class Admin {
 	}
 
 	public static function show_editor( $fields, $is_meta_panel = false ) {
-		$fields['text']['current_value'] = trim( $fields['text']['current_value'] ) ? $fields['text']['current_value'] : self::array_first( Plugin::text_fallback_chain() );
+		$fields['text']['current_value'] = trim( $fields['text']['current_value'] ) !== '' && trim( $fields['text']['current_value'] ) !== '0' ? $fields['text']['current_value'] : self::array_first( Plugin::text_fallback_chain() );
 
 		$text_settings = Plugin::instance()->text_options;
 		$logo_settings = Plugin::instance()->logo_options;
@@ -443,8 +445,9 @@ class Admin {
 			$image = $m[1];
 		}
 
-		$logo  = $fields['image_logo']['current_value'];
-		$width = $height = 0;
+		$logo   = $fields['image_logo']['current_value'];
+		$width  = 0;
+		$height = 0;
 		if ( $logo && is_numeric( $logo ) ) {
 			$logo = wp_get_attachment_image( $logo, 'full' );
 			preg_match( '/width="(.+)"/U', $logo, $width );
@@ -461,24 +464,24 @@ class Admin {
 				return array_merge(
 					$list,
 					[
-						'padding'           => Plugin::PADDING . 'px',
-						'text-width'        => ceil( Plugin::instance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding'] ) . 'px',
-						'text-height'       => ceil( Plugin::instance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding'] ) . 'px',
+						'padding'     => Plugin::PADDING . 'px',
+						'text-width'  => ceil( Plugin::instance()->width * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding'] ) . 'px',
+						'text-height' => ceil( Plugin::instance()->height * Plugin::TEXT_AREA_WIDTH - 2 * $text_settings['padding'] ) . 'px',
 
 						'text-background'   => Admin::hex_to_rgba( $text_settings['background-color'], true ),
 						'text-color'        => Admin::hex_to_rgba( $text_settings['color'], true ),
 						'text-font'         => $text_settings['font-file'],
 						'letter-spacing'    => '1px',
 						'text-shadow-color' => Admin::hex_to_rgba( $text_settings['text-shadow-color'], true ),
-						'text-shadow-top'   => intval( $text_settings['text-shadow-top'] ) . 'px',
-						'text-shadow-left'  => intval( $text_settings['text-shadow-left'] ) . 'px',
+						'text-shadow-top'   => (int) $text_settings['text-shadow-top'] . 'px',
+						'text-shadow-left'  => (int) $text_settings['text-shadow-left'] . 'px',
 						'font-size'         => $text_settings['font-size'] . 'px',
 						'text-padding'      => $text_settings['padding'] . 'px',
 						'line-height'       => $text_settings['line-height'] . 'px',
 
-						'logo-scale'        => $logo_settings['size'],
-						'logo-width'        => ( $logo ? $width : 410 ), /* example logo */
-						'logo-height'       => ( $logo ? $height : 82 ),
+						'logo-scale'  => $logo_settings['size'],
+						'logo-width'  => ( $logo ? $width : 410 ), /* example logo */
+						'logo-height' => ( $logo ? $height : 82 ),
 					]
 				);
 			},
@@ -508,8 +511,8 @@ class Admin {
 		<?php
 
 		$editor_class   = [];
-		$editor_class[] = 'logo_position-' . ( ! empty( $fields['logo_position'] ) ? $fields['logo_position']['current_value'] : $logo_settings['position'] );
-		$editor_class[] = 'text_position-' . ( ! empty( $fields['text_position'] ) ? $fields['text_position']['current_value'] : $text_settings['position'] );
+		$editor_class[] = 'logo_position-' . ( empty( $fields['logo_position'] ) ? $logo_settings['position'] : $fields['logo_position']['current_value'] );
+		$editor_class[] = 'text_position-' . ( empty( $fields['text_position'] ) ? $text_settings['position'] : $fields['text_position']['current_value'] );
 
 		if ( ( empty( $fields['disabled'] ) && 'on' === get_option( Plugin::DEFAULTS_PREFIX . 'disabled', 'off' ) ) || $fields['disabled']['current_value'] == 'on' ) {
 			$editor_class[] = 'bsi-disabled';
@@ -540,10 +543,11 @@ class Admin {
 
 		$editor_class = implode( ' ', $editor_class );
 		?>
-		<div id="branded-social-images-editor"
-			 class="<?php print $editor_class; ?>"
-			 data-font="<?php print $text_settings['font-file']; ?>"
-			 data-use-thumbnail="<?php print Plugin::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
+		<div
+			id="branded-social-images-editor"
+			class="<?php print $editor_class; ?>"
+			data-font="<?php print $text_settings['font-file']; ?>"
+			data-use-thumbnail="<?php print Plugin::field_list()['admin']['image_use_thumbnail']['current_value']; ?>">
 			<?php if ( $is_meta_panel ) { /* meta panel has shorter, more compact view */ ?>
 				<div class="settings">
 					<div class="area--settings">
@@ -558,17 +562,19 @@ class Admin {
 				<div class="area--background-canvas"><?php include __DIR__ . '/../img/example.svg'; ?></div>
 				<?php foreach ( Plugin::image_fallback_chain() as $kind => $fallback_image ) { ?>
 					<div class="area--background-alternate image-source-<?php print $kind; ?>">
-						<div class="background"
-							 <?php
-								if ( $fallback_image ) {
-									?>
-									style="background-image:url('<?php print esc_attr( $fallback_image ); ?>')"<?php } ?>>
+						<div
+							class="background"
+							<?php
+							if ( $fallback_image ) {
+								?>
+								style="background-image:url('<?php print esc_attr( $fallback_image ); ?>')"<?php } ?>>
 						</div>
 					</div>
 				<?php } ?>
 				<div class="area--logo logo-alternate">
-					<div class="logo"
-						 style="background-image:url('<?php print plugins_url( 'img/example-logo.svg', __DIR__ ); ?>')"></div>
+					<div
+						class="logo"
+						style="background-image:url('<?php print plugins_url( 'img/example-logo.svg', __DIR__ ); ?>')"></div>
 				</div>
 				<?php do_action( 'bsi_image_editor', 'after_creating_canvas' ); ?>
 				<div class="area--background">
@@ -581,13 +587,14 @@ class Admin {
 				<?php do_action( 'bsi_image_editor', 'after_adding_logo' ); ?>
 				<div class="area--text">
 					<div class="editable-container">
-						<pre contenteditable="true"
-							 class="editable"><?php print $fields['text']['current_value']; ?></pre>
+						<pre
+							contenteditable="true"
+							class="editable"><?php print $fields['text']['current_value']; ?></pre>
 						<?php
 						foreach ( $text_fallback_chain as $type => $text ) {
 							?>
 							<div class="text-alternate type-<?php print $type; ?>"><?php print $text; ?></div>
-																		<?php
+							<?php
 						}
 						?>
 					</div>
@@ -679,7 +686,7 @@ class Admin {
 		if ( ! empty( $option_atts['namespace'] ) && $option_atts['namespace'] == Plugin::DO_NOT_RENDER ) {
 			return;
 		}
-		print '<span data-name="' . esc_attr( $option_name ) . '" class="input-wrap name-' . esc_attr( $option_name ) . ' input-' . $option_atts['type'] . ( ! empty( $option_atts['class'] ) ? str_replace( ' ', ' wrap-', ' ' . $option_atts['class'] ) : '' ) . '">';
+		print '<span data-name="' . esc_attr( $option_name ) . '" class="input-wrap name-' . esc_attr( $option_name ) . ' input-' . $option_atts['type'] . ( empty( $option_atts['class'] ) ? '' : str_replace( ' ', ' wrap-', ' ' . $option_atts['class'] ) ) . '">';
 		$label = '';
 		if ( ! empty( $option_atts['label'] ) ) {
 			$label = $option_atts['label'];
@@ -697,11 +704,11 @@ class Admin {
 				<div class="inner">
 					<pre><?php print $log; ?></pre>
 					<em>
-					<?php
-					$date = date( 'd-m-Y H:i:s', get_option( '_transient_timeout_' . Plugin::OPTION_PREFIX . '_debug_log' ) );
+						<?php
+						$date = date( 'd-m-Y H:i:s', get_option( '_transient_timeout_' . Plugin::OPTION_PREFIX . '_debug_log' ) );
 						print sprintf( __( 'This log will be available until %s or until overwritten by a new log.', Plugin::TEXT_DOMAIN ), $date );
-					?>
-						</em>
+						?>
+					</em>
 				</div>
 			</div>
 			<?php
@@ -731,7 +738,7 @@ class Admin {
 		$hex = substr( $hex . 'FF', 0, 8 );
 
 		$int  = hexdec( $hex );
-		$rgba = [ ( $int >> 24 ) & 255, ( $int >> 16 ) & 255, ( $int >> 8 ) & 255, floatval( $int & 255 ) / 255 ];
+		$rgba = [ ( $int >> 24 ) & 255, ( $int >> 16 ) & 255, ( $int >> 8 ) & 255, (float) ( $int & 255 ) / 255 ];
 
 		return $asRGBA ? vsprintf( 'rgba(%d, %d, %d, %0.1F)', $rgba ) : array_combine(
 			[
@@ -774,14 +781,12 @@ class Admin {
 	}
 
 	public static function save_category_meta_data( $object ): bool {
-		if ( ! is_a( $object, WP_Term::class ) ) {
-			if ( is_numeric( $object ) ) {
-				// create a fake object because without Taxonmy, WordPress will not allow lookup by id ... !@#$ knows why
-				$object = (object) [
-					'term_id'  => $object,
-					'taxonomy' => self::get_taxonomy_for_term( $object ),
-				];
-			}
+		if ( ! is_a( $object, WP_Term::class ) && is_numeric( $object ) ) {
+			// create a fake object because without Taxonmy, WordPress will not allow lookup by id ... !@#$ knows why
+			$object = (object) [
+				'term_id'  => $object,
+				'taxonomy' => self::get_taxonomy_for_term( $object ),
+			];
 		}
 
 		return self::save_meta_data( $object->term_id, $object->taxonomy, 'category' );
@@ -845,12 +850,12 @@ class Admin {
 		// taxonomy panel has no wrappings
 		?>
 		<div id="branded-social-images" class="fake-postbox">
-		<div class="postbox-header"><h2 class="wp-ui-primary">Branded Social Images</h2></div>
-		<div class="inside">
-			<?php
-			self::meta_panel();
-			?>
-		</div>
+			<div class="postbox-header"><h2 class="wp-ui-primary">Branded Social Images</h2></div>
+			<div class="inside">
+				<?php
+				self::meta_panel();
+				?>
+			</div>
 		</div>
 		<?php
 	}
@@ -866,7 +871,7 @@ class Admin {
 		foreach ( $errors as $error ) {
 			?>
 			<div class="updated error"><p><?php print $error; ?></p></div>
-													  <?php
+			<?php
 		}
 	}
 
@@ -939,8 +944,8 @@ EOCSS;
 		$missed_one = false;
 		foreach ( Plugin::default_google_fonts() as $font ) {
 			$font_family    = $font['font_family'];
-			$font_weight    = ! empty( $font['font_weight'] ) ? $font['font_weight'] : 400;
-			$font_style     = ! empty( $font['font_style'] ) ? $font['font_style'] : 'normal';
+			$font_weight    = empty( $font['font_weight'] ) ? 400 : $font['font_weight'];
+			$font_style     = empty( $font['font_style'] ) ? 'normal' : $font['font_style'];
 			$local_filename = self::google_font_filename( $font_family, $font_weight, $font_style, 'ttf' );
 			if ( ! is_file( $storage . $local_filename ) ) {
 				self::download_google_font( $font_family, $font_weight, $font_style );
@@ -979,7 +984,8 @@ EOCSS;
 					$font_url,
 					[
 						'headers'     => [
-							'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', // emulate browser
+							'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+							// emulate browser
 						],
 						'user-agent'  => $user_agent,  // emulate browser
 						'httpversion' => '1.1',  // emulate browser
@@ -1065,14 +1071,15 @@ EOCSS;
 	}
 
 	public static function process_post() {
-		if ( is_admin() && ! empty( $_GET['page'] ) && $_GET['page'] === Plugin::ADMIN_SLUG && ! empty( $_POST ) ) {
-			$action = ! empty( $_REQUEST['bsi-action'] ) ? $_REQUEST['bsi-action'] : 'nop';
+		$base = null;
+		if ( is_admin() && ! empty( $_GET['page'] ) && $_GET['page'] === Plugin::ADMIN_SLUG && $_POST !== [] ) {
+			$action = empty( $_REQUEST['bsi-action'] ) ? 'nop' : $_REQUEST['bsi-action'];
 			switch ( $action ) {
 				case 'save-settings':
 					$valid_post_keys = Plugin::get_valid_POST_keys( 'admin' );
 					$fields          = Plugin::field_list();
 
-					foreach ( $fields as $group => $_fields ) {
+					foreach ( array_keys( $fields ) as $group ) {
 						if ( $group === 'admin' || $group === 'meta' ) { // skip groups arelady here
 							continue;
 						}
@@ -1111,14 +1118,11 @@ EOCSS;
 	}
 
 	private static function weight_to_suffix( $weight, $is_italic ): string {
-		$weight  = intval( round( $weight / 100 ) * 100 );
+		$weight  = (int) ( round( $weight / 100 ) * 100 );
 		$weights = self::font_name_weights();
 
-		if ( ! array_key_exists( $weight, $weights ) || ( /* Special case; RegularItalic is just called Italic */ 400 == $weight && $is_italic ) ) {
-			$suffix = '';
-		} else {
-			$suffix = $weights[ $weight ];
-		}
+		$suffix = ! array_key_exists( $weight, $weights ) || ( /* Special case; RegularItalic is just called Italic */
+			400 == $weight && $is_italic ) ? '' : $weights[ $weight ];
 		if ( $is_italic ) {
 			$suffix .= 'Italic';
 		}

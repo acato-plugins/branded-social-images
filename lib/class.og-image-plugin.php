@@ -302,7 +302,7 @@ class Plugin {
 		add_action( 'wp', [ QueriedObject::class, 'setData' ], PHP_INT_MIN, 0 );
 		add_action( 'admin_init', [ QueriedObject::class, 'setData' ], PHP_INT_MIN, 0 );
 
-		if ( defined( 'BSI_DEBUG' ) && true === BSI_DEBUG ) {
+		if ( defined( 'BSI_DEBUG' ) && BSI_DEBUG ) {
 			add_action( 'admin_notices', [ static::class, 'show_queried_object' ] );
 		}
 
@@ -379,7 +379,7 @@ class Plugin {
 
 					$overrule = get_post_meta( $id, self::OPTION_PREFIX . 'text_stroke', true );
 					if ( '' !== $overrule && in_array( 'text_stroke', $allowed_meta, true ) ) {
-						$this->text_options['text-stroke'] = intval( $overrule );
+						$this->text_options['text-stroke'] = (int) $overrule;
 					}
 
 					$overrule_color = get_post_meta( $id, self::OPTION_PREFIX . 'text_shadow_color', true );
@@ -463,10 +463,7 @@ class Plugin {
 				 * Make custom taxonomies work.
 				 */
 				$taxonomies          = get_taxonomies(
-					array(
-						'public'   => true,
-						'_builtin' => false,
-					),
+					[ 'public' => true, '_builtin' => false ],
 					'objects'
 				);
 				$taxonomy_rules      = [];
@@ -517,9 +514,7 @@ class Plugin {
 					}
 				}
 
-				$rules = array_merge( $top, $bottom );
-
-				return $rules;
+				return array_merge( $top, $bottom );
 			}
 		);
 
@@ -692,10 +687,10 @@ class Plugin {
 			$log[] = 'BSI revision date: ' . gmdate( 'r', filemtime( BSI_PLUGIN_FILE ) );
 			$log[] = 'Start memory usage: ' . ceil( memory_get_peak_usage() / ( 1024 * 1024 ) ) . 'M';
 			$log[] = '-- image generation --';
-			$log[] = 'BSI Debug log for  http' . ( ! empty( $_SERVER['HTTPS'] ) ? 's' : '' ) . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg( 'debug' );
+			$log[] = 'BSI Debug log for  http' . ( empty( $_SERVER['HTTPS'] ) ? '' : 's' ) . '://' . $_SERVER['HTTP_HOST'] . remove_query_arg( 'debug' );
 			$log   = array_merge( $log, self::array_key_prefix( QueriedObject::instance()->getTable() ) );
 		}
-		if ( count( func_get_args() ) > 0 ) {
+		if ( func_num_args() > 0 ) {
 			$item = func_get_arg( 0 );
 			// Sanitize.
 			$root_path = self::get_site_root_path();
@@ -736,7 +731,7 @@ class Plugin {
 		$subdir = trim( str_replace( $home_url, '', $site_url ), '/' );
 
 		$root_path = ABSPATH; // This points to the path with  wp  at the end (again; in our example).
-		if ( $subdir ) {
+		if ( '' !== $subdir ) {
 			$root_path = preg_replace( '/\/' . $subdir . '$/', '', $subdir );
 		}
 
@@ -862,9 +857,7 @@ class Plugin {
 				);
 				// now the items are sorted, but the order in the array is wrong ?!?!.
 				$sorted = [];
-				foreach ( $list as $item ) {
-					$sorted[] = $item;
-				}
+				$sorted = $list;
 
 				return array_values( array_unique( $sorted ) );
 		}
@@ -943,15 +936,11 @@ class Plugin {
 			$page = '';
 		}
 
-		if ( $page && ( false !== strpos( $page, 'og:title' ) ) ) {
-			if ( preg_match( '/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $page, $m ) ) {
-				$title = trim( $m[2], ' />' . $m[1] );
-			}
+		if ( $page && ( false !== strpos( $page, 'og:title' ) ) && preg_match( '/og:title.+content=([\'"])(.+)\1([ \/>])/mU', $page, $m ) ) {
+			$title = trim( $m[2], ' />' . $m[1] );
 		}
-		if ( $page && ! $title && ( false !== strpos( $page, '<title' ) ) ) {
-			if ( preg_match( '/<title[^>]*>(.+)<\/title>/mU', $page, $m ) ) {
-				$title = trim( $m[1] );
-			}
+		if ( $page && ! $title && ( false !== strpos( $page, '<title' ) ) && preg_match( '/<title[^>]*>(.+)<\/title>/mU', $page, $m ) ) {
+			$title = trim( $m[1] );
 		}
 
 		$previous[ $url ] = [ $code, html_entity_decode( $title ) ];
@@ -1068,15 +1057,11 @@ class Plugin {
 			}
 
 			try {
-				if ( is_file( $item ) ) {
-					if ( ! self::unlink( $item ) ) {
-						$result = false;
-					}
+				if ( is_file( $item ) && ! self::unlink( $item ) ) {
+					$result = false;
 				}
-				if ( is_dir( $item ) ) {
-					if ( ! self::rmdir( $item ) ) {
-						$result = false;
-					}
+				if ( is_dir( $item ) && ! self::rmdir( $item ) ) {
+					$result = false;
 				}
 			} catch ( Exception $e ) {
 				$result = false;
@@ -1092,14 +1077,16 @@ class Plugin {
 	 * @param false $destroy_buffer if false; do a nice flush. if true; previous output is destroyed.
 	 */
 	public static function no_output_buffers( $destroy_buffer = false ) {
-		if ( ob_get_level() ) {
+		if ( ob_get_level() !== 0 ) {
 			$list = ob_list_handlers();
 			foreach ( $list as $item ) {
 				// @phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- NO. JSON does not show difference between arrays and objects.
 				self::log( 'Output buffer detected: ' . ( is_string( $item ) ? $item : serialize( $item ) ) );
 			}
 			while ( ob_get_level() ) {
-				$destroy_buffer ? ob_end_clean() : ob_end_flush();
+				if ( $destroy_buffer ) {
+					ob_end_clean();
+				}
 			}
 			self::log( 'All buffers are ' . ( $destroy_buffer ? 'cleaned' : 'flushed' ) );
 		}
@@ -1490,10 +1477,10 @@ class Plugin {
 
 		$shadow_type = 'open';
 		foreach ( [ 'left', 'top' ] as $dir ) {
-			if ( preg_match( '/[0-9]+S/', $this->text_options[ 'text-shadow-' . $dir ] ) ) {
+			if ( preg_match( '/\d+S/', $this->text_options[ 'text-shadow-' . $dir ] ) ) {
 				$shadow_type = 'solid';
 			}
-			if ( preg_match( '/[0-9]+G/', $this->text_options[ 'text-shadow-' . $dir ] ) ) {
+			if ( preg_match( '/\d+G/', $this->text_options[ 'text-shadow-' . $dir ] ) ) {
 				$shadow_type = 'gradient';
 			}
 		}
@@ -1511,11 +1498,11 @@ class Plugin {
 	public function evaluate_font_weight( $weight, $default = 400 ) {
 		$translate = Admin::font_weights();
 
-		if ( ! intval( $weight ) ) {
+		if ( (int) $weight === 0 ) {
 			$weight = $translate[ strtolower( $weight ) ] ?? $default;
 		}
 		$weight = floor( $weight / 100 ) * 100;
-		if ( ! $weight ) {
+		if ( $weight === 0.0 ) {
 			$weight = $default;
 		}
 		if ( $weight > 800 ) {
@@ -1555,7 +1542,7 @@ class Plugin {
 		if ( preg_match( '/google:(.+)/', $font_family, $m ) ) {
 			$italic = $font_style == 'italic' ? 'italic' : '';
 
-			return $m[1] /* fontname */ . '-w' . $font_weight . ( $italic ? '-' . $italic : '' ) . '.ttf';
+			return $m[1] /* fontname */ . '-w' . $font_weight . ( $italic !== '' && $italic !== '0' ? '-' . $italic : '' ) . '.ttf';
 		}
 
 		// don't know what to do with any other
@@ -1591,7 +1578,7 @@ class Plugin {
 	public function download_font( $font_family, $font_weight, $font_style ) {
 		self::setError( 'font-family', null );
 		$font_filename = $this->font_filename( $font_family, $font_weight, $font_style );
-		if ( ! $font_filename ) {
+		if ( $font_filename === '' || $font_filename === '0' ) {
 			self::setError( 'font-family', __( 'Don\'t know where to get this font.', self::TEXT_DOMAIN ) . ' ' . __( 'Sorry.', self::TEXT_DOMAIN ) );
 
 			return false;
@@ -1644,20 +1631,21 @@ class Plugin {
 	}
 
 	private function evaluate_vertical( &$top, &$bottom ) {
-		if ( substr( $top, - 1 ) == '%' ) {
-			$top = intval( floor( intval( $top ) / 100 * $this->height ) );
+		if ( $top && substr( $top, - 1 ) == '%' ) {
+			$top = (int) floor( (int) $top / 100 * $this->height );
 		}
-		if ( substr( $bottom, - 1 ) == '%' ) {
-			$bottom = intval( ceil( intval( $bottom ) / 100 * $this->height ) );
+
+		if ( $bottom && substr( $bottom, - 1 ) == '%' ) {
+			$bottom = (int) ceil( (int) $bottom / 100 * $this->height );
 		}
 	}
 
 	private function evaluate_horizontal( &$left, &$right ) {
-		if ( substr( $left, - 1 ) == '%' ) {
-			$left = intval( floor( intval( $left ) / 100 * $this->width ) );
+		if ( $left && substr( $left, - 1 ) == '%' ) {
+			$left = (int) floor( (int) $left / 100 * $this->width );
 		}
-		if ( substr( $right, - 1 ) == '%' ) {
-			$right = intval( ceil( intval( $right ) / 100 * $this->width ) );
+		if ( $right && substr( $right, - 1 ) == '%' ) {
+			$right = (int) ceil( (int) $right / 100 * $this->width );
 		}
 	}
 
@@ -1732,7 +1720,7 @@ class Plugin {
 		$this->logo_options['halign'] = $halign;
 
 		// size w and h are bounding box!
-		$this->logo_options['size'] = intval( $this->logo_options['size'] );
+		$this->logo_options['size'] = (int) $this->logo_options['size'];
 		$this->logo_options['size'] = min( self::MAX_LOGO_SCALE, $this->logo_options['size'] );
 		$this->logo_options['size'] = max( self::MIN_LOGO_SCALE, $this->logo_options['size'] );
 		$this->logo_options['w']    = $this->logo_options['size'] / 100 * $sw;
@@ -1846,8 +1834,8 @@ class Plugin {
 			case 2:
 				$wpseo_head = ob_get_clean();
 				if ( preg_match( '@/' . self::output_filename() . '/@', $wpseo_head ) ) {
-					$wpseo_head = preg_replace( '/og:image:width" content="([0-9]+)"/', 'og:image:width" content="' . self::instance()->width . '"', $wpseo_head );
-					$wpseo_head = preg_replace( '/og:image:height" content="([0-9]+)"/', 'og:image:height" content="' . self::instance()->height . '"', $wpseo_head );
+					$wpseo_head = preg_replace( '/og:image:width" content="(\d+)"/', 'og:image:width" content="' . self::instance()->width . '"', $wpseo_head );
+					$wpseo_head = preg_replace( '/og:image:height" content="(\d+)"/', 'og:image:height" content="' . self::instance()->height . '"', $wpseo_head );
 				}
 				print $wpseo_head;
 		}
@@ -1916,11 +1904,9 @@ class Plugin {
 			}
 			ob_end_clean();
 		}
-		if ( file_exists( "$bin/dwebp" ) ) {
-			// downloaded and ran conversion tool successfully
-			if ( file_exists( $bin . '/can-execute-binaries-from-php.success' ) ) {
-				$support = true;
-			}
+		// downloaded and ran conversion tool successfully
+		if ( file_exists( "$bin/dwebp" ) && file_exists( $bin . '/can-execute-binaries-from-php.success' ) ) {
+			$support = true;
 		}
 
 		return $support;
@@ -2471,16 +2457,16 @@ EODOC;
 		}
 
 		foreach ( $options['admin'] as $field => $_ ) {
-			$options['admin'][ $field ]['current_value'] = get_option( $_['namespace'] . $field, ! empty( $_['default'] ) ? $_['default'] : null );
+			$options['admin'][ $field ]['current_value'] = get_option( $_['namespace'] . $field, empty( $_['default'] ) ? null : $_['default'] );
 		}
 
 		if ( $qo->object_id ) {
 			foreach ( $options['meta'] as $field => $_ ) {
 				if ( $qo->isPost() ) {
-					$options['meta'][ $field ]['current_value'] = get_post_meta( $qo->object_id, $_['namespace'] . $field, true ) ?: ( ! empty( $_['default'] ) ? $_['default'] : null );
+					$options['meta'][ $field ]['current_value'] = get_post_meta( $qo->object_id, $_['namespace'] . $field, true ) ?: ( empty( $_['default'] ) ? null : $_['default'] );
 				}
 				if ( $qo->isCategory() ) {
-					$options['meta'][ $field ]['current_value'] = get_term_meta( $qo->object_id, $_['namespace'] . $field, true ) ?: ( ! empty( $_['default'] ) ? $_['default'] : null );
+					$options['meta'][ $field ]['current_value'] = get_term_meta( $qo->object_id, $_['namespace'] . $field, true ) ?: ( empty( $_['default'] ) ? null : $_['default'] );
 				}
 			}
 		}
@@ -2530,26 +2516,22 @@ EODOC;
 		if ( $object_id ) {
 			$new_post = 'new' === $object_id;
 
-			if ( self::setting( 'use_bare_post_title' ) ) {
-				if ( ! $new_post ) {
-					$title = apply_filters( 'the_title', $function( $object_id ), $object_id );
-					if ( $title ) {
-						$layers['wordpress'] = $title;
-					}
+			if ( self::setting( 'use_bare_post_title' ) && ! $new_post ) {
+				$title = apply_filters( 'the_title', $function( $object_id ), $object_id );
+				if ( $title ) {
+					$layers['wordpress'] = $title;
 				}
 			}
 
-			if ( ! $title ) {
-				if ( $permalink ) {
-					$title = self::scrape_title( $permalink );
-					if ( $title ) {
-						$layers['scraped'] = $title;
-					}
+			if ( ! $title && $permalink ) {
+				$title = self::scrape_title( $permalink );
+				if ( $title ) {
+					$layers['scraped'] = $title;
 				}
 			}
 			if ( ! $title ) { // no text from scraping, build it
 				$title = self::title_format( $object_id, $new_post );
-				if ( $title ) {
+				if ( $title !== '' && $title !== '0' ) {
 					$layers['by-format'] = $title;
 				}
 			}
@@ -2624,7 +2606,7 @@ EODOC;
 			$og_image  = $qo->og_image;
 			$permalink = $qo->permalink;
 
-			$args = array(
+			$args = [
 				'id'    => self::ADMIN_SLUG . '-inspector',
 				'title' => self::icon() . __( 'Inspect Social Image', self::TEXT_DOMAIN ),
 				'href'  => self::EXTERNAL_INSPECTOR,
@@ -2632,16 +2614,16 @@ EODOC;
 					'target' => '_blank',
 					'title'  => __( 'Shows how this post is shared using an external, unaffiliated service.', self::TEXT_DOMAIN ),
 				],
-			);
+			];
 
 			$args['href'] = sprintf( $args['href'], urlencode( $permalink ) );
 			$admin_bar->add_node( $args );
 
 			if (
-				( ! defined( 'BSI_DEBUG' ) || false === BSI_DEBUG ) &&
+				( ! defined( 'BSI_DEBUG' ) || ! BSI_DEBUG ) &&
 				array_filter( self::image_fallback_chain( true ) )
 			) {
-				$args = array(
+				$args = [
 					'id'     => self::ADMIN_SLUG . '-view',
 					'parent' => self::ADMIN_SLUG . '-inspector',
 					'title'  => __( 'View Social Image', self::TEXT_DOMAIN ),
@@ -2650,53 +2632,44 @@ EODOC;
 						'target' => '_blank',
 						'class'  => self::ADMIN_SLUG . '-view',
 					],
-				);
+				];
 				$admin_bar->add_node( $args );
 			}
 
-			if ( defined( 'BSI_DEBUG' ) && true === BSI_DEBUG ) {
+			if ( defined( 'BSI_DEBUG' ) && BSI_DEBUG ) {
 				$admin_bar->add_group(
-					array(
-						'id'     => self::ADMIN_SLUG . '-debug',
-						'parent' => self::ADMIN_SLUG . '-inspector',
-						'meta'   => array(
-							'class' => 'ab-sub-secondary',
-						),
-					)
+					[ 'id'     => self::ADMIN_SLUG . '-debug',
+					  'parent' => self::ADMIN_SLUG . '-inspector',
+					  'meta'   => [ 'class' => 'ab-sub-secondary' ],
+					]
 				);
 				$admin_bar->add_group(
-					array(
-						'id'     => self::ADMIN_SLUG . '-debug2',
-						'parent' => self::ADMIN_SLUG . '-inspector',
-					)
+					[ 'id' => self::ADMIN_SLUG . '-debug2', 'parent' => self::ADMIN_SLUG . '-inspector' ]
 				);
 
 				if ( $qo->base_type !== 'unsupported' ) {
 					$admin_bar->add_node(
-						array(
-							'id'     => self::ADMIN_SLUG . '-object_id',
-							'parent' => self::ADMIN_SLUG . '-debug',
-							'title'  => "Object ID: $qo->object_id",
-						)
+						[ 'id'     => self::ADMIN_SLUG . '-object_id',
+						  'parent' => self::ADMIN_SLUG . '-debug',
+						  'title'  => "Object ID: $qo->object_id",
+						]
 					);
 				}
 				$admin_bar->add_node(
-					array(
-						'id'     => self::ADMIN_SLUG . '-object_type',
-						'parent' => self::ADMIN_SLUG . '-debug',
-						'title'  => "Object Type: $qo->object_type",
-					)
+					[ 'id'     => self::ADMIN_SLUG . '-object_type',
+					  'parent' => self::ADMIN_SLUG . '-debug',
+					  'title'  => "Object Type: $qo->object_type",
+					]
 				);
 				if ( $qo->base_type !== 'unsupported' ) {
 					$admin_bar->add_node(
-						array(
-							'id'     => self::ADMIN_SLUG . '-base_type',
-							'parent' => self::ADMIN_SLUG . '-debug',
-							'title'  => "Base Object Type: $qo->base_type",
-						)
+						[ 'id'     => self::ADMIN_SLUG . '-base_type',
+						  'parent' => self::ADMIN_SLUG . '-debug',
+						  'title'  => "Base Object Type: $qo->base_type",
+						]
 					);
 					$admin_bar->add_node(
-						array(
+						[
 							'id'     => self::ADMIN_SLUG . '-permalink',
 							'parent' => self::ADMIN_SLUG . '-debug2',
 							'title'  => 'Link to Object (new tab)',
@@ -2704,10 +2677,10 @@ EODOC;
 							'meta'   => [
 								'target' => '_blank',
 							],
-						)
+						]
 					);
 					$admin_bar->add_node(
-						array(
+						[
 							'id'     => self::ADMIN_SLUG . '-og_image',
 							'parent' => self::ADMIN_SLUG . '-debug2',
 							'title'  => 'Link to Image (new tab)',
@@ -2715,14 +2688,13 @@ EODOC;
 							'meta'   => [
 								'target' => '_blank',
 							],
-						)
+						]
 					);
 					$admin_bar->add_node(
-						array(
-							'id'     => self::ADMIN_SLUG . '-go',
-							'parent' => self::ADMIN_SLUG . '-debug',
-							'title'  => 'Ready to go?: ' . ( $qo->go ? 'yes' : 'no' ),
-						)
+						[ 'id'     => self::ADMIN_SLUG . '-go',
+						  'parent' => self::ADMIN_SLUG . '-debug',
+						  'title'  => 'Ready to go?: ' . ( $qo->go ? 'yes' : 'no' ),
+						]
 					);
 				}
 			}
@@ -2795,7 +2767,7 @@ EODOC;
 		$value1 = trim( str_replace( [ "\n", "\r" ], '', $value1 ) );
 		$value2 = trim( str_replace( [ "\n", "\r" ], '', $value2 ) );
 
-		return strip_tags( $value1 ) == strip_tags( $value2 );
+		return strip_tags( $value1 ) === strip_tags( $value2 );
 	}
 
 	public function hex_to_rgba( $hex_color, $alpha_is_gd = false ): array {
@@ -2808,7 +2780,7 @@ EODOC;
 		if ( $alpha_is_gd ) {
 			$int_values[3] = 255 - $int_values[3];
 			$int_values[3] = $int_values[3] / 255 * 127;
-			$int_values[3] = intval( floor( $int_values[3] ) );
+			$int_values[3] = (int) floor( $int_values[3] );
 		}
 
 		return $int_values;
@@ -2816,7 +2788,7 @@ EODOC;
 
 	public function rgba_to_hex( $rgba_color, $alpha_is_gd = false ): string {
 		if ( $alpha_is_gd ) {
-			$rgba_color[3] = intval( $rgba_color[3] );
+			$rgba_color[3] = (int) $rgba_color[3];
 			$rgba_color[3] = $rgba_color[3] / 127 * 255;
 			$rgba_color[3] = 255 - floor( $rgba_color[3] );
 			$rgba_color[3] = max( 0, $rgba_color[3] ); // minimum value = 0
@@ -2838,10 +2810,9 @@ EODOC;
 	 * @return string|void
 	 */
 	public function dummy_data( $what ) {
-		switch ( $what ) {
-			case 'text':
-				return __( 'Type here to change the text on the image', self::TEXT_DOMAIN ) . "\n" .
-					   __( 'Change logo and image below', self::TEXT_DOMAIN );
+		if ( $what === 'text' ) {
+			return __( 'Type here to change the text on the image', self::TEXT_DOMAIN ) . "\n" .
+			       __( 'Change logo and image below', self::TEXT_DOMAIN );
 		}
 	}
 

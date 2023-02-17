@@ -2,7 +2,7 @@
 
 namespace Acato\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 class checkbox extends Input {
 	public function __construct( $attribute_name, $atts ) {
@@ -30,6 +30,6 @@ class checkbox extends Input {
 		$atts = $this->attributes(); // builds HTML attributes
 
 		return '<span class="field-wrap"><input type="hidden" name="' . $this->atts['name'] . '" value="off" />' .
-			   '<input type="' . $this->type . '" ' . $atts . '>' . ( $this->empty ? '' : $this->content . '</' . $this->type . '>' ) . $label . '</span>';
+		       '<input type="' . $this->type . '" ' . $atts . '>' . ( $this->empty ? '' : $this->content . '</' . $this->type . '>' ) . $label . '</span>';
 	}
 }

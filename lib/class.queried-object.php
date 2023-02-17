@@ -5,12 +5,11 @@ namespace Acato\Plugins\OGImage;
 use ArrayAccess;
 
 class QueriedObject implements ArrayAccess {
-	private $data;
+	private $data = [];
 	private $keys = [ 'object_id', 'object_type', 'base_type', 'permalink', 'og_image', 'go' ];
 	private $is_public;
 
 	public function __construct() {
-		$this->data = [];
 	}
 
 	public static function instance() {
@@ -47,10 +46,10 @@ class QueriedObject implements ArrayAccess {
 					// post edit
 					case is_admin() && in_array( $pagenow, [ 'post.php', 'post-new.php' ] ):
 						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
-						$id        = ! empty( $_GET['post'] ) ? intval( $_GET['post'] ) : 'new';
+						$id        = empty( $_GET['post'] ) ? 'new' : (int) $_GET['post'];
 						$type      = empty( $_GET['post_type'] ) ? false : $_GET['post_type'];
 						$type      = ! $type && $pagenow == 'post-new.php' ? 'post' : $type;
-						$type      = ! $type ? get_post_type( $id ) : $type;
+						$type      = $type ?: get_post_type( $id );
 						$base_type = 'post';
 						$link      = get_permalink( $id );
 						break;
@@ -82,8 +81,8 @@ class QueriedObject implements ArrayAccess {
 					// category edit
 					case is_admin() && in_array( $pagenow, [ 'term.php', 'edit-tags.php' ] ):
 						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
-						$id        = ! empty( $_GET['tag_ID'] ) ? intval( $_GET['tag_ID'] ) : 'new';
-						$type      = ! empty( $_GET['taxonomy'] ) ? $_GET['taxonomy'] : get_post_type( $id );
+						$id        = empty( $_GET['tag_ID'] ) ? 'new' : (int) $_GET['tag_ID'];
+						$type      = empty( $_GET['taxonomy'] ) ? get_post_type( $id ) : $_GET['taxonomy'];
 						$base_type = 'category';
 						$link      = get_term_link( $id, $type );
 						if ( is_wp_error( $link ) ) {
@@ -136,18 +135,19 @@ class QueriedObject implements ArrayAccess {
 				switch ( $base_type ) {
 					case 'post':
 						$type_o = get_post_type_object( $type );
-						if ( ! $type_o->public ) {
+						if ( ! $type_o || ! $type_o->public ) {
 							$that->is_public = false;
 						}
 						break;
 					case 'category':
 						$type_o = get_taxonomy( $type );
-						if ( ! $type_o->public ) {
+						if ( ! $type_o || ! $type_o->public ) {
 							$that->is_public = false;
 						}
 						break;
 				}
 
+				$link          = $link ?: '';
 				$og_link_perma = trailingslashit( trailingslashit( $link ) . Plugin::output_filename() );
 				$og_link_param = add_query_arg( Plugin::QUERY_VAR, '1', $link );
 				$og_link       = is_preview() || ! Plugin::url_can_be_rewritten( $link ) || ! Plugin::url_can_be_rewritten( $og_link_perma ) ? $og_link_param : $og_link_perma;
@@ -182,7 +182,7 @@ class QueriedObject implements ArrayAccess {
 			$diff = str_replace( $needle, '', $haystack );
 			$diff = trim( $diff, '&?' );
 
-			return $diff == Plugin::QUERY_VAR . '=1';
+			return $diff === Plugin::QUERY_VAR . '=1';
 		};
 
 		if ( $this->is_public ) {
@@ -195,7 +195,7 @@ class QueriedObject implements ArrayAccess {
 					] as $group => $item
 				) {
 					if ( $rewrite = Plugin::url_can_be_rewritten( $item ) ) {
-						$rewrites_to[ $group ] = $rewrite['target'];
+						$rewrites_to[ $group ]                                                    = $rewrite['target'];
 						$matching_rules[ $group . ' matches rule #' . ( $rewrite['rule#'] + 1 ) ] = $rewrite['rule'] . '<br />' . $rewrites_to[ $group ];
 					} else {
 						$matching_rules[ $group . ' Rewrite Error' ] = 'There are no rewrite rules that match this URL';
@@ -219,6 +219,7 @@ class QueriedObject implements ArrayAccess {
 	/**
 	 * @inheritDoc
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetExists( $offset ): bool {
 		if ( is_numeric( $offset ) ) {
 			return $offset < count( $this->data );
@@ -230,6 +231,7 @@ class QueriedObject implements ArrayAccess {
 	/**
 	 * @inheritDoc
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetGet( $offset ) {
 		if ( is_numeric( $offset ) ) {
 			return $this->data[ $offset ];
@@ -241,6 +243,7 @@ class QueriedObject implements ArrayAccess {
 	/**
 	 * @inheritDoc
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetSet( $offset, $value ) {
 		return false;
 	}
@@ -248,6 +251,7 @@ class QueriedObject implements ArrayAccess {
 	/**
 	 * @inheritDoc
 	 */
+	#[\ReturnTypeWillChange]
 	public function offsetUnset( $offset ) {
 		return false;
 	}

@@ -2,7 +2,7 @@
 
 namespace Acato\Plugins\OGImage;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 use GDText\Box;
 use GDText\Color;
@@ -12,19 +12,17 @@ class GD {
 	private $manager;
 
 	private $source;
-	private $source_is_temporary;
+	private $source_is_temporary = false;
 	private $target;
 
 	private $line_height_factor = 1;
-	private $text_area_width;
+	private $text_area_width = Plugin::TEXT_AREA_WIDTH;
 
 	private $resource;
 
 	public function __construct( Image $handler, $source, $target ) {
-		$this->handler             = $handler;
-		$this->manager             = $handler->getManager();
-		$this->source_is_temporary = false;
-		$this->text_area_width     = Plugin::TEXT_AREA_WIDTH;
+		$this->handler = $handler;
+		$this->manager = $handler->getManager();
 
 		// use this construction, so we don't have to check file mime
 		if ( is_file( $source ) && preg_match( '@\.webp$@', strtolower( trim( $source ) ) ) ) {
@@ -83,7 +81,8 @@ class GD {
 
 		$target_ratio = $h / $w;
 		$source_ratio = $source_height / $source_width;
-		$source_x     = $source_y = 0;
+		$source_x     = 0;
+		$source_y     = 0;
 		if ( $source_ratio > $target_ratio ) { // image is too high
 			$source_height = $source_width * $target_ratio;
 			$source_y      = ( imagesy( $baseImage ) - $source_height ) / 2;
@@ -169,7 +168,7 @@ class GD {
 			}
 		}
 		$fontSize = $textOptions['font-size'] * Plugin::AA;
-		if ( ! trim( $text ) ) {
+		if ( trim( $text ) === '' || trim( $text ) === '0' ) {
 			$background_color = false;
 		}
 
@@ -196,8 +195,8 @@ class GD {
 		$textOptions['right']  *= Plugin::AA;
 		$textOptions['top']    *= Plugin::AA;
 		$textOptions['bottom'] *= Plugin::AA;
-
-		$text_posX = $text_posY = 0;
+		$text_posX             = 0;
+		$text_posY             = 0;
 		if ( $textOptions['halign'] == 'center' ) {
 			$text_posX = ( $image_width - $textOptions['left'] - $textOptions['right'] ) / 2 - $text_width / 2 + $textOptions['left'];
 		}
@@ -219,11 +218,9 @@ class GD {
 		}
 
 		// text-background
-		if ( false !== $background_color ) {
-			if ( 'inline' === $textOptions['display'] ) {
-				// .75 points to pixels
-				imagefilledrectangle( $this->resource, $text_posX - $p, $text_posY - $p, $text_posX + $text_width + $p, $text_posY + ( $text_height / .75 ) + $p, $background_color );
-			}
+		if ( false !== $background_color && 'inline' === $textOptions['display'] ) {
+			// .75 points to pixels
+			imagefilledrectangle( $this->resource, $text_posX - $p, $text_posY - $p, $text_posX + $text_width + $p, $text_posY + ( $text_height / .75 ) + $p, $background_color );
 		}
 		// NOTE: imagettf uses Y position for bottom!! of the text, not the top
 		// ALSO: this is for the text BASE, so some text might stick out below. compensate by 18% of text height.
@@ -307,7 +304,8 @@ class GD {
 				$skip_alpha = $hex_rgba_end;
 			}
 			$skip_alpha             = $this->manager->hex_to_rgba( $skip_alpha );
-			$hex_rgba_start_rgba[3] = $hex_rgba_end_rgba[3] = $skip_alpha[3];
+			$hex_rgba_start_rgba[3] = $skip_alpha[3];
+			$hex_rgba_end_rgba[3]   = $skip_alpha[3];
 		}
 
 		$gradient_hex_rgba = [
@@ -361,8 +359,9 @@ class GD {
 		$logoOptions['right']  *= Plugin::AA;
 		$logoOptions['top']    *= Plugin::AA;
 		$logoOptions['bottom'] *= Plugin::AA;
-
-		$p = $logo_posX = $logo_posY = 0;
+		$p                     = 0;
+		$logo_posX             = 0;
+		$logo_posY             = 0;
 
 		if ( $logoOptions['halign'] == 'center' ) {
 			$logo_posX = ( $image_width - $logoOptions['left'] - $logoOptions['right'] ) / 2 - $w / 2 + $logoOptions['left'];
@@ -440,6 +439,9 @@ class GD {
 	}
 
 	private function imagettftextbox( $image, $size, $x, $y, $w, $h, Color $color, $fontfile, $text, $options = [] ) {
+		$stroke_color = null;
+		$stroke_width = null;
+		$align        = null;
 		/** @var $align string left, center or right */
 		/** @var $stroke_width int */
 		/** @var $stroke_color false|Color a color */
@@ -477,17 +479,15 @@ class GD {
 
 	// Returns expected width of rendered text in pixels
 	private function getWidthPixels( $text, $font, $font_size ) {
-		if ( ! trim( $text ) ) {
+		if ( trim( $text ) === '' || trim( $text ) === '0' ) {
 			return 0;
 		}
 		static $widthCorrection;
 		$bbox  = imageftbbox( $font_size, 0, $font, $text );
 		$width = ( $bbox[2] - $bbox[0] );
-		if ( $width ) {
-			if ( ! $widthCorrection ) {
-				$widthCorrection = static::getWidthPixelsTrue( $text, $font, $font_size );
-				$widthCorrection = $widthCorrection['width'] / $width;
-			}
+		if ( $width && ! $widthCorrection ) {
+			$widthCorrection = static::getWidthPixelsTrue( $text, $font, $font_size );
+			$widthCorrection = $widthCorrection['width'] / $width;
 		}
 
 		return $width / $widthCorrection;
@@ -498,10 +498,10 @@ class GD {
 		if ( ! $box ) {
 			return false;
 		}
-		$min_x  = min( array( $box[0], $box[2], $box[4], $box[6] ) );
-		$max_x  = max( array( $box[0], $box[2], $box[4], $box[6] ) );
-		$min_y  = min( array( $box[1], $box[3], $box[5], $box[7] ) );
-		$max_y  = max( array( $box[1], $box[3], $box[5], $box[7] ) );
+		$min_x  = min( [ $box[0], $box[2], $box[4], $box[6] ] );
+		$max_x  = max( [ $box[0], $box[2], $box[4], $box[6] ] );
+		$min_y  = min( [ $box[1], $box[3], $box[5], $box[7] ] );
+		$max_y  = max( [ $box[1], $box[3], $box[5], $box[7] ] );
 		$width  = ( $max_x - $min_x );
 		$height = ( $max_y - $min_y );
 		$left   = abs( $min_x ) + $width;
@@ -523,10 +523,12 @@ class GD {
 			$text
 		);
 		// start scanning (0=> black => empty)
-		$rleft   = $w4 = $width << 2;
+		$rleft   = $width << 2;
+		$w4      = $width << 2;
 		$rright  = 0;
 		$rbottom = 0;
-		$rtop    = $h4 = $height << 2;
+		$rtop    = $height << 2;
+		$h4      = $height << 2;
 		for ( $x = 0; $x < $w4; $x ++ ) {
 			for ( $y = 0; $y < $h4; $y ++ ) {
 				if ( imagecolorat( $img, $x, $y ) ) {
@@ -540,12 +542,11 @@ class GD {
 		// destroy img and serve the result
 		imagedestroy( $img );
 
-		return array(
-			'left'   => $left - $rleft,
-			'top'    => $top - $rtop,
-			'width'  => $rright - $rleft + 1,
-			'height' => $rbottom - $rtop + 1,
-		);
+		return [ 'left'   => $left - $rleft,
+		         'top'    => $top - $rtop,
+		         'width'  => $rright - $rleft + 1,
+		         'height' => $rbottom - $rtop + 1,
+		];
 	}
 
 	// Returns wrapped format (with newlines) of a piece of text (meant to be rendered on an image)

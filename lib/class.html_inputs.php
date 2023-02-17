@@ -4,7 +4,7 @@ namespace Acato\Tools;
 
 use Acato\Tools\HTML_Inputs\Input;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 require __DIR__ . '/html_inputs/class.input.php';
 require __DIR__ . '/html_inputs/class.text.php';
@@ -23,10 +23,10 @@ require __DIR__ . '/html_inputs/class.color.php';
 class HTML_Inputs {
 
 	/**
-	 * @param        $option_name
-	 * @param array       $option_atts
-	 * @param string      $option_label
-	 * @param bool        $echo
+	 * @param string $option_name
+	 * @param array  $option_atts
+	 * @param string $option_label
+	 * @param bool   $echo
 	 *
 	 * @return string|null
 	 */

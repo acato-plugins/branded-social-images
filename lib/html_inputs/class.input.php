@@ -2,11 +2,11 @@
 
 namespace Acato\Tools\HTML_Inputs;
 
-defined( 'ABSPATH' ) or die( 'You cannot be here.' );
+defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 class Input {
 
-	protected $type  = 'text';
+	protected $type = 'text';
 	protected $empty = true;
 
 	protected $name;
@@ -16,9 +16,9 @@ class Input {
 	protected $info_icon;
 	protected $comment;
 	protected $comment_icon;
-	protected $atts          = [];
-	protected $content       = '';
-	protected $value         = null;
+	protected $atts = [];
+	protected $content = '';
+	protected $value = null;
 	protected $current_value = null;
 
 	public function __construct( $attribute_name, $atts ) {
@@ -61,22 +61,22 @@ class Input {
 	}
 
 	public function set_comment() {
-		$this->comment = ! empty( $this->atts['comment'] ) ? $this->atts['comment'] : '';
+		$this->comment = empty( $this->atts['comment'] ) ? '' : $this->atts['comment'];
 		unset( $this->atts['comment'] );
 	}
 
 	public function set_comment_icon() {
-		$this->comment_icon = ! empty( $this->atts['comment-icon'] ) ? $this->atts['comment-icon'] : '';
+		$this->comment_icon = empty( $this->atts['comment-icon'] ) ? '' : $this->atts['comment-icon'];
 		unset( $this->atts['comment-icon'] );
 	}
 
 	public function set_info() {
-		$this->info = ! empty( $this->atts['info'] ) ? $this->atts['info'] : '';
+		$this->info = empty( $this->atts['info'] ) ? '' : $this->atts['info'];
 		unset( $this->atts['info'] );
 	}
 
 	public function set_info_icon() {
-		$this->info_icon = ! empty( $this->atts['info-icon'] ) ? $this->atts['info-icon'] : '';
+		$this->info_icon = empty( $this->atts['info-icon'] ) ? '' : $this->atts['info-icon'];
 		unset( $this->atts['info-icon'] );
 	}
 
@@ -177,7 +177,7 @@ class Input {
 		if ( $this->comment ) {
 			$comment = '<span class="comment">' . $this->comment;
 			if ( $this->the_info() ) {
-				$comment        .= $this->the_info();
+				$comment         .= $this->the_info();
 				$this->info      = false;
 				$this->info_icon = false;
 			}
