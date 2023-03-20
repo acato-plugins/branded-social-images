@@ -1519,7 +1519,7 @@ class Plugin {
 	 */
 	public function evaluate_font_style( $style, $default = 'normal' ) {
 		$allowed = [ 'normal', 'italic' ];
-		if ( ! in_array( $style, $allowedm, true ) ) {
+		if ( ! in_array( $style, $allowed, true ) ) {
 			return $default;
 		}
 
