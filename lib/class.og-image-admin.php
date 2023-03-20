@@ -195,6 +195,9 @@ class Admin
 						?>
 						<form method="POST"
 							  action="<?php print esc_attr(add_query_arg('bsi-action', 'purge-cache-confirm')); ?>">
+							<?php
+							self::nonce_field('purge-cache-confirm');
+							?>
 							<input type="hidden" name="bsi-action" value="purge-cache-confirm"/>
 							<button
 								class="action button-primary"><?php _e('Confirm', Plugin::TEXT_DOMAIN); ?></button>
@@ -208,7 +211,10 @@ class Admin
 						?>
 						<form method="POST"
 							  action="<?php print esc_attr(add_query_arg('bsi-action', 'save-settings')); ?>">
-							<?php self::show_editor($fields); ?>
+							<?php
+							self::nonce_field('save-settings');
+							self::show_editor($fields);
+							?>
 							<br/>
 							<br/>
 							<button
@@ -857,10 +863,11 @@ EOCSS;
 
 	public static function process_post()
 	{
-		if (is_admin() && !empty($_GET['page']) && $_GET['page'] === Plugin::ADMIN_SLUG && !empty($_POST)) {
+		if (is_admin() && current_user_can( Plugin::get_management_permission() ) && !empty($_GET['page']) && $_GET['page'] === Plugin::ADMIN_SLUG && !empty($_POST)) {
 			$action = !empty($_REQUEST['bsi-action']) ? $_REQUEST['bsi-action'] : 'nop';
 			switch ($action) {
 				case 'save-settings':
+					self::verify_nonce( $action );
 					$valid_post_keys = Plugin::get_valid_POST_keys('admin');
 					$fields = Plugin::field_list();
 
@@ -888,6 +895,7 @@ EOCSS;
 					wp_redirect(remove_query_arg('bsi-action', add_query_arg('updated', 1)));
 					exit;
 				case 'purge-cache-confirm':
+					self::verify_nonce( $action );
 					Plugin::purge_cache();
 
 					$purgable = Plugin::get_purgable_cache();
@@ -986,4 +994,15 @@ EOCSS;
 		return reset($array);
 	}
 
+	private static function nonce_field( $action, $referer = true, $echo = true )
+	{
+		return wp_nonce_field( "bsi-$action", '_bsinonce', $referer, $echo );
+	}
+
+	private static function verify_nonce($action)
+	{
+		if (!wp_verify_nonce($_POST['_bsinonce'] ?? false, "bsi-$action")) {
+			wp_die(__('Nonce verification failed, please try again.', Plugin::TEXT_DOMAIN));
+		}
+	}
 }

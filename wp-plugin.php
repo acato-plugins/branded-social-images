@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/clearsite/branded-social-images
  * Author: Acato
  * Author URI: https://acato.nl
- * Version: 1.1.0
+ * Version: 1.1.1
  * License: GPL2
  */
 
