@@ -2,8 +2,8 @@
 Contributors: acato,clearsite
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
-Tested up to: 6.1.1
-Stable tag: 1.1.1
+Tested up to: 6.2
+Stable tag: 1.1.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -130,6 +130,10 @@ When in doubt, contact us before sharing.
 3. Post-meta
 
 == Changelog ==
+
+= 1.1.2 =
+* Fix issue with missing admin icon.
+* Fix error log spam on PHP8.
 
 = 1.1.1 =
 * Fix CVE-2023-28536
