@@ -107,10 +107,12 @@ class Admin
 		add_action('bsi_settings_panels', [ static::class, 'log_panel']);
 	}
 
-	public static function admin_icon(): string
-	{
-		if ( is_file( dirname( __DIR__ ) . '/assets/' . basename( '/' . Plugin::ADMIN_ICON ) ) ) {
-			return plugins_url( '/assets/' . basename( '/' . Plugin::ADMIN_ICON ), __DIR__ );
+	public static function admin_icon(): string {
+		$icon_file = '/img/' . basename( '/' . Plugin::ADMIN_ICON );
+		if ( is_file( dirname( __DIR__ ) . $icon_file ) ) {
+			$icon_url = plugins_url( $icon_file, __DIR__ );
+
+			return $icon_url;
 		}
 
 		return Plugin::ADMIN_ICON;
