@@ -339,7 +339,7 @@ class Admin
 
 	public static function show_editor($fields, $is_meta_panel = false)
 	{
-		$fields['text']['current_value'] = trim($fields['text']['current_value']) ? $fields['text']['current_value'] : self::array_first(Plugin::text_fallback_chain());
+		$fields['text']['current_value'] = trim( $fields['text']['current_value'] ?? "" ) ? $fields['text']['current_value'] : self::array_first( Plugin::text_fallback_chain() );
 
 		$text_settings = Plugin::getInstance()->text_options;
 		$logo_settings = Plugin::getInstance()->logo_options;

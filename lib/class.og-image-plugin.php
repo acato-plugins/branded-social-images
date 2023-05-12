@@ -177,30 +177,30 @@ class Plugin
 		/**
 		 * url endpoint, the WordPress way
 		 *
-		 * pros: 
-		 * 1. it works on non-standard hosts, 
+		 * pros:
+		 * 1. it works on non-standard hosts,
 		 * 2. works on nginx hosts
-		 * cons: 
+		 * cons:
 		 * 1. does not work for custom post-type archives
 		 * 2. because it is in essence a page-modifier, WP considers this a page, therefore
 		 * - adds a trailing slash
 		 * - confusing caching plugins into thinking the content-type should be text/html
 		 * 3. the WP construction assumes an /endpoint/value/ set-up, requiring cleanup, see fileter rewrite_rules_array implementation below
-		 * 
+		 *
 		 * Why this way?
-		 * 
+		 *
 		 * Because an .htaccess RewriteRule, although improving performance 20-fold, would be web-server-software specific, blog-set-up specific and multi-site aware
 		 * which makes it quite impossible to do universally. Unfortunately.
-		 * 
+		 *
 		 * If you feel adventurous, you can always add it yourself! It should look something like this:
-		 * 
+		 *
 		 * RewriteRule (.+)/social-image.(jpg|png)/?$ $1/?bsi_img=1 [QSA,L,NC]
-		 * 
+		 *
 		 * If only for a certain domain, you can add a condition;
-		 * 
+		 *
 		 * RewriteCond %{HTTP_HOST} yourdomain.com
 		 * RewriteRule (.+)/social-image.(jpg|png)/?$ $1/?bsi_img=1 [QSA,L,NC]
-		 * 
+		 *
 		 * For more information on apache rewrite rules, see
 		 * @see https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html
 		 */
@@ -257,7 +257,7 @@ class Plugin
 				}
 			}
 			$rules = array_merge($pt_archives, $rules);
-			
+
 			/**
 			 * changes the rewrite rules so the endpoint is value-less and more a tag, like 'feed' is for WordPress.
 			 */
@@ -1073,21 +1073,21 @@ class Plugin
 
 	private function evaluate_vertical(&$top, &$bottom)
 	{
-		if (substr($top, -1) == '%') {
-			$top = intval(floor(intval($top) / 100 * $this->height));
+		if ( ! empty( $top ) && '%' === substr( $top, - 1 ) ) {
+			$top = intval( floor( intval( $top ) / 100 * $this->height ) );
 		}
-		if (substr($bottom, -1) == '%') {
-			$bottom = intval(ceil(intval($bottom) / 100 * $this->height));
+		if ( ! empty( $bottom ) && '%' === substr( $bottom, - 1 ) ) {
+			$bottom = intval( ceil( intval( $bottom ) / 100 * $this->height ) );
 		}
 	}
 
 	private function evaluate_horizontal(&$left, &$right)
 	{
-		if (substr($left, -1) == '%') {
-			$left = intval(floor(intval($left) / 100 * $this->width));
+		if ( ! empty( $left ) && '%' === substr( $left, - 1 ) ) {
+			$left = intval( floor( intval( $left ) / 100 * $this->width ) );
 		}
-		if (substr($right, -1) == '%') {
-			$right = intval(ceil(intval($right) / 100 * $this->width));
+		if ( ! empty( $right ) && '%' === substr( $right, - 1 ) ) {
+			$right = intval( ceil( intval( $right ) / 100 * $this->width ) );
 		}
 	}
 
