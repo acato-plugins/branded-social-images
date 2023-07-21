@@ -390,7 +390,7 @@ class GD
 			}
 		}
 
-		return $width / $widthCorrection;
+		return $widthCorrection ? $width / $widthCorrection : 0;
 	}
 
 	private function getWidthPixelsTrue($text, $font_file, $font_size, $font_angle = 0)
