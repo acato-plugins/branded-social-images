@@ -73,6 +73,7 @@ class Plugin
 	const DEFAULTS_PREFIX = '_bsi_default_';
 	/** @var string meta prefix */
 	const OPTION_PREFIX = '_bsi_';
+	private static $timestamp;
 
 	/** @var int Output width. Cannot remember why this is not a constant... */
 	public $width = 1200;
@@ -90,6 +91,9 @@ class Plugin
 
 	public function __construct()
 	{
+		if (!self::$timestamp) {
+			self::$timestamp = time();
+		}
 		add_filter('query_vars', function ($vars) {
 			$vars[] = Plugin::QUERY_VAR;
 
@@ -209,8 +213,8 @@ class Plugin
 			// does not work in any possible way for Post-Type Archives
 			add_rewrite_endpoint(self::output_filename(), EP_PERMALINK | EP_ROOT | EP_PAGES, Plugin::QUERY_VAR);
 
-			if (get_option("bsi_needs_rewrite_rules") || Plugin::output_filename() !== get_option('_bsi_rewrite_rules_based_on')) {
-				delete_option("bsi_needs_rewrite_rules");
+			if (get_option("bsi_rewrite_version", 0) < 1 || Plugin::output_filename() !== get_option('_bsi_rewrite_rules_based_on')) {
+				update_option("bsi_rewrite_version", 1);
 				global $wp_rewrite;
 				update_option("rewrite_rules", false);
 				$wp_rewrite->flush_rules(true);
@@ -275,6 +279,29 @@ class Plugin
 					$target = $target[0] . Plugin::QUERY_VAR . '=1';
 				}
 				$new_rules[$source] = $target;
+			}
+
+			/**
+			 * Duplicates all BSI rules to allow a cache-buster in the filename.
+			 */
+			foreach ( $new_rules as $source => $target ) {
+				$source    = str_replace( self::output_filename(), self::output_filename( 'regex' ), $source );
+				$new_rules = [ $source => $target ] + $new_rules;
+			}
+
+			$rules = $new_rules;
+			$new_rules = [];
+			$search_for = self::BSI_IMAGE_NAME;
+			// Move BSI rules to top of the list.
+			foreach ( $rules as $source => $target ) {
+				if ( false !== strpos( $source, $search_for ) ) {
+					$new_rules[ $source ] = $target;
+				}
+			}
+			foreach ( $rules as $source => $target ) {
+				if ( false === strpos( $source, $search_for ) ) {
+					$new_rules[ $source ] = $target;
+				}
 			}
 
 			return $new_rules;
@@ -593,7 +620,12 @@ class Plugin
 		return $format;
 	}
 
-	public static function output_filename()
+	/**
+	 * @param false|string $with_cache_buster if false; do not add cache buster. if string 'regex'; add cache buster regex. if string 'format'; add as sprintf placeholder.
+	 *
+	 * @return string
+	 */
+	public static function output_filename( $with_cache_buster = false )
 	{
 		$fallback_format = 'jpg';
 		$output_format = Plugin::setting('output_format', $fallback_format);
@@ -611,7 +643,17 @@ class Plugin
 			$output_format = $fallback_format;
 		}
 
-		return self::BSI_IMAGE_NAME . '.' . $output_format;
+		$cache_buster = '';
+		switch ( $with_cache_buster ) {
+			case 'regex':
+				$cache_buster = '-[0-9]+';
+				break;
+			case 'format':
+				$cache_buster = '-%d';
+				break;
+		}
+
+		return self::BSI_IMAGE_NAME . $cache_buster . '.' . $output_format;
 	}
 
 	/**
@@ -1243,7 +1285,7 @@ class Plugin
 		// from https://somesite.com/language/, keep only the base url, as the rest is included in the result from 'remove_query_arg'
 		$base_url = parse_url($base_url, PHP_URL_SCHEME) . '://' . parse_url($base_url, PHP_URL_HOST); // no trailing slash
 
-		$og_url = trailingslashit($base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . self::output_filename() . '/'; // yes, slash, WP will add it with a redirect anyway
+		$og_url = trailingslashit($base_url . remove_query_arg(array_keys(!empty($_GET) ? $_GET : ['asd' => 1]))) . sprintf( self::output_filename('format'), self::$timestamp ). '/'; // yes, slash, WP will add it with a redirect anyway
 
 		/**
 		 * @since 1.0.20 allows for final filtering of the output OG:Image url.
@@ -1251,17 +1293,20 @@ class Plugin
 		return apply_filters('bsi_image_url', $og_url);
 	}
 
-	public static function overrule_og_type(): string
+	public static function overrule_og_type()
 	{
 		$ext = explode('.', self::output_filename());
 		$ext = end($ext);
+		if ($ext === 'jpg') {
+			$ext = 'jpeg';
+		}
 
 		return 'image/' . $ext;
 	}
 
 	public static function get_og_image_url($post_id)
 	{
-		return get_permalink($post_id) ? get_permalink($post_id) . self::output_filename() . '/' : false;
+		return get_permalink($post_id) ? get_permalink($post_id) . sprintf( self::output_filename( 'format'), self::$timestamp ) . '/' : false;
 	}
 
 	public static function patch_wpseo_head()
@@ -2206,12 +2251,12 @@ EODOC;
 	public static function on_activation($network_wide)
 	{
 		global $wpdb;
-		update_option("bsi_needs_rewrite_rules", true);
+		update_option("bsi_rewrite_version", 0);
 		if ($network_wide && function_exists('is_multisite') && is_multisite()) {
 			$blog_ids = $wpdb->get_col("SELECT blog_id FROM {$wpdb->base_prefix}blogs");
 			foreach ($blog_ids as $blog_id) {
 				switch_to_blog($blog_id);
-				update_option("bsi_needs_rewrite_rules", true);
+				update_option("bsi_rewrite_version", 0);
 				restore_current_blog();
 			}
 		}
