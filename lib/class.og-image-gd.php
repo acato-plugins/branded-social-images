@@ -92,7 +92,7 @@ class GD {
 			$source_x     = ( imagesx( $baseImage ) - $source_width ) / 2;
 		}
 
-		imagecopyresampled( $this->resource, $baseImage, 0, 0, $source_x, $source_y, $w, $h, $source_width, $source_height );
+		imagecopyresampled( $this->resource, $baseImage, 0, 0, (int) $source_x, (int) $source_y, (int) $w, (int) $h, (int) $source_width, (int) $source_height );
 		imagedestroy( $baseImage );
 		if ( $this->source_is_temporary ) {
 			@unlink( $this->source );
@@ -220,7 +220,7 @@ class GD {
 		// text-background
 		if ( false !== $background_color && 'inline' === $textOptions['display'] ) {
 			// .75 points to pixels
-			imagefilledrectangle( $this->resource, $text_posX - $p, $text_posY - $p, $text_posX + $text_width + $p, $text_posY + ( $text_height / .75 ) + $p, $background_color );
+			imagefilledrectangle( $this->resource, (int) $text_posX - $p, (int) $text_posY - $p, (int) $text_posX + $text_width + $p, (int) $text_posY + ( $text_height / .75 ) + $p, $background_color );
 		}
 		// NOTE: imagettf uses Y position for bottom!! of the text, not the top
 		// ALSO: this is for the text BASE, so some text might stick out below. compensate by 18% of text height.
