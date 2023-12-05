@@ -477,6 +477,7 @@ class Plugin
 	public static function get_purgable_cache($type = 'all')
 	{
 		$filter = 'is_file';
+		$exts = false;
 		switch ($type) {
 			case 'directories':
 				$ext = '';
@@ -486,7 +487,12 @@ class Plugin
 				$ext = '/*';
 				break;
 			case 'images':
-				$ext = '/*.{png,jpg,webp}';
+				if ( ! defined( 'GLOB_BRACE' ) ) {
+					$ext  = '/*.%s';
+					$exts = [ 'png', 'jpg', 'webp' ];
+				} else {
+					$ext = '/*.{png,jpg,webp}';
+				}
 				break;
 			case 'locks':
 				$ext = '/*.lock';
@@ -514,7 +520,20 @@ class Plugin
 				}
 				return array_values(array_unique($sorted));
 		}
-		$cache = glob(self::getInstance()->storage() . '/*/*' . $ext, GLOB_BRACE);
+
+		// GLOB_BRACE is not available on all servers. Revert to a loop.
+		if ( $exts ) {
+			$cache       = [];
+			$ext_pattern = $ext;
+			foreach ( $exts as $ext ) {
+				$ext   = sprintf( $ext_pattern, $ext );
+				$cache = array_merge( $cache, glob( self::getInstance()->storage() . '/*/*' . $ext ) );
+			}
+		} elseif ( defined( 'GLOB_BRACE' ) ) {
+			$cache = glob( self::getInstance()->storage() . '/*/*' . $ext, GLOB_BRACE );
+		} else {
+			$cache = glob( self::getInstance()->storage() . '/*/*' . $ext );
+		}
 
 		return array_filter($cache, $filter);
 	}
