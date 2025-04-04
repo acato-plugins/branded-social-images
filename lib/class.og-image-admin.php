@@ -356,11 +356,11 @@ class Admin
 		if ($logo && is_numeric($logo)) {
 			$logo = wp_get_attachment_image($logo, 'full');
 			preg_match('/width="(.+)"/U', $logo, $width);
-			$width = $width[1];
+			$width = $width[1] ?? 0;
 			preg_match('/height="(.+)"/U', $logo, $height);
-			$height = $height[1];
+			$height = $height[1] ?? 0;
 			preg_match('/src="(.+)"/U', $logo, $m);
-			$logo = $m[1];
+			$logo = $m[1] ?? '';
 		}
 
 		add_filter('bsi_editor_variables', function($list) use ($text_settings, $logo_settings, $logo, $width, $height) {

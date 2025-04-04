@@ -186,7 +186,7 @@ class GD
 		if (false !== $background_color) {
 			if ('inline' === $textOptions['display']) {
 				//  /.75 points to pixels
-				imagefilledrectangle($this->resource, $text_posX - $p, $text_posY - $p, $text_posX + $text_width + $p, $text_posY + ($text_height / .75) + $p, $background_color);
+				imagefilledrectangle( $this->resource, ceil( $text_posX - $p ), ceil( $text_posY - $p ), ceil( $text_posX + $text_width + $p ), ceil( $text_posY + ( $text_height / .75 ) + $p ), $background_color );
 			}
 		}
 		// NOTE: imagettf uses Y position for bottom!! of the text, not the top
