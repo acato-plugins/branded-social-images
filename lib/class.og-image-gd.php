@@ -487,7 +487,7 @@ class GD {
 			$logo_posY = $logoOptions['top'] + $p;
 		}
 
-		imagecopyresampled( $this->resource, $logo, $logo_posX, $logo_posY, 0, 0, $w, $h, $logo_width, $logo_height );
+		imagecopyresampled( $this->resource, $logo, (int) $logo_posX, (int) $logo_posY, 0, 0, (int) $w, (int) $h, (int) $logo_width, (int) $logo_height );
 		imagedestroy( $logo );
 
 		// with WP_DEBUG_DISPLAY, don't throw deprecation errors on the screen as it will interfere with the image output.
