@@ -1,15 +1,36 @@
 <?php
+/**
+ * Input definition file.
+ *
+ * @package Acato\Plugins\OGImage
+ */
 
 namespace Acato\Tools\HTML_Inputs;
 
 defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
-class radio extends Input {
+/**
+ * Class Radio
+ *
+ * Represents a radio input field.
+ */
+class Radio extends Input {
+	/**
+	 * Constructor for the Radio class.
+	 *
+	 * @param string $attribute_name The name of the attribute.
+	 * @param array  $atts           The attributes for the input.
+	 */
 	public function __construct( $attribute_name, $atts ) {
 		parent::__construct( $attribute_name, $atts );
 		$this->type = 'radio';
 	}
 
+	/**
+	 * Generates the HTML for the input field.
+	 *
+	 * @return string
+	 */
 	public function generate_html(): string {
 		$label = '';
 		if ( $this->label ) {
@@ -18,10 +39,10 @@ class radio extends Input {
 		}
 
 		$this->atts['value'] = $this->get_tag_value();
-		if ( ! isset( $this->atts['checked'] ) && $this->get_current_value() == $this->get_tag_value() ) {
+		if ( ! isset( $this->atts['checked'] ) && $this->get_current_value() === $this->get_tag_value() ) {
 			$this->atts['checked'] = 'checked';
 		}
-		$atts = $this->attributes(); // builds HTML attributes
+		$atts = $this->attributes();
 
 		return '<input type="' . $this->type . '" ' . $atts . '>' . ( $this->empty ? '' : $this->content . '</' . $this->type . '>' ) . $label;
 	}

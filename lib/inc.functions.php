@@ -1,8 +1,16 @@
 <?php
 /**
- * @since 1.0.15
+ * A collection of functions that are used throughout the plugin.
+ *
+ * @package Acato\Plugins\OGImage
+ * @since   1.0.15
+ */
+
+/**
  * Some hosts do not have the mime_content_type function.
  * In case it is missing, try alternatives
+ *
+ * @since   1.0.15
  */
 foreach (
 	[
@@ -13,12 +21,22 @@ foreach (
 		'shell_exec',
 		'passthru',
 		'system',
-	] as $function
+	] as $bsi_function_name
 ) {
-	define( strtoupper( $function . '_EXISTED_BEFORE_PATCH' ), function_exists( $function ) );
+	// Define a constant to indicate if the function existed before the patch.
+	// We use this to determine if we actually needed to implement the function ourselves.
+	// This will be listed in the debug information.
+	define( 'BSI_' . strtoupper( $bsi_function_name . '_EXISTED_BEFORE_PATCH' ), function_exists( $bsi_function_name ) );
 }
 
 if ( ! function_exists( 'mime_content_type' ) ) {
+	/**
+	 * Get the mime type of a file.
+	 *
+	 * @param string $file The file to get the mime type of.
+	 *
+	 * @return false|mixed|string
+	 */
 	function mime_content_type( $file ) {
 		/**
 		 * Alternative 1: finfo
@@ -48,7 +66,7 @@ if ( ! function_exists( 'mime_content_type' ) ) {
 		}
 
 		/**
-		 * if all else fails;
+		 * If all else fails;
 		 * Alternative 3: mime type based on file extension.
 		 * Now this is a potential security risk, but if you are that keen on this; please just fix your webserver to properly
 		 * support mime-sniffing on files.
@@ -67,7 +85,7 @@ if ( ! function_exists( 'mime_content_type' ) ) {
 			'xml'  => 'application/xml',
 			'swf'  => 'application/x-shockwave-flash',
 			'flv'  => 'video/x-flv',
-			// images
+			// images.
 			'png'  => 'image/png',
 			'jpe'  => 'image/jpeg',
 			'jpeg' => 'image/jpeg',
@@ -79,28 +97,28 @@ if ( ! function_exists( 'mime_content_type' ) ) {
 			'tif'  => 'image/tiff',
 			'svg'  => 'image/svg+xml',
 			'svgz' => 'image/svg+xml',
-			// archives
+			// archives.
 			'zip'  => 'application/zip',
 			'rar'  => 'application/x-rar-compressed',
 			'exe'  => 'application/x-msdownload',
 			'msi'  => 'application/x-msdownload',
 			'cab'  => 'application/vnd.ms-cab-compressed',
-			// audio/video
+			// audio/video.
 			'mp3'  => 'audio/mpeg',
 			'qt'   => 'video/quicktime',
 			'mov'  => 'video/quicktime',
-			// adobe
+			// adobe.
 			'pdf'  => 'application/pdf',
 			'psd'  => 'image/vnd.adobe.photoshop',
 			'ai'   => 'application/postscript',
 			'eps'  => 'application/postscript',
 			'ps'   => 'application/postscript',
-			// ms office
+			// ms office.
 			'doc'  => 'application/msword',
 			'rtf'  => 'application/rtf',
 			'xls'  => 'application/vnd.ms-excel',
 			'ppt'  => 'application/vnd.ms-powerpoint',
-			// open office
+			// open office.
 			'odt'  => 'application/vnd.oasis.opendocument.text',
 			'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
 		];
@@ -114,4 +132,3 @@ if ( ! function_exists( 'mime_content_type' ) ) {
 		return 'application/octet-stream';
 	}
 }
-

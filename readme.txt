@@ -1,5 +1,5 @@
 === Branded Social Images - Open Graph Images with logo and extra text layer ===
-Contributors: acato,clearsite
+Contributors: acato,rmpel,clearsite
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
 Tested up to: 6.0.1
@@ -112,7 +112,7 @@ If you set the output to PNG, use filter `bsi_settings_png_compression_level` an
 
 = Can I assist with translating the plugin? =
 
-Absolutely! A .pot template can be found in the [GitHub repository](https://github.com/clearsite/branded-social-images "Branded Social Images on GitHub")
+Absolutely! A .pot template can be found in the [GitHub repository](https://github.com/acato-plugins/branded-social-images "Branded Social Images on GitHub")
 
 = Something isn't working properly. Can you help? =
 

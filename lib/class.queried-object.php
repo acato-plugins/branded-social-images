@@ -1,17 +1,61 @@
 <?php
+/**
+ * Helper class to get the queried object data.
+ *
+ * @package Acato\Plugins\OGImage
+ */
 
 namespace Acato\Plugins\OGImage;
 
+/**
+ * Exceptions to the WordPress coding standards:
+ * phpcs:disable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- We use camelCase for properties and methods.
+ * phpcs:disable WordPress.Security.NonceVerification.Recommended -- not processing any user input here.
+ */
+
 use ArrayAccess;
 
+/**
+ * Class QueriedObject
+ *
+ * This class is a singleton that provides access to the queried object data.
+ * It implements ArrayAccess to allow accessing properties as array keys.
+ *
+ * @package Acato\Plugins\OGImage
+ */
 class QueriedObject implements ArrayAccess {
+	/**
+	 * The queried object data.
+	 *
+	 * @var array
+	 */
 	private $data = [];
+
+	/**
+	 * The keys for the queried object data.
+	 *
+	 * @var array
+	 */
 	private $keys = [ 'object_id', 'object_type', 'base_type', 'permalink', 'og_image', 'go' ];
+
+	/**
+	 * Is the queried object public?
+	 *
+	 * @var bool
+	 */
 	private $is_public;
 
+	/**
+	 * Constructor (NOP).
+	 */
 	public function __construct() {
 	}
 
+	/**
+	 * Get the singleton instance of the QueriedObject class.
+	 *
+	 * @return static
+	 */
 	public static function instance() {
 		static $instance;
 		if ( ! $instance ) {
@@ -21,6 +65,16 @@ class QueriedObject implements ArrayAccess {
 		return $instance;
 	}
 
+	/**
+	 * Set the queried object data.
+	 *
+	 * If $newData is null, it will determine the data based on the current query.
+	 * If $newData is provided, it will set the data to that value.
+	 *
+	 * @param array|null $newData The new data to set, or null to determine from the current query.
+	 *
+	 * @return static
+	 */
 	public static function setData( $newData = null ) {
 		$that = self::instance();
 
@@ -32,55 +86,51 @@ class QueriedObject implements ArrayAccess {
 				$qo            = get_queried_object();
 				$is_front_page = false;
 
-				// front-page hack
-				$current_url = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+				// front-page hack.
+				$current_url = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 				$front       = get_option( 'page_on_front' );
 				if ( $front && ( '/' . Plugin::output_filename() . '/' === $current_url || '/' === $current_url ) ) {
 					$id            = $front;
 					$is_front_page = true;
-					// $qo is ignored for pages
+					// $qo is ignored for pages.
 				}
 				$that->is_public = true;
 
 				switch ( true ) {
-					// post edit
-					case is_admin() && in_array( $pagenow, [ 'post.php', 'post-new.php' ] ):
-						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
+					// post edit.
+					case is_admin() && in_array( $pagenow, [ 'post.php', 'post-new.php' ], true ):
 						$id        = empty( $_GET['post'] ) ? 'new' : (int) $_GET['post'];
 						$type      = empty( $_GET['post_type'] ) ? false : $_GET['post_type'];
-						$type      = ! $type && $pagenow == 'post-new.php' ? 'post' : $type;
+						$type      = ! $type && 'post-new.php' === $pagenow ? 'post' : $type;
 						$type      = $type ?: get_post_type( $id );
 						$base_type = 'post';
 						$link      = get_permalink( $id );
 						break;
 
-					// post
+					// post.
 					case is_single():
 					case is_page():
-					case $is_front_page: // front-page social-image-url hack
+					case $is_front_page: // front-page social-image-url hack.
 					case is_front_page() && ! is_home():
 					case is_privacy_policy():
 					case is_singular():
-						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type      = get_post_type();
 						$base_type = 'post';
 						$link      = get_permalink( $id );
 						break;
 
-					// post archive
+					// post archive.
 					case is_post_type_archive():
 					case is_archive() && ! is_category() && ! is_tag() && ! is_tax():
 					case is_home():
-						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id        = 'archive';
 						$type      = get_post_type();
 						$base_type = 'post';
 						$link      = get_post_type_archive_link( $type );
 						break;
 
-					// category edit
-					case is_admin() && in_array( $pagenow, [ 'term.php', 'edit-tags.php' ] ):
-						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
+					// category edit.
+					case is_admin() && in_array( $pagenow, [ 'term.php', 'edit-tags.php' ], true ):
 						$id        = empty( $_GET['tag_ID'] ) ? 'new' : (int) $_GET['tag_ID'];
 						$type      = empty( $_GET['taxonomy'] ) ? get_post_type( $id ) : $_GET['taxonomy'];
 						$base_type = 'category';
@@ -90,19 +140,17 @@ class QueriedObject implements ArrayAccess {
 						}
 						break;
 
-					// category archive
+					// category archive.
 					case is_category():
 					case is_tag():
 					case is_tax():
-						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type      = $qo->taxonomy;
 						$base_type = 'category';
 						$link      = get_term_link( $id, $type );
 						break;
 
-					// unsupported
+					// unsupported.
 					case is_404():
-						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$type      = '404';
 						$base_type = 'unsupported';
 						break;
@@ -124,7 +172,6 @@ class QueriedObject implements ArrayAccess {
 					case is_comment_feed():
 					case is_trackback():
 					default:
-						// var_dump(__LINE__, $wp_query, $id, $qo);exit;
 						$id        = null;
 						$type      = 'unsupported';
 						$base_type = 'unsupported';
@@ -165,13 +212,23 @@ class QueriedObject implements ArrayAccess {
 			$that->data = $newData;
 		}
 
-		return $that; // allow chaining
+		return $that; // allow chaining.
 	}
 
+	/**
+	 * Get the queried object data.
+	 *
+	 * @return array
+	 */
 	public function getData() {
 		return $this->data;
 	}
 
+	/**
+	 * Get the queried object as a table.
+	 *
+	 * @return array
+	 */
 	public function getTable() {
 		$base_data                      = array_combine( $this->keys, $this->data );
 		$base_data['go']                = $base_data['go'] ? 'yes' : 'no';
@@ -182,7 +239,7 @@ class QueriedObject implements ArrayAccess {
 			$diff = str_replace( $needle, '', $haystack );
 			$diff = trim( $diff, '&?' );
 
-			return $diff === Plugin::QUERY_VAR . '=1';
+			return ( Plugin::QUERY_VAR . '=1' ) === $diff;
 		};
 
 		if ( $this->is_public ) {
@@ -194,8 +251,10 @@ class QueriedObject implements ArrayAccess {
 						'og_image'  => $base_data['og_image'],
 					] as $group => $item
 				) {
-					if ( $rewrite = Plugin::url_can_be_rewritten( $item ) ) {
-						$rewrites_to[ $group ]                                                    = $rewrite['target'];
+					$rewrite = Plugin::url_can_be_rewritten( $item );
+					if ( $rewrite ) {
+						$rewrites_to[ $group ] = $rewrite['target'];
+
 						$matching_rules[ $group . ' matches rule #' . ( $rewrite['rule#'] + 1 ) ] = $rewrite['rule'] . '<br />' . $rewrites_to[ $group ];
 					} else {
 						$matching_rules[ $group . ' Rewrite Error' ] = 'There are no rewrite rules that match this URL';
@@ -217,6 +276,88 @@ class QueriedObject implements ArrayAccess {
 	}
 
 	/**
+	 * Magic method to get properties as array keys.
+	 *
+	 * @param string $offset The property name.
+	 *
+	 * @return mixed
+	 */
+	public function __get( $offset ) {
+		if ( $this->offsetExists( $offset ) ) {
+			$data_count = count( $this->data );
+			$key_count  = count( $this->keys );
+			while ( $data_count < $key_count ) {
+				$this->data[] = false;
+				++ $data_count;
+			}
+
+			return array_combine( $this->keys, $this->data )[ $offset ];
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if the queried object is a post.
+	 *
+	 * @param string|null $post_type The post type to check against.
+	 *
+	 * @return bool
+	 */
+	public function isPost( $post_type = null ): bool {
+		return $post_type ? $this->object_type === $post_type : 'post' === $this->base_type;
+	}
+
+	/**
+	 * Check if the queried object is a category.
+	 *
+	 * @param string|null $taxonomy The taxonomy to check against.
+	 *
+	 * @return bool
+	 */
+	public function isCategory( $taxonomy = null ): bool {
+		return $taxonomy ? $this->object_type === $taxonomy : 'category' === $this->base_type;
+	}
+
+	/**
+	 * Check if the queried object is supported.
+	 *
+	 * @return bool
+	 */
+	public function showInterface(): bool {
+		return 'unsupported' !== $this->base_type;
+	}
+
+	/**
+	 * Get the cache directory for the queried object.
+	 *
+	 * @return int|string
+	 */
+	public function cacheDir(): string {
+		return self::cacheDirFor( $this->object_id, $this->object_type, $this->base_type );
+	}
+
+	/**
+	 * Get the cache directory for a given object.
+	 *
+	 * @param int|string $object_id   The ID of the object.
+	 * @param string     $object_type The type of the object.
+	 * @param string     $base_type   The base type of the object (e.g., 'post', 'category').
+	 *
+	 * @return string
+	 */
+	public static function cacheDirFor( $object_id, $object_type, $base_type ): string {
+		$dir = $object_id;
+		if ( 'post' !== $base_type ) {
+			$dir = $base_type . '-' . $dir;
+		}
+
+		return $dir;
+	}
+
+	// phpcs:disable Generic.Commenting.DocComment.MissingShort,Squiz.Commenting.FunctionComment.MissingParamTag -- From here on, we use the inherited generic ArrayAccess interface, so no need for a doc comment.
+
+	/**
 	 * @inheritDoc
 	 */
 	#[\ReturnTypeWillChange]
@@ -225,7 +366,7 @@ class QueriedObject implements ArrayAccess {
 			return $offset < count( $this->data );
 		}
 
-		return in_array( $offset, $this->keys );
+		return in_array( $offset, $this->keys, true );
 	}
 
 	/**
@@ -254,42 +395,5 @@ class QueriedObject implements ArrayAccess {
 	#[\ReturnTypeWillChange]
 	public function offsetUnset( $offset ) {
 		return false;
-	}
-
-	public function __get( $offset ) {
-		if ( $this->offsetExists( $offset ) ) {
-			while ( count( $this->data ) < count( $this->keys ) ) {
-				$this->data[] = false;
-			}
-
-			return array_combine( $this->keys, $this->data )[ $offset ];
-		}
-
-		return false;
-	}
-
-	public function isPost( $post_type = null ): bool {
-		return $post_type ? $this->object_type == $post_type : $this->base_type == 'post';
-	}
-
-	public function isCategory( $taxonomy = null ): bool {
-		return $taxonomy ? $this->object_type == $taxonomy : $this->base_type == 'category';
-	}
-
-	public function showInterface(): bool {
-		return 'unsupported' !== $this->base_type;
-	}
-
-	public function cacheDir(): string {
-		return self::cacheDirFor( $this->object_id, $this->object_type, $this->base_type );
-	}
-
-	public static function cacheDirFor( $object_id, $object_type, $base_type ): string {
-		$dir = $object_id;
-		if ( 'post' !== $base_type ) {
-			$dir = $base_type . '-' . $dir;
-		}
-
-		return $dir;
 	}
 }

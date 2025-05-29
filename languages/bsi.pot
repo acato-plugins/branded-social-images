@@ -1,24 +1,43 @@
+# Copyright (C) 2025 Acato
+# This file is distributed under the GPL2.
 msgid ""
 msgstr ""
-"Project-Id-Version: Branded Social Images\n"
-"POT-Creation-Date: 2022-09-26 14:05+0200\n"
-"PO-Revision-Date: \n"
-"Last-Translator: Remon Pel <remon@acato.nl>\n"
-"Language-Team: Acato <wordpress@acato.nl>\n"
-"Language: nl_NL\n"
+"Project-Id-Version: Branded Social Images 2.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/branded-social-images\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0.1\n"
-"X-Poedit-Basepath: ..\n"
-"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
-"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
-"X-Poedit-SearchPath-0: .\n"
-"X-Poedit-SearchPathExcluded-0: bin\n"
-"X-Poedit-SearchPathExcluded-1: node_modules\n"
-"X-Poedit-SearchPathExcluded-2: vendor\n"
-"X-Poedit-SearchPathExcluded-3: admin\n"
+"POT-Creation-Date: 2025-05-29T09:01:32+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: bsi\n"
+
+#. Plugin Name of the plugin
+#: wp-plugin.php
+msgid "Branded Social Images"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: wp-plugin.php
+msgid "https://github.com/acato-plugins/branded-social-images"
+msgstr ""
+
+#. Description of the plugin
+#: wp-plugin.php
+msgid "The simplest way to brand your social images. Provide all your social images (Open Graph Images) with your brand en text. In just a few clicks."
+msgstr ""
+
+#. Author of the plugin
+#: wp-plugin.php
+msgid "Acato"
+msgstr ""
+
+#. Author URI of the plugin
+#: wp-plugin.php
+msgid "https://acato.nl"
+msgstr ""
 
 #: lib/class.og-image-admin.php:70
 msgid "Select an image or upload one."
@@ -36,439 +55,462 @@ msgstr ""
 msgid "Use this file"
 msgstr ""
 
-#: lib/class.og-image-admin.php:129
+#: lib/class.og-image-admin.php:128
 msgid "The OG:Image recommended size"
 msgstr ""
 
+#. translators: %1$s is the plugin URL, %2$s is the author URL.
+#: lib/class.og-image-admin.php:168
+msgid "<a href=\"%1$s\" target=\"_blank\">Branded Social Images</a> is a free plugin by <a href=\"%2$s\" target=\"_blank\">Acato</a>."
+msgstr ""
+
 #: lib/class.og-image-admin.php:169
-#, php-format
-msgid ""
-"<a href=\"%1$s\" target=\"_blank\">Branded Social Images</a> is a free "
-"plugin by <a href=\"%2$s\" target=\"_blank\">Acato</a>."
+msgid "Please let us know what you think of this plugin and what you wish to see in future versions."
 msgstr ""
 
-#: lib/class.og-image-admin.php:170
-msgid ""
-"Please let us know what you think of this plugin and what you wish to see in "
-"future versions."
-msgstr ""
-
+#. translators: %s is the contact URL.
 #: lib/class.og-image-admin.php:171
-#, php-format
 msgid "<a href=\"%s\" target=\"_blank\">Contact us here</a>."
 msgstr ""
 
-#: lib/class.og-image-admin.php:180
-#, php-format
-msgid ""
-"Use <a href=\"%1$s\" target=\"_blank\">%2$s</a> to preview what your social "
-"image looks like on social media."
+#. translators: %1$s is the URL to the social image inspector, %2$s is the name of the inspector.
+#: lib/class.og-image-admin.php:183
+#: lib/class.og-image-admin.php:206
+msgid "Use <a href=\"%1$s\" target=\"_blank\">%2$s</a> to preview what your social image looks like on social media."
 msgstr ""
 
-#: lib/class.og-image-admin.php:189
-#, php-format
-msgid ""
-"<a href=\"%s\" target=\"_blank\">Show debug information</a> for the social-"
-"image of this post."
+#. translators: %s is the URL to the social image of this post.
+#: lib/class.og-image-admin.php:190
+msgid "<a href=\"%s\" target=\"_blank\">Show the social-image of this post</a>."
 msgstr ""
 
-#: lib/class.og-image-admin.php:287
+#. translators: %s is the URL to the debug information of the social image of this post.
+#: lib/class.og-image-admin.php:196
+msgid "<a href=\"%s\" target=\"_blank\">Show debug information</a> for the social-image of this post."
+msgstr ""
+
+#. translators: %s is the URL to the social image of this category.
+#: lib/class.og-image-admin.php:213
+msgid "<a href=\"%s\" target=\"_blank\">Show the social-image of this category</a>."
+msgstr ""
+
+#. translators: %s is the URL to the debug information of the social image of this category.
+#: lib/class.og-image-admin.php:219
+msgid "<a href=\"%s\" target=\"_blank\">Show debug information</a> for the social-image of this category."
+msgstr ""
+
+#: lib/class.og-image-admin.php:316
 msgid "The cache is empty"
 msgstr ""
 
-#: lib/class.og-image-admin.php:290
+#: lib/class.og-image-admin.php:320
 msgid "Ok"
 msgstr ""
 
-#: lib/class.og-image-admin.php:294
-#, php-format
-msgid ""
-"This will clear the cache, %1$d image(s) and %2$d folder(s) will be removed. "
-"New images will be generated on demand."
+#. translators: %1$d is the number of images, %2$d is the number of directories.
+#: lib/class.og-image-admin.php:325
+msgid "This will clear the cache, %1$d image(s) and %2$d folder(s) will be removed. New images will be generated on demand."
 msgstr ""
 
-#: lib/class.og-image-admin.php:301
+#: lib/class.og-image-admin.php:334
 msgid "Confirm"
 msgstr ""
 
-#: lib/class.og-image-admin.php:303
+#: lib/class.og-image-admin.php:337
 msgid "Cancel"
 msgstr ""
 
-#: lib/class.og-image-admin.php:317
+#: lib/class.og-image-admin.php:355
 msgid "Save settings"
 msgstr ""
 
-#: lib/class.og-image-admin.php:319
+#: lib/class.og-image-admin.php:358
 msgid "Purge cache"
 msgstr ""
 
-#: lib/class.og-image-admin.php:346 lib/class.og-image-admin.php:550
+#: lib/class.og-image-admin.php:385
+#: lib/class.og-image-admin.php:591
 msgid "Settings"
 msgstr ""
 
-#: lib/class.og-image-admin.php:349
+#: lib/class.og-image-admin.php:388
 msgid "Support"
 msgstr ""
 
-#: lib/class.og-image-admin.php:352
+#: lib/class.og-image-admin.php:391
 msgid "Contribute"
 msgstr ""
 
-#: lib/class.og-image-admin.php:411 lib/class.og-image-plugin.php:1578
+#: lib/class.og-image-admin.php:450
+#: lib/class.og-image-plugin.php:1581
 msgid "Could not create the storage directory in the uploads folder."
 msgstr ""
 
-#: lib/class.og-image-admin.php:411 lib/class.og-image-plugin.php:1578
+#: lib/class.og-image-admin.php:450
+#: lib/class.og-image-plugin.php:1581
 msgid "In a WordPress site the uploads folder should always be writable."
 msgstr ""
 
-#: lib/class.og-image-admin.php:411 lib/class.og-image-plugin.php:1578
+#: lib/class.og-image-admin.php:450
+#: lib/class.og-image-plugin.php:1581
 msgid "Please fix this."
 msgstr ""
 
-#: lib/class.og-image-admin.php:411 lib/class.og-image-plugin.php:1578
+#: lib/class.og-image-admin.php:450
+#: lib/class.og-image-plugin.php:1581
 msgid "This error will disappear once the problem has been corrected."
 msgstr ""
 
-#: lib/class.og-image-admin.php:600
+#: lib/class.og-image-admin.php:645
 msgid "Image and Logo options"
 msgstr ""
 
-#: lib/class.og-image-admin.php:618
+#: lib/class.og-image-admin.php:663
 msgid "Text settings"
 msgstr ""
 
-#: lib/class.og-image-admin.php:696
+#: lib/class.og-image-admin.php:741
 msgid "Debug log"
 msgstr ""
 
-#: lib/class.og-image-admin.php:702
-#, php-format
+#. translators: %s is the date when the log will be removed.
+#: lib/class.og-image-admin.php:748
 msgid "This log will be available until %s or until overwritten by a new log."
 msgstr ""
 
-#: lib/class.og-image-admin.php:714
+#: lib/class.og-image-admin.php:760
 msgid "Plugin configuration"
 msgstr ""
 
-#: lib/class.og-image-admin.php:995 lib/class.og-image-plugin.php:1607
+#: lib/class.og-image-admin.php:1040
+#: lib/class.og-image-plugin.php:1627
 msgid "Could not download font from Google Fonts."
 msgstr ""
 
-#: lib/class.og-image-admin.php:995 lib/class.og-image-plugin.php:1607
+#: lib/class.og-image-admin.php:1040
+#: lib/class.og-image-plugin.php:1627
 msgid "Please download yourself and upload here."
 msgstr ""
 
-#: lib/class.og-image-admin.php:1103
-#, php-format
-msgid ""
-"Not all cache items could be removed. Please try again, or check the cache "
-"folder yourself. Location: %s"
+#. translators: %s is the cache-folder location in which there are items that could not be removed.
+#: lib/class.og-image-admin.php:1152
+msgid "Not all cache items could be removed. Please try again, or check the cache folder yourself. Location: %s"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:1595
+#: lib/class.og-image-admin.php:1241
+msgid "Nonce verification failed, please try again."
+msgstr ""
+
+#: lib/class.og-image-plugin.php:1615
 msgid "Don't know where to get this font."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:1595
+#: lib/class.og-image-plugin.php:1615
 msgid "Sorry."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:1619
+#: lib/class.og-image-plugin.php:1639
 msgid "This Google Fonts does not offer a TTF or OTF file."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:1619
+#: lib/class.og-image-plugin.php:1639
 msgid "Sorry, cannot continue at this time."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2092
+#: lib/class.og-image-plugin.php:2215
 msgid "Top Left"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2093
+#: lib/class.og-image-plugin.php:2216
 msgid "Top Center"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2094
+#: lib/class.og-image-plugin.php:2217
 msgid "Top Right"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2095
+#: lib/class.og-image-plugin.php:2218
 msgid "Left Middle"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2096
+#: lib/class.og-image-plugin.php:2219
 msgid "Centered"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2097
+#: lib/class.og-image-plugin.php:2220
 msgid "Right Middle"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2098
+#: lib/class.og-image-plugin.php:2221
 msgid "Bottom Left"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2099
+#: lib/class.og-image-plugin.php:2222
 msgid "Bottom Center"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2100
+#: lib/class.og-image-plugin.php:2223
 msgid "Bottom Right"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2128
-msgid ""
-"The following process is used to determine the OG:Image (in order of "
-"importance)"
+#: lib/class.og-image-plugin.php:2260
+msgid "The following process is used to determine the OG:Image (in order of importance)"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2129
+#: lib/class.og-image-plugin.php:2261
 msgid "Branded Social Image on page/post"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2131
+#: lib/class.og-image-plugin.php:2263
 msgid "Yoast Social image on page/post"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2133
+#: lib/class.og-image-plugin.php:2265
 msgid "Featured image on page/post (when checked in general settings)"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2134
+#: lib/class.og-image-plugin.php:2266
 msgid "Fallback Branded Social image in general settings"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2141
+#: lib/class.og-image-plugin.php:2275
 msgid "Select to disable the plugin Branded Social Images by default."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2147
+#: lib/class.og-image-plugin.php:2281
 msgid "Where does Branded Social Images live in the menu?"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2150
+#: lib/class.og-image-plugin.php:2284
 msgid "At the main level"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2151
+#: lib/class.og-image-plugin.php:2285
 msgid "In the Settings sub-menu"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2152
+#: lib/class.og-image-plugin.php:2286
 msgid "In the Media sub-menu"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2158
+#: lib/class.og-image-plugin.php:2292
 msgid "Branded Social Images meta-box location"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2161
+#: lib/class.og-image-plugin.php:2295
 msgid "Below the content editor"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2162
+#: lib/class.og-image-plugin.php:2296
 msgid "In the sidebar"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2171
+#: lib/class.og-image-plugin.php:2304
 msgid "Fallback OG:Image."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2172
+#: lib/class.og-image-plugin.php:2305
 msgid "Used for any page/post that has no OG image selected."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2172 lib/class.og-image-plugin.php:2339
+#: lib/class.og-image-plugin.php:2305
+#: lib/class.og-image-plugin.php:2467
 msgid "You can use JPEG and PNG."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2172 lib/class.og-image-plugin.php:2339
+#: lib/class.og-image-plugin.php:2305
+#: lib/class.og-image-plugin.php:2467
 msgid "Recommended size: 1200x630 pixels."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2177
+#: lib/class.og-image-plugin.php:2310
 msgid "Use the WordPress Featured image."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2187 lib/class.og-image-plugin.php:2435
+#: lib/class.og-image-plugin.php:2319
+#: lib/class.og-image-plugin.php:2557
 msgid "Your logo"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2188 lib/class.og-image-plugin.php:2436
+#: lib/class.og-image-plugin.php:2320
+#: lib/class.og-image-plugin.php:2558
 msgid "Image should be approximately 600 pixels wide/high."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2188 lib/class.og-image-plugin.php:2436
+#: lib/class.og-image-plugin.php:2320
+#: lib/class.og-image-plugin.php:2558
 msgid "Use a transparent PNG for best results."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2195
+#: lib/class.og-image-plugin.php:2327
 msgid "Default logo position"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2202
+#: lib/class.og-image-plugin.php:2334
 msgid "Logo-scale (%)"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2214
+#: lib/class.og-image-plugin.php:2345
 msgid "The text to overlay if no other text or title can be found."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2215
+#: lib/class.og-image-plugin.php:2346
 msgid "This should be a generic text that is applicable to the entire website."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2221
+#: lib/class.og-image-plugin.php:2352
 msgid "Select a font"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2229
+#: lib/class.og-image-plugin.php:2360
 msgid "Font upload"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2230
+#: lib/class.og-image-plugin.php:2361
 msgid "Upload .ttf/.otf file"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2232
+#: lib/class.og-image-plugin.php:2363
 msgid "Custom font must be a .ttf or .otf file."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2232
-msgid ""
-"You're responsible for the proper permissions and usage rights of the font."
+#: lib/class.og-image-plugin.php:2363
+msgid "You're responsible for the proper permissions and usage rights of the font."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2240 lib/class.og-image-plugin.php:2361
+#: lib/class.og-image-plugin.php:2369
+#: lib/class.og-image-plugin.php:2488
 msgid "Text position"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2248
+#: lib/class.og-image-plugin.php:2377
 msgid "Default Text color"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2255
+#: lib/class.og-image-plugin.php:2384
 msgid "Font-size (px)"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2266 lib/class.og-image-plugin.php:2370
+#: lib/class.og-image-plugin.php:2395
+#: lib/class.og-image-plugin.php:2496
 msgid "Text background color"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2272
+#: lib/class.og-image-plugin.php:2401
 msgid "Use text background"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2282 lib/class.og-image-plugin.php:2378
+#: lib/class.og-image-plugin.php:2410
+#: lib/class.og-image-plugin.php:2503
 msgid "Stroke color"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2288 lib/class.og-image-plugin.php:2384
+#: lib/class.og-image-plugin.php:2416
+#: lib/class.og-image-plugin.php:2509
 msgid "Default stroke width"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2295
+#: lib/class.og-image-plugin.php:2422
 msgid "Default Text shadow color"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2301 lib/class.og-image-plugin.php:2397
+#: lib/class.og-image-plugin.php:2428
+#: lib/class.og-image-plugin.php:2521
 msgid "Shadow offset - vertical."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2301 lib/class.og-image-plugin.php:2397
+#: lib/class.og-image-plugin.php:2428
+#: lib/class.og-image-plugin.php:2521
 msgid "Negative numbers to top, Positive numbers to bottom."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2307 lib/class.og-image-plugin.php:2403
+#: lib/class.og-image-plugin.php:2434
+#: lib/class.og-image-plugin.php:2527
 msgid "Shadow offset - horizontal."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2307 lib/class.og-image-plugin.php:2403
+#: lib/class.og-image-plugin.php:2434
+#: lib/class.og-image-plugin.php:2527
 msgid "Negative numbers to left, Positive numbers to right."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2313 lib/class.og-image-plugin.php:2409
+#: lib/class.og-image-plugin.php:2440
+#: lib/class.og-image-plugin.php:2533
 msgid "Use a text shadow"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2322
-msgid "Select to disable the plugin Branded Social Images for this post."
+#. translators: %s is the object base type, like 'post' or 'category'.
+#: lib/class.og-image-plugin.php:2450
+msgid "Select to disable the plugin Branded Social Images for this %s."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2324
-msgid "The plugin Branded Social Images is disabled for this post."
+#. translators: %s is the object base type, like 'post' or 'category'.
+#: lib/class.og-image-plugin.php:2453
+msgid "The plugin Branded Social Images is disabled for this %s."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2329
+#: lib/class.og-image-plugin.php:2458
 msgid "Display text on this image."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2338
+#: lib/class.og-image-plugin.php:2466
 msgid "You can upload/select a specific Social Image here"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2348
+#: lib/class.og-image-plugin.php:2475
 msgid "Text on image"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2354
+#: lib/class.og-image-plugin.php:2481
 msgid "Text color"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2391
+#: lib/class.og-image-plugin.php:2515
 msgid "Text shadow color"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2410
+#: lib/class.og-image-plugin.php:2534
 msgid "Will improve readability of light text on light background."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2418
+#: lib/class.og-image-plugin.php:2541
 msgid "Use a logo on this image?"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2420
-msgid ""
-"Uncheck if you do not wish a logo on this image, or choose a position below."
+#: lib/class.og-image-plugin.php:2543
+msgid "Uncheck if you do not wish a logo on this image, or choose a position below."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2425
+#: lib/class.og-image-plugin.php:2548
 msgid "Logo position"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2629
+#: lib/class.og-image-plugin.php:2776
 msgid "Inspect Social Image"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2633
+#: lib/class.og-image-plugin.php:2780
 msgid "Shows how this post is shared using an external, unaffiliated service."
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2647
+#: lib/class.og-image-plugin.php:2794
 msgid "View Social Image"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2843
+#: lib/class.og-image-plugin.php:3010
 msgid "Type here to change the text on the image"
 msgstr ""
 
-#: lib/class.og-image-plugin.php:2844
+#: lib/class.og-image-plugin.php:3011
 msgid "Change logo and image below"
 msgstr ""
 
-#: lib/class.og-image.php:71
+#: lib/class.og-image.php:67
 msgid "Sorry, could not find an OG Image configured."
 msgstr ""
 
-#: lib/class.og-image.php:97
+#: lib/class.og-image.php:93
 msgid "Sorry, we could not create the image."
-msgstr ""
-
-#: lib/html_inputs/class.file.php:24
-msgid "Choose file"
 msgstr ""
 
 #: lib/html_inputs/class.image.php:35

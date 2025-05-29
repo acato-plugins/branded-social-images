@@ -158,7 +158,7 @@ class Plugin {
 	 *
 	 * @var string
 	 */
-	const BSI_URL_CONTRIBUTE = 'https://github.com/clearsite/branded-social-images/';
+	const BSI_URL_CONTRIBUTE = 'https://github.com/acato-plugins/branded-social-images/';
 
 	/**
 	 * External tool for post-inspection, the name
@@ -598,7 +598,6 @@ class Plugin {
 				}
 
 				return $data;
-
 			},
 			PHP_INT_MAX,
 			2
@@ -668,7 +667,7 @@ class Plugin {
 					'system',
 				] as $function
 			) {
-				$static[] = "$function: " . ( constant( strtoupper( $function ) . '_EXISTED_BEFORE_PATCH' ) ? 'exists' : 'does not exist' );
+				$static[] = "$function: " . ( constant( 'BSI_' . strtoupper( $function ) . '_EXISTED_BEFORE_PATCH' ) ? 'exists' : 'does not exist' );
 			}
 			$static[] = '-- php settings --';
 			foreach ( [ 'memory_limit', 'max_execution_time' ] as $setting ) {
@@ -817,7 +816,7 @@ class Plugin {
 	 */
 	public static function get_purgable_cache( string $type = 'all' ) {
 		$filter = 'is_file';
-		$exts = false;
+		$exts   = false;
 		switch ( $type ) {
 			case 'directories':
 				$ext    = '';
@@ -877,6 +876,7 @@ class Plugin {
 		} else {
 			$cache = glob( self::getInstance()->storage() . '/*/*' . $ext );
 		}
+
 		return array_filter( $cache, $filter );
 	}
 
@@ -972,7 +972,7 @@ class Plugin {
 	 */
 	public static function title_format( $post_id = null, $no_title = false ) {
 		// to return, in case of no post.
-		$format = get_option( self::OPTION_PREFIX . 'title_format', '{title} - {blogname}' );
+		$format = get_option( self::OPTION_PREFIX . 'default_text', '{title} - {blogname}' );
 		if ( $post_id ) { // post asked, build the full title.
 			$tokens = apply_filters(
 				'bsi_title_tokens',
@@ -1024,7 +1024,7 @@ class Plugin {
 	 */
 	private static function unlink( $path ): bool {
 		try {
-			$result = unlink( $path );
+			$result = wp_delete_file( $path );
 		} catch ( Exception $e ) {
 			$result = false;
 		}
@@ -1047,6 +1047,7 @@ class Plugin {
 			self::unlink( "$path/.DS_Store" );
 		}
 		try {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- not implementing a convoluted way to remove directories.
 			$result = rmdir( $path );
 		} catch ( Exception $e ) {
 			$result = false;
@@ -1196,7 +1197,7 @@ class Plugin {
 						'has_query_var' => false !== strpos( $target, self::QUERY_VAR ),
 					];
 				}
-				$i ++;
+				++ $i;
 			}
 
 			return false;
@@ -1208,6 +1209,21 @@ class Plugin {
 			'target'        => $url,
 			'has_query_var' => false !== strpos( $url, self::QUERY_VAR ),
 		];
+	}
+
+	/**
+	 * Create a directory.
+	 *
+	 * @param string $dir The directory to create.
+	 *
+	 * @return bool
+	 */
+	public static function mkdir( string $dir ) {
+		if ( is_dir( $dir ) ) {
+			return true;
+		}
+
+		return wp_mkdir_p( $dir );
 	}
 
 	/**
@@ -1505,20 +1521,20 @@ class Plugin {
 	/**
 	 * Evaluate the font weight, normalize to valid values 100 - 800 in steps of 100.
 	 *
-	 * @param int|string $weight  A font-weight.
-	 * @param int        $default The default weight to use if invalid.
+	 * @param int|string $weight         A font-weight.
+	 * @param int        $default_weight The default weight to use if invalid.
 	 *
 	 * @return float|int|mixed
 	 */
-	public function evaluate_font_weight( $weight, $default = 400 ) {
+	public function evaluate_font_weight( $weight, $default_weight = 400 ) {
 		$translate = Admin::font_weights();
 
 		if ( 0 === (int) $weight ) {
-			$weight = $translate[ strtolower( $weight ) ] ?? $default;
+			$weight = $translate[ strtolower( $weight ) ] ?? $default_weight;
 		}
 		$weight = floor( $weight / 100 ) * 100;
 		if ( 0.0 === $weight ) {
-			$weight = $default;
+			$weight = $default_weight;
 		}
 		if ( $weight > 800 ) {
 			$weight = 800;
@@ -1530,15 +1546,15 @@ class Plugin {
 	/**
 	 * Evaluate font style and return a normalized value.
 	 *
-	 * @param string $style   The font-style.
-	 * @param string $default The default to use if invalid.
+	 * @param string $style         The font-style.
+	 * @param string $default_style The default to use if invalid.
 	 *
 	 * @return mixed|string
 	 */
-	public function evaluate_font_style( $style, $default = 'normal' ) {
+	public function evaluate_font_style( $style, $default_style = 'normal' ) {
 		$allowed = [ 'normal', 'italic' ];
 		if ( ! in_array( $style, $allowed, true ) ) {
-			return $default;
+			return $default_style;
 		}
 
 		return $style;
@@ -1572,9 +1588,8 @@ class Plugin {
 	public function storage(): string {
 		$dir = wp_upload_dir();
 		$dir = $dir['basedir'] . '/' . self::STORAGE;
-		if ( ! is_dir( $dir ) ) {
-			mkdir( $dir );
-		}
+		self::mkdir( $dir );
+
 		self::set_error( 'storage', null );
 		if ( ! is_dir( $dir ) ) {
 			self::set_error( 'storage', __( 'Could not create the storage directory in the uploads folder.', 'bsi' ) . ' ' . __( 'In a WordPress site the uploads folder should always be writable.', 'bsi' ) . ' ' . __( 'Please fix this.', 'bsi' ) . ' ' . __( 'This error will disappear once the problem has been corrected.', 'bsi' ) );
@@ -1660,17 +1675,12 @@ class Plugin {
 		if ( substr( trim( $filename ), 0, strlen( $this->storage() ) ) !== $this->storage() ) {
 			return false;
 		}
-		$dirs = [];
-		$dir  = $filename; // we will be dirname-ing this .
 
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition -- Intentional for recurse purposes.
-		while ( ( $dir = dirname( $dir ) ) && $dir && '.' !== $dir && $this->storage() !== $dir && ! is_dir( $dir ) ) {
-			array_unshift( $dirs, $dir );
-		}
+		// create container directory if it does not exist.
+		self::mkdir( dirname( $filename ) );
 
-		array_map( 'mkdir', $dirs );
-
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents -- No. If your server needs the FTP methods for WordPress; time to move on to a better hosting platform.
+		// If your server needs the FTP methods for WordPress; time to move on to a better hosting platform.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents,WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 		return file_put_contents( $filename, $content );
 	}
 
@@ -1919,7 +1929,7 @@ class Plugin {
 		if ( ! $step ) {
 			$step = 0;
 		}
-		$step ++;
+		++ $step;
 
 		switch ( $step ) {
 			case 1:
@@ -1942,10 +1952,9 @@ class Plugin {
 	 * @return void
 	 */
 	public static function init() {
-		$instance = self::instance();
+		self::instance();
 		if ( is_admin() ) {
-			$admin          = Admin::instance();
-			$admin->storage = $instance->storage();
+			Admin::instance();
 		}
 
 		load_plugin_textdomain( 'bsi', false, basename( dirname( __DIR__ ) ) . '/languages' );
@@ -1960,7 +1969,7 @@ class Plugin {
 	 *
 	 * @uses exec to execute system command. this might not be supported.
 	 *
-	 * @see  file php.ini. disable_functions = "show_source,system,shell_exec,exec" <- remove exec
+	 * @see  File php.ini. disable_functions = "show_source,system,shell_exec,exec" <- remove exec
 	 */
 	public static function convert_webp_to_png( $source ) {
 		$support = self::maybe_fake_support_webp(); // just in case.
@@ -1993,7 +2002,7 @@ class Plugin {
 	 *
 	 * @return bool
 	 *
-	 * @see  file php.ini. disable_functions = "show_source,system, shell_exec,exec" <- remove exec
+	 * @see  File php.ini. disable_functions = "show_source,system, shell_exec,exec" <- remove exec
 	 *
 	 * @uses exec to execute system command. this might not be supported.
 	 */
@@ -2264,6 +2273,8 @@ EODOC;
 		$image_comment .= '<li>' . __( 'Featured image on page/post (when checked in general settings)', 'bsi' ) . '</li>';
 		$image_comment .= '<li>' . __( 'Fallback Branded Social image in general settings', 'bsi' ) . '</li></ol>';
 
+		$object_type = $qo->base_type ?? 'post';
+
 		$options = [
 			'admin' => [
 				'disabled'            => [
@@ -2443,9 +2454,11 @@ EODOC;
 				'disabled'            => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'checkbox',
-					'label'     => __( 'Select to disable the plugin Branded Social Images for this post.', 'bsi' ),
+					// translators: %s is the object base type, like 'post' or 'category'.
+					'label'     => sprintf( __( 'Select to disable the plugin Branded Social Images for this %s.', 'bsi' ), $object_type ),
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'disabled', 'off' ),
-					'comment'   => '<div class="disabled-notice">' . __( 'The plugin Branded Social Images is disabled for this post.', 'bsi' ) . '</div>',
+					// translators: %s is the object base type, like 'post' or 'category'.
+					'comment'   => sprintf( '<div class="disabled-notice">' . __( 'The plugin Branded Social Images is disabled for this %s.', 'bsi' ) . '</div>', $object_type ),
 				],
 				'text_enabled'        => [
 					'namespace' => self::OPTION_PREFIX,
@@ -2929,45 +2942,74 @@ EODOC;
 	}
 
 	/**
+	 * Settings handler.
+	 *
 	 * @function Will eventually handle all settings, but for now, this allows you to overrule...
 	 *
-	 * @param $setting                             string can be one of ...
-	 *                                             $setting = use_bare_post_title, filter = bsi_settings_use_bare_post_title, expects true or false
-	 *                                             with true, the WordPress title is used as default
-	 *                                             with false, the default title is scraped from the HTML and will therefore be
-	 *                                             influenced by plugins like Yoast SEO. This is standard behavior.
-	 *                                             $setting = png_compression_level, filter = bsi_settings_png_compression_level, expects number 0 - 9,
-	 *                                             0 = no compression, 9 = highest compression, default = 2
-	 *                                             WARNING                 If you change the format, you must flush all page-caches, flush the BSI Image
-	 *                                             cache and re-save permalinks!  THIS IS YOUR OWN RESPONSIBILITY.
+	 * @param string $setting       can be one of ...
+	 *                              $setting = use_bare_post_title, filter = bsi_settings_use_bare_post_title, expects true or false
+	 *                              with true, the WordPress title is used as default
+	 *                              with false, the default title is scraped from the HTML and will therefore be
+	 *                              influenced by plugins like Yoast SEO. This is standard behavior.
+	 *                              $setting = png_compression_level, filter = bsi_settings_png_compression_level, expects number 0 - 9,
+	 *                              0 = no compression, 9 = highest compression, default = 2
+	 *                              WARNING                 If you change the format, you must flush all page-caches, flush the BSI Image
+	 *                              cache and re-save permalinks!  THIS IS YOUR OWN RESPONSIBILITY.
+	 *
+	 * @param mixed  $default_value Default value to return if the filter does not return a value.
 	 *
 	 * @return mixed|void
 	 */
-	public static function setting( $setting, $default = null ) {
-		return apply_filters( 'bsi_settings_' . $setting, $default );
+	public static function setting( $setting, $default_value = null ) {
+		return apply_filters( 'bsi_settings_' . $setting, $default_value );
 	}
 
+	/**
+	 * Protect a directory with an invalid-on-purpose .htaccess file.
+	 * Only works on Apache servers.
+	 *
+	 * @param string $dir The directory to protect.
+	 *
+	 * @return void
+	 */
 	public static function protect_dir( $dir ) {
 		if ( ! file_exists( $dir . '/.htaccess' ) ) {
-			// invalid HTACCESS code to prevent downloads the hard way
+			// invalid HTACCESS code to prevent downloads the hard way.
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			file_put_contents( $dir . '/.htaccess', 'You cannot be here' );
 		}
 	}
 
+	/**
+	 * Fuzzy compare two text values.
+	 *
+	 * @param string $value1 The first value.
+	 * @param string $value2 The second value.
+	 *
+	 * @return bool
+	 */
 	public static function text_is_identical( $value1, $value2 ): bool {
 		$value1 = trim( str_replace( [ "\n", "\r" ], '', $value1 ) );
 		$value2 = trim( str_replace( [ "\n", "\r" ], '', $value2 ) );
 
-		return strip_tags( $value1 ) === strip_tags( $value2 );
+		return wp_strip_all_tags( $value1 ) === wp_strip_all_tags( $value2 );
 	}
 
+	/**
+	 * Convert a hex color to an RGBA array.
+	 *
+	 * @param string $hex_color   The hex color, with or without the #.
+	 * @param bool   $alpha_is_gd If true, the alpha value is in GD format (0-127), otherwise 0-255.
+	 *
+	 * @return array An array with RGBA values.
+	 */
 	public function hex_to_rgba( $hex_color, $alpha_is_gd = false ): array {
 		if ( substr( $hex_color, 0, 1 ) !== '#' ) {
 			$hex_color = '#ffffffff';
 		}
 		$hex_values = str_split( substr( $hex_color, 1 ), 2 );
 		$int_values = array_map( 'hexdec', $hex_values );
-		// the last value is 255 for opaque and 0 for transparent, but GD uses 0 - 127 for the same
+		// the last value is 255 for opaque and 0 for transparent, but GD uses 0 - 127 for the same.
 		if ( $alpha_is_gd ) {
 			$int_values[3] = 255 - $int_values[3];
 			$int_values[3] = $int_values[3] / 255 * 127;
@@ -2977,13 +3019,21 @@ EODOC;
 		return $int_values;
 	}
 
+	/**
+	 * Convert an RGBA array to a hex color.
+	 *
+	 * @param array $rgba_color  The RGBA color as an array with 4 values: [R, G, B, A].
+	 * @param bool  $alpha_is_gd If true, the alpha value is in GD format (0-127), otherwise 0-255.
+	 *
+	 * @return string The hex color, with or without the #.
+	 */
 	public function rgba_to_hex( $rgba_color, $alpha_is_gd = false ): string {
 		if ( $alpha_is_gd ) {
 			$rgba_color[3] = (int) $rgba_color[3];
 			$rgba_color[3] = $rgba_color[3] / 127 * 255;
 			$rgba_color[3] = 255 - floor( $rgba_color[3] );
-			$rgba_color[3] = max( 0, $rgba_color[3] ); // minimum value = 0
-			$rgba_color[3] = min( 255, $rgba_color[3] ); // maximum value = 255
+			$rgba_color[3] = max( 0, $rgba_color[3] ); // minimum value = 0 .
+			$rgba_color[3] = min( 255, $rgba_color[3] ); // maximum value = 255 .
 		}
 		$hex_values = array_map(
 			function ( $in ) {
@@ -2996,21 +3046,23 @@ EODOC;
 	}
 
 	/**
-	 * @param $what
+	 * Generate dummy data for the editor.
+	 *
+	 * @param string $what What kind of dummy data to generate.
 	 *
 	 * @return string|void
 	 */
 	public function dummy_data( $what ) {
-		if ( $what === 'text' ) {
-			return __( 'Type here to change the text on the image', 'bsi' ) . "\n" .
-			       __( 'Change logo and image below', 'bsi' );
+		if ( 'text' === $what ) {
+			return __( 'Type here to change the text on the image', 'bsi' ) . "\n" . __( 'Change logo and image below', 'bsi' );
 		}
 	}
-
 
 	/**
 	 * On plugin activation, register a flag to rewrite permalinks.
 	 * The plugin will do so after adding the post-endpoint.
+	 *
+	 * @param bool $network_wide Whether the activation is network-wide.
 	 */
 	public static function on_activation( $network_wide ) {
 		global $wpdb;
@@ -3025,6 +3077,12 @@ EODOC;
 		}
 	}
 
+	/**
+	 * On plugin deactivation, purge the cache.
+	 * If network-wide, purge the cache for all blogs.
+	 *
+	 * @param bool $network_wide Whether the deactivation is network-wide.
+	 */
 	public static function on_deactivation( $network_wide ) {
 		global $wpdb;
 		self::purge_cache();
@@ -3038,6 +3096,13 @@ EODOC;
 		}
 	}
 
+	/**
+	 * On plugin uninstall, we cannot do much.
+	 * The plugin will be deactivated first, so we may expect WordPress to call the deactivation hook.
+	 * No need to do it ourselves.
+	 *
+	 * @param bool $network_wide Whether the uninstall is network-wide.
+	 */
 	public static function on_uninstall( $network_wide ) {
 		// cannot uninstall without deactivation, so we may expect WordPress to call the dectivation hook.
 		// no need to do it ourselves.

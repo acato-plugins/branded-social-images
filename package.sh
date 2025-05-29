@@ -18,7 +18,6 @@ if [ "yes" = "$GO" ]; then
 fi
 
 SVN_PROJECT=https://plugins.svn.wordpress.org/branded-social-images
-# SVN_PROJECT=svn://svn.clearsite.nl/wp_plugins/__test/branded-social-images
 SVN_TRUNK=/trunk
 SVN_TAGS=/tags
 SVN_TAG=$SVN_TAGS/$VERSION

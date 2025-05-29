@@ -15,11 +15,13 @@ function bsi_execute_system_call_test() {
 
 	$succes = is_file( $d . '/test.png' );
 	if ( $succes ) {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- cannot use wp_delete_file as we are not in WP context.
 		unlink( $d . '/test.png' );
 	}
 	echo $succes ? 'It works!' : 'Sorry, it did not work';
 	echo PHP_EOL;
 
+	// @phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- we are not in WP context.
 	touch( $d . '/can-execute-binaries-from-php.' . ( $succes ? 'success' : 'fail' ) );
 }
 

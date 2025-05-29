@@ -1,4 +1,19 @@
 <?php
+/**
+ * Image generation class.
+ *
+ * @package Acato\Plugins\OGImage
+ */
+
+/**
+ * We disable a few WPCS rules here.
+ * phpcs:disable WordPress.Security.NonceVerification.Recommended -- not needed here, this is not a form.
+ * phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date -- we don't care about timezones here, we just need a date.
+ * phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- we like to use camelCase here, sorry.
+ * phpcs:disable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- we like to use camelCase here, sorry.
+ * phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged -- we will try to catch errors, but we don't want to throw exceptions here.
+ * phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- serving a file without readfile would be highly inefficient.
+ */
 
 namespace Acato\Plugins\OGImage;
 
@@ -6,29 +21,62 @@ defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
 use RankMath;
 
+/**
+ * Class Image
+ *
+ * This class is responsible for generating the Open Graph image based on the queried object.
+ * It handles caching, image processing, and serving the final image.
+ */
 class Image {
+	/**
+	 * The plugin manager instance.
+	 *
+	 * @var Plugin
+	 */
 	private $manager;
+
+	/**
+	 * The ID of the image to be generated.
+	 *
+	 * @var int
+	 */
 	public $image_id;
 
 	/**
+	 * The ID of the post for which the image is generated.
+	 *
 	 * @deprecated, please use QueriedObject::instance()->object_id, QueriedObject::instance()->object_type and ->base_type
+	 *
+	 * @var int
 	 */
 	public $post_id;
 
+	/**
+	 * Whether to use an existing cached image or not.
+	 *
+	 * @var bool
+	 */
 	private $use_existing_cached_image = true;
 
+	/**
+	 * Image constructor.
+	 *
+	 * Initializes the image generation process based on the current queried object.
+	 *
+	 * @param Plugin $manager The plugin manager instance.
+	 */
 	public function __construct( Plugin $manager ) {
 		$this->manager = $manager;
 
 		list( $object_id, $object_type, $base_type, $link, $ogimage, $go ) = QueriedObject::instance();
-		// hack for home (posts on front)
+		// hack for home (posts on front) .
 		if ( is_home() ) {
 			$object_id = 0;
 			Plugin::log( 'Page is home (latest posts), post_id set to 0' );
 		}
 
-		// hack for front-page
-		$current_url = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+		// hack for front-page.
+		$current_url = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
 		if ( '/' . Plugin::output_filename() . '/' === $current_url ) {
 			Plugin::log( 'URI = Homepage BSI; ' . $current_url );
 			$front = get_option( 'page_on_front' );
@@ -50,26 +98,38 @@ class Image {
 			Plugin::log( 'Cache ignored because of rebuild flag' );
 		}
 
-		if ( ! empty( $_GET['debug'] ) && 'BSI' == $_GET['debug'] ) {
+		if ( ! empty( $_GET['debug'] ) && 'BSI' === $_GET['debug'] ) {
 			$this->use_existing_cached_image = false;
 			Plugin::log( 'Cache ignored because of debug=BSI flag' );
 		}
 	}
 
+	/**
+	 * Get the plugin manager instance.
+	 *
+	 * @return Plugin
+	 */
 	public function getManager(): Plugin {
 		return $this->manager;
 	}
 
+	/**
+	 * Serve the generated image.
+	 *
+	 * This method checks if the image ID is set, retrieves the cached image if available,
+	 * and serves it with the appropriate headers. If the image cannot be found or generated,
+	 * it returns a 404 error.
+	 */
 	public function serve() {
-		// well, we tried :(
+		// well, we tried :( .
 		if ( ! $this->image_id ) {
 			header( 'HTTP/1.1 404 Not found' );
 			$error = __( 'Sorry, could not find an OG Image configured.', 'bsi' );
 			header( 'X-OG-Error: ' . $error );
 			Plugin::log( $error );
 			Plugin::display_log();
-			// if we get here, display_log was unavailable
-			print $error;
+			// if we get here, display_log was unavailable.
+			print esc_html( $error );
 			exit;
 		}
 
@@ -78,14 +138,14 @@ class Image {
 		$qo          = QueriedObject::instance();
 		$image_cache = $this->cache( $this->image_id, $qo );
 		if ( $image_cache ) {
-			// we have cache, or have created cache. In any way, we have an image :)
-			// serve-type = redirect?
+			// we have cache, or have created cache. In any way, we have an image :) .
+			// serve-type = redirect? .
 			header( 'Content-Type: ' . mime_content_type( $image_cache['file'] ) );
 			header( 'Content-Disposition: inline; filename=' . Plugin::output_filename() );
 			header( 'Content-Length: ' . filesize( $image_cache['file'] ) );
 			if ( is_file( $image_cache['file'] . '.lock' ) ) {
 				header( 'X-OG-Stray-Lock: removed' );
-				@unlink( $image_cache['file'] . '.lock' );
+				wp_delete_file( $image_cache['file'] . '.lock' );
 			}
 			readfile( $image_cache['file'] );
 			exit;
@@ -94,11 +154,23 @@ class Image {
 		header( 'X-OG-Error: ' . $error );
 		Plugin::log( $error );
 		Plugin::display_log();
-		// if we get here, display_log was unavailable
-		print $error;
+		// if we get here, display_log was unavailable .
+		print esc_html( $error );
 		exit;
 	}
 
+	/**
+	 * Cache the generated image.
+	 *
+	 * This method checks if a cached image exists, and if not, it attempts to build the image.
+	 * If the image is successfully built, it returns the cache file and URL.
+	 *
+	 * @param int           $image_id      The ID of the image to be cached.
+	 * @param QueriedObject $queriedObject The queried object containing metadata for the image.
+	 * @param int           $retry         The number of retries for building the image (default is 0).
+	 *
+	 * @return array|false|void Returns an array with 'file' and 'url' if successful, false otherwise.
+	 */
 	public function cache( $image_id, QueriedObject $queriedObject, $retry = 0 ) {
 		// do we have cache?
 		$cache_file = wp_upload_dir();
@@ -110,7 +182,7 @@ class Image {
 		if ( $retry >= 2 ) {
 			header( 'X-OG-Error-Fail: Generating image failed.' );
 			if ( is_file( $lock_file ) ) {
-				unlink( $lock_file );
+				wp_delete_file( $lock_file );
 			}
 
 			return false;
@@ -130,10 +202,10 @@ class Image {
 		// we're already building this file.
 		if ( is_file( $lock_file ) && filemtime( $lock_file ) > time() - 3600 ) {
 			// but if we already took an hour.
-			// we can safely assume we failed
-			// right now, at this point, we must assume 'busy'
+			// we can safely assume we failed.
+			// right now, at this point, we must assume 'busy'.
 			header( 'Retry-After: 10' );
-			// try again in 10 seconds
+			// try again in 10 seconds.
 			http_response_code( 503 );
 			exit;
 		}
@@ -151,6 +223,17 @@ class Image {
 		}
 	}
 
+	/**
+	 * Build the image based on the provided image ID and queried object.
+	 *
+	 * This method retrieves the source image, processes it, applies overlays, and saves the final image.
+	 * It handles errors and returns the cache file if successful.
+	 *
+	 * @param int           $image_id      The ID of the image to be built.
+	 * @param QueriedObject $queriedObject The queried object containing metadata for the image.
+	 *
+	 * @return string|false Returns the cache file path if successful, false otherwise.
+	 */
 	public function build( $image_id, QueriedObject $queriedObject ) {
 		$cache_file = wp_upload_dir();
 		$base_url   = $cache_file['baseurl'];
@@ -174,8 +257,8 @@ class Image {
 			}
 		}
 
-		if ( $source === '' ) {
-			// use x1 source, no matter what dimensions
+		if ( '' === $source ) {
+			// use x1 source, no matter what dimensions.
 			Plugin::log( 'Source: trying image size "' . Plugin::IMAGE_SIZE_NAME . '" for ' . $image_id );
 			$source = Plugin::wp_get_attachment_image_data( $image_id, Plugin::IMAGE_SIZE_NAME );
 		}
@@ -187,7 +270,7 @@ class Image {
 			return false;
 		}
 
-		if ( $source !== [] ) {
+		if ( [] !== $source ) {
 			list( $image, $width, $height, $_, $image_file ) = $source;
 			Plugin::log( 'Source: found: ' . "W: $width, H: $height,\n URL: $image,\n Filepath: $image_file" );
 			if ( $this->manager->height > $height || $this->manager->width > $width ) {
@@ -197,19 +280,19 @@ class Image {
 				$image_file = str_replace( $base_url, $base_dir, $image );
 			}
 
-			// situation: replacement failed. the url is not like the uploads url
+			// situation: replacement failed. the url is not like the uploads url.
 			if ( $image_file === $image ) {
 				$error = 'Image appears not to be in the regular path structure. Trying to get the path by checking for path fraction';
 				Plugin::log( "Source error: $error" );
 				Plugin::log( "Source error: $image" );
 				header( 'X-OG-Error: ' . $error );
-				$base_url_path_only = parse_url( $base_url, PHP_URL_PATH );
+				$base_url_path_only = wp_parse_url( $base_url, PHP_URL_PATH );
 				$image_file         = explode( $base_url_path_only, $image );
 				$image_file         = $base_dir . end( $image_file );
 				Plugin::log( "Source error fixed?: $image_file; " . is_file( $image_file ) !== '' ? 'yes' : 'no' );
 
 				if ( ! is_file( $image_file ) ) {
-					// create temp file
+					// create temp file.
 					$error = 'Attempt 2 at getting image path failed, fetching file from web.';
 					header( 'X-OG-Error: ' . $error );
 					Plugin::log( "Source error: $error" );
@@ -222,25 +305,17 @@ class Image {
 			if ( ! is_file( $image_file ) ) {
 				Plugin::log( 'Source: not found: ' . "Filepath: $image_file does not exist" );
 				header( 'X-OG-Error-File: Source image not found. This is a 404 on the source image.' );
-				unlink( $lock_file );
+				wp_delete_file( $lock_file );
 
 				return false;
 			}
 
-			// $editor = wp_get_image_editor( $image_file );
-			// we assume GD because we cannot be sure Imagick is there.
-			// TODO: add IMagick variant
-			// if (is_a($editor, \WP_Image_Editor_Imagick::class)) {
-			// require_once __DIR__ .'/class.og-image-imagick.php';
-			// $image = new IMagick($this, $image_file, $cache_file);
-			// }
-			// elseif (is_a($editor, \WP_Image_Editor_GD::class)) {
-			if ( true ) { // hard coded GD now
+			if ( function_exists( 'imagecreatefromstring' ) ) {
 				require_once __DIR__ . '/class.og-image-gd.php';
 				$image = new GD( $this, $image_file, $cache_file );
 			} else {
-				header( 'X-OG-Error-Editor: No software present to manipulate images.' );
-				unlink( $lock_file );
+				header( 'X-OG-Error-Editor: GD2 Image processor missing.' );
+				wp_delete_file( $lock_file );
 
 				return false;
 			}
@@ -262,8 +337,8 @@ class Image {
 			add_action(
 				'shutdown',
 				function () use ( $lock_file, $temp_file ) {
-					@unlink( $lock_file );
-					@unlink( $temp_file );
+					wp_delete_file( $lock_file );
+					wp_delete_file( $temp_file );
 				}
 			);
 
@@ -290,7 +365,7 @@ class Image {
 					break;
 			}
 
-			if ( ! empty( $_GET['debug'] ) && $_GET['debug'] == 'BSI' ) {
+			if ( ! empty( $_GET['debug'] ) && 'BSI' === $_GET['debug'] ) {
 				Plugin::display_log();
 			}
 
@@ -302,7 +377,13 @@ class Image {
 		return false;
 	}
 
-
+	/**
+	 * Get the text for the queried object.
+	 *
+	 * This method retrieves the text for the current queried object, applying filters to allow customization.
+	 *
+	 * @return string The text for the queried object.
+	 */
 	private function getTextForQueriedObject() {
 		list( $object_id, $object_type, $base_type, $permalink, $ogimage, $go ) = QueriedObject::instance();
 
@@ -314,6 +395,17 @@ class Image {
 		return $text;
 	}
 
+	/**
+	 * Get the text for the specified meta type and object ID.
+	 *
+	 * This method retrieves the text from post meta or term meta, applying filters and defaults as necessary.
+	 *
+	 * @param string $base_type The base type of the object (e.g., 'post', 'category').
+	 * @param int    $object_id The ID of the object.
+	 * @param string $permalink The permalink of the object.
+	 *
+	 * @return string The text for the specified meta type and object ID.
+	 */
 	public function getTextForMeta( $base_type, $object_id, $permalink ) {
 		Plugin::log( 'Using meta-data from ' . $base_type . ' with id ' . $object_id );
 		$default = $this->manager->text_options['text'];
@@ -325,11 +417,13 @@ class Image {
 		switch ( $base_type ) {
 			case 'post':
 				$function = 'get_post_meta';
-				$title    = apply_filters( 'the_title', get_the_title( $object_id ), $object_id );
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- would not make sense.
+				$title = apply_filters( 'the_title', get_the_title( $object_id ), $object_id );
 				break;
 			case 'category':
 				$function = 'get_term_meta';
-				$title    = apply_filters( 'the_title', get_cat_name( $object_id ), $object_id );
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- would not make sense.
+				$title = apply_filters( 'the_title', get_cat_name( $object_id ), $object_id );
 				break;
 			default:
 				Plugin::log( 'Unsupported type. sorry' );
@@ -367,7 +461,7 @@ class Image {
 				$text = $scraped;
 			}
 
-			if ( ! $text ) { // no text from scraping, build it
+			if ( ! $text ) { // no text from scraping, build it.
 				$text = Plugin::title_format( $object_id );
 				$type = 'by-format';
 			}
@@ -410,17 +504,45 @@ class Image {
 		return $text;
 	}
 
-
+	/**
+	 * Get the image ID for the current queried object.
+	 *
+	 * This method retrieves the image ID based on the queried object type and ID,
+	 * checking post meta, term meta, and global settings.
+	 *
+	 * @return int The image ID for the queried object.
+	 */
 	private function getImageIdForQueriedObject() {
 		$qo = QueriedObject::instance();
 
 		return $this->getImageIdForMeta( $qo->base_type, $qo->object_id );
 	}
 
+	/**
+	 * Get the image ID for a post.
+	 *
+	 * This method retrieves the image ID for a post based on its ID,
+	 * checking post meta, term meta, and global settings.
+	 *
+	 * @param int $post_id The ID of the post.
+	 *
+	 * @return int The image ID for the post.
+	 */
 	private function getImageIdForPost( $post_id ) {
 		return $this->getImageIdForMeta( 'post', $post_id );
 	}
 
+	/**
+	 * Get the image ID for a specific meta type and ID.
+	 *
+	 * This method retrieves the image ID based on the specified meta type (post or category)
+	 * and the corresponding ID, checking various sources for the image.
+	 *
+	 * @param string $meta_type The type of meta (e.g., 'post', 'category').
+	 * @param int    $id        The ID of the post or category.
+	 *
+	 * @return int The image ID for the specified meta type and ID.
+	 */
 	private function getImageIdForMeta( $meta_type, $id ) {
 		$the_img = 'meta';
 		Plugin::log( 'Using meta-data from ' . $meta_type . ' with id ' . $id );
@@ -450,15 +572,17 @@ class Image {
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if ( 'post' === $meta_type && ! $image_id && ( 'on' === get_option( Plugin::OPTION_PREFIX . 'image_use_thumbnail' ) ) ) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if ( 'post' === $meta_type && ! $image_id && ( 'on' === get_option( Plugin::OPTION_PREFIX . 'image_use_thumbnail' ) ) ) {
+			// this is a Carbon Fields field, defined in class.og-image-admin.php .
 			$the_img  = 'thumbnail';
 			$image_id = get_post_thumbnail_id( $id );
 			Plugin::log( 'Image consideration: WordPress Featured Image; ' . ( $image_id ?: 'no image found' ) );
 		}
-		// global Image?
+		// is this the globally defined Image?
 		if ( ! $image_id ) {
 			$the_img  = 'global';
-			$image_id = get_option( Plugin::DEFAULTS_PREFIX . 'image' ); // this is a Carbon Fields field, defined in class.og-image-admin.php
+			$image_id = get_option( Plugin::DEFAULTS_PREFIX . 'image' );
+			// this is a Carbon Fields field, defined in class.og-image-admin.php .
 			Plugin::log( 'Image consideration: BSI Fallback Image; ' . ( $image_id ?: 'no image found' ) );
 		}
 
@@ -473,37 +597,4 @@ class Image {
 
 		return $image_id;
 	}
-
-	/**
-	 * Replaces the first occurrence of $needle from $haystack with $replace
-	 * and returns the resultant string
-	 *
-	 * @param string $haystack
-	 * @param string $needle
-	 * @param string $replace
-	 *
-	 * @return string
-	 */
-	public static function replaceFirstOccurence( string $haystack, string $needle, string $replace ): string {
-		$new_string = $haystack;
-		$pos        = strpos( $haystack, $needle );
-		if ( $pos !== false ) {
-			$new_string = substr_replace( $haystack, $replace, $pos, strlen( $needle ) );
-		}
-
-		return $new_string;
-	}
-
-	/**
-	 * Removes the first occurrence $needle from $haystack and returns the resulting string
-	 *
-	 * @param string $haystack
-	 * @param string $needle
-	 *
-	 * @return string
-	 */
-	public static function removeFirstOccurrence( string $haystack, string $needle ): string {
-		return self::replaceFirstOccurence( $haystack, $needle, '' );
-	}
-
 }

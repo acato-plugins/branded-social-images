@@ -1,16 +1,27 @@
 <?php
+/**
+ * Input definition file.
+ *
+ * @package Acato\Plugins\OGImage
+ */
 
 namespace Acato\Tools\HTML_Inputs;
 
 defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
-require_once __DIR__ . '/class.option.php'; // dependency
+require_once __DIR__ . '/class.option.php';
 
-class select extends Input {
-	public function __construct( $attribute_name, $atts ) {
-		parent::__construct( $attribute_name, $atts );
-	}
-
+/**
+ * The select input class.
+ *
+ * This class extends the Input class to create a select input.
+ */
+class Select extends Input {
+	/**
+	 * Generates the HTML for the input field.
+	 *
+	 * @return string
+	 */
 	public function generate_html(): string {
 		$label = '';
 		if ( $this->label ) {
@@ -23,13 +34,14 @@ class select extends Input {
 			$_atts          = $this->atts;
 			$_atts['value'] = $option_value;
 			unset( $_atts['class'], $_atts['options'], $_atts['current_value'], $_atts['default'] );
-			$option = new option( $this->name, $_atts );
+			$option = new Option( $this->name, $_atts );
 			$option->set_label( $option_label, true );
 			$option->current_value = $this->get_current_value();
-			$options              .= "$option";
+
+			$options .= "$option";
 		}
 
-		$atts = $this->attributes(); // builds HTML attributes
+		$atts = $this->attributes();
 
 		return $label . '<select ' . $atts . '/>' . $options . '</select>';
 	}

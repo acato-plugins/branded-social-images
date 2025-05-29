@@ -1,4 +1,9 @@
 <?php
+/**
+ * Input definition file.
+ *
+ * @package Acato\Plugins\OGImage
+ */
 
 namespace Acato\Tools\HTML_Inputs;
 
@@ -6,14 +11,28 @@ use Acato\Plugins\OGImage\Plugin;
 
 defined( 'ABSPATH' ) || die( 'You cannot be here.' );
 
-require_once __DIR__ . '/class.text.php'; // dependency
+require_once __DIR__ . '/class.text.php';
 
-class image extends text {
+/**
+ * The Image input class.
+ */
+class Image extends Text {
+	/**
+	 * Constructor for the Image input class.
+	 *
+	 * @param string $attribute_name The name of the attribute.
+	 * @param array  $atts           The attributes for the input.
+	 */
 	public function __construct( $attribute_name, $atts ) {
 		parent::__construct( $attribute_name, $atts );
 		$this->type = 'hidden';
 	}
 
+	/**
+	 * Generates the HTML for the input field.
+	 *
+	 * @return string
+	 */
 	public function generate_html(): string {
 		$this->init();
 		$label = '';
@@ -25,7 +44,7 @@ class image extends text {
 		unset( $this->atts['types'] );
 
 		$this->atts['value'] = $this->get_current_value();
-		$atts                = $this->attributes(); // builds HTML attributes
+		$atts                = $this->attributes();
 
 		return $label . '<span class="add-image-select" data-types="' . $types . '">
 			<input type="' . $this->type . '" ' . $atts . '/>
@@ -37,6 +56,11 @@ class image extends text {
 		</span>';
 	}
 
+	/**
+	 * Initializes the media uploader for the image input.
+	 *
+	 * This method ensures that the media uploader is only initialized once.
+	 */
 	public function init(): void {
 		static $once;
 		if ( $once ) {

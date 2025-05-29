@@ -22,8 +22,13 @@
 		<exclude name="WordPress.Security.EscapeOutput"/>
 		-->
 		<exclude name="Generic.Arrays.DisallowShortArraySyntax.Found"/>
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found"/>
 		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
 		<exclude name="WordPress.PHP.DisallowShortTernary.Found"/>
+		<exclude name="Universal.Operators.DisallowShortTernary.Found"/>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+		<exclude name="Generic.WhiteSpace.IncrementDecrementSpacing.SpaceAfterIncrement"/>
+		<exclude name="Generic.WhiteSpace.IncrementDecrementSpacing.SpaceAfterDecrement"/>
 	</rule>
 
 	<!-- Let's also check that everything is properly documented. -->
@@ -79,6 +84,7 @@
 		</properties>
 	</rule>
 
+	<exclude-pattern>*/languages/*</exclude-pattern>
 	<exclude-pattern>*/acf-php/*</exclude-pattern>
 	<exclude-pattern>*/build/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
