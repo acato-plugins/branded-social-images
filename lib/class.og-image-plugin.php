@@ -972,7 +972,7 @@ class Plugin {
 	 */
 	public static function title_format( $post_id = null, $no_title = false ) {
 		// to return, in case of no post.
-		$format = get_option( self::OPTION_PREFIX . 'default_text', '{title} - {blogname}' );
+		$format = get_option( self::OPTION_PREFIX . 'title_format', '{title} - {blogname}' );
 		if ( $post_id ) { // post asked, build the full title.
 			$tokens = apply_filters(
 				'bsi_title_tokens',
