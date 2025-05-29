@@ -1,13 +1,12 @@
 /******/ (function() { // webpackBootstrap
 /******/ 	"use strict";
-var __webpack_exports__ = {};
 
-;// CONCATENATED MODULE: ./node_modules/vanilla-picker/dist/vanilla-picker.mjs
+;// ./node_modules/vanilla-picker/dist/vanilla-picker.mjs
 /*!
- * vanilla-picker v2.12.1
+ * vanilla-picker v2.12.3
  * https://vanilla-picker.js.org
  *
- * Copyright 2017-2021 Andreas Borgen (https://github.com/Sphinxxxx), Adam Brooks (https://github.com/dissimulate)
+ * Copyright 2017-2024 Andreas Borgen (https://github.com/Sphinxxxx), Adam Brooks (https://github.com/dissimulate)
  * Released under the ISC license.
  */
 var classCallCheck = function (instance, Constructor) {
@@ -1005,7 +1004,7 @@ var Picker = function () {
 
 
 
-;// CONCATENATED MODULE: ./src/helpers/hex_to_rgba.js
+;// ./src/helpers/hex_to_rgba.js
 function hex_to_rgba(hex) {
   var c;
   // #ABC or #ABCD
@@ -1016,7 +1015,7 @@ function hex_to_rgba(hex) {
   c = '0x' + (hex.substring(1) + 'FF').substring(0, 8);
   return 'rgba(' + [c >> 24 & 255, c >> 16 & 255, c >> 8 & 255, Math.round((c & 255) / 25.5) / 10].join(',') + ')';
 }
-;// CONCATENATED MODULE: ./src/helpers/decode_entities.js
+;// ./src/helpers/decode_entities.js
 /* harmony default export */ var decode_entities = ((function () {
   // this prevents any overhead from creating the object each time
   var element = document.createElement('div');
@@ -1039,7 +1038,7 @@ function hex_to_rgba(hex) {
   }
   return decodeHTMLEntities;
 })());
-;// CONCATENATED MODULE: ./src/admin.js
+;// ./src/admin.js
 /*globals jQuery, wp, bsi_settings */
 
 
@@ -1377,7 +1376,6 @@ function hex_to_rgba(hex) {
         // onClose: function(color){}
       });
     });
-
     var getFeaturedImage = function getFeaturedImage() {};
     // window.getFeaturedImage = getFeaturedImage;
     var subscribe,
@@ -1516,7 +1514,7 @@ function hex_to_rgba(hex) {
     }
     setInterval(external_images_maybe_changed, 5000);
 
-    // monitor available space for editor 
+    // monitor available space for editor
     // you might be wondering, why?
     // we use zoom to scale the entire interface because otherwise we would have to size all images and the text based on viewport width... which is even more crap
     var monitor_space = function monitor_space() {
@@ -1531,29 +1529,36 @@ function hex_to_rgba(hex) {
     setTimeout(monitor_space, 1000);
 
     // monitor title
-    var title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php,.edit-tags-php').find('#post #title,.block-editor .editor-post-title textarea,#tag-name').get(0);
-    var update_auto_title = function update_auto_title() {
+    var title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php,.edit-tags-php').find('#post #title,.block-editor .editor-post-title textarea,#tag-name,h1.wp-block-post-title[contenteditable]').get(0);
+    var _update_auto_title = function update_auto_title() {
       // sure?
       if (editor.is('.auto-title')) {
-        var new_title = bsi_settings.title_format.replace('{title}', $(title_field).val());
+        var input_title = $(title_field).is('h1') ? $(title_field).text() : $(title_field).val().trim();
+        if ("\uFEFF" === input_title) {
+          input_title = '';
+        }
+        var new_title = bsi_settings.title_format;
+        if (input_title) {
+          new_title = new_title.replace('{title}', input_title);
+        }
         texteditor_target.val(new_title);
         texteditor.text(new_title);
       } else {
-        $(title_field).off('keyup change blur', update_auto_title);
+        $(title_field).off('keyup change blur', _update_auto_title);
       }
     };
     if ($body.is('.block-editor-page')) {
       // gutenberg
       subscribe(function () {
-        title_field = $('.block-editor-page .block-editor .editor-post-title textarea,#tag-name').get(0);
+        title_field = $('.block-editor-page .block-editor .editor-post-title textarea,#tag-name,h1.wp-block-post-title[contenteditable]').get(0);
         if (title_field && !$(title_field).is('bsi-bound')) {
-          $(title_field).addClass('bsi-bound').on('keyup change blur', update_auto_title).trigger('keyup');
+          $(title_field).addClass('bsi-bound').on('keyup change blur', _update_auto_title).trigger('keyup');
         }
       });
     } else {
       // classic editor and category
       if (title_field) {
-        $(title_field).on('keyup change blur', update_auto_title).trigger('keyup');
+        $(title_field).on('keyup change blur', _update_auto_title).trigger('keyup');
       }
     }
   });
