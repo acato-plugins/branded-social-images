@@ -495,7 +495,7 @@ import decodeEntities from './helpers/decode_entities';
 		}
 		setInterval(external_images_maybe_changed, 5000);
 
-		// monitor available space for editor 
+		// monitor available space for editor
 		// you might be wondering, why?
 		// we use zoom to scale the entire interface because otherwise we would have to size all images and the text based on viewport width... which is even more crap
 		let monitor_space = () => {
@@ -510,22 +510,39 @@ import decodeEntities from './helpers/decode_entities';
 		setTimeout(monitor_space, 1000);
 
 		// monitor title
-		let title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php').find('#post #title,.block-editor #post-title-0').get(0);
-		let update_auto_title = () => {
+		var title_field;
+
+		// For all that is dear in this world, WordPress; what the **** are you doing?
+		var nbsp='\ufeff';
+
+		var update_auto_title = function () {
+			initialize_monitor_title_field();
 			// sure?
-			if (editor.is('.auto-title')) {
-				let new_title = bsi_settings.title_format.replace('{title}', $(title_field).val());
-				texteditor_target.val(new_title);
-				texteditor.text(new_title);
+			if (editor.is( '.auto-title' )) {
+				var input_title = $( title_field ).is('h1') ? $( title_field ).text() : $( title_field).val();
+				var new_title = bsi_settings.title_format;
+
+				if ( '' !== input_title && input_title !== nbsp ) {
+					new_title = bsi_settings.title_format.replace( '{title}', input_title );
+				}
+				texteditor_target.val( new_title );
+				texteditor.text( new_title );
 			} else {
-				$(title_field).off(update_auto_title);
+				$( title_field ).off( update_auto_title );
 			}
 		};
-
-		if (title_field) {
-			$(title_field).on('keyup change blur', update_auto_title).trigger('keyup');
+		var monitor_title_field_interval;
+		var initialize_monitor_title_field = function () {
+			if ( title_field ) {
+				return;
+			}
+			title_field = $( '.wp-admin,.block-editor-page' ).filter( '.post-new-php,.edit-php,.post-php' ).find( '#post #title,.block-editor #post-title-0,h1.wp-block-post-title[contenteditable]' ).get( 0 );
+			if ( title_field ) {
+				$( title_field ).on( 'keyup change blur', update_auto_title ).trigger( 'keyup' );
+				clearInterval( monitor_title_field_interval );
+			}
 		}
-
+		monitor_title_field_interval = setInterval( initialize_monitor_title_field, 250 );
 	});
 })(jQuery, 'branded-social-images-editor');
 
