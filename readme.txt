@@ -17,7 +17,7 @@ This plugin creates branded social images to match with your company’s style. 
 These open graph images can either be auto-generated for the entire site or you have the option to overrule this per page/post.
 # Works with every (public) post-type in WordPress!
 # Also tested with WOOCommerce.
-# The version 2.0.0 branch even supports taxonomies, so you can brand your category and tag pages as well! Check it out on [GitHub](https://github.com/acato-plugins/branded-social-images "Branded Social Images on GitHub")
+# The version 2.0.0 branch even supports taxonomies, so you can brand your category and tag pages as well!
 
 == Installation ==
 
@@ -45,7 +45,7 @@ The plugin is quite stable and does not need a lot of changes, but we certainly 
 
 = Can I help with the development? =
 
-Absolutely! The plugin is open source and can be found on [GitHub](https://github.com/acato-plugins/branded-social-images "Branded Social Images on GitHub"). There is a master branch for the current 1.x versions of the plugin and a version-2.0.0 branch. We welcome you to try it out!
+Absolutely! The plugin is open source and can be found on [GitHub](https://github.com/acato-plugins/branded-social-images "Branded Social Images on GitHub").
 
 = Does this plugin work with third party plugins like Yoast etc.? =
 
@@ -131,7 +131,7 @@ Sure! Go to the support forum and create a new request.
 Please include as much information as you feel comfortable with, just make sure you do not reveal information that could lead to unauthorized access to your website.
 Do NOT send us your logins, password etc.
 If you have problems with a specific image, please generate a log and include it in your support ticket (take the url to the social-image, add ?debug=BSI to it). If you do not see the log on-screen, you can find it in the BSI settings panel.
-If you don't want to share this information publicly, send us an e-mail referencing the support ticket.
+If you don't want to share this information publicly, [send us an e-mail](mailto:service+branded-social-images@acato.nl?I%20need%20help%20with%20BSI%20version%202.0.0) referencing the support ticket.
 When in doubt, contact us before sharing.
 
 == Screenshots ==
@@ -142,10 +142,15 @@ When in doubt, contact us before sharing.
 
 == Changelog ==
 
+= 2.0.0 =
+* **BREAKING CHANGES**: The plugin now uses a different namespace. If you are not calling the plugin functions directly, you will not notice this.
+* Plugin now supports taxonomies, so you can brand your category and tag pages as well!
+* Plugin is now fully WordPress Coding Standards 3.0 compliant.
+* Thank you [Borkweb](https://github.com/borkweb) for your contributions to the plugin!
+
 = 1.1.4 =
 * Fix the title-updater in the BSI editor - in some cases the "empty" title was \uFEFF, a zero-width space character.
 * Fix a few PHP warnings regarding integers expected but floats given, empty values and GLOB_BRACE not being available on all installations.
-* Thank you [Borkweb](https://github.com/borkweb) for your contributions to the plugin!
 
 = 1.1.3 =
 * Fix division by zero error in the rare case that a font file has gone missing.
