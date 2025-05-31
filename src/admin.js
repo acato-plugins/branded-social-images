@@ -511,11 +511,12 @@ import decodeEntities from './helpers/decode_entities';
 
     // monitor title
     let title_field = $( '.wp-admin,.block-editor-page' ).filter( '.post-new-php,.edit-php,.edit-tags-php' ).find( '#post #title,.block-editor .editor-post-title textarea,#tag-name,h1.wp-block-post-title[contenteditable]' ).get( 0 );
+    let nbsp='\ufeff';
     let update_auto_title = () => {
       // sure?
       if (editor.is( '.auto-title' )) {
         let input_title = $( title_field ).is( 'h1' ) ? $( title_field ).text() : $( title_field ).val().trim();
-        if ("\ufeff" === input_title) {
+        if (nbsp === input_title) {
           input_title = '';
         }
         let new_title = bsi_settings.title_format;

@@ -555,7 +555,7 @@ class Admin {
 	 * @return void
 	 */
 	public static function show_editor( $fields, $is_meta_panel = false ) {
-		$fields['text']['current_value'] = trim( $fields['text']['current_value'] ) !== '' ? $fields['text']['current_value'] : self::array_first( Plugin::text_fallback_chain() );
+		$fields['text']['current_value'] = trim( $fields['text']['current_value'] ?? "" ) !== '' ? $fields['text']['current_value'] : self::array_first( Plugin::text_fallback_chain() );
 
 		$text_settings = Plugin::instance()->text_options;
 		$logo_settings = Plugin::instance()->logo_options;
@@ -573,11 +573,11 @@ class Admin {
 		if ( $logo && is_numeric( $logo ) ) {
 			$logo = wp_get_attachment_image( $logo, 'full' );
 			preg_match( '/width="(.+)"/U', $logo, $width );
-			$width = $width[1];
+			$width = $width[1] ?? 0;
 			preg_match( '/height="(.+)"/U', $logo, $height );
-			$height = $height[1];
+			$height = $height[1] ?? 0;
 			preg_match( '/src="(.+)"/U', $logo, $m );
-			$logo = $m[1];
+			$logo = $m[1] ?? '';
 		}
 
 		add_filter(

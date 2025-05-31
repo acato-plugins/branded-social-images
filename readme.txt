@@ -1,9 +1,9 @@
 === Branded Social Images - Open Graph Images with logo and extra text layer ===
-Contributors: acato,rmpel,clearsite
+Contributors: rmpel,borkweb,acato
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
-Tested up to: 6.0.1
-Stable tag: 1.1.0
+Tested up to: 6.8.1
+Stable tag: 2.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,6 +16,8 @@ The simplest way to brand your social images. Provide all your social images (Op
 This plugin creates branded social images to match with your company’s style. Including a company logo and title.
 These open graph images can either be auto-generated for the entire site or you have the option to overrule this per page/post.
 # Works with every (public) post-type in WordPress!
+# Also tested with WOOCommerce.
+# The version 2.0.0 branch even supports taxonomies, so you can brand your category and tag pages as well! Check it out on [GitHub](https://github.com/acato-plugins/branded-social-images "Branded Social Images on GitHub")
 
 == Installation ==
 
@@ -35,6 +37,15 @@ Please note:
 This is usually the case. If not, contact your hosting company or internet agency.
 
 == Frequently Asked Questions ==
+
+= This plugin seems to be slow in development, is it still maintained? =
+
+Yes, it is. The plugin is maintained by [Acato](https://acato.nl), a Dutch web agency that has taken over the development of this plugin.
+The plugin is quite stable and does not need a lot of changes, but we certainly have not abandoned it.
+
+= Can I help with the development? =
+
+Absolutely! The plugin is open source and can be found on [GitHub](https://github.com/acato-plugins/branded-social-images "Branded Social Images on GitHub"). There is a master branch for the current 1.x versions of the plugin and a version-2.0.0 branch. We welcome you to try it out!
 
 = Does this plugin work with third party plugins like Yoast etc.? =
 
@@ -56,7 +67,7 @@ Yes, it does, but you have to make sure you upload the appropriate font. If you 
 = Is the plugin MultiSite compatible? =
 
 Yes and no. The plugin can be installed without problems in a MultiSite environment and can be activated per site or network-wide, but the settings are not network-wide.
-Although this might be a feature for a future version; there currently is no way to set-up Branded Social Images in one single place for the entire network.
+Although this might be a feature for a future version; there currently is no way to set up Branded Social Images in one single place for the entire network.
 
 = Is the plugin WPML compatible? =
 
@@ -79,7 +90,7 @@ Number 2 might fail silently, resulting in not being able to use WEBP, but this 
 
 = I am using plugin XYZ for SEO and your plugin does not use the selected image or configured text, what can I do? =
 
-You can set-up Branded Social Image on every post/page manually, but an automatic solution is always possible.
+You can set up Branded Social Image on every post/page manually, but an automatic solution is always possible.
 You can use WordPress filters to influence the text- and image selection process;
 1. Filter `bsi_text` with parameters `$text`, `$post_id` and `$image_id`
 2. Filter `bsi_image` with parameters `$image_id` and `$post_id`
@@ -107,12 +118,12 @@ Yes you can. use filter `bsi_settings_output_format` to change it; `add_filter('
 = The quality of the output image is not high enough, the output image size is too large. What can I do? =
 
 By changing the quality-level of the output image, you can reduce the filesize, or increase the sharpness of the image.
-Use filter `bsi_settings_jpg_quality_level` and return a number between 0 and 100, 100 being best quality, 75 being the default.
+Use filter `bsi_settings_jpg_quality_level` and return a number between 0 and 100, 100 being the best quality, 75 being the default.
 If you set the output to PNG, use filter `bsi_settings_png_compression_level` and return a number from 0 to 9, 2 being the default.
 
 = Can I assist with translating the plugin? =
 
-Absolutely! A .pot template can be found in the [GitHub repository](https://github.com/acato-plugins/branded-social-images "Branded Social Images on GitHub")
+Absolutely! A .pot template can be found in the [GitHub repository](https://github.com/acato-plugins/branded-social-images "Branded Social Images on GitHub") or you can check the [WordPress translation page](https://translate.wordpress.org/projects/wp-plugins/branded-social-images/)
 
 = Something isn't working properly. Can you help? =
 
@@ -130,6 +141,21 @@ When in doubt, contact us before sharing.
 3. Post-meta
 
 == Changelog ==
+
+= 1.1.4 =
+* Fix the title-updater in the BSI editor - in some cases the "empty" title was \uFEFF, a zero-width space character.
+* Fix a few PHP warnings regarding integers expected but floats given, empty values and GLOB_BRACE not being available on all installations.
+* Thank you [Borkweb](https://github.com/borkweb) for your contributions to the plugin!
+
+= 1.1.3 =
+* Fix division by zero error in the rare case that a font file has gone missing.
+
+= 1.1.2 =
+* Fix issue with missing admin icon.
+* Fix error log spam on PHP8.
+
+= 1.1.1 =
+* Fix CVE-2023-28536
 
 = 1.1.0 =
 * *Important message*

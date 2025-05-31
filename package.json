@@ -29,7 +29,7 @@
   },
   "author": "Acato",
   "license": "ISC",
-  "homepage": "http://www.acato.nl",
+  "homepage": "https://acato.nl",
   "dependencies": {
     "vanilla-picker": "^2.11.2"
   }

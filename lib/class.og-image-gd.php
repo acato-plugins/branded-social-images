@@ -631,6 +631,10 @@ class GD {
 			return 0;
 		}
 		static $widthCorrection;
+		// Can't get font width if there is no font.
+		if ( ! $font || ! is_file( $font ) ) {
+			return 0;
+		}
 		$bbox  = imageftbbox( $font_size, 0, $font, $text );
 		$width = ( $bbox[2] - $bbox[0] );
 		if ( $width && ! $widthCorrection ) {
@@ -638,7 +642,7 @@ class GD {
 			$widthCorrection = $widthCorrection['width'] / $width;
 		}
 
-		return $width / $widthCorrection;
+		return $widthCorrection ? $width / $widthCorrection : 0;
 	}
 
 	/**

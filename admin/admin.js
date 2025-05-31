@@ -1530,11 +1530,12 @@ function hex_to_rgba(hex) {
 
     // monitor title
     var title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php,.edit-tags-php').find('#post #title,.block-editor .editor-post-title textarea,#tag-name,h1.wp-block-post-title[contenteditable]').get(0);
+    var nbsp = "\uFEFF";
     var _update_auto_title = function update_auto_title() {
       // sure?
       if (editor.is('.auto-title')) {
         var input_title = $(title_field).is('h1') ? $(title_field).text() : $(title_field).val().trim();
-        if ("\uFEFF" === input_title) {
+        if (nbsp === input_title) {
           input_title = '';
         }
         var new_title = bsi_settings.title_format;

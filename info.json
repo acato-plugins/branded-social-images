@@ -1,9 +1,9 @@
 {
   "Plugin Name": "Branded Social Images",
   "Description": "The simplest way to brand your social images. Provide all your social images (Open Graph images) with your brand en text. In just a few clicks.",
-  "Plugin URI": "https://clearsite.nl/branded-social-images/",
-  "Author": "Internetbureau Clearsite",
-  "Author URI": "https://www.clearsite.nl/",
-  "Version": "1.1.0",
+  "Plugin URI": "https://github.com/acato-plugins/branded-social-images",
+  "Author": "Acato - Maakt het makkelijk",
+  "Author URI": "https://acato.nl/",
+  "Version": "1.1.4",
   "License": "GPL2"
 }
