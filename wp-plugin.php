@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/clearsite/branded-social-images
  * Author: Acato
  * Author URI: https://acato.nl
- * Version: 1.1.3
+ * Version: 1.1.4
  * License: GPL2
  */
 
@@ -34,9 +34,7 @@
  * 1. Better settings handler and all settings filterable for mass rollout or embedding in themes
  * 2. Positioning of text and logo as well as logo scaling and font-size done "on image"
  * 3. Title builder (like Yoast SEO)
- * 4. ImageMagick support
- * 5. With IM; svg and webp support
- * 6. Code refactoring
+ * 4. Code refactoring
  */
 
 use Clearsite\Plugins\OGImage\Plugin;
