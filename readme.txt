@@ -1,5 +1,5 @@
 === Branded Social Images - Open Graph Images with logo and extra text layer ===
-Contributors: acato,clearsite
+Contributors: rmpel,borkweb,acato
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
 Tested up to: 6.8.1
@@ -144,6 +144,8 @@ When in doubt, contact us before sharing.
 
 = 1.1.4 =
 * Fix the title-updater in the BSI editor - in some cases the "empty" title was \uFEFF, a zero-width space character.
+* Fix a few PHP warnings regarding integers expected but floats given, empty values and GLOB_BRACE not being available on all installations.
+* Thank you [Borkweb](https://github.com/borkweb) for your contributions to the plugin!
 
 = 1.1.3 =
 * Fix division by zero error in the rare case that a font file has gone missing.
