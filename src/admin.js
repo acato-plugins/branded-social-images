@@ -519,7 +519,7 @@ import decodeEntities from './helpers/decode_entities';
 			initialize_monitor_title_field();
 			// sure?
 			if (editor.is( '.auto-title' )) {
-				var input_title = $( title_field ).is('h1') ? $( title_field ).text() : $( title_field).val();
+				var input_title = $( title_field ).is('h1') ? $( title_field ).text() : $( title_field ).val();
 				var new_title = bsi_settings.title_format;
 
 				if ( '' !== input_title && input_title !== nbsp ) {
