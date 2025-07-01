@@ -344,18 +344,18 @@ class GD {
 			'stroke_color' => false,
 		], $options ) );
 		$textbox = new Box( $image );
-		$textbox->setFontSize( $size / .75 );
+		$textbox->setFontSize( ceil( $size / .75 ) );
 		$textbox->setFontFace( $fontfile );
 		$textbox->setFontColor( $color );
 		if ( false !== $stroke_color && $stroke_width > 0 ) {
 			$textbox->setStrokeColor( $stroke_color );
-			$textbox->setStrokeSize( $stroke_width );
+			$textbox->setStrokeSize( ceil( $stroke_width ) );
 		}
 		$textbox->setBox(
-			$x,  // distance from left edge
-			$y,  // distance from top edge
-			$w, // textbox width
-			$h  // textbox height
+			ceil( $x ),  // distance from left edge
+			ceil( $y ),  // distance from top edge
+			ceil( $w ), // textbox width
+			ceil( $h )  // textbox height
 		);
 
 		// text will be aligned inside textbox to right horizontally and to top vertically

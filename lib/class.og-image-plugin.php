@@ -27,7 +27,7 @@ class Plugin {
 	 * For example, if set to 2; 2400x1260 for the image and min 1200 w/h for the logo. You can even use 3 or 4 ;)
 	 * After changing, you will need to use a 3rd party plugin to "rebuild thumbnails" to re-generate the proper formats.
 	 */
-	const AA = 1;
+	const AA = 2;
 	/** @var string The name of the folder in /wp-uploads (/wp-content/uploads) */
 	const STORAGE = 'bsi-uploads';
 	/** @var string The name of the WordPress "image-size", visible in the interface with plugins like "ajax thumbnail rebuild" */
@@ -808,7 +808,7 @@ class Plugin {
 		$this->text_options['text-stroke']        = get_option( self::DEFAULTS_PREFIX . 'text_stroke' );
 		$this->text_options['text-stroke-color']  = get_option( self::DEFAULTS_PREFIX . 'text_stroke_color' );
 
-		$this->text_options['font-size']   = get_option( self::OPTION_PREFIX . 'text__font_size', Plugin::DEF_FONT_SIZE );
+		$this->text_options['font-size']   = floor( get_option( self::OPTION_PREFIX . 'text__font_size', Plugin::DEF_FONT_SIZE ) );
 		$this->text_options['line-height'] = get_option( self::OPTION_PREFIX . 'text__font_size', Plugin::DEF_FONT_SIZE ) * 1.25;
 
 		if ( 'on' === Plugin::FEATURE_SHADOW ) {
