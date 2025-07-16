@@ -348,6 +348,11 @@ class Image {
 			Plugin::log( ' This is a failsafe, should not happen. Please check the editor javascript console.' );
 			$text = str_replace( '{title}', $title, $text );
 		}
+		if ( false !== strpos( $text, '{blogname}' ) ) {
+			Plugin::log( '{blogname} placeholder stored in database. Replacing with actual title.' );
+			Plugin::log( ' This is a failsafe, should not happen. Please check the editor javascript console.' );
+			$text = str_replace( '{blogname}', get_bloginfo('name'), $text );
+		}
 
 		Plugin::log( 'Text determination: text before filter  bsi_text; ' . ( $text ?: '( no text )' ) );
 		$text = apply_filters( 'bsi_text', $text, $post_id, $this->image_id, $type );

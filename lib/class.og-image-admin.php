@@ -111,6 +111,7 @@ class Admin {
 			}
 		} );
 
+		add_action( 'bsi_settings_panels', [ static::class, 'experimental' ] );
 		add_action( 'bsi_settings_panels', [ static::class, 'config_panel' ] );
 		add_action( 'bsi_settings_panels', [ static::class, 'log_panel' ] );
 	}
@@ -485,7 +486,14 @@ class Admin {
 					<div class="logo" style="background-image:url('<?php print esc_attr( $logo ); ?>')"></div>
 				</div>
 				<?php do_action( 'bsi_image_editor', 'after_adding_logo' ); ?>
-				<div class="area--text">
+				<div
+					class="area--text"
+					<?php
+					if ( ! $is_meta_panel ) {
+						print 'title="' . esc_attr__( 'This is the text you see when no other can be determined.', Plugin::TEXT_DOMAIN ) . '"';
+					}
+					?>
+				>
 					<div class="editable-container">
 						<pre
 							contenteditable="true"
@@ -601,6 +609,17 @@ class Admin {
 			<h2><?php _e( 'Plugin configuration', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
 			<div class="inner">
 				<?php self::render_options( $fields, [ 'disabled' ] ); ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	public static function experimental( $fields ) {
+		?>
+		<div class="area--config closed collapsible">
+			<h2><?php _e( 'Experimental settings', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
+			<div class="inner">
+				<?php self::render_options( $fields, [ 'title_format' ] ); ?>
 			</div>
 		</div>
 		<?php

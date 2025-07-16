@@ -51,7 +51,7 @@ class Plugin {
 	/** @var string External URL: the WP Plugin support URL */
 	const BSI_URL_CONTACT = 'https://wordpress.org/support/plugin/branded-social-images/';
 	/** @var string External URL: the GitHub  repository URL */
-	const BSI_URL_CONTRIBUTE = 'https://github.com/clearsite/branded-social-images/';
+	const BSI_URL_CONTRIBUTE = 'https://github.com/acato-plugins/branded-social-images/';
 	/** @var string External tool for post-inspection, the name */
 	const EXTERNAL_INSPECTOR_NAME = 'opengraph.xyz';
 	/** @var string External tool for post-inspection, the url-pattern */
@@ -1720,6 +1720,16 @@ EODOC;
 					'value'     => 'on',
 					'default'   => 'off',
 				],
+				'title_format' => [
+					'namespace' => self::OPTION_PREFIX,
+					'type'      => 'text',
+					'label'     => __( 'The base formatting of the text on the image', Plugin::TEXT_DOMAIN ),
+					'default'   => '{title} - {blogname}',
+					'comment'   => __( 'You can use the following variables:', Plugin::TEXT_DOMAIN ) . '<br>' .
+						'<code>{title}</code> - ' . __( 'The title of the post', Plugin::TEXT_DOMAIN ) . '<br>' .
+						'<code>{blogname}</code> - ' . __( 'The name of the blog', Plugin::TEXT_DOMAIN ) . '<br>' .
+						__( 'Changes have no effect on existing content.', Plugin::TEXT_DOMAIN ),
+				],
 			],
 			'meta'  => [
 				'disabled'     => [
@@ -2014,10 +2024,17 @@ EODOC;
 				$permalink = trailingslashit( get_home_url() ) . ltrim( parse_url( $permalink, PHP_URL_PATH ), '/' );
 			}
 
-			if (
-				defined( 'BSI_SHOW_ADMIN_BAR_IMAGE_LINK' ) &&
-				true === BSI_SHOW_ADMIN_BAR_IMAGE_LINK && array_filter( Plugin::image_fallback_chain( true ) )
-			) {
+			$parent_node = null;
+
+			if ( array_filter( Plugin::image_fallback_chain( true ) ) ) {
+				$parent_node = self::ADMIN_SLUG . '-main';
+				$args = array(
+					'id'    => $parent_node,
+					'title' => __( 'Social Image', Plugin::TEXT_DOMAIN ),
+					'href'  => '#',
+				);
+				$admin_bar->add_node( $args );
+
 				$args = array(
 					'id'    => self::ADMIN_SLUG . '-view',
 					'title' => __( 'View Social Image', Plugin::TEXT_DOMAIN ),
@@ -2026,18 +2043,20 @@ EODOC;
 						'target' => '_blank',
 						'class'  => self::ADMIN_SLUG . '-view',
 					],
+					'parent' => $parent_node,
 				);
 				$admin_bar->add_node( $args );
 			}
 
 			$args = array(
 				'id'    => self::ADMIN_SLUG . '-inspector',
-				'title' => self::icon() . __( 'Inspect Social Image', Plugin::TEXT_DOMAIN ),
+				'title' => __( 'Inspect Social Image', Plugin::TEXT_DOMAIN ),
 				'href'  => Plugin::EXTERNAL_INSPECTOR,
 				'meta'  => [
 					'target' => '_blank',
 					'title'  => __( 'Shows how this post is shared using an external, unaffiliated service.', Plugin::TEXT_DOMAIN ),
 				],
+				'parent' => $parent_node,
 			);
 
 			$args['href'] = sprintf( $args['href'], urlencode( $permalink ) );
