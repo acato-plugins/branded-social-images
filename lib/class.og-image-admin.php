@@ -170,6 +170,10 @@ class Admin {
 			'size'     => get_option( Plugin::OPTION_PREFIX . 'image_logo_size', '100' ),
 		];
 
+		if ( ! Plugin::bool_text_enabled() ) {
+			$defaults['text_options']['enabled'] = false;
+		}
+
 		return $defaults;
 	}
 
@@ -486,24 +490,27 @@ class Admin {
 					<div class="logo" style="background-image:url('<?php print esc_attr( $logo ); ?>')"></div>
 				</div>
 				<?php do_action( 'bsi_image_editor', 'after_adding_logo' ); ?>
-				<div
-					class="area--text"
-					<?php
-					if ( ! $is_meta_panel ) {
-						print 'title="' . esc_attr__( 'This is the text you see when no other can be determined.', Plugin::TEXT_DOMAIN ) . '"';
-					}
-					?>
-				>
-					<div class="editable-container">
+				<?php if ( Plugin::bool_text_enabled() ) { ?>
+					<div
+
+						class="area--text"
+						<?php
+						if ( ! $is_meta_panel ) {
+							print 'title="' . esc_attr__( 'This is the text you see when no other can be determined.', Plugin::TEXT_DOMAIN ) . '"';
+						}
+						?>
+					>
+						<div class="editable-container">
 						<pre
 							contenteditable="true"
 							class="editable"><?php print $fields['text']['current_value']; ?></pre>
-						<?php foreach ( $text_fallback_chain as $type => $text ) {
-							?>
-							<div class="text-alternate type-<?php print $type; ?>"><?php print $text; ?></div><?php
-						} ?>
+							<?php foreach ( $text_fallback_chain as $type => $text ) {
+								?>
+								<div class="text-alternate type-<?php print $type; ?>"><?php print $text; ?></div><?php
+							} ?>
+						</div>
 					</div>
-				</div>
+				<?php } ?>
 				<?php do_action( 'bsi_image_editor', 'after_adding_text' ); ?>
 			</div>
 			<?php if ( ! $is_meta_panel ) { ?>
@@ -565,18 +572,30 @@ class Admin {
 		if ( ! $filter ) {
 			$filter = array_keys( $options );
 		}
+		$footer = [];
 
 		$filter = array_diff( $filter, $seen );
 
 		foreach ( $filter as $option_name ) {
 			if ( ! empty ( $options[ $option_name ] ) ) {
 				$seen[] = $option_name;
-				self::render_option( $option_name, $options[ $option_name ] );
+				self::render_option( $option_name, $options[ $option_name ], $footer );
 			}
+		}
+
+		if ( ! empty( $footer ) ) {
+			print '<div class="footer hidden">';
+			foreach ( $footer as $item ) {
+				print $item;
+			}
+			print '</div>';
 		}
 	}
 
-	private static function render_option( $option_name, $option_atts ) {
+	private static function render_option( $option_name, $option_atts, &$footer ) {
+		if ( 'hidden' === $option_atts['type'] ) {
+			ob_start();
+		}
 		if ( ! empty( $option_atts['namespace'] ) && $option_atts['namespace'] == Plugin::DO_NOT_RENDER ) {
 			return;
 		}
@@ -588,6 +607,9 @@ class Admin {
 		}
 		HTML_Inputs::render( $option_name, $option_atts, $label );
 		print '</span>';
+		if ( 'hidden' === $option_atts['type'] ) {
+			$footer[] = ob_get_clean();
+		}
 	}
 
 	public static function log_panel() {
@@ -619,7 +641,7 @@ class Admin {
 		<div class="area--config closed collapsible">
 			<h2><?php _e( 'Experimental settings', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
 			<div class="inner">
-				<?php self::render_options( $fields, [ 'title_format' ] ); ?>
+				<?php self::render_options( $fields, [ 'disable_text', 'title_format' ] ); ?>
 			</div>
 		</div>
 		<?php

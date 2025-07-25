@@ -16,6 +16,7 @@ require __DIR__ . '/html_inputs/class.radios.php';
 require __DIR__ . '/html_inputs/class.slider.php';
 require __DIR__ . '/html_inputs/class.image.php';
 require __DIR__ . '/html_inputs/class.color.php';
+require __DIR__ . '/html_inputs/class.hidden.php';
 //require __DIR__ .'/html_inputs/class.email.php';
 //require __DIR__ .'/html_inputs/class.tel.php';
 //require __DIR__ .'/html_inputs/class.number.php';

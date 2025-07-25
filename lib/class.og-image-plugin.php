@@ -1720,15 +1720,24 @@ EODOC;
 					'value'     => 'on',
 					'default'   => 'off',
 				],
-				'title_format' => [
+				'title_format'        => [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'text',
 					'label'     => __( 'The base formatting of the text on the image', Plugin::TEXT_DOMAIN ),
 					'default'   => '{title} - {blogname}',
 					'comment'   => __( 'You can use the following variables:', Plugin::TEXT_DOMAIN ) . '<br>' .
-						'<code>{title}</code> - ' . __( 'The title of the post', Plugin::TEXT_DOMAIN ) . '<br>' .
-						'<code>{blogname}</code> - ' . __( 'The name of the blog', Plugin::TEXT_DOMAIN ) . '<br>' .
-						__( 'Changes have no effect on existing content.', Plugin::TEXT_DOMAIN ),
+					               '<code>{title}</code> - ' . __( 'The title of the post', Plugin::TEXT_DOMAIN ) . '<br>' .
+					               '<code>{blogname}</code> - ' . __( 'The name of the blog', Plugin::TEXT_DOMAIN ) . '<br>' .
+					               __( 'Changes have no effect on existing content.', Plugin::TEXT_DOMAIN ),
+				],
+				'disable_text'        => [
+					'namespace' => self::OPTION_PREFIX,
+					'type'      => 'checkbox',
+					'label'     => __( 'Completely disable text overlay', Plugin::TEXT_DOMAIN ),
+					'value'     => 'on',
+					'default'   => 'off',
+					'comment'   => __( 'This will disable the text overlay on all images, even if the text is enabled for a post.', Plugin::TEXT_DOMAIN ) . '<br>' .
+					               __( 'This change effects ALL Social Images, unless cached.', Plugin::TEXT_DOMAIN ),
 				],
 			],
 			'meta'  => [
@@ -1739,12 +1748,16 @@ EODOC;
 					'default'   => get_option( self::DEFAULTS_PREFIX . 'disabled', 'off' ),
 					'comment'   => '<div class="disabled-notice">' . __( 'The plugin Branded Social Images is disabled for this post.', Plugin::TEXT_DOMAIN ) . '</div>',
 				],
-				'text_enabled' => [
+				'text_enabled' => Plugin::bool_text_enabled() ? [
 					'namespace' => self::OPTION_PREFIX,
 					'type'      => 'checkbox',
 					'label'     => __( 'Deselect if you do not wish text on this image.', Plugin::TEXT_DOMAIN ),
-					'default'   => 'yes',
+					'default'   => get_option( self::DEFAULTS_PREFIX . 'text_enabled', 'yes' ) === 'yes' ? 'yes' : 'no',
 					'value'     => 'yes',
+				] : [
+					'namespace' => self::OPTION_PREFIX,
+					'type'      => 'hidden',
+					'value'     => get_post_meta( get_the_ID(), self::OPTION_PREFIX . 'text_enabled', true ) ?: 'yes',
 				],
 
 				'image' => [
@@ -2028,7 +2041,7 @@ EODOC;
 
 			if ( array_filter( Plugin::image_fallback_chain( true ) ) ) {
 				$parent_node = self::ADMIN_SLUG . '-main';
-				$args = array(
+				$args        = array(
 					'id'    => $parent_node,
 					'title' => __( 'Social Image', Plugin::TEXT_DOMAIN ),
 					'href'  => '#',
@@ -2036,10 +2049,10 @@ EODOC;
 				$admin_bar->add_node( $args );
 
 				$args = array(
-					'id'    => self::ADMIN_SLUG . '-view',
-					'title' => __( 'View Social Image', Plugin::TEXT_DOMAIN ),
-					'href'  => $permalink . Plugin::output_filename() . '/',
-					'meta'  => [
+					'id'     => self::ADMIN_SLUG . '-view',
+					'title'  => __( 'View Social Image', Plugin::TEXT_DOMAIN ),
+					'href'   => $permalink . Plugin::output_filename() . '/',
+					'meta'   => [
 						'target' => '_blank',
 						'class'  => self::ADMIN_SLUG . '-view',
 					],
@@ -2049,10 +2062,10 @@ EODOC;
 			}
 
 			$args = array(
-				'id'    => self::ADMIN_SLUG . '-inspector',
-				'title' => __( 'Inspect Social Image', Plugin::TEXT_DOMAIN ),
-				'href'  => Plugin::EXTERNAL_INSPECTOR,
-				'meta'  => [
+				'id'     => self::ADMIN_SLUG . '-inspector',
+				'title'  => __( 'Inspect Social Image', Plugin::TEXT_DOMAIN ),
+				'href'   => Plugin::EXTERNAL_INSPECTOR,
+				'meta'   => [
 					'target' => '_blank',
 					'title'  => __( 'Shows how this post is shared using an external, unaffiliated service.', Plugin::TEXT_DOMAIN ),
 				],
@@ -2116,6 +2129,13 @@ EODOC;
 	 */
 	public static function setting( $setting, $default = null ) {
 		return apply_filters( 'bsi_settings_' . $setting, $default );
+	}
+
+	public static function bool_text_enabled() {
+		// The checkbox ON means "Text disabled" - so we return true when the checkbox is OFF.
+		$a = get_option( self::OPTION_PREFIX . 'disable_text', 'off' ) !== 'on';
+
+		return $a;
 	}
 
 	public static function protect_dir( $dir ) {
