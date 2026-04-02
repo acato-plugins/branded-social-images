@@ -936,6 +936,12 @@ class Plugin {
 			}
 			if ( is_file( $this->storage() . '/' . $this->text_options['font-file'] ) ) {
 				$this->text_options['font-file'] = $this->storage() . '/' . $this->text_options['font-file'];
+			} else {
+				// Fallback to OpenSans if the configured font is not available
+				$fallback_font = $this->download_font( 'google:Open Sans', 700, 'normal' );
+				if ( $fallback_font && is_file( $this->storage() . '/' . $fallback_font ) ) {
+					$this->text_options['font-file'] = $this->storage() . '/' . $fallback_font;
+				}
 			}
 		}
 
