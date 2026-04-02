@@ -138,13 +138,15 @@ class GD {
 		$text = $this->wrapTextByPixels( $text, $image_width * $this->text_area_width, $fontSize, $font );
 
 		$textDim     = imagettfbbox( $fontSize, 0, $font, implode( ' ', explode( "\n", $text . 'Hj' ) ) ); // Hj is to make sure the correct line-height is calculated.
-		$line_height = $textDim[1] - $textDim[7];
+		$line_height = ( $textDim !== false ) ? ( $textDim[1] - $textDim[7] ) : 0;
 
 		$lines      = explode( "\n", $text );
 		$text_width = 0;
 		foreach ( $lines as $line ) {
 			$textDim    = imagettfbbox( $fontSize, 0, $font, $line );
-			$text_width = max( $text_width, $textDim[2] - $textDim[0] );
+			if ( $textDim !== false ) {
+				$text_width = max( $text_width, $textDim[2] - $textDim[0] );
+			}
 		}
 		$text_width  += 2;
 		$line_height *= $this->line_height_factor;

@@ -271,7 +271,7 @@ class Box
         $n = 0;
         foreach ($lines as $line) {
             $box = $this->calculateBox($line);
-            $boxWidth = $box[2] - $box[0];
+            $boxWidth = ($box !== false) ? ($box[2] - $box[0]) : 0;
             switch ($this->alignX) {
                 case HorizontalAlignment::Center:
                     $xAlign = ($this->box['width'] - $boxWidth) / 2;
@@ -351,7 +351,7 @@ class Box
             $line = $words[0];
             for ($i = 1; $i < count($words); $i++) {
                 $box = $this->calculateBox($line." ".$words[$i]);
-                if (($box[4]-$box[6]) >= $this->box['width']) {
+                if ($box === false || ($box[4]-$box[6]) >= $this->box['width']) {
                     $lines[] = $line;
                     $line = $words[$i];
                 } else {
@@ -400,8 +400,8 @@ class Box
             $this->im,
             $this->getFontSizeInPoints(),
             0, // no rotation
-            $x,
-            $y,
+            (int) $x,
+            (int) $y,
             $color->getIndex($this->im),
             $this->fontFace,
             $text
