@@ -1,6 +1,6 @@
 === Branded Social Images - Open Graph Images with logo and extra text layer ===
 Contributors: rmpel,borkweb,acato
-Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
+Tags: Open Graph Image, OG Image, featured image, social image, facebook image
 Requires at least: 4.7
 Tested up to: 6.9.4
 Stable tag: 1.1.5
