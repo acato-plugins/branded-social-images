@@ -2,8 +2,8 @@
 Contributors: rmpel,borkweb,acato
 Tags: social image, Open Graph Image, OG Image, OG-image, open graph, open-graph, facebook image, featured image, branded, watermark, logo
 Requires at least: 4.7
-Tested up to: 6.8.1
-Stable tag: 1.1.4
+Tested up to: 6.9.4
+Stable tag: 1.1.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -134,6 +134,10 @@ If you have problems with a specific image, please generate a log and include it
 If you don't want to share this information publicly, send us an e-mail referencing the support ticket.
 When in doubt, contact us before sharing.
 
+= How can I report security bugs? =
+
+You can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/9e5fbb02-83f3-4ff0-868a-979648c56c23)
+
 == Screenshots ==
 
 1. Enrich your social images, automatically.
@@ -141,6 +145,11 @@ When in doubt, contact us before sharing.
 3. Post-meta
 
 == Changelog ==
+
+= 1.1.5 =
+* Fix more float-to-int issues.
+* Missing font (font file deleted or moved) resulted in error-log-spam, fallback to default font now in place.
+* Added PatchStack for responsible disclosure of security vulnerabilities.
 
 = 1.1.4 =
 * Fix the title-updater in the BSI editor - in some cases the "empty" title was \uFEFF, a zero-width space character.
