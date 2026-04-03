@@ -373,7 +373,7 @@ class Box
 
     protected function drawFilledRectangle($x, $y, $width, $height, Color $color)
     {
-        imagefilledrectangle($this->im, $x, $y, $x + $width, $y + $height,
+        imagefilledrectangle($this->im, (int) $x, (int) $y, (int) ($x + $width), (int) ($y + $height),
             $color->getIndex($this->im)
         );
     }
@@ -387,8 +387,8 @@ class Box
     {
         $size = $this->strokeSize;
         if ($size <= 0) return;
-        for ($c1 = $x - $size; $c1 <= $x + $size; $c1++) {
-            for ($c2 = $y - $size; $c2 <= $y + $size; $c2++) {
+        for ($c1 = (int) ($x - $size); $c1 <= $x + $size; $c1++) {
+            for ($c2 = (int) ($y - $size); $c2 <= $y + $size; $c2++) {
                 $this->drawInternal($c1, $c2, $this->strokeColor, $text);
             }
         }

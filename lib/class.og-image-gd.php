@@ -74,7 +74,7 @@ class GD {
 			$source_x     = ( imagesx( $baseImage ) - $source_width ) / 2;
 		}
 
-		imagecopyresampled( $this->resource, $baseImage, 0, 0, $source_x, $source_y, $w, $h, $source_width, $source_height );
+		imagecopyresampled( $this->resource, $baseImage, 0, 0, (int) round( $source_x ), (int) round( $source_y ), $w, $h, (int) round( $source_width ), (int) round( $source_height ) );
 		imagedestroy( $baseImage );
 		if ( $this->source_is_temporary ) {
 			@unlink( $this->source );
@@ -284,8 +284,8 @@ class GD {
 		Plugin::log( "Logo overlay: logo dimensions; W:$image_width, H:$image_height" );
 
 		// logo overlay
-		$w = $logoOptions['w'] * Plugin::AA * 0.5;
-		$h = $logoOptions['h'] * Plugin::AA * 0.5;
+		$w = (int) round( $logoOptions['w'] * Plugin::AA * 0.5 );
+		$h = (int) round( $logoOptions['h'] * Plugin::AA * 0.5 );
 
 		$logoOptions['left']   *= Plugin::AA;
 		$logoOptions['right']  *= Plugin::AA;
@@ -295,23 +295,23 @@ class GD {
 		$p = $logo_posX = $logo_posY = 0;
 
 		if ( $logoOptions['halign'] == 'center' ) {
-			$logo_posX = ( $image_width - $logoOptions['left'] - $logoOptions['right'] ) / 2 - $w / 2 + $logoOptions['left'];
+			$logo_posX = (int) round( ( $image_width - $logoOptions['left'] - $logoOptions['right'] ) / 2 - $w / 2 + $logoOptions['left'] );
 		}
 		if ( $logoOptions['halign'] == 'right' ) {
-			$logo_posX = $image_width - $logoOptions['right'] - $w - $p;
+			$logo_posX = (int) round( $image_width - $logoOptions['right'] - $w - $p );
 		}
 		if ( $logoOptions['halign'] == 'left' ) {
-			$logo_posX = $logoOptions['left'] + $p;
+			$logo_posX = (int) round( $logoOptions['left'] + $p );
 		}
 
 		if ( $logoOptions['valign'] == 'center' ) {
-			$logo_posY = ( $image_height - $logoOptions['top'] - $logoOptions['bottom'] ) / 2 - $h / 2 + $logoOptions['top'];
+			$logo_posY = (int) round( ( $image_height - $logoOptions['top'] - $logoOptions['bottom'] ) / 2 - $h / 2 + $logoOptions['top'] );
 		}
 		if ( $logoOptions['valign'] == 'bottom' ) {
-			$logo_posY = $image_height - $logoOptions['bottom'] - $h - $p;
+			$logo_posY = (int) round( $image_height - $logoOptions['bottom'] - $h - $p );
 		}
 		if ( $logoOptions['valign'] == 'top' ) {
-			$logo_posY = $logoOptions['top'] + $p;
+			$logo_posY = (int) round( $logoOptions['top'] + $p );
 		}
 
 		imagecopyresampled( $this->resource, $logo, $logo_posX, $logo_posY, 0, 0, $w, $h, $logo_width, $logo_height );
