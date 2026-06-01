@@ -47,6 +47,11 @@ class Admin {
 				'preview_url'     => get_permalink() . Plugin::output_filename(),
 				'image_size_name' => Plugin::IMAGE_SIZE_NAME,
 				'title_format'    => Plugin::title_format( 1, true ),
+				'ajax_url'        => admin_url( 'admin-ajax.php' ),
+				'sampling'        => [
+					'action' => Plugin::ADMIN_SLUG . '_sampling-preview',
+					'nonce'  => wp_create_nonce( 'bsi-sampling-preview' ),
+				],
 				'text'            => [
 					'image_upload_title'  => __( 'Select an image or upload one.', Plugin::TEXT_DOMAIN ),
 					'image_upload_button' => __( 'Use this image', Plugin::TEXT_DOMAIN ),
@@ -96,6 +101,7 @@ class Admin {
 		add_filter( 'network_admin_plugin_action_links', [ static::class, 'add_settings_link' ], 10, 2 );
 
 		add_action( 'wp_ajax_' . Plugin::ADMIN_SLUG . '_get-font', [ static::class, 'wp_ajax_bsi_get_font' ] );
+		add_action( 'wp_ajax_' . Plugin::ADMIN_SLUG . '_sampling-preview', [ static::class, 'wp_ajax_bsi_sampling_preview' ] );
 
 		add_action( 'bsi_footer', function () {
 			?><p><?php
@@ -608,7 +614,7 @@ class Admin {
 		<div class="area--config closed collapsible">
 			<h2><?php _e( 'Plugin configuration', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
 			<div class="inner">
-				<?php self::render_options( $fields, [ 'image_scaling', 'disabled' ] ); ?>
+				<?php self::render_options( $fields, [ 'disabled', 'image_scaling' ] ); ?>
 			</div>
 		</div>
 		<?php
@@ -706,6 +712,81 @@ class Admin {
 			?>
 			<div class="updated error"><p><?php print $error; ?></p></div><?php
 		}
+	}
+
+	public static function wp_ajax_bsi_sampling_preview() {
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'bsi-sampling-preview' ) ) {
+			header( 'HTTP/1.1 403 Forbidden', true, 403 );
+			exit;
+		}
+
+		$allowed = [
+			'bicubic_fixed'    => IMG_BICUBIC_FIXED,
+			'bilinear_fixed'   => IMG_BILINEAR_FIXED,
+			'bicubic'          => IMG_BICUBIC,
+			'nearest_neighbor' => IMG_NEAREST_NEIGHBOUR,
+		];
+		$scaling = (string) ( $_GET['scaling'] ?? '' );
+		if ( ! isset( $allowed[ $scaling ] ) || ! function_exists( 'imagecreatetruecolor' ) || ! function_exists( 'imagescale' ) ) {
+			self::output_sampling_error_png();
+			exit;
+		}
+
+		$src = imagecreatetruecolor( 2, 2 );
+		if ( ! $src ) {
+			self::output_sampling_error_png();
+			exit;
+		}
+		$black = imagecolorallocate( $src, 0, 0, 0 );
+		$white = imagecolorallocate( $src, 255, 255, 255 );
+		// black TL, white BR; the other two corners get gray so the chosen interpolation
+		// is the only thing that decides the value of the (single) middle pixel of the 3x3.
+		$gray = imagecolorallocate( $src, 128, 128, 128 );
+		imagesetpixel( $src, 0, 0, $black );
+		imagesetpixel( $src, 1, 0, $gray );
+		imagesetpixel( $src, 0, 1, $gray );
+		imagesetpixel( $src, 1, 1, $white );
+
+		$scaled = @imagescale( $src, 3, 3, $allowed[ $scaling ] );
+		imagedestroy( $src );
+
+		if ( ! $scaled || imagesx( $scaled ) !== 3 || imagesy( $scaled ) !== 3 ) {
+			if ( $scaled ) {
+				imagedestroy( $scaled );
+			}
+			self::output_sampling_error_png();
+			exit;
+		}
+
+		header( 'Content-Type: image/png' );
+		header( 'Cache-Control: no-store, max-age=0' );
+		imagepng( $scaled );
+		imagedestroy( $scaled );
+		exit;
+	}
+
+	private static function output_sampling_error_png() {
+		// Higher-resolution red cross so the "not available" state is unmistakable
+		// even when the <img> tag scales it up. 32x32 with thick diagonals.
+		$size = 32;
+		header( 'Content-Type: image/png' );
+		header( 'Cache-Control: no-store, max-age=0' );
+
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			// 1x1 red PNG fallback when GD is unavailable
+			print base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' );
+			return;
+		}
+
+		$img   = imagecreatetruecolor( $size, $size );
+		$white = imagecolorallocate( $img, 255, 255, 255 );
+		$red   = imagecolorallocate( $img, 220, 30, 30 );
+		imagefilledrectangle( $img, 0, 0, $size - 1, $size - 1, $white );
+		imagesetthickness( $img, 4 );
+		imageline( $img, 4, 4, $size - 5, $size - 5, $red );
+		imageline( $img, $size - 5, 4, 4, $size - 5, $red );
+		imagepng( $img );
+		imagedestroy( $img );
 	}
 
 	public static function wp_ajax_bsi_get_font() {

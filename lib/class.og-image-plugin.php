@@ -1545,22 +1545,39 @@ EODOC;
 		$image_comment .= '<li>' . __( 'Featured image on page/post (when checked in general settings)', Plugin::TEXT_DOMAIN ) . '</li>';
 		$image_comment .= '<li>' . __( 'Fallback Branded Social image in general settings', Plugin::TEXT_DOMAIN ) . '</li></ol>';
 
+		// 2x2 source: black TL, gray TR & BL, white BR — the input the resampler sees.
+		$source_2x2_png         = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAFklEQVQImWNgYGBoaGhgaGho+P//PwAbCAX+jVFy4QAAAABJRU5ErkJggg==';
+		// 3x3 fully transparent PNG (placeholder until the AJAX sample loads)
+		$transparent_3x3_png    = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAADElEQVQImWNgIAoAAAAnAAGfWjwcAAAAAElFTkSuQmCC';
+		$swatch_style           = 'image-rendering:pixelated;image-rendering:-moz-crisp-edges;vertical-align:middle;border:1px solid #ccc;';
+		$image_sampling_example = '<span style="display:inline-flex;align-items:center;gap:8px;margin-left:8px;vertical-align:middle;">'
+		                          . '<img src="' . $source_2x2_png . '" width="40" height="40" style="' . $swatch_style . '" alt="" title="' . esc_attr__( '2x2 source pixels', Plugin::TEXT_DOMAIN ) . '" />'
+		                          . '<span aria-hidden="true" style="font-size:20px;line-height:1;color:#666;">&rarr;</span>'
+		                          . '<img id="bsi-sampling-example" src="' . $transparent_3x3_png . '" width="60" height="60" style="' . $swatch_style . '" alt="" title="' . esc_attr__( '3x3 resampled result', Plugin::TEXT_DOMAIN ) . '" />'
+		                          . '</span>';
+
 		$options = [
 			'admin' => [
 				'image_scaling'      => [
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'select',
-					'label'     => __( 'Resizing Mode', Plugin::TEXT_DOMAIN ),
-					'comment'   => __( 'If you are having issues rendering images try using Bilinear Fixed', Plugin::TEXT_DOMAIN ),
+					'label'     => __( 'Pixel Resampling Mode', Plugin::TEXT_DOMAIN ),
+					'comment'   => $image_sampling_example .
+					               '<br />' . __( 'This sample shows interpolation between a black and a white pixel for demonstration purposes.', Plugin::TEXT_DOMAIN ) .
+					               '<br /><em>' . __( 'Note: a 2x2 to 3x3 upscale is a deliberately extreme test that exaggerates the differences between methods. On a real social image (1200x630) the visible difference will be much smaller.', Plugin::TEXT_DOMAIN ) . '</em>' .
+					               '<br />' . __( '<strong>Bicubic</strong> usually produces the smoothest result, which is best for photos and gradients but can look slightly soft on sharp edges (logos, text).', Plugin::TEXT_DOMAIN ) .
+					               '<br />' . __( 'The <strong>Fixed</strong> variants (Bicubic Fixed, Bilinear Fixed) use older, more conservative GD code paths. They are not necessarily higher quality — they are the safer default because they behave more consistently across PHP/GD versions and avoid rendering glitches that the non-Fixed paths have historically caused on some installations.', Plugin::TEXT_DOMAIN ) .
+					               '<br />' . __( 'If you are having issues rendering images try using Bilinear Fixed.', Plugin::TEXT_DOMAIN ),
 					'options'   => [
 						'bicubic_fixed'    => __( 'Bicubic Fixed', Plugin::TEXT_DOMAIN ),
 						'bilinear_fixed'   => __( 'Bilinear Fixed', Plugin::TEXT_DOMAIN ),
-						'nearest_neighbor' => __( 'Nearest Neighbor', Plugin::TEXT_DOMAIN ),
 						'bicubic'          => __( 'Bicubic', Plugin::TEXT_DOMAIN ),
+						'nearest_neighbor' => __( 'Nearest Neighbor', Plugin::TEXT_DOMAIN ),
 					],
 					'default'   => 'bicubic_fixed',
 				],
 				'disabled'      => [
+					'header'    => __( 'BSI Default state', Plugin::TEXT_DOMAIN ),
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'checkbox',
 					'label'     => __( 'Select to disable the plugin Branded Social Images by default.', Plugin::TEXT_DOMAIN ),

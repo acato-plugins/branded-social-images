@@ -1,9 +1,9 @@
 === Branded Social Images - Open Graph Images with logo and extra text layer ===
-Contributors: rmpel,borkweb,acato
+Contributors: rmpel,borkweb,acato,kennydude
 Tags: Open Graph Image, OG Image, featured image, social image, facebook image
 Requires at least: 4.7
 Tested up to: 6.9.4
-Stable tag: 1.1.5
+Stable tag: 1.2.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,12 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 3. Post-meta
 
 == Changelog ==
+
+= 1.2.0 =
+* Added: "Pixel Resampling Mode" setting — pick between Bicubic Fixed (default), Bilinear Fixed, Bicubic and Nearest Neighbor for image rescaling. The Fixed variants are the safer default because they behave more consistently across PHP/GD versions; Bicubic (non-Fixed) often produces a smoother result but can vary between hosts. Try Bilinear Fixed if you're seeing rendering glitches.
+* Added: Live preview swatch next to the setting — a 2x2 source upscaled to 3x3 with the selected method, so you can see what each option does before saving. (The 2x2-to-3x3 jump deliberately exaggerates the differences; on a real 1200x630 social image the visible difference is much smaller.)
+* Added: Dutch translation updated and .pot regenerated to cover the new strings.
+* Thanks to [kennydude](https://github.com/kennydude) for the patch (PR #6) that started this off.
 
 = 1.1.5 =
 * Fix more float-to-int issues.
