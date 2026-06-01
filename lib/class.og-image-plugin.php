@@ -1547,7 +1547,21 @@ EODOC;
 
 		$options = [
 			'admin' => [
+				'image_scaling'      => [
+					'namespace' => self::DEFAULTS_PREFIX,
+					'type'      => 'select',
+					'label'     => __( 'Resizing Mode', Plugin::TEXT_DOMAIN ),
+					'comment'   => __( 'If you are having issues rendering images try using Bilinear Fixed', Plugin::TEXT_DOMAIN ),
+					'options'   => [
+						'bicubic_fixed'    => __( 'Bicubic Fixed', Plugin::TEXT_DOMAIN ),
+						'bilinear_fixed'   => __( 'Bilinear Fixed', Plugin::TEXT_DOMAIN ),
+						'bicubic'          => __( 'Bicubic', Plugin::TEXT_DOMAIN ),
+						'nearest_neighbor' => __( 'Nearest Neighbor', Plugin::TEXT_DOMAIN ),
+					],
+					'default'   => 'bicubic_fixed',
+				],
 				'disabled'      => [
+					'header'    => __( 'BSI Default state', Plugin::TEXT_DOMAIN ),
 					'namespace' => self::DEFAULTS_PREFIX,
 					'type'      => 'checkbox',
 					'label'     => __( 'Select to disable the plugin Branded Social Images by default.', Plugin::TEXT_DOMAIN ),

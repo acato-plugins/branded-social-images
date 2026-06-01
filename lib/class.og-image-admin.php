@@ -608,7 +608,7 @@ class Admin {
 		<div class="area--config closed collapsible">
 			<h2><?php _e( 'Plugin configuration', Plugin::TEXT_DOMAIN ); ?><span class="toggle"></span></h2>
 			<div class="inner">
-				<?php self::render_options( $fields, [ 'disabled' ] ); ?>
+				<?php self::render_options( $fields, [ 'disabled', 'image_scaling' ] ); ?>
 			</div>
 		</div>
 		<?php

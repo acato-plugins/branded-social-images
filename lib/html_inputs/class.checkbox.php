@@ -26,6 +26,11 @@ class checkbox extends Input
 			$this->atts['id'] = $this->id;
 		}
 
+		$header = '';
+		if ($this->header??'') {
+			$header = '<label>' . $this->header . '</label>';
+		}
+
 		$this->atts['value'] = $this->get_tag_value();
 		if (!isset($this->atts['checked']) && $this->get_current_value() == $this->get_tag_value()) {
 			$this->atts['checked'] = 'checked';
@@ -33,7 +38,7 @@ class checkbox extends Input
 
 		$atts = $this->attributes(); // builds HTML attributes
 
-		return '<span class="field-wrap"><input type="hidden" name="' . $this->atts['name'] . '" value="off" />' .
+		return $header . '<span class="field-wrap"><input type="hidden" name="' . $this->atts['name'] . '" value="off" />' .
 			'<input type="' . $this->type . '" ' . $atts . '>' . ($this->empty ? '' : $this->content . '</' . $this->type . '>') . $label . '</span>';
 	}
 }

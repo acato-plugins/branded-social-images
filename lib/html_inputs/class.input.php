@@ -14,6 +14,7 @@ class Input
 	protected $id;
 	protected $label;
 	protected $info;
+	protected $header = '';
 	protected $info_icon;
 	protected $comment;
 	protected $comment_icon;
@@ -34,6 +35,10 @@ class Input
 		$this->set_comment_icon();
 		$this->set_info();
 		$this->set_info_icon();
+
+		if (!empty($atts['header'])) {
+			$this->header = $atts['header'];
+		}
 	}
 
 	public function set_value()

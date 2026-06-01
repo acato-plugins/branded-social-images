@@ -322,16 +322,31 @@ class GD {
 
 	public function save( $format, $quality ) {
 		$this->manager->file_put_contents( $this->target, '' ); // prime the file, creating all directories
+
+		$resize_option = get_option( Plugin::DEFAULTS_PREFIX . 'image_scaling', 'bicubic_fixed' );
+		$resize_key = IMG_BICUBIC_FIXED;
+		switch($resize_option) {
+			case 'bilinear_fixed':
+				$resize_key = IMG_BILINEAR_FIXED;
+				break;
+			case 'nearest_neighbor':
+				$resize_key = IMG_NEAREST_NEIGHBOUR;
+				break;
+			case 'bicubic':
+				$resize_key = IMG_BICUBIC;
+				break;
+		}
+
 		switch ( $format ) {
 			case 'jpg':
-				imagejpeg( imagescale( $this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED ), $this->target, $quality );
+				imagejpeg( imagescale( $this->resource, $this->manager->width, $this->manager->height, $resize_key ), $this->target, $quality );
 				break;
 			case 'webp':
-				imagewebp( imagescale( $this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED ), $this->target, $quality );
+				imagewebp( imagescale( $this->resource, $this->manager->width, $this->manager->height, $resize_key ), $this->target, $quality );
 				break;
 			case 'png':
 			default:
-				imagepng( imagescale( $this->resource, $this->manager->width, $this->manager->height, IMG_BICUBIC_FIXED ), $this->target, $quality );
+				imagepng( imagescale( $this->resource, $this->manager->width, $this->manager->height, $resize_key ), $this->target, $quality );
 				break;
 		}
 	}
