@@ -4,6 +4,25 @@ import hex_to_rgba from './helpers/hex_to_rgba';
 import decodeEntities from './helpers/decode_entities';
 
 ;(($, s) => {
+	// Sampling preview lives on the settings page and runs independently of the editor.
+	$(() => {
+		let $select = $('#image_scaling');
+		let $img = $('#bsi-sampling-example');
+		if (!$select.length || !$img.length || !window.bsi_settings || !bsi_settings.sampling) {
+			return;
+		}
+		let refresh = () => {
+			let url = bsi_settings.ajax_url
+				+ '?action=' + encodeURIComponent(bsi_settings.sampling.action)
+				+ '&_wpnonce=' + encodeURIComponent(bsi_settings.sampling.nonce)
+				+ '&scaling=' + encodeURIComponent($select.val())
+				+ '&t=' + Date.now();
+			$img.attr('src', url);
+		};
+		$select.on('change', refresh);
+		refresh();
+	});
+
 	let editor = $('#' + s);
 	if (editor.length < 1) {
 		return false;

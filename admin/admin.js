@@ -1045,6 +1045,20 @@ function hex_to_rgba(hex) {
 
 ;
 (function ($, s) {
+  // Sampling preview lives on the settings page and runs independently of the editor.
+  $(function () {
+    var $select = $('#image_scaling');
+    var $img = $('#bsi-sampling-example');
+    if (!$select.length || !$img.length || !window.bsi_settings || !bsi_settings.sampling) {
+      return;
+    }
+    var refresh = function refresh() {
+      var url = bsi_settings.ajax_url + '?action=' + encodeURIComponent(bsi_settings.sampling.action) + '&_wpnonce=' + encodeURIComponent(bsi_settings.sampling.nonce) + '&scaling=' + encodeURIComponent($select.val()) + '&t=' + Date.now();
+      $img.attr('src', url);
+    };
+    $select.on('change', refresh);
+    refresh();
+  });
   var editor = $('#' + s);
   if (editor.length < 1) {
     return false;
