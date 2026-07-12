@@ -556,6 +556,11 @@ class Plugin {
 			return $previous[ $post_id ];
 		}
 
+		$status = get_post_status( $post_id );
+		if ( $status && 'publish' !== $status ) {
+			return $previous[ $post_id ] = [ 0, '' ];
+		}
+
 		$title = $page = '';
 		$code  = 0;
 		try {
@@ -2051,7 +2056,7 @@ EODOC;
 		global $pagenow;
 		if ( ! is_admin() || $pagenow == 'post.php' || $pagenow == 'post-new.php' ) {
 			if ( ! is_admin() ) {
-				$permalink = is_single() ? get_permalink( get_the_ID() ) : remove_query_arg( '' );
+				$permalink = is_single() ? get_permalink( get_queried_object_id() ) : remove_query_arg( '' );
 			} else {
 				$permalink = get_permalink( get_the_ID() );
 			}

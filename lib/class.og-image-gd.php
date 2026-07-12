@@ -6,6 +6,7 @@ defined( 'ABSPATH' ) or die( 'You cannot be here.' );
 
 use GDText\Box;
 use GDText\Color;
+use GDText\TextWrapping;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -368,17 +369,16 @@ class GD {
 			$textbox->setStrokeColor( $stroke_color );
 			$textbox->setStrokeSize( ceil( $stroke_width ) );
 		}
-		$textbox->setBox(
-			ceil( $x ),  // distance from left edge
-			ceil( $y ),  // distance from top edge
-			ceil( $w ), // textbox width
-			ceil( $h )  // textbox height
-		);
-
-		// text will be aligned inside textbox to right horizontally and to top vertically
+		// text will be aligned inside textbox horizontally and to top vertically
 		$textbox->setTextAlign( $align, 'top' );
+		$textbox->setTextWrapping( TextWrapping::NoWrap );
 
-		$textbox->draw( $text );
+		$line_height_px = 1.25 * ceil( $size / .75 );
+
+		foreach ( explode( "\n", $text ) as $n => $line ) {
+			$textbox->setBox( ceil( $x ), ceil( $y + $n * $line_height_px ), ceil( $w ), ceil( $h ) );
+			$textbox->draw( $line );
+		}
 	}
 
 
