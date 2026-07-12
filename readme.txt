@@ -3,7 +3,7 @@ Contributors: rmpel,borkweb,acato,kennydude,Mte90
 Tags: Open Graph Image, OG Image, featured image, social image, facebook image
 Requires at least: 4.7
 Tested up to: 6.9.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 3. Post-meta
 
 == Changelog ==
+
+= 1.2.2 =
+* Fixed: auto-title update not always working. Added check for unpublished post-state.
 
 = 1.2.1 =
 * Fixed: correct preview link on single posts, draft/pending titles no longer fall back to the homepage title, and long overlay titles now wrap without orphaned words.
