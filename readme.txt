@@ -1,9 +1,9 @@
 === Branded Social Images - Open Graph Images with logo and extra text layer ===
-Contributors: rmpel,borkweb,acato,kennydude
+Contributors: rmpel,borkweb,acato,kennydude,Mte90
 Tags: Open Graph Image, OG Image, featured image, social image, facebook image
 Requires at least: 4.7
 Tested up to: 6.9.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,12 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 3. Post-meta
 
 == Changelog ==
+
+= 1.2.1 =
+* Fixed: correct preview link on single posts, draft/pending titles no longer fall back to the homepage title, and long overlay titles now wrap without orphaned words.
+* Thanks to [Mte90](https://github.com/Mte90) for the patch (PR #7).
+* AI Disclosure: This patch was created by AI, but has been fully tested and approved by both the PR author and [myself](https://github.com/rmpel).
+* Fixed: javascript error on the auto-title-update code. The error is gone, but the auto-title-update code is still not working. This will be fixed in a future release.
 
 = 1.2.0 =
 * Added: "Pixel Resampling Mode" setting — pick between Bicubic Fixed (default), Bilinear Fixed, Bicubic and Nearest Neighbor for image rescaling. The Fixed variants are the safer default because they behave more consistently across PHP/GD versions; Bicubic (non-Fixed) often produces a smoother result but can vary between hosts. Try Bilinear Fixed if you're seeing rendering glitches.

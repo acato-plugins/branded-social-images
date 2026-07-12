@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/acato-plugins/branded-social-images
  * Author: Acato
  * Author URI: https://acato.nl
- * Version: 1.2.0
+ * Version: 1.2.1
  * License: GPL2
  */
 
