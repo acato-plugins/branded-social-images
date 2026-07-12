@@ -52,7 +52,7 @@ for i in bin; do
 done
 
 # don't want these
-for i in .git .gitignore .github .jshintrc .babelrc src webpack.config.js node_modules assets composer.json composer.lock package.sh tmp package.json package-lock.json gulpfile.js languages/make-pot.sh; do
+for i in .git .gitignore .github .jshintrc .babelrc src webpack.config.js node_modules assets composer.json composer.lock package.sh tmp package.json package-lock.json gulpfile.js languages/make-pot.sh .claude CLAUDE.md AGENTS.md; do
 	rm -rf "$SVN_DIRECTORY"/$i
 done
 find . -name '.DS_Store' -exec rm {} \;
