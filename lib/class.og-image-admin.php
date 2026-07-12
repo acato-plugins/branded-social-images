@@ -443,11 +443,19 @@ class Admin {
 		}
 
 		$text_fallback_chain = Plugin::text_fallback_chain();
-		// in case of no 'scraped' title which resulted of a non-normal-page-code, build the title on-the-fly
+		// No OG title configured yet: for unpublished posts there is no reliable page to scrape,
+		// so let the editor prefill the title live from the post title (see .auto-title handling in admin.js).
 		if ( get_the_ID() && empty( $text_fallback_chain['meta'] ) ) { // post but no title configured
-			$scraped = Plugin::scrape_title_data( get_the_ID() );
-			if ( $scraped[0] >= 300 ) { // non-normal state
+			$status = get_post_status( get_the_ID() );
+			if ( $status && 'publish' !== $status ) { // unpublished; keep in sync with scrape_title_data()
 				$editor_class[] = 'auto-title';
+			}
+			else {
+				// in case of no 'scraped' title which resulted of a non-normal-page-code, build the title on-the-fly
+				$scraped = Plugin::scrape_title_data( get_the_ID() );
+				if ( $scraped[0] >= 300 ) { // non-normal state
+					$editor_class[] = 'auto-title';
+				}
 			}
 		}
 
