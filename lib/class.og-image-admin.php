@@ -145,7 +145,7 @@ class Admin {
 			'bottom'              => null,
 			'top'                 => null,
 			'right'               => null,
-			'position'            => 'bottom-left',
+			'position'            => Plugin::DEF_TEXT_POSITION,
 			'font-size'           => Plugin::DEF_FONT_SIZE,
 			'color'               => '#ffffffff',
 			'line-height'         => Plugin::DEF_FONT_SIZE * 1.25,
@@ -168,7 +168,7 @@ class Admin {
 		];
 		$defaults['logo_options'] = [
 			'enabled'  => 'on',
-			'position' => 'top-left',
+			'position' => Plugin::DEF_LOGO_POSITION,
 			'left'     => null,
 			'bottom'   => null,
 			'top'      => null,

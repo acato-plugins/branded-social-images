@@ -378,7 +378,7 @@ class Image {
 			$the_img = 'rankmath';
 		}
 		// thumbnail?
-		if ( ! $image_id && ( 'on' === get_option( Plugin::OPTION_PREFIX . 'image_use_thumbnail' ) ) ) { // this is a Carbon Fields field, defined in class.og-image-admin.php
+		if ( ! $image_id && ( 'on' === Plugin::field_list()['admin']['image_use_thumbnail']['current_value'] ) ) { // current_value applies the field default when the settings were never saved
 			$the_img  = 'thumbnail';
 			$image_id = get_post_thumbnail_id( $post_id );
 			Plugin::log( 'Image consideration: WordPress Featured Image; ' . ( $image_id ?: 'no image found' ) );
