@@ -38,7 +38,7 @@ class Admin {
 		add_action( 'admin_init', [ static::class, 'process_post' ], 11 );
 		add_action( 'admin_enqueue_scripts', function () {
 			$script = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.min.js' : 'admin/admin.js' );
-			$style  = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.css' : 'admin/admin.min.css' );
+			$style  = ( ! defined( 'BSI_UNMINIFIED' ) ? 'admin/admin.min.css' : 'admin/admin.css' );
 			wp_enqueue_script( Plugin::SCRIPT_STYLE_HANDLE, plugins_url( $script, __DIR__ ), [
 				'jquery',
 				'jquery-ui-slider',

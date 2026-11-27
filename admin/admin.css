@@ -1,45 +1,3 @@
-#branded-social-images-editor {
-  /* Interaction Cues
-  ----------------------------------*/
-  /* Icons
-  ----------------------------------*/
-  /* states and images */
-  /* Misc visuals
-  ----------------------------------*/
-  /* Overlays */
-  /* to make room for the icon, a width needs to be set here */
-  /* button elements seem to need a little more width */
-  /* button text element */
-  /* no icon support for input elements, provide padding by default */
-  /* button icon element(s) */
-  /* button sets */
-  /* workarounds */
-  /* reset extra padding in Firefox, see h5bp.com/l */
-  /* with multiple calendars */
-  /* RTL support */
-  /* icon support */
-  /* left-aligned */
-  /* right-aligned */
-  /* support: IE8 - See #6727 */
-  /* more specificity required here to override default borders */
-  /* vertically center icon */
-  /* TR overrides */
-  /* Component containers
-  ----------------------------------*/
-  /* Interaction states
-  ----------------------------------*/
-  /* Interaction Cues
-  ----------------------------------*/
-  /* Icons
-  ----------------------------------*/
-  /* states and images */
-  /* positioning */
-  /* ui-icon-seek-first is deprecated, use ui-icon-seek-start instead */
-  /* Misc visuals
-  ----------------------------------*/
-  /* Corner radius */
-  /* Overlays */
-}
 #branded-social-images-editor .ui-helper-hidden {
   display: none;
 }
@@ -87,14 +45,28 @@
 #branded-social-images-editor .ui-front {
   z-index: 100;
 }
+#branded-social-images-editor {
+  /* Interaction Cues
+  ----------------------------------*/
+}
 #branded-social-images-editor .ui-state-disabled {
   cursor: default !important;
+}
+#branded-social-images-editor {
+  /* Icons
+  ----------------------------------*/
+  /* states and images */
 }
 #branded-social-images-editor .ui-icon {
   display: block;
   text-indent: -99999px;
   overflow: hidden;
   background-repeat: no-repeat;
+}
+#branded-social-images-editor {
+  /* Misc visuals
+  ----------------------------------*/
+  /* Overlays */
 }
 #branded-social-images-editor .ui-widget-overlay {
   position: fixed;
@@ -153,8 +125,14 @@
 #branded-social-images-editor .ui-button:active {
   text-decoration: none;
 }
+#branded-social-images-editor {
+  /* to make room for the icon, a width needs to be set here */
+}
 #branded-social-images-editor .ui-button-icon-only {
   width: 2.2em;
+}
+#branded-social-images-editor {
+  /* button elements seem to need a little more width */
 }
 #branded-social-images-editor button.ui-button-icon-only {
   width: 2.4em;
@@ -164,6 +142,9 @@
 }
 #branded-social-images-editor button.ui-button-icons-only {
   width: 3.7em;
+}
+#branded-social-images-editor {
+  /* button text element */
 }
 #branded-social-images-editor .ui-button .ui-button-text {
   display: block;
@@ -189,8 +170,14 @@
   padding-left: 2.1em;
   padding-right: 2.1em;
 }
+#branded-social-images-editor {
+  /* no icon support for input elements, provide padding by default */
+}
 #branded-social-images-editor input.ui-button {
   padding: 0.4em 1em;
+}
+#branded-social-images-editor {
+  /* button icon element(s) */
 }
 #branded-social-images-editor .ui-button-icon-only .ui-icon,
 #branded-social-images-editor .ui-button-text-icon-primary .ui-icon,
@@ -215,12 +202,19 @@
 #branded-social-images-editor .ui-button-icons-only .ui-button-icon-secondary {
   right: 0.5em;
 }
+#branded-social-images-editor {
+  /* button sets */
+}
 #branded-social-images-editor .ui-buttonset {
   margin-right: 7px;
 }
 #branded-social-images-editor .ui-buttonset .ui-button {
   margin-left: 0;
   margin-right: -0.3em;
+}
+#branded-social-images-editor {
+  /* workarounds */
+  /* reset extra padding in Firefox, see h5bp.com/l */
 }
 #branded-social-images-editor input.ui-button::-moz-focus-inner,
 #branded-social-images-editor button.ui-button::-moz-focus-inner {
@@ -323,6 +317,9 @@
 #branded-social-images-editor .ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current {
   float: left;
 }
+#branded-social-images-editor {
+  /* with multiple calendars */
+}
 #branded-social-images-editor .ui-datepicker.ui-datepicker-multi {
   width: auto;
 }
@@ -353,6 +350,9 @@
   clear: both;
   width: 100%;
   font-size: 0;
+}
+#branded-social-images-editor {
+  /* RTL support */
 }
 #branded-social-images-editor .ui-datepicker-rtl {
   direction: rtl;
@@ -449,7 +449,6 @@
   cursor: move;
 }
 #branded-social-images-editor .ui-draggable-handle {
-  -ms-touch-action: none;
   touch-action: none;
 }
 #branded-social-images-editor .ui-menu {
@@ -482,11 +481,17 @@
 #branded-social-images-editor .ui-menu .ui-state-active {
   margin: -1px;
 }
+#branded-social-images-editor {
+  /* icon support */
+}
 #branded-social-images-editor .ui-menu-icons {
   position: relative;
 }
 #branded-social-images-editor .ui-menu-icons .ui-menu-item {
   padding-left: 2em;
+}
+#branded-social-images-editor {
+  /* left-aligned */
 }
 #branded-social-images-editor .ui-menu .ui-icon {
   position: absolute;
@@ -494,6 +499,9 @@
   bottom: 0;
   left: 0.2em;
   margin: auto 0;
+}
+#branded-social-images-editor {
+  /* right-aligned */
 }
 #branded-social-images-editor .ui-menu .ui-menu-icon {
   left: auto;
@@ -524,7 +532,6 @@
   position: absolute;
   font-size: 0.1px;
   display: block;
-  -ms-touch-action: none;
   touch-action: none;
 }
 #branded-social-images-editor .ui-resizable-disabled .ui-resizable-handle,
@@ -588,7 +595,6 @@
   top: -5px;
 }
 #branded-social-images-editor .ui-selectable {
-  -ms-touch-action: none;
   touch-action: none;
 }
 #branded-social-images-editor .ui-selectable-helper {
@@ -655,7 +661,6 @@
   width: 1.2em;
   height: 1.2em;
   cursor: default;
-  -ms-touch-action: none;
   touch-action: none;
 }
 #branded-social-images-editor .ui-slider .ui-slider-range {
@@ -665,6 +670,9 @@
   display: block;
   border: 0;
   background-position: 0 0;
+}
+#branded-social-images-editor {
+  /* support: IE8 - See #6727 */
 }
 #branded-social-images-editor .ui-slider.ui-state-disabled .ui-slider-handle,
 #branded-social-images-editor .ui-slider.ui-state-disabled .ui-slider-range {
@@ -707,7 +715,6 @@
   top: 0;
 }
 #branded-social-images-editor .ui-sortable-handle {
-  -ms-touch-action: none;
   touch-action: none;
 }
 #branded-social-images-editor .ui-spinner {
@@ -740,10 +747,16 @@
   overflow: hidden;
   right: 0;
 }
+#branded-social-images-editor {
+  /* more specificity required here to override default borders */
+}
 #branded-social-images-editor .ui-spinner a.ui-spinner-button {
   border-top: none;
   border-bottom: none;
   border-right: none;
+}
+#branded-social-images-editor {
+  /* vertically center icon */
 }
 #branded-social-images-editor .ui-spinner .ui-icon {
   position: absolute;
@@ -756,6 +769,9 @@
 }
 #branded-social-images-editor .ui-spinner-down {
   bottom: 0;
+}
+#branded-social-images-editor {
+  /* TR overrides */
 }
 #branded-social-images-editor .ui-spinner .ui-icon-triangle-1-s {
   /* need to fix icons sprite */
@@ -812,6 +828,10 @@
 #branded-social-images-editor body .ui-tooltip {
   border-width: 2px;
 }
+#branded-social-images-editor {
+  /* Component containers
+  ----------------------------------*/
+}
 #branded-social-images-editor .ui-widget {
   font-family: Verdana, Arial, sans-serif;
   font-size: 1.1em;
@@ -842,6 +862,10 @@
 }
 #branded-social-images-editor .ui-widget-header a {
   color: #222222;
+}
+#branded-social-images-editor {
+  /* Interaction states
+  ----------------------------------*/
 }
 #branded-social-images-editor .ui-state-default,
 #branded-social-images-editor .ui-widget-content .ui-state-default,
@@ -892,6 +916,10 @@
 #branded-social-images-editor .ui-state-active a:visited {
   color: #212121;
   text-decoration: none;
+}
+#branded-social-images-editor {
+  /* Interaction Cues
+  ----------------------------------*/
 }
 #branded-social-images-editor .ui-state-highlight,
 #branded-social-images-editor .ui-widget-content .ui-state-highlight,
@@ -944,6 +972,11 @@
 #branded-social-images-editor .ui-state-disabled .ui-icon {
   filter: Alpha(Opacity=35); /* support: IE8 - See #6059 */
 }
+#branded-social-images-editor {
+  /* Icons
+  ----------------------------------*/
+  /* states and images */
+}
 #branded-social-images-editor .ui-icon {
   width: 16px;
   height: 16px;
@@ -971,6 +1004,9 @@
 #branded-social-images-editor .ui-state-error .ui-icon,
 #branded-social-images-editor .ui-state-error-text .ui-icon {
   background-image: url("../admin/images/ui-icons_cd0a0a_256x240.png");
+}
+#branded-social-images-editor {
+  /* positioning */
 }
 #branded-social-images-editor .ui-icon-blank {
   background-position: 16px 16px;
@@ -1383,6 +1419,9 @@
 #branded-social-images-editor .ui-icon-seek-start {
   background-position: -80px -160px;
 }
+#branded-social-images-editor {
+  /* ui-icon-seek-first is deprecated, use ui-icon-seek-start instead */
+}
 #branded-social-images-editor .ui-icon-seek-first {
   background-position: -80px -160px;
 }
@@ -1497,6 +1536,11 @@
 #branded-social-images-editor .ui-icon-grip-diagonal-se {
   background-position: -80px -224px;
 }
+#branded-social-images-editor {
+  /* Misc visuals
+  ----------------------------------*/
+  /* Corner radius */
+}
 #branded-social-images-editor .ui-corner-all,
 #branded-social-images-editor .ui-corner-top,
 #branded-social-images-editor .ui-corner-left,
@@ -1520,6 +1564,9 @@
 #branded-social-images-editor .ui-corner-right,
 #branded-social-images-editor .ui-corner-br {
   border-bottom-right-radius: 4px;
+}
+#branded-social-images-editor {
+  /* Overlays */
 }
 #branded-social-images-editor .ui-widget-overlay {
   background: #aaaaaa url("../admin/images/ui-bg_flat_0_aaaaaa_40x100.png") 50% 50% repeat-x;
@@ -1547,15 +1594,15 @@
 }
 #branded-social-images-editor .grid {
   zoom: var(--editor-scale, 0.5);
-  display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: 1200px;
-      grid-template-columns: 1200px;
-  grid-template-areas: "image" ".";
-  z-index: 0;
 }
 #side-sortables #branded-social-images-editor .grid, .is-side #branded-social-images-editor .grid {
   zoom: 0.21;
+}
+#branded-social-images-editor .grid {
+  display: grid;
+  grid-template-columns: 1200px;
+  grid-template-areas: "image" ".";
+  z-index: 0;
 }
 #branded-social-images-editor .area--background, #branded-social-images-editor .area--background-alternate, #branded-social-images-editor .area--background-canvas, #branded-social-images-editor .area--extra-layer {
   width: 1200px;
@@ -1569,12 +1616,10 @@
   display: none;
 }
 #branded-social-images-editor.logo_position-top-right .area--background-canvas svg .mountains, #branded-social-images-editor.logo_position-right .area--background-canvas svg .mountains, #branded-social-images-editor.logo_position-bottom-right .area--background-canvas svg .mountains {
-  -ms-transform: translate(1200px) scale(-1, 1);
-      transform: translate(1200px) scale(-1, 1);
+  transform: translate(1200px) scale(-1, 1);
 }
 #branded-social-images-editor.logo_position-top-right .area--background-canvas svg .sun, #branded-social-images-editor.logo_position-right .area--background-canvas svg .sun, #branded-social-images-editor.logo_position-bottom-right .area--background-canvas svg .sun {
-  -ms-transform: translate(-420px);
-      transform: translate(-420px);
+  transform: translate(-420px);
 }
 #branded-social-images-editor .background {
   position: absolute;
@@ -1587,17 +1632,12 @@
 #branded-social-images-editor .area--logo {
   grid-area: image;
   z-index: 1;
-  display: -ms-grid;
   display: grid;
-  -ms-grid-columns: auto var(--text-width) auto;
-      grid-template-columns: auto var(--text-width) auto;
-  -ms-grid-rows: auto var(--text-height) auto;
-      grid-template-rows: auto var(--text-height) auto;
+  grid-template-columns: auto var(--text-width) auto;
+  grid-template-rows: auto var(--text-height) auto;
   grid-template-areas: ". . ." ". logo ." ". . .";
-  -ms-flex-align: center;
-      align-items: center;
-  -ms-grid-column-align: center;
-      justify-items: center;
+  align-items: center;
+  justify-items: center;
 }
 #branded-social-images-editor .area--logo .logo {
   grid-area: logo;
@@ -1619,37 +1659,29 @@
   display: none;
 }
 #branded-social-images-editor.logo_position-top-left .area--logo, #branded-social-images-editor.logo_position-left .area--logo, #branded-social-images-editor.logo_position-bottom-left .area--logo {
-  -ms-grid-columns: var(--padding) var(--text-width) auto;
-      grid-template-columns: var(--padding) var(--text-width) auto;
-  -ms-grid-column-align: start;
-      justify-items: start;
+  grid-template-columns: var(--padding) var(--text-width) auto;
+  justify-items: start;
 }
 #branded-social-images-editor.logo_position-top-left .area--logo .logo, #branded-social-images-editor.logo_position-left .area--logo .logo, #branded-social-images-editor.logo_position-bottom-left .area--logo .logo {
   background-position-x: left;
 }
 #branded-social-images-editor.logo_position-top-right .area--logo, #branded-social-images-editor.logo_position-right .area--logo, #branded-social-images-editor.logo_position-bottom-right .area--logo {
-  -ms-grid-columns: auto var(--text-width) var(--padding);
-      grid-template-columns: auto var(--text-width) var(--padding);
-  -ms-grid-column-align: end;
-      justify-items: end;
+  grid-template-columns: auto var(--text-width) var(--padding);
+  justify-items: end;
 }
 #branded-social-images-editor.logo_position-top-right .area--logo .logo, #branded-social-images-editor.logo_position-right .area--logo .logo, #branded-social-images-editor.logo_position-bottom-right .area--logo .logo {
   background-position-x: right;
 }
 #branded-social-images-editor.logo_position-top-left .area--logo, #branded-social-images-editor.logo_position-top .area--logo, #branded-social-images-editor.logo_position-top-right .area--logo {
-  -ms-grid-rows: var(--padding) var(--text-height) auto;
-      grid-template-rows: var(--padding) var(--text-height) auto;
-  -ms-flex-align: start;
-      align-items: start;
+  grid-template-rows: var(--padding) var(--text-height) auto;
+  align-items: start;
 }
 #branded-social-images-editor.logo_position-top-left .area--logo .logo, #branded-social-images-editor.logo_position-top .area--logo .logo, #branded-social-images-editor.logo_position-top-right .area--logo .logo {
   background-position-y: top;
 }
 #branded-social-images-editor.logo_position-bottom-left .area--logo, #branded-social-images-editor.logo_position-bottom .area--logo, #branded-social-images-editor.logo_position-bottom-right .area--logo {
-  -ms-grid-rows: auto var(--text-height) var(--padding);
-      grid-template-rows: auto var(--text-height) var(--padding);
-  -ms-flex-align: end;
-      align-items: end;
+  grid-template-rows: auto var(--text-height) var(--padding);
+  align-items: end;
 }
 #branded-social-images-editor.logo_position-bottom-left .area--logo .logo, #branded-social-images-editor.logo_position-bottom .area--logo .logo, #branded-social-images-editor.logo_position-bottom-right .area--logo .logo {
   background-position-y: bottom;
@@ -1657,15 +1689,11 @@
 #branded-social-images-editor .area--text {
   grid-area: image;
   z-index: 2;
-  display: -ms-grid;
   display: grid;
-  -ms-grid-columns: auto var(--text-width) auto;
-      grid-template-columns: auto var(--text-width) auto;
-  -ms-grid-rows: auto var(--text-height) auto;
-      grid-template-rows: auto var(--text-height) auto;
+  grid-template-columns: auto var(--text-width) auto;
+  grid-template-rows: auto var(--text-height) auto;
   grid-template-areas: ". . ." ". edit ." ". . .";
-  -ms-flex-align: center;
-      align-items: center;
+  align-items: center;
 }
 #branded-social-images-editor .area--text .editable-container {
   text-align: center;
@@ -1687,13 +1715,11 @@
   pointer-events: none;
   opacity: 0.4;
   top: 50%;
-  -ms-transform: translateY(-50%);
-      transform: translateY(-50%);
+  transform: translateY(-50%);
   max-height: unset;
 }
 #branded-social-images-editor.text_position-top-left .area--text, #branded-social-images-editor.text_position-left .area--text, #branded-social-images-editor.text_position-bottom-left .area--text {
-  -ms-grid-columns: var(--padding) var(--text-width) auto;
-      grid-template-columns: var(--padding) var(--text-width) auto;
+  grid-template-columns: var(--padding) var(--text-width) auto;
 }
 #branded-social-images-editor.text_position-top-left .area--text .editable-container, #branded-social-images-editor.text_position-left .area--text .editable-container, #branded-social-images-editor.text_position-bottom-left .area--text .editable-container {
   text-align: left;
@@ -1702,8 +1728,7 @@
   left: 0;
 }
 #branded-social-images-editor.text_position-top-right .area--text, #branded-social-images-editor.text_position-right .area--text, #branded-social-images-editor.text_position-bottom-right .area--text {
-  -ms-grid-columns: auto var(--text-width) var(--padding);
-      grid-template-columns: auto var(--text-width) var(--padding);
+  grid-template-columns: auto var(--text-width) var(--padding);
 }
 #branded-social-images-editor.text_position-top-right .area--text .editable-container, #branded-social-images-editor.text_position-right .area--text .editable-container, #branded-social-images-editor.text_position-bottom-right .area--text .editable-container {
   text-align: right;
@@ -1712,27 +1737,21 @@
   right: 0;
 }
 #branded-social-images-editor.text_position-top-left .area--text, #branded-social-images-editor.text_position-top .area--text, #branded-social-images-editor.text_position-top-right .area--text {
-  -ms-grid-rows: var(--padding) var(--text-height) auto;
-      grid-template-rows: var(--padding) var(--text-height) auto;
-  -ms-flex-align: start;
-      align-items: start;
+  grid-template-rows: var(--padding) var(--text-height) auto;
+  align-items: start;
 }
 #branded-social-images-editor.text_position-top-left .area--text .editable:empty + .text-alternate, #branded-social-images-editor.text_position-top .area--text .editable:empty + .text-alternate, #branded-social-images-editor.text_position-top-right .area--text .editable:empty + .text-alternate {
   top: 0;
-  -ms-transform: translateY(0);
-      transform: translateY(0);
+  transform: translateY(0);
 }
 #branded-social-images-editor.text_position-bottom-left .area--text, #branded-social-images-editor.text_position-bottom .area--text, #branded-social-images-editor.text_position-bottom-right .area--text {
-  -ms-grid-rows: auto var(--text-height) var(--padding);
-      grid-template-rows: auto var(--text-height) var(--padding);
-  -ms-flex-align: end;
-      align-items: end;
+  grid-template-rows: auto var(--text-height) var(--padding);
+  align-items: end;
 }
 #branded-social-images-editor.text_position-bottom-left .area--text .editable:empty + .text-alternate, #branded-social-images-editor.text_position-bottom .area--text .editable:empty + .text-alternate, #branded-social-images-editor.text_position-bottom-right .area--text .editable:empty + .text-alternate {
   top: initial;
   bottom: 0;
-  -ms-transform: translateY(0);
-      transform: translateY(0);
+  transform: translateY(0);
 }
 #branded-social-images-editor .area--text .editable-container {
   grid-area: edit;
@@ -1763,13 +1782,9 @@
   padding: var(--text-padding);
 }
 #branded-social-images-editor .settings {
-  display: -ms-grid;
   display: grid;
   gap: 20px;
   margin-top: 20px;
-  -ms-grid-columns: 1fr;
-      grid-template-columns: 1fr;
-  grid-template-areas: "settings" "options";
 }
 #branded-social-images-editor .settings, #branded-social-images-editor .settings > [class*=area--] {
   max-width: 600px;
@@ -1777,11 +1792,9 @@
 #side-sortables #branded-social-images-editor .settings, .is-side #branded-social-images-editor .settings {
   width: 100%;
 }
-#branded-social-images-editor .collapsible {
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-direction: column;
-      flex-direction: column;
+#branded-social-images-editor .settings {
+  grid-template-columns: 1fr;
+  grid-template-areas: "settings" "options";
 }
 #branded-social-images-editor .collapsible h2 {
   font-weight: 600;
@@ -1791,10 +1804,12 @@
   display: block;
   margin: 0;
   padding: 1em 30px;
-  position: relative;
 }
 #side-sortables #branded-social-images-editor .collapsible h2, .is-side #branded-social-images-editor .collapsible h2 {
   padding: 1em 15px;
+}
+#branded-social-images-editor .collapsible h2 {
+  position: relative;
 }
 #branded-social-images-editor .collapsible h2 .toggle {
   display: inline-block;
@@ -1805,8 +1820,7 @@
   border-right-width: 6px;
   border-top-color: currentColor;
   position: absolute;
-  -ms-transform: rotate(180deg);
-      transform: rotate(180deg);
+  transform: rotate(180deg);
   top: 0.5em;
   right: 30px;
 }
@@ -1816,17 +1830,18 @@
 }
 #branded-social-images-editor .collapsible.closed h2 .toggle {
   top: 1em;
-  -ms-transform: rotate(0);
-      transform: rotate(0);
+  transform: rotate(0);
 }
 #branded-social-images-editor .collapsible .inner {
   padding: 20px;
-  background: white;
-  border: 1px solid #ddd;
-  border-top: 0;
 }
 #side-sortables #branded-social-images-editor .collapsible .inner, .is-side #branded-social-images-editor .collapsible .inner {
   padding: 5px;
+}
+#branded-social-images-editor .collapsible .inner {
+  background: white;
+  border: 1px solid #ddd;
+  border-top: 0;
 }
 #branded-social-images-editor .collapsible.closed .inner {
   overflow: hidden;
@@ -1834,13 +1849,14 @@
   padding-top: 0;
   padding-bottom: 0;
 }
-#branded-social-images-editor .collapsible .inner {
-  display: -ms-flexbox;
+#branded-social-images-editor .collapsible {
   display: flex;
-  -ms-flex-direction: row;
-      flex-direction: row;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
+  flex-direction: column;
+}
+#branded-social-images-editor .collapsible .inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 #branded-social-images-editor .collapsible .inner > span {
   width: 50%;
@@ -1868,18 +1884,14 @@
 }
 #branded-social-images-editor .wrap-position-grid .options-wrap {
   width: 66px;
-  display: -ms-inline-grid;
   display: inline-grid;
-  -ms-grid-columns: 22px 22px 22px;
-      grid-template-columns: 22px 22px 22px;
-  -ms-grid-rows: 22px 22px 22px;
-      grid-template-rows: 22px 22px 22px;
+  grid-template-columns: 22px 22px 22px;
+  grid-template-rows: 22px 22px 22px;
   border: 1px solid #8c8f94;
   padding: 0 !important;
   box-sizing: content-box;
 }
 #branded-social-images-editor .wrap-position-grid .option-wrap {
-  display: -ms-inline-grid !important;
   display: inline-grid !important;
   width: 100%;
   height: 100%;
@@ -1909,7 +1921,9 @@
 #branded-social-images-editor .wrap-position-grid input {
   width: 20px;
   height: 30px;
-  appearance: none;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   border-radius: 0;
   border: 0;
   opacity: 0;

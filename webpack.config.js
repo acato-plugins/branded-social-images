@@ -16,7 +16,7 @@ const config = {
 		//  on the global var jQuery
 		"jquery": "jQuery"
 	},
-	target: ['web', 'es5'],
+	target: 'browserslist', // see package.json
 	module: {
 		rules: [
 			{
