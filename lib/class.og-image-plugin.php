@@ -44,6 +44,10 @@ class Plugin {
 	const MAX_FONT_SIZE = 64;
 	/** @var int default value for font-size, a points value. */
 	const DEF_FONT_SIZE = 40;
+
+	const DEF_LOGO_POSITION = 'top-left';
+
+	const DEF_TEXT_POSITION = 'bottom-right';
 	/** @var string External URL: the WP Plugin repository URL */
 	const PLUGIN_URL_WPORG = 'https://wordpress.org/plugins/branded-social-images/';
 	/** @var string External URL: Our website */
@@ -103,9 +107,6 @@ class Plugin {
 			$this->setup_defaults();
 			$image_layers             = self::image_fallback_chain( true );
 			$this->og_image_available = ! ! array_filter( $image_layers );
-
-			$this->text_options['position'] = get_option( self::DEFAULTS_PREFIX . 'text_position', 'top-left' );
-			$this->logo_options['position'] = get_option( self::DEFAULTS_PREFIX . 'logo_position', 'bottom-right' );
 
 			$id = get_the_ID();
 			if ( $id ) {
@@ -798,7 +799,7 @@ class Plugin {
 	public function setup_defaults() {
 		$defaults                       = Admin::base_settings();
 		$this->logo_options             = $defaults['logo_options'];
-		$this->logo_options['position'] = get_option( self::DEFAULTS_PREFIX . 'logo_position', 'top-left' );
+		$this->logo_options['position'] = get_option( self::DEFAULTS_PREFIX . 'logo_position', self::DEF_LOGO_POSITION );
 
 		// text options
 		$this->text_options = $defaults['text_options'];
@@ -806,7 +807,7 @@ class Plugin {
 
 		$this->text_options['font-file'] = $font_file;
 
-		$this->text_options['position']           = get_option( self::DEFAULTS_PREFIX . 'text_position', 'bottom-left' );
+		$this->text_options['position']           = get_option( self::DEFAULTS_PREFIX . 'text_position', self::DEF_TEXT_POSITION );
 		$this->text_options['color']              = get_option( self::DEFAULTS_PREFIX . 'color', '#FFFFFFFF' );
 		$this->text_options['background-color']   = get_option( self::DEFAULTS_PREFIX . 'background_color', '#66666666' );
 		$this->text_options['background-enabled'] = get_option( self::DEFAULTS_PREFIX . 'background_enabled', 'on' );
@@ -1213,7 +1214,7 @@ class Plugin {
 		}
 		if ( ! self::getInstance()->page_already_has_og_image ) {
 			?>
-			<meta property="og:image" content="<?php print self::overrule_og_image(); ?>"><?php
+			<meta property="og:image" content="<?php print esc_url( self::overrule_og_image() ); ?>"><?php
 		}
 	}
 
@@ -1237,15 +1238,20 @@ class Plugin {
 		// get_bloginfo('url') returns https://somesite.com/language/
 		// we could use site_url, but this will be problematic with multi-site installations...
 		$base_url = get_bloginfo( 'url' );
-		// from https://somesite.com/language/, keep only the base url, as the rest is included in the result from 'remove_query_arg'
-		$base_url = parse_url( $base_url, PHP_URL_SCHEME ) . '://' . parse_url( $base_url, PHP_URL_HOST ); // no trailing slash
+		// from https://somesite.com/language/, keep only the base url (with port), as the rest is included in the request path
+		$base_port = parse_url( $base_url, PHP_URL_PORT );
+		$base_url  = parse_url( $base_url, PHP_URL_SCHEME ) . '://' . parse_url( $base_url, PHP_URL_HOST ) . ( $base_port ? ':' . $base_port : '' ); // no trailing slash
 
-		$og_url = trailingslashit( $base_url . remove_query_arg( array_keys( ! empty( $_GET ) ? $_GET : [ 'asd' => 1 ] ) ) ) . self::output_filename() . '/'; // yes, slash, WP will add it with a redirect anyway
+		// use only the path of the current request; never the query string or fragment, these are user controlled.
+		$path = isset( $_SERVER['REQUEST_URI'] ) ? (string) parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '/';
+		$path = '/' . ltrim( $path, '/' );
+
+		$og_url = esc_url_raw( trailingslashit( $base_url . $path ) . self::output_filename() . '/' ); // yes, slash, WP will add it with a redirect anyway
 
 		/**
 		 * @since 1.0.20 allows for final filtering of the output OG:Image url.
 		 */
-		return apply_filters( 'bsi_image_url', $og_url );
+		return esc_url_raw( apply_filters( 'bsi_image_url', $og_url ) );
 	}
 
 	public static function overrule_og_type(): string {
@@ -1640,7 +1646,7 @@ EODOC;
 					'class'     => 'position-grid',
 					'options'   => self::position_grid(),
 					'label'     => __( 'Default logo position', Plugin::TEXT_DOMAIN ),
-					'default'   => 'top-left',
+					'default'   => self::DEF_LOGO_POSITION,
 				],
 				'image_logo_size' => [
 					'namespace' => self::OPTION_PREFIX,
@@ -1686,7 +1692,7 @@ EODOC;
 					'class'     => 'position-grid',
 					'label'     => __( 'Text position', Plugin::TEXT_DOMAIN ),
 					'options'   => self::position_grid(),
-					'default'   => 'bottom-left',
+					'default'   => self::DEF_TEXT_POSITION,
 				],
 				'color'              => [
 					'namespace'  => self::DEFAULTS_PREFIX,
@@ -1817,7 +1823,7 @@ EODOC;
 					'class'     => 'position-grid',
 					'label'     => __( 'Text position', Plugin::TEXT_DOMAIN ),
 					'options'   => self::position_grid(),
-					'default'   => get_option( self::DEFAULTS_PREFIX . 'text_position', 'bottom-left' ),
+					'default'   => get_option( self::DEFAULTS_PREFIX . 'text_position', self::DEF_TEXT_POSITION ),
 				],
 
 				'background_color' => [
@@ -1882,7 +1888,7 @@ EODOC;
 					'label'     => __( 'Logo position', Plugin::TEXT_DOMAIN ),
 					'class'     => 'position-grid',
 					'options'   => self::position_grid(),
-					'default'   => get_option( self::DEFAULTS_PREFIX . 'logo_position', 'top-left' ),
+					'default'   => get_option( self::DEFAULTS_PREFIX . 'logo_position', self::DEF_LOGO_POSITION ),
 				],
 
 				'image_logo' => [

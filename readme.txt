@@ -2,8 +2,8 @@
 Contributors: rmpel,borkweb,acato,kennydude,Mte90
 Tags: Open Graph Image, OG Image, featured image, social image, facebook image
 Requires at least: 4.7
-Tested up to: 6.9.4
-Stable tag: 1.2.2
+Tested up to: 7.1.5
+Stable tag: 1.2.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,13 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 3. Post-meta
 
 == Changelog ==
+
+= 1.2.3 =
+* Security: fixed an unauthenticated reflected Cross Site Scripting (XSS) vulnerability in the og:image meta tag. The image URL is now built from the request path only, sanitized, and escaped on output. Reported by Phạm Khắc Sang via Patchstack.
+* Fixed: og:image URL lost a non-default port (e.g. `:8080`) of the site URL.
+* Fixed: with default (never saved) settings, the og:image tag was output but the image itself returned a 404 when using the WordPress Featured Image.
+* Fixed: inconsistent default logo and text positions, which could make them overlap. Defaults are now: logo top-left, text bottom-right. Sites that saved their settings are not affected.
+* Tested up to WordPress 7.1.5 (and 7.2-RC3).
 
 = 1.2.2 =
 * Fixed: auto-title update not always working. Added check for unpublished post-state.
