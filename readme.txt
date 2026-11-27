@@ -3,7 +3,7 @@ Contributors: rmpel,borkweb,acato,kennydude,Mte90
 Tags: Open Graph Image, OG Image, featured image, social image, facebook image
 Requires at least: 4.7
 Tested up to: 7.1.5
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,11 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 3. Post-meta
 
 == Changelog ==
+
+= 1.2.4 =
+* Fixed: the text on the image no longer followed the post title while typing in the block editor. Recent WordPress versions show the title inside a frame the plugin could not see; it now reads the title from the editor itself. The classic editor is unaffected.
+* Fixed: the admin screens loaded the unminified stylesheet, and the minified one only when debugging.
+* Development: the build tools for the admin scripts and styles are updated and simplified (`npm run build`).
 
 = 1.2.3 =
 * Security: fixed an unauthenticated reflected Cross Site Scripting (XSS) vulnerability in the og:image meta tag. The image URL is now built from the request path only, sanitized, and escaped on output. Reported by Phạm Khắc Sang via Patchstack.
