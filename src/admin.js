@@ -548,6 +548,7 @@ import decodeEntities from './helpers/decode_entities';
 		// so it cannot be found or monitored in this document. Follow the title in the editor data store instead.
 		if ($body.is('.block-editor-page')) {
 			var last_title = null;
+			var title_decoder = document.createElement( 'textarea' );
 			var follow_block_editor_title = function () {
 				if (!editor.is( '.auto-title' )) {
 					return;
@@ -556,7 +557,10 @@ import decodeEntities from './helpers/decode_entities';
 				if (!editor_store || !editor_store.getCurrentPostId()) {
 					return; // not loaded yet
 				}
-				var input_title = editor_store.getEditedPostAttribute( 'title' ) || '';
+				// the stored title can contain entities (&amp;); decode them like the server does (html_entity_decode).
+				// a textarea decodes entities without creating elements, so markup in the title stays text.
+				title_decoder.innerHTML = editor_store.getEditedPostAttribute( 'title' ) || '';
+				var input_title = title_decoder.value;
 				if (input_title !== last_title) {
 					last_title = input_title;
 					set_auto_title( input_title );

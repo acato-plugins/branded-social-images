@@ -733,7 +733,8 @@ class Plugin {
 	public function _init() {
 		$id = get_the_ID();
 		if ( ! is_admin() && $id || is_home() || is_archive() ) {
-			$go = ! self::is_disabled( $id );
+			// on a listing (posts page, archive), the image endpoint uses the default setting, not that of a listed post
+			$go = ! self::is_disabled( is_home() || is_archive() ? 0 : $id );
 			if ( ! Plugin::getInstance()->og_image_available ) {
 				$go = false;
 			}
@@ -2077,7 +2078,7 @@ EODOC;
 
 			$parent_node = null;
 
-			if ( ! Plugin::is_disabled( get_the_ID() ) && array_filter( Plugin::image_fallback_chain( true ) ) ) {
+			if ( ! Plugin::is_disabled( ! is_admin() && ( is_home() || is_archive() ) ? 0 : get_the_ID() ) && array_filter( Plugin::image_fallback_chain( true ) ) ) {
 				$parent_node = self::ADMIN_SLUG . '-main';
 				$args = array(
 					'id'    => $parent_node,
@@ -2180,7 +2181,8 @@ EODOC;
 		$value1 = trim( str_replace( [ "\n", "\r" ], '', $value1 ) );
 		$value2 = trim( str_replace( [ "\n", "\r" ], '', $value2 ) );
 
-		return strip_tags( $value1 ) == strip_tags( $value2 );
+		// compare as plain text; one side may come from a stored title with entities (&amp;), the other from the editor
+		return html_entity_decode( strip_tags( $value1 ), ENT_QUOTES ) == html_entity_decode( strip_tags( $value2 ), ENT_QUOTES );
 	}
 
 	public function hex_to_rgba( $hex_color, $alpha_is_gd = false ): array {

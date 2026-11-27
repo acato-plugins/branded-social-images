@@ -147,7 +147,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 == Changelog ==
 
 = 1.2.4 =
-* Fixed: the text on the image no longer followed the post title while typing in the block editor. Recent WordPress versions show the title inside a frame the plugin could not see; it now reads the title from the editor itself. The classic editor is unaffected.
+* Fixed: the text on the image no longer followed the post title while typing in the block editor. Recent WordPress versions show the title inside a frame the plugin could not see; it now reads the title from the editor itself. Titles with characters like & are shown correctly, and are no longer saved as custom text when left unchanged.
 * Fixed: oEmbed (link previews in WordPress and other sites) and Rank Math structured data now include the social image whenever the page has one, including when it only uses the fallback image, and leave it out when there is no image at all.
 * Fixed: when Branded Social Images is turned off for a page, its social image address now returns "not found" instead of still showing the image, and the "View Social Image" link is no longer shown in the toolbar.
 * Fixed: the admin screens loaded the unminified stylesheet, and the minified one only when debugging.
