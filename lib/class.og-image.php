@@ -62,6 +62,17 @@ class Image {
 	}
 
 	public function serve() {
+		if ( Plugin::is_disabled( $this->post_id ) ) {
+			header( 'HTTP/1.1 404 Not found' );
+			$error = __( 'Branded Social Images is disabled for this page.', Plugin::TEXT_DOMAIN );
+			header( 'X-OG-Error: ' . $error );
+			Plugin::log( $error );
+			Plugin::display_log();
+			// if we get here, display_log was unavailable
+			print $error;
+			exit;
+		}
+
 		// well, we tried :(
 		if ( ! $this->image_id ) {
 			header( 'HTTP/1.1 404 Not found' );
