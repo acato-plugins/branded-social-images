@@ -347,13 +347,20 @@ class Plugin {
 	 * @todo: future version will have to detect archives and categories as well
 	 */
 	public static function go_for_id( $post_id ): bool {
-		$killswitch = get_post_meta( $post_id, self::OPTION_PREFIX . 'disabled', true ) ?: get_option( self::DEFAULTS_PREFIX . 'disabled', 'off' );
-		$go         = ! ! self::image_fallback_chain() || get_post_meta( $post_id, self::OPTION_PREFIX . 'image', true );
-		if ( 'on' === $killswitch ) {
-			$go = false;
-		}
+		return ! self::is_disabled( $post_id ) && array_filter( self::image_fallback_chain( true, $post_id ) );
+	}
 
-		return $go;
+	/**
+	 * Test if BSI is switched off for this post, or by default.
+	 *
+	 * @param int|string $post_id
+	 *
+	 * @return bool
+	 */
+	public static function is_disabled( $post_id ): bool {
+		$killswitch = ( is_numeric( $post_id ) ? get_post_meta( $post_id, self::OPTION_PREFIX . 'disabled', true ) : '' ) ?: get_option( self::DEFAULTS_PREFIX . 'disabled', 'off' );
+
+		return 'on' === $killswitch;
 	}
 
 	/**
@@ -726,11 +733,8 @@ class Plugin {
 	public function _init() {
 		$id = get_the_ID();
 		if ( ! is_admin() && $id || is_home() || is_archive() ) {
-			$killswitch = get_post_meta( $id, self::OPTION_PREFIX . 'disabled', true ) ?: get_option( self::DEFAULTS_PREFIX . 'disabled', 'off' );
-			$go         = true;
-			if ( 'on' === $killswitch ) {
-				$go = false;
-			}
+			// on a listing (posts page, archive), the image endpoint uses the default setting, not that of a listed post
+			$go = ! self::is_disabled( is_home() || is_archive() ? 0 : $id );
 			if ( ! Plugin::getInstance()->og_image_available ) {
 				$go = false;
 			}
@@ -2003,8 +2007,9 @@ EODOC;
 		return $chain = array_filter( $layers );
 	}
 
-	public static function image_fallback_chain( $with_post = false ): array {
-		if ( ! get_the_ID() && ! is_home() && ! is_archive() ) {
+	public static function image_fallback_chain( $with_post = false, $post_id = null ): array {
+		$post_id = $post_id ?: get_the_ID();
+		if ( ! $post_id && ! is_home() && ! is_archive() ) {
 			return [];
 		}
 
@@ -2015,22 +2020,22 @@ EODOC;
 		$layers['settings'] = $settings['image']['current_value'];
 		// layer 2, if enabled, the thumbnail/featured
 		if ( 'on' === $settings['image_use_thumbnail']['current_value'] ) {
-			$layers['thumbnail'] = get_post_thumbnail_id( get_the_ID() );
+			$layers['thumbnail'] = get_post_thumbnail_id( $post_id );
 		}
 		// layer 3, if available, social plugins
 
 		// maybe Yoast SEO?
 		if ( defined( 'WPSEO_VERSION' ) ) {
-			$layers['yoast'] = get_post_meta( get_the_ID(), '_yoast_wpseo_opengraph-image-id', true );
+			$layers['yoast'] = get_post_meta( $post_id, '_yoast_wpseo_opengraph-image-id', true );
 		}
 
 		// maybe RankMath? // latest rank math uses thumbnail ?????
 		if ( class_exists( RankMath::class ) ) {
-			$layers['rankmath'] = get_post_meta( get_the_ID(), 'rank_math_facebook_image_id', true );
+			$layers['rankmath'] = get_post_meta( $post_id, 'rank_math_facebook_image_id', true );
 		}
 
 		if ( $with_post ) {
-			$layers['meta'] = get_post_meta( get_the_ID(), Plugin::OPTION_PREFIX . 'image', true );
+			$layers['meta'] = get_post_meta( $post_id, Plugin::OPTION_PREFIX . 'image', true );
 		}
 
 		foreach ( $layers as &$layer ) {
@@ -2073,7 +2078,7 @@ EODOC;
 
 			$parent_node = null;
 
-			if ( array_filter( Plugin::image_fallback_chain( true ) ) ) {
+			if ( ! Plugin::is_disabled( ! is_admin() && ( is_home() || is_archive() ) ? 0 : get_the_ID() ) && array_filter( Plugin::image_fallback_chain( true ) ) ) {
 				$parent_node = self::ADMIN_SLUG . '-main';
 				$args = array(
 					'id'    => $parent_node,
@@ -2176,7 +2181,8 @@ EODOC;
 		$value1 = trim( str_replace( [ "\n", "\r" ], '', $value1 ) );
 		$value2 = trim( str_replace( [ "\n", "\r" ], '', $value2 ) );
 
-		return strip_tags( $value1 ) == strip_tags( $value2 );
+		// compare as plain text; one side may come from a stored title with entities (&amp;), the other from the editor
+		return html_entity_decode( strip_tags( $value1 ), ENT_QUOTES ) == html_entity_decode( strip_tags( $value2 ), ENT_QUOTES );
 	}
 
 	public function hex_to_rgba( $hex_color, $alpha_is_gd = false ): array {

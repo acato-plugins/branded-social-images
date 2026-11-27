@@ -1002,7 +1002,7 @@ var Picker = function () {
     Picker.StyleElement = style;
 }
 
-
+;
 
 ;// ./src/helpers/hex_to_rgba.js
 function hex_to_rgba(hex) {
@@ -1024,12 +1024,8 @@ function hex_to_rgba(hex) {
       // Fill HTML into element.
       element.innerHTML = str;
       // Find all script tags and remove them.
-      element.querySelectorAll('script').forEach(function (n) {
-        return n.remove();
-      });
-      element.querySelectorAll('iframe').forEach(function (n) {
-        return n.remove();
-      });
+      element.querySelectorAll('script').forEach(n => n.remove());
+      element.querySelectorAll('iframe').forEach(n => n.remove());
       // Get the plain text; this removes all HTML, but keeps the content.
       str = element.textContent;
       element.textContent = '';
@@ -1044,38 +1040,38 @@ function hex_to_rgba(hex) {
 
 
 ;
-(function ($, s) {
+(($, s) => {
   // Sampling preview lives on the settings page and runs independently of the editor.
-  $(function () {
-    var $select = $('#image_scaling');
-    var $img = $('#bsi-sampling-example');
+  $(() => {
+    let $select = $('#image_scaling');
+    let $img = $('#bsi-sampling-example');
     if (!$select.length || !$img.length || !window.bsi_settings || !bsi_settings.sampling) {
       return;
     }
-    var refresh = function refresh() {
-      var url = bsi_settings.ajax_url + '?action=' + encodeURIComponent(bsi_settings.sampling.action) + '&_wpnonce=' + encodeURIComponent(bsi_settings.sampling.nonce) + '&scaling=' + encodeURIComponent($select.val()) + '&t=' + Date.now();
+    let refresh = () => {
+      let url = bsi_settings.ajax_url + '?action=' + encodeURIComponent(bsi_settings.sampling.action) + '&_wpnonce=' + encodeURIComponent(bsi_settings.sampling.nonce) + '&scaling=' + encodeURIComponent($select.val()) + '&t=' + Date.now();
       $img.attr('src', url);
     };
     $select.on('change', refresh);
     refresh();
   });
-  var editor = $('#' + s);
+  let editor = $('#' + s);
   if (editor.length < 1) {
     return false;
   }
-  var $body = $('body'),
+  let $body = $('body'),
     imageeditor = editor.find('.area--background .background'),
     logoeditor = editor.find('.area--logo:not(.logo-alternate) .logo');
   $.fn.attachMediaUpload = function () {
-    var wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
+    let wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
 
     // Restore the main ID when the add media button is pressed
-    $('a.add_media').on('click', function () {
+    $('a.add_media').on('click', () => {
       // console.log('is this really needed?');
       wp.media.model.settings.post.id = wp_media_post_id;
     });
-    return $(this).each(function (i, element) {
-      var file_frame,
+    return $(this).each((i, element) => {
+      let file_frame,
         wrap = $(element),
         input = wrap.find('input').not('.button'),
         preview = wrap.find('.image-preview-wrapper img'),
@@ -1083,7 +1079,7 @@ function hex_to_rgba(hex) {
         button = wrap.find('.button').not('.remove'),
         remove = wrap.find('.button.remove');
       remove.on('click', function () {
-        var attachment = {
+        let attachment = {
           id: '0',
           url: 'data:image/png;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
         };
@@ -1094,7 +1090,7 @@ function hex_to_rgba(hex) {
       });
 
       // Uploading files
-      button.on('click', function (event) {
+      button.on('click', event => {
         event.preventDefault();
         // If the media frame already exists, reopen it.
         if (!file_frame) {
@@ -1113,9 +1109,9 @@ function hex_to_rgba(hex) {
           });
 
           // When an image is selected, run a callback.
-          file_frame.on('select', function () {
+          file_frame.on('select', () => {
             // We set multiple to false so only get one image from the uploader
-            var attachment = file_frame.state().get('selection').first().toJSON();
+            let attachment = file_frame.state().get('selection').first().toJSON();
             if ('sizes' in attachment && 'og-image' in attachment.sizes) {
               attachment.url = attachment.sizes['og-image'].url;
             }
@@ -1126,8 +1122,8 @@ function hex_to_rgba(hex) {
             current_image_id = attachment.id;
             // Restore the main post ID
             wp.media.model.settings.post.id = wp_media_post_id;
-          }).on('open', function () {
-            var selection = file_frame.state().get('selection');
+          }).on('open', () => {
+            let selection = file_frame.state().get('selection');
             if (current_image_id) {
               selection.add(wp.media.attachment(current_image_id));
             }
@@ -1142,22 +1138,22 @@ function hex_to_rgba(hex) {
     });
   };
   $.fn.BSIattachFileUpload = function () {
-    var wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
+    let wp_media_post_id = wp.media.model.settings.post.id; // Store the old id
 
     // Restore the main ID when the add media button is pressed
-    $('a.add_media').on('click', function () {
+    $('a.add_media').on('click', () => {
       // console.log('is this really needed?');
       wp.media.model.settings.post.id = wp_media_post_id;
     });
     return $(this).each(function () {
-      var file_frame,
+      let file_frame,
         wrap = $(this),
         input = wrap.find('input').not('.button'),
         current_image_id = input.val(),
         button = wrap.find('.button').not('.remove');
 
       // Uploading files
-      button.on('click', function (event) {
+      button.on('click', event => {
         event.preventDefault();
         // If the media frame already exists, reopen it.
         if (!file_frame) {
@@ -1176,9 +1172,9 @@ function hex_to_rgba(hex) {
           });
           // console.log(file_frame);
           // When an image is selected, run a callback.
-          file_frame.on('select', function () {
+          file_frame.on('select', () => {
             // We set multiple to false so only get one image from the uploader
-            var attachment = file_frame.state().get('selection').first().toJSON();
+            let attachment = file_frame.state().get('selection').first().toJSON();
             // Do something with attachment.id and/or attachment.url here
             input.trigger('file:select', [attachment]);
             // console.log(attachment);
@@ -1186,8 +1182,8 @@ function hex_to_rgba(hex) {
             current_image_id = attachment.id;
             // Restore the main post ID
             wp.media.model.settings.post.id = wp_media_post_id;
-          }).on('open', function () {
-            var selection = file_frame.state().get('selection');
+          }).on('open', () => {
+            let selection = file_frame.state().get('selection');
             if (current_image_id) {
               selection.add(wp.media.attachment(current_image_id));
             }
@@ -1201,25 +1197,25 @@ function hex_to_rgba(hex) {
       });
     });
   };
-  $(document).ready(function () {
-    var texteditor = editor.find('.editable');
-    var texteditor_target = editor.find('textarea.editable-target');
-    editor.find('h2 .toggle').on('click touchend', function (e) {
+  $(document).ready(() => {
+    let texteditor = editor.find('.editable');
+    let texteditor_target = editor.find('textarea.editable-target');
+    editor.find('h2 .toggle').on('click touchend', e => {
       $(e.target).closest('[class^="area"]').toggleClass('closed');
     });
 
     // bugfix: compose.js is preventing things like undo.
-    editor.on('keypress keyup keydown', function (e) {
+    editor.on('keypress keyup keydown', e => {
       e.stopPropagation();
     });
 
     // native JS solution for paste-fix
-    texteditor.get(0).addEventListener('paste', function () {
+    texteditor.get(0).addEventListener('paste', () => {
       // console.log('PASTE with visual editor');
-      setTimeout(function () {
+      setTimeout(() => {
         // strip all HTML
-        var text = texteditor.text();
-        var html = texteditor.html();
+        let text = texteditor.text();
+        let html = texteditor.html();
         if (text !== html) {
           text = text.replace('<br[^>]*>/g', '\n');
           // console.log('cleaning from', html);
@@ -1230,16 +1226,16 @@ function hex_to_rgba(hex) {
     });
 
     // update target when editor edited
-    texteditor.on('blur keyup paste', function () {
+    texteditor.on('blur keyup paste', () => {
       // console.log('interaction with visual editor: ', e);
-      setTimeout(function () {
+      setTimeout(() => {
         texteditor_target.val(texteditor.text());
       }, 250);
 
       // once we edit, remove the automatic update
       editor.removeClass('auto-title');
     });
-    texteditor_target.on('blur keyup input', function () {
+    texteditor_target.on('blur keyup input', () => {
       // console.log('interaction with hidden field: ', e);
       texteditor_target.val(texteditor_target.val().replace(/&nbsp;<br/g, '<br'));
       texteditor_target.val(texteditor_target.val().replace(/&nbsp;\n/g, '\n'));
@@ -1250,7 +1246,7 @@ function hex_to_rgba(hex) {
     });
 
     // update editor when target edited
-    texteditor_target.on('blur keyup paste', function () {
+    texteditor_target.on('blur keyup paste', () => {
       // console.log('copy hidden field to visual: ', e);
       texteditor.text(decode_entities(texteditor_target.val()));
     }).trigger('paste');
@@ -1260,8 +1256,8 @@ function hex_to_rgba(hex) {
       editor.get(0).style.setProperty('--text-color', hex_to_rgba($(this).val()));
     });
     // text background color
-    editor.find('#background_enabled,#background_color').on('keyup blur paste input change', function () {
-      var use_background = editor.find('#background_enabled').is(':checked');
+    editor.find('#background_enabled,#background_color').on('keyup blur paste input change', () => {
+      let use_background = editor.find('#background_enabled').is(':checked');
       editor.toggleClass('with-text-background', use_background);
       editor.get(0).style.setProperty('--text-background', hex_to_rgba(editor.find('#background_color').val()));
     }).trigger('blur');
@@ -1288,18 +1284,18 @@ function hex_to_rgba(hex) {
 
     // positions
     $('.wrap-position-grid input').on('change', function () {
-      var c = $(this).closest('.wrap-position-grid');
-      var n = c.data('name');
-      editor.removeClass(function (index, className) {
+      let c = $(this).closest('.wrap-position-grid');
+      let n = c.data('name');
+      editor.removeClass((index, className) => {
         return (className.match(new RegExp('(^|\\s)' + n + '-\\S+', 'g')) || []).join(' ');
       }).addClass(n + '-' + c.find('input:checked').attr('value'));
     }).trigger('change');
 
     // logo size
     $('#image_logo_size').on('keyup blur paste input', function () {
-      var v = parseInt('0' + $(this).val(), 10);
-      var logo_min = parseInt($(this).attr('min'), 10);
-      var logo_max = parseInt($(this).attr('max'), 10);
+      let v = parseInt('0' + $(this).val(), 10);
+      let logo_min = parseInt($(this).attr('min'), 10);
+      let logo_max = parseInt($(this).attr('max'), 10);
       if (v < logo_min) {
         v = logo_min;
       }
@@ -1311,9 +1307,9 @@ function hex_to_rgba(hex) {
 
     // font size
     $('#text__font_size').on('keyup blur paste input', function () {
-      var v = parseInt('0' + $(this).val(), 10);
-      var fs_min = parseInt($(this).attr('min'), 10);
-      var fs_max = parseInt($(this).attr('max'), 10);
+      let v = parseInt('0' + $(this).val(), 10);
+      let fs_min = parseInt($(this).attr('min'), 10);
+      let fs_max = parseInt($(this).attr('max'), 10);
       if (v < fs_min) {
         v = fs_min;
       }
@@ -1326,7 +1322,7 @@ function hex_to_rgba(hex) {
 
     // sliders
     $('.add-slider').each(function () {
-      var $input = $(this).find('input');
+      let $input = $(this).find('input');
       $input.attr('size', 4).on('blur change', function () {
         $(this).next('.a-slider').slider('value', parseInt($(this).val(), 10));
         $(this).trigger('input');
@@ -1336,18 +1332,18 @@ function hex_to_rgba(hex) {
         max: parseInt($input.attr('max'), 10),
         step: parseInt($input.attr('step'), 10),
         value: parseInt($input.attr('value'), 10),
-        change: function change(event, ui) {
+        change: function (event, ui) {
           $(this).prev('input').val(ui.value).trigger('input');
         },
-        slide: function slide(event, ui) {
+        slide: function (event, ui) {
           $(this).prev('input').val(ui.value).trigger('input');
         }
       });
     });
-    editor.find('#image').on('image:select', function (event, attachment) {
+    editor.find('#image').on('image:select', (event, attachment) => {
       imageeditor.get(0).style.backgroundImage = 'url("' + attachment.url + '")';
     });
-    editor.find('#image_logo').on('image:select', function (event, attachment) {
+    editor.find('#image_logo').on('image:select', (event, attachment) => {
       if ('id' in attachment && parseInt('' + attachment.id, 10) > 0) {
         editor.get(0).style.setProperty('--logo-width', attachment.width);
         editor.get(0).style.setProperty('--logo-height', attachment.height);
@@ -1376,12 +1372,12 @@ function hex_to_rgba(hex) {
     }).trigger('change'); // font face is defined in *admin.php
 
     $('.input-color', editor).each(function () {
-      var $input = $(this).find('input');
+      let $input = $(this).find('input');
       new Picker({
         parent: this,
         popup: 'top',
         color: $input.val(),
-        onChange: function onChange(color) {
+        onChange: color => {
           $input.val(color.hex.toUpperCase()).parent().get(0).style.setProperty('--the-color', hex_to_rgba(color.hex));
           $input.trigger('blur');
         }
@@ -1390,34 +1386,34 @@ function hex_to_rgba(hex) {
         // onClose: function(color){}
       });
     });
-    var getFeaturedImage = function getFeaturedImage() {};
+    let getFeaturedImage = function () {};
     // window.getFeaturedImage = getFeaturedImage;
-    var subscribe,
+    let subscribe,
       state = {
         yoast: false,
         rankmath: false,
         featured: false
       };
     if ($body.is('.block-editor-page')) {
-      var select = wp.data.select;
+      let select = wp.data.select;
       subscribe = wp.data.subscribe;
-      var _coreDataSelect, _coreEditorSelect;
-      var getMediaById = function getMediaById(mediaId) {
+      let _coreDataSelect, _coreEditorSelect;
+      let getMediaById = mediaId => {
         if (!_coreDataSelect) {
           _coreDataSelect = select('core');
         }
         return _coreDataSelect.getMedia(mediaId);
       };
-      var getPostAttribute = function getPostAttribute(attribute) {
+      let getPostAttribute = attribute => {
         if (!_coreEditorSelect) {
           _coreEditorSelect = select('core/editor');
         }
         return _coreEditorSelect.getEditedPostAttribute(attribute);
       };
-      getFeaturedImage = function getFeaturedImage() {
-        var featuredImage = getPostAttribute('featured_media');
+      getFeaturedImage = () => {
+        const featuredImage = getPostAttribute('featured_media');
         if (featuredImage) {
-          var mediaObj = getMediaById(featuredImage);
+          const mediaObj = getMediaById(featuredImage);
           if (mediaObj) {
             if (bsi_settings.image_size_name in mediaObj.media_details.sizes) {
               return mediaObj.media_details.sizes[bsi_settings.image_size_name].source_url;
@@ -1428,16 +1424,16 @@ function hex_to_rgba(hex) {
         return null;
       };
     } else {
-      getFeaturedImage = function getFeaturedImage() {
+      getFeaturedImage = () => {
         return $('#set-post-thumbnail img').attr('src') || '';
       };
     }
 
     // yoast?? no events on the input, use polling
-    var getYoastFacebookImage = function getYoastFacebookImage() {
-      var url;
-      var $field = $('#facebook-url-input-metabox');
-      var $preview = $('#wpseo-section-social > div:n' + 'th(0) .yoast-image-select__preview--image');
+    let getYoastFacebookImage = () => {
+      let url;
+      let $field = $('#facebook-url-input-metabox');
+      let $preview = $('#wpseo-section-social > div:n' + 'th(0) .yoast-image-select__preview--image');
       if (!$field.length && !$preview.length) {
         return false;
       }
@@ -1449,9 +1445,9 @@ function hex_to_rgba(hex) {
     };
 
     // rankmath?? no events on the input, use polling
-    var getRankMathFacebookImage = function getRankMathFacebookImage() {
-      var url;
-      var $preview = $('.rank-math-social-preview-facebook .rank-math-social-image-thumbnail');
+    let getRankMathFacebookImage = () => {
+      let url;
+      let $preview = $('.rank-math-social-preview-facebook .rank-math-social-image-thumbnail');
       if (!$preview.length) {
         url = state.rankmath;
       } else if ($preview.attr('src').match(/wp-content\/plugins\/seo-by-rank-math\//)) {
@@ -1472,9 +1468,9 @@ function hex_to_rgba(hex) {
     // window.i_grmfi = getRankMathFacebookImage;
     // window.i_gfi = getFeaturedImage;
 
-    var external_images_maybe_changed = function external_images_maybe_changed() {
-      setTimeout(function () {
-        var url;
+    let external_images_maybe_changed = () => {
+      setTimeout(() => {
+        let url;
         // yoast
         if ($('.area--background-alternate.image-source-yoast').length) {
           url = getYoastFacebookImage();
@@ -1516,12 +1512,12 @@ function hex_to_rgba(hex) {
       }, 500);
     };
     if ($body.is('.block-editor-page')) {
-      var debounce;
-      subscribe(function () {
+      let debounce;
+      subscribe(() => {
         if (debounce) {
           clearTimeout(debounce);
         }
-        debounce = setTimeout(function () {
+        debounce = setTimeout(() => {
           external_images_maybe_changed();
         }, 1000);
       });
@@ -1531,8 +1527,8 @@ function hex_to_rgba(hex) {
     // monitor available space for editor
     // you might be wondering, why?
     // we use zoom to scale the entire interface because otherwise we would have to size all images and the text based on viewport width... which is even more crap
-    var monitor_space = function monitor_space() {
-      var w = $('#branded-social-images').outerWidth();
+    let monitor_space = () => {
+      let w = $('#branded-social-images').outerWidth();
       if (w < 600) {
         editor.get(0).style.setProperty('--editor-scale', (w - 26) / 600 * 0.5);
       } else {
@@ -1546,30 +1542,59 @@ function hex_to_rgba(hex) {
     var title_field;
 
     // For all that is dear in this world, WordPress; what the **** are you doing?
-    var nbsp = "\uFEFF";
-    var _update_auto_title = function update_auto_title() {
+    var nbsp = '\ufeff';
+    var set_auto_title = function (input_title) {
+      var new_title = bsi_settings.title_format;
+      if ('' !== input_title && input_title !== nbsp) {
+        new_title = bsi_settings.title_format.replace('{title}', input_title);
+      }
+      texteditor_target.val(new_title);
+      texteditor.text(new_title);
+    };
+
+    // Block editor: the title lives in the editor canvas, which is an iframe (always, since WordPress 7.0),
+    // so it cannot be found or monitored in this document. Follow the title in the editor data store instead.
+    if ($body.is('.block-editor-page')) {
+      var last_title = null;
+      var title_decoder = document.createElement('textarea');
+      var follow_block_editor_title = function () {
+        if (!editor.is('.auto-title')) {
+          return;
+        }
+        var editor_store = wp.data.select('core/editor');
+        if (!editor_store || !editor_store.getCurrentPostId()) {
+          return; // not loaded yet
+        }
+        // the stored title can contain entities (&amp;); decode them like the server does (html_entity_decode).
+        // a textarea decodes entities without creating elements, so markup in the title stays text.
+        title_decoder.innerHTML = editor_store.getEditedPostAttribute('title') || '';
+        var input_title = title_decoder.value;
+        if (input_title !== last_title) {
+          last_title = input_title;
+          set_auto_title(input_title);
+        }
+      };
+      wp.data.subscribe(follow_block_editor_title);
+      follow_block_editor_title();
+      return;
+    }
+    var update_auto_title = function () {
       initialize_monitor_title_field();
       // sure?
       if (editor.is('.auto-title')) {
-        var input_title = $(title_field).is('h1') ? $(title_field).text() : $(title_field).val();
-        var new_title = bsi_settings.title_format;
-        if ('' !== input_title && input_title !== nbsp) {
-          new_title = bsi_settings.title_format.replace('{title}', input_title);
-        }
-        texteditor_target.val(new_title);
-        texteditor.text(new_title);
+        set_auto_title($(title_field).is('h1') ? $(title_field).text() : $(title_field).val());
       } else {
-        $(title_field).off('keyup change blur', _update_auto_title);
+        $(title_field).off('keyup change blur', update_auto_title);
       }
     };
     var monitor_title_field_interval;
-    var initialize_monitor_title_field = function initialize_monitor_title_field() {
+    var initialize_monitor_title_field = function () {
       if (title_field) {
         return;
       }
       title_field = $('.wp-admin,.block-editor-page').filter('.post-new-php,.edit-php,.post-php').find('#post #title,.block-editor #post-title-0,h1.wp-block-post-title[contenteditable]').get(0);
       if (title_field) {
-        $(title_field).on('keyup change blur', _update_auto_title).trigger('keyup');
+        $(title_field).on('keyup change blur', update_auto_title).trigger('keyup');
         clearInterval(monitor_title_field_interval);
       }
     };

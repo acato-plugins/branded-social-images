@@ -534,18 +534,48 @@ import decodeEntities from './helpers/decode_entities';
 		// For all that is dear in this world, WordPress; what the **** are you doing?
 		var nbsp='\ufeff';
 
+		var set_auto_title = function ( input_title ) {
+			var new_title = bsi_settings.title_format;
+
+			if ( '' !== input_title && input_title !== nbsp ) {
+				new_title = bsi_settings.title_format.replace( '{title}', input_title );
+			}
+			texteditor_target.val( new_title );
+			texteditor.text( new_title );
+		};
+
+		// Block editor: the title lives in the editor canvas, which is an iframe (always, since WordPress 7.0),
+		// so it cannot be found or monitored in this document. Follow the title in the editor data store instead.
+		if ($body.is('.block-editor-page')) {
+			var last_title = null;
+			var title_decoder = document.createElement( 'textarea' );
+			var follow_block_editor_title = function () {
+				if (!editor.is( '.auto-title' )) {
+					return;
+				}
+				var editor_store = wp.data.select( 'core/editor' );
+				if (!editor_store || !editor_store.getCurrentPostId()) {
+					return; // not loaded yet
+				}
+				// the stored title can contain entities (&amp;); decode them like the server does (html_entity_decode).
+				// a textarea decodes entities without creating elements, so markup in the title stays text.
+				title_decoder.innerHTML = editor_store.getEditedPostAttribute( 'title' ) || '';
+				var input_title = title_decoder.value;
+				if (input_title !== last_title) {
+					last_title = input_title;
+					set_auto_title( input_title );
+				}
+			};
+			wp.data.subscribe( follow_block_editor_title );
+			follow_block_editor_title();
+			return;
+		}
+
 		var update_auto_title = function () {
 			initialize_monitor_title_field();
 			// sure?
 			if (editor.is( '.auto-title' )) {
-				var input_title = $( title_field ).is('h1') ? $( title_field ).text() : $( title_field ).val();
-				var new_title = bsi_settings.title_format;
-
-				if ( '' !== input_title && input_title !== nbsp ) {
-					new_title = bsi_settings.title_format.replace( '{title}', input_title );
-				}
-				texteditor_target.val( new_title );
-				texteditor.text( new_title );
+				set_auto_title( $( title_field ).is('h1') ? $( title_field ).text() : $( title_field ).val() );
 			} else {
 				$( title_field ).off( 'keyup change blur', update_auto_title );
 			}

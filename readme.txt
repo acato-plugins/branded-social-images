@@ -3,7 +3,7 @@ Contributors: rmpel,borkweb,acato,kennydude,Mte90
 Tags: Open Graph Image, OG Image, featured image, social image, facebook image
 Requires at least: 4.7
 Tested up to: 7.1.5
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,13 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 3. Post-meta
 
 == Changelog ==
+
+= 1.2.4 =
+* Fixed: the text on the image no longer followed the post title while typing in the block editor. Recent WordPress versions show the title inside a frame the plugin could not see; it now reads the title from the editor itself. Titles with characters like & are shown correctly, and are no longer saved as custom text when left unchanged.
+* Fixed: oEmbed (link previews in WordPress and other sites) and Rank Math structured data now include the social image whenever the page has one, including when it only uses the fallback image, and leave it out when there is no image at all.
+* Fixed: when Branded Social Images is turned off for a page, its social image address now returns "not found" instead of still showing the image, and the "View Social Image" link is no longer shown in the toolbar.
+* Fixed: the admin screens loaded the unminified stylesheet, and the minified one only when debugging.
+* Development: the build tools for the admin scripts and styles are updated and simplified (`npm run build`).
 
 = 1.2.3 =
 * Security: fixed an unauthenticated reflected Cross Site Scripting (XSS) vulnerability in the og:image meta tag. The image URL is now built from the request path only, sanitized, and escaped on output. Reported by Phạm Khắc Sang via Patchstack.

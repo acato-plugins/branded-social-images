@@ -1,5 +1,8 @@
+@use "sass:math";
+@use "sass:meta";
+
 #branded-social-images-editor {
-	@import "jquery-ui";
+	@include meta.load-css("jquery-ui");
 
 	.add-slider {
 		input {
@@ -44,7 +47,7 @@
 	.area--background, .area--background-alternate, .area--background-canvas, .area--extra-layer {
 		width: 1200px;
 		height: 0;
-		padding-bottom: (630/1200)*100%;
+		padding-bottom: math.div(630, 1200) * 100%;
 		position: relative;
 		grid-area: image;
 		z-index: 0;
